@@ -1,8 +1,6 @@
-use chrono::{DateTime, Datelike, FixedOffset, Offset, TimeZone, Timelike};
+use chrono::{DateTime, Datelike, Duration, Offset, TimeZone, Timelike, Utc};
 #[allow(unused_imports)]
 use core_maths::CoreFloat;
-
-use crate::math::normalize_unit_interval;
 
 /// Normalize a time offset (in minutes) to a small range around zero.
 ///
@@ -133,26 +131,248 @@ pub(crate) fn julian_ephemeris_millennium_from_julian_ephemeris_century(ephemeri
     ephemeris_century / 10.0
 }
 
-/// Convert a fractional day value to local hour of the day.
+pub(crate) fn foobar<T: TimeZone>(datetime: &DateTime<T>, utc_midnight: &DateTime<Utc>, factor: f64) -> DateTime<T> {
+    (*utc_midnight + Duration::milliseconds((factor * 24.0 * 3600.0 * 1000.0) as i64))
+        .with_timezone(&datetime.timezone())
+}
+
+/// ΔT (Delta T) estimation functions.
 ///
-/// This function takes a day fraction (where 0.0 represents midnight and 1.0
-/// represents the next midnight) and a timezone offset, then computes the
-/// corresponding local hour of the day (0.0 to 24.0).
-///
-/// The function normalizes the result to ensure it stays within a single day
-/// (wrapping around if the timezone offset pushes it past midnight).
-///
-/// # Arguments
-///
-/// * `day_fraction` - A fractional day value, typically in the range \[0.0, 1.0\],
-///   where 0.0 is midnight and 0.5 is noon.
-/// * `timezone` - A `FixedOffset` representing the timezone offset from UTC.
-///
-/// # Returns
-///
-/// The local hour of the day as a floating-point value in the range \[0.0, 24.0\],
-/// where 0.0 is midnight, 12.0 is noon, etc.
-pub(crate) fn dayfrac_to_local_hr(day_fraction: f64, timezone: FixedOffset) -> f64 {
-    let timezone_hours = timezone.local_minus_utc() as f64 / 3600.0;
-    24.0 * normalize_unit_interval(day_fraction + timezone_hours / 24.0)
+/// ΔT represents the difference between Terrestrial Time (TT) and Universal Time (UT1).
+/// These estimates are based on Espenak and Meeus polynomial fits updated in 2014.
+pub mod delta_t {
+    use chrono::Datelike;
+
+    use crate::math::polynomial;
+
+    /// Estimates ΔT for a given decimal year.
+    ///
+    /// Based on polynomial fits from Espenak & Meeus, updated 2014.
+    /// See: <https://www.eclipsewise.com/help/deltatpoly2014.html>
+    ///
+    /// # Arguments
+    /// * `decimal_year` - Year with fractional part (e.g., 2024.5 for mid-2024)
+    ///
+    /// # Returns
+    /// Estimated ΔT in seconds
+    ///
+    /// # Errors
+    /// Returns error for years outside the valid range (-500 to 3000 CE)
+    #[allow(clippy::too_many_lines)] // Comprehensive polynomial fit across historical periods
+    pub fn estimate(decimal_year: f64) -> Option<f64> {
+        let year = decimal_year;
+
+        if !year.is_finite() {
+            return None;
+        }
+
+        if year < -500.0 {
+            return None;
+        }
+
+        let delta_t = if year < 500.0 {
+            let u = year / 100.0;
+            polynomial(
+                &[
+                    10583.6,
+                    -1014.41,
+                    33.78311,
+                    -5.952053,
+                    -0.1798452,
+                    0.022174192,
+                    0.0090316521,
+                ],
+                u,
+            )
+        } else if year < 1600.0 {
+            let u = (year - 1000.0) / 100.0;
+            polynomial(
+                &[
+                    1574.2,
+                    -556.01,
+                    71.23472,
+                    0.319781,
+                    -0.8503463,
+                    -0.005050998,
+                    0.0083572073,
+                ],
+                u,
+            )
+        } else if year < 1700.0 {
+            let t = year - 1600.0;
+            polynomial(&[120.0, -0.9808, -0.01532, 1.0 / 7129.0], t)
+        } else if year < 1800.0 {
+            let t = year - 1700.0;
+            polynomial(&[8.83, 0.1603, -0.0059285, 0.00013336, -1.0 / 1_174_000.0], t)
+        } else if year < 1860.0 {
+            let t = year - 1800.0;
+            polynomial(
+                &[
+                    13.72,
+                    -0.332447,
+                    0.0068612,
+                    0.0041116,
+                    -0.00037436,
+                    0.0000121272,
+                    -0.0000001699,
+                    0.000000000875,
+                ],
+                t,
+            )
+        } else if year < 1900.0 {
+            let t = year - 1860.0;
+            polynomial(
+                &[7.62, 0.5737, -0.251754, 0.01680668, -0.0004473624, 1.0 / 233_174.0],
+                t,
+            )
+        } else if year < 1920.0 {
+            let t = year - 1900.0;
+            polynomial(&[-2.79, 1.494119, -0.0598939, 0.0061966, -0.000197], t)
+        } else if year < 1941.0 {
+            let t = year - 1920.0;
+            polynomial(&[21.20, 0.84493, -0.076100, 0.0020936], t)
+        } else if year < 1961.0 {
+            let t = year - 1950.0;
+            polynomial(&[29.07, 0.407, -1.0 / 233.0, 1.0 / 2547.0], t)
+        } else if year < 1986.0 {
+            let t = year - 1975.0;
+            polynomial(&[45.45, 1.067, -1.0 / 260.0, -1.0 / 718.0], t)
+        } else if year < 2005.0 {
+            let t = year - 2000.0;
+            polynomial(&[63.86, 0.3345, -0.060374, 0.0017275, 0.000651814, 0.00002373599], t)
+        } else if year < 2015.0 {
+            let t = year - 2005.0;
+            polynomial(&[64.69, 0.2930], t)
+        } else if year <= 3000.0 {
+            let t = year - 2015.0;
+            polynomial(&[67.62, 0.3645, 0.0039755], t)
+        } else {
+            return None;
+        };
+
+        Some(delta_t)
+    }
+
+    /// Estimates ΔT from year and month.
+    ///
+    /// Calculates decimal year as: year + (month - 0.5) / 12
+    ///
+    /// # Arguments
+    /// * `year` - Year
+    /// * `month` - Month (1-12)
+    ///
+    /// # Returns
+    /// Returns estimated ΔT in seconds.
+    ///
+    /// # Errors
+    /// Returns error if month is outside the range 1-12.
+    ///
+    /// # Panics
+    /// This function does not panic.
+    pub fn estimate_from_date(year: i32, month: u32) -> Option<f64> {
+        if !(1..=12).contains(&month) {
+            return None;
+        }
+
+        let decimal_year = f64::from(year) + (f64::from(month) - 0.5) / 12.0;
+        estimate(decimal_year)
+    }
+
+    /// Estimates ΔT from any date-like type.
+    ///
+    /// Convenience method that extracts the year and month from any chrono type
+    /// that implements `Datelike` (`DateTime`, `NaiveDateTime`, `NaiveDate`, etc.).
+    ///
+    /// # Arguments
+    /// * `date` - Any date-like type
+    ///
+    /// # Returns
+    /// Returns estimated ΔT in seconds.
+    ///
+    /// # Errors
+    /// Returns error if the date components are invalid.
+    ///
+    #[allow(clippy::needless_pass_by_value)]
+    pub fn estimate_from_date_like<D: Datelike>(date: &D) -> Option<f64> {
+        estimate_from_date(date.year(), date.month())
+    }
+    #[allow(clippy::unwrap_used, unused_imports)]
+    mod tests {
+        use crate::delta_t::{estimate, estimate_from_date, estimate_from_date_like};
+
+        #[test]
+        fn delta_t_modern_estimates() {
+            // Test some known ranges
+            let delta_t_2000 = estimate(2000.0).unwrap();
+            let delta_t_2020 = estimate(2020.0).unwrap();
+
+            assert!(delta_t_2000 > 60.0 && delta_t_2000 < 70.0);
+            assert!(delta_t_2020 > 65.0 && delta_t_2020 < 75.0);
+            assert!(delta_t_2020 > delta_t_2000); // ΔT is generally increasing
+        }
+
+        #[test]
+        fn delta_t_historical_estimates() {
+            let delta_t_1900 = estimate(1900.0).unwrap();
+            let delta_t_1950 = estimate(1950.0).unwrap();
+
+            assert!(delta_t_1900 < 0.0); // Negative in early 20th century
+            assert!(delta_t_1950 > 25.0 && delta_t_1950 < 35.0);
+        }
+
+        #[test]
+        fn delta_t_boundary_conditions() {
+            // Test edge cases
+            assert!(estimate(-500.0).is_some());
+            assert!(estimate(3000.0).is_some());
+            assert!(estimate(-501.0).is_none());
+            assert!(estimate(3001.0).is_none()); // Should fail beyond 3000
+        }
+
+        #[test]
+        fn delta_t_from_date() {
+            let delta_t = estimate_from_date(2024, 6).unwrap();
+            let delta_t_decimal = estimate(2024.5 - 1.0 / 24.0).unwrap(); // June = month 6, so (6-0.5)/12 ≈ 0.458
+
+            // Should be very close
+            assert!((delta_t - delta_t_decimal).abs() < 0.01);
+
+            // Test invalid month
+            assert!(estimate_from_date(2024, 13).is_none());
+            assert!(estimate_from_date(2024, 0).is_none());
+        }
+
+        #[test]
+        fn delta_t_from_date_like() {
+            use chrono::{DateTime, FixedOffset, NaiveDate, Utc};
+
+            // Test with DateTime<FixedOffset>
+            let datetime_fixed = "2024-06-15T12:00:00-07:00".parse::<DateTime<FixedOffset>>().unwrap();
+            let delta_t_fixed = estimate_from_date_like(&datetime_fixed).unwrap();
+
+            // Test with DateTime<Utc>
+            let datetime_utc = "2024-06-15T19:00:00Z".parse::<DateTime<Utc>>().unwrap();
+            let delta_t_utc = estimate_from_date_like(&datetime_utc).unwrap();
+
+            // Test with NaiveDate
+            let naive_date = NaiveDate::from_ymd_opt(2024, 6, 15).unwrap();
+            let delta_t_naive_date = estimate_from_date_like(&naive_date).unwrap();
+
+            // Test with NaiveDateTime
+            let naive_datetime = naive_date.and_hms_opt(12, 0, 0).unwrap();
+            let delta_t_naive_datetime = estimate_from_date_like(&naive_datetime).unwrap();
+
+            // Should all be identical since we only use year/month
+            assert_eq!(delta_t_fixed, delta_t_utc);
+            assert_eq!(delta_t_fixed, delta_t_naive_date);
+            assert_eq!(delta_t_fixed, delta_t_naive_datetime);
+
+            // Should match estimate_from_date
+            let delta_t_date = estimate_from_date(2024, 6).unwrap();
+            assert_eq!(delta_t_fixed, delta_t_date);
+
+            // Verify reasonable range for 2024
+            assert!(delta_t_fixed > 60.0 && delta_t_fixed < 80.0);
+        }
+    }
 }

@@ -127,9 +127,8 @@ pub(crate) fn calculate_approximate_sun_transit_time(
 /// * `hour_angle` - Hour angle at rise/set in degrees
 pub(crate) fn calculate_approximate_sun_rise_and_set(m_rts: &mut [f64; 3], hour_angle: f64) {
     let hour_angle_day_fraction = hour_angle / 360.0;
-    m_rts[SUN_RISE] = normalize_unit_interval(m_rts[SUN_TRANSIT] - hour_angle_day_fraction);
-    m_rts[SUN_SET] = normalize_unit_interval(m_rts[SUN_TRANSIT] + hour_angle_day_fraction);
-    m_rts[SUN_TRANSIT] = normalize_unit_interval(m_rts[SUN_TRANSIT]);
+    m_rts[SUN_RISE] = m_rts[SUN_TRANSIT] - hour_angle_day_fraction;
+    m_rts[SUN_SET] = m_rts[SUN_TRANSIT] + hour_angle_day_fraction;
 }
 
 /// Interpolates right ascension or declination values for rise/transit/set calculations.
@@ -146,13 +145,12 @@ pub(crate) fn calculate_approximate_sun_rise_and_set(m_rts: &mut [f64; 3], hour_
 pub(crate) fn interpolate_right_ascension_declination_for_rts(values: &mut [f64; 3], time_fraction: f64) -> f64 {
     let mut difference_minus = values[1] - values[0];
     let mut difference_plus = values[2] - values[1];
-
     // Handle discontinuities near 0°/360° for right ascension
     if difference_minus.abs() >= 2.0 {
-        difference_minus = normalize_unit_interval(difference_minus);
+        difference_minus = normalize_degrees_180pm(difference_minus);
     }
     if difference_plus.abs() >= 2.0 {
-        difference_plus = normalize_unit_interval(difference_plus);
+        difference_plus = normalize_degrees_180pm(difference_plus);
     }
 
     // Parabolic interpolation
@@ -189,7 +187,6 @@ pub(crate) fn calculate_sun_rise_and_set_time(
             * delta_prime[event_type].to_radians().cos()
             * latitude.to_radians().cos()
             * hour_angle_prime[event_type].to_radians().sin());
-
     approximate_time + altitude_correction
 }
 

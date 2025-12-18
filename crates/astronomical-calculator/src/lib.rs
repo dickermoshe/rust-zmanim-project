@@ -8,7 +8,7 @@
 //! - Sunrise, sunset, and solar transit times
 //! - Atmospheric refraction corrections
 //! - Topocentric coordinate adjustments
-#![no_std]
+// #![no_std]
 
 use chrono::NaiveDate;
 use chrono::{DateTime, Datelike, Offset, TimeZone};
@@ -24,10 +24,12 @@ extern crate std;
 
 mod geo;
 mod math;
-#[cfg(all(feature = "__spa-sys", test))]
-mod spa_compat_tests;
 mod terms;
+#[cfg(all(feature = "__spa-sys", test))]
+mod tests;
 mod time;
+
+pub use time::delta_t;
 
 // ============================================================================
 // Constants
@@ -81,6 +83,9 @@ pub enum Error {
 
     #[error("invalid timezone: {0} (expected -18.0..=18.0 hours)")]
     InvalidTimezone(f64),
+
+    #[error("unable to estimate delta_t")]
+    UnableToEstimateDeltaT,
 }
 
 // ============================================================================
@@ -138,7 +143,7 @@ pub struct AstronomicalCalculator<T: TimeZone> {
 }
 
 impl<T: TimeZone> AstronomicalCalculator<T> {
-    /// Creates a new `Inputs` struct with validation.
+    /// Creates a new `AstronomicalCalculator` struct with validation.
     ///
     /// # Arguments
     ///
@@ -156,7 +161,7 @@ impl<T: TimeZone> AstronomicalCalculator<T> {
     ///
     /// # Returns
     ///
-    /// * `Ok(Inputs)` - Valid input parameters
+    /// * `Ok(AstronomicalCalculator)` - Valid input parameters
     /// * `Err(Error)` - If any parameter is out of valid range
     #[allow(clippy::too_many_arguments)]
     pub fn new(
@@ -235,17 +240,52 @@ impl<T: TimeZone> AstronomicalCalculator<T> {
             atmos_refract,
         })
     }
+    /// Creates a new `AstronomicalCalculator` with standard atmospheric conditions and automatic ΔT estimation.
+    ///
+    /// This convenience constructor uses typical atmospheric values (1013.25 mbar pressure, 15°C temperature,
+    /// 0.5667° refraction) and automatically estimates ΔT (the difference between Terrestrial Time and
+    /// Universal Time) based on the date.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - Date and time for the calculation. **Year must be between -500 and 3000** for ΔT estimation.
+    /// * `longitude` - Observer longitude in degrees (positive East, range: -180 to 180)
+    /// * `latitude` - Observer latitude in degrees (positive North, range: -90 to 90)
+    /// * `elevation` - Elevation above sea level in meters (range: -6500000 to ∞)
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(AstronomicalCalculator)` - Valid input parameters
+    /// * `Err(Error)` - If any parameter is out of valid range or year is outside [-500, 3000]
+    pub fn standard(datetime: DateTime<T>, longitude: f64, latitude: f64, elevation: f64) -> Result<Self, Error> {
+        if let Some(delta_t) = delta_t::estimate_from_date_like(&datetime) {
+            Ok(Self {
+                datetime,
+                delta_ut1: 0.0,
+                delta_t,
+                longitude,
+                latitude,
+                elevation,
+                pressure: 1013.25,
+                temperature: 15.0,
+                slope: 0.0,
+                azm_rotation: 0.0,
+                atmos_refract: 0.5667,
+            })
+        } else {
+            Err(Error::UnableToEstimateDeltaT)
+        }
+    }
 
     /// Calculates the complete solar position for the given inputs.
     ///
     /// This is the main entry point for solar position calculations. It returns
     /// zenith angle, azimuth, and sunrise/sunset times.
     ///
-    /// # Returns
-    ///
-    /// * `Some(SolarPositionOutput)` - Solar position and times if calculation succeeds
-    /// * `None` - If the sun doesn't rise or set (polar day/night)
-    pub fn calculate_solar_position(&self) -> Option<SolarPositionOutput> {
+    /// The solar position (zenith, azimuth, incidence) is always calculated.
+    /// However, sunrise/sunset/transit times may be `None` if the sun doesn't
+    /// rise or set at this location and date (e.g., polar day/night).
+    pub fn calculate_solar_position(&self) -> SolarPositionOutput<T> {
         let intermediates = self.calculate_intermediate_solar_values();
 
         // Calculate observer's local hour angle
@@ -289,18 +329,32 @@ impl<T: TimeZone> AstronomicalCalculator<T> {
         let azimuth = convert_astronomical_to_observer_azimuth(azimuth_astronomical);
         let incidence = calculate_surface_incidence_angle(zenith, azimuth_astronomical, self.azm_rotation, self.slope);
 
-        // Calculate rise, transit, and set times
-        let rts_times = self.calculate_rise_transit_set_times(&intermediates)?;
-
-        Some(SolarPositionOutput {
-            zenith,
-            azimuth_astronomical,
-            azimuth,
-            incidence,
-            solar_transit_time: rts_times.solar_transit_time,
-            sunrise_time: rts_times.sunrise_time,
-            sunset_time: rts_times.sunset_time,
-        })
+        // Calculate rise, transit, and set times (may be None for polar day/night)
+        let rts_times = self.calculate_rise_transit_set_times(&intermediates);
+        if let Some(rts_times) = rts_times {
+            let solar_transit_time = rts_times.solar_transit_time;
+            let sunrise_time = rts_times.sunrise_time;
+            let sunset_time = rts_times.sunset_time;
+            SolarPositionOutput {
+                zenith,
+                azimuth_astronomical,
+                azimuth,
+                incidence,
+                solar_transit_time: Some(solar_transit_time),
+                sunrise_time: Some(sunrise_time),
+                sunset_time: Some(sunset_time),
+            }
+        } else {
+            SolarPositionOutput {
+                zenith,
+                azimuth_astronomical,
+                azimuth,
+                incidence,
+                solar_transit_time: None,
+                sunrise_time: None,
+                sunset_time: None,
+            }
+        }
     }
 
     /// Calculates intermediate astronomical values needed for solar position.
@@ -417,7 +471,7 @@ impl<T: TimeZone> AstronomicalCalculator<T> {
     fn calculate_rise_transit_set_times(
         &self,
         intermediates: &SolarPositionIntermediates,
-    ) -> Option<RiseTransitSetTimes> {
+    ) -> Option<RiseTransitSetTimes<T>> {
         // Calculate equation of time for the target date
         let _equation_of_time = equation_of_time(
             calculate_sun_mean_longitude(intermediates.julian_ephemeris_millennium),
@@ -477,7 +531,8 @@ impl<T: TimeZone> AstronomicalCalculator<T> {
 
         // Refine the approximate times
         calculate_approximate_sun_rise_and_set(&mut approx_times, hour_angle_at_horizon);
-
+        println!("approx_times: {:?}", approx_times);
+        println!("normalized_sunrise: {:?}", approx_times[SUN_RISE] * 24.0);
         // Calculate more precise values for rise, transit, and set times
         let mut sidereal_times_rts: [f64; 3] = [0.0; 3];
         let mut interpolated_right_ascension: [f64; 3] = [0.0; 3];
@@ -504,47 +559,75 @@ impl<T: TimeZone> AstronomicalCalculator<T> {
             );
         }
 
+        debug_assert!(
+            approx_times[SUN_RISE] < approx_times[SUN_TRANSIT] && approx_times[SUN_TRANSIT] < approx_times[SUN_SET],
+            "sunrise must be before transit, and transit must be before sunset"
+        );
+
         // Calculate final times in local time
-        let solar_transit_time = dayfrac_to_local_hr(
-            approx_times[SUN_TRANSIT] - topocentric_hour_angles[SUN_TRANSIT] / 360.0,
-            self.datetime.offset().fix(),
+        let solar_transit_fraction = approx_times[SUN_TRANSIT] - topocentric_hour_angles[SUN_TRANSIT] / 360.0;
+
+        let sunrise_fraction = calculate_sun_rise_and_set_time(
+            approx_times,
+            calculated_altitudes,
+            interpolated_declination,
+            self.latitude,
+            topocentric_hour_angles,
+            -(SUN_RADIUS + self.atmos_refract),
+            SUN_RISE,
+        );
+        let sunset_fraction = calculate_sun_rise_and_set_time(
+            approx_times,
+            calculated_altitudes,
+            interpolated_declination,
+            self.latitude,
+            topocentric_hour_angles,
+            -(SUN_RADIUS + self.atmos_refract),
+            SUN_SET,
+        );
+        if sunrise_fraction > solar_transit_fraction || solar_transit_fraction > sunset_fraction {
+            return None;
+        }
+
+        let mut local_sunrise = foobar(&self.datetime, &midnight_inputs.datetime, sunrise_fraction);
+        let mut local_solar_transit = foobar(&self.datetime, &midnight_inputs.datetime, solar_transit_fraction);
+        let mut local_sunset = foobar(&self.datetime, &midnight_inputs.datetime, sunset_fraction);
+
+        // The solar transit must occur on the same date as the target date.
+        let diff = (local_solar_transit.date_naive() - self.datetime.date_naive()).num_days();
+        if diff != 0 {
+            local_sunrise = foobar(
+                &self.datetime,
+                &midnight_inputs.datetime,
+                sunrise_fraction - diff as f64,
+            );
+            local_solar_transit = foobar(
+                &self.datetime,
+                &midnight_inputs.datetime,
+                solar_transit_fraction - diff as f64,
+            );
+            local_sunset = foobar(&self.datetime, &midnight_inputs.datetime, sunset_fraction - diff as f64);
+        }
+        debug_assert!(
+            local_solar_transit.date_naive() == self.datetime.date_naive(),
+            "solar transit must occur on the same date as the target date, got {:?} and {:?}",
+            local_solar_transit.date_naive(),
+            self.datetime.date_naive()
         );
 
-        let sunrise_time = dayfrac_to_local_hr(
-            calculate_sun_rise_and_set_time(
-                approx_times,
-                calculated_altitudes,
-                interpolated_declination,
-                self.latitude,
-                topocentric_hour_angles,
-                -(SUN_RADIUS + self.atmos_refract),
-                SUN_RISE,
-            ),
-            self.datetime.offset().fix(),
-        );
-
-        let sunset_time = dayfrac_to_local_hr(
-            calculate_sun_rise_and_set_time(
-                approx_times,
-                calculated_altitudes,
-                interpolated_declination,
-                self.latitude,
-                topocentric_hour_angles,
-                -(SUN_RADIUS + self.atmos_refract),
-                SUN_SET,
-            ),
-            self.datetime.offset().fix(),
-        );
-
-        Some(RiseTransitSetTimes {
-            equation_of_time: _equation_of_time,
-            solar_transit_time,
-            sunrise_time,
-            sunset_time,
-            sunrise_hour_angle: topocentric_hour_angles[SUN_RISE],
-            sunset_hour_angle: topocentric_hour_angles[SUN_SET],
-            transit_altitude: calculated_altitudes[SUN_TRANSIT],
-        })
+        if local_sunrise < local_solar_transit && local_solar_transit < local_sunset {
+            Some(RiseTransitSetTimes {
+                equation_of_time: _equation_of_time,
+                solar_transit_time: local_solar_transit,
+                sunrise_time: local_sunrise,
+                sunset_time: local_sunset,
+                sunrise_hour_angle: topocentric_hour_angles[SUN_RISE],
+                sunset_hour_angle: topocentric_hour_angles[SUN_SET],
+                transit_altitude: calculated_altitudes[SUN_TRANSIT],
+            })
+        } else {
+            None
+        }
     }
 }
 
@@ -623,7 +706,8 @@ struct SolarPositionIntermediates {
 /// Solar position output containing position angles and rise/transit/set times.
 ///
 /// All angles are in degrees, and times are in hours (decimal format).
-pub struct SolarPositionOutput {
+#[derive(Debug, PartialEq)]
+pub struct SolarPositionOutput<T: TimeZone> {
     /// Solar zenith angle in degrees (angle from vertical)
     /// 0° = directly overhead, 90° = at horizon
     pub zenith: f64,
@@ -640,29 +724,33 @@ pub struct SolarPositionOutput {
     pub incidence: f64,
 
     /// Solar transit time (solar noon) in local hours (decimal)
-    pub solar_transit_time: f64,
+    /// `None` if the sun doesn't rise or set (polar day/night)
+    pub solar_transit_time: Option<DateTime<T>>,
 
     /// Sunrise time in local hours (decimal)
-    pub sunrise_time: f64,
+    /// `None` if the sun doesn't rise or set (polar day/night)
+    pub sunrise_time: Option<DateTime<T>>,
 
     /// Sunset time in local hours (decimal)
-    pub sunset_time: f64,
+    /// `None` if the sun doesn't rise or set (polar day/night)
+    pub sunset_time: Option<DateTime<T>>,
 }
 
 /// Rise, transit, and set times with additional diagnostic information.
-struct RiseTransitSetTimes {
+struct RiseTransitSetTimes<T: TimeZone> {
     /// Equation of time in minutes
     #[allow(unused)]
     equation_of_time: f64,
 
     /// Solar transit (noon) time in local hours
-    solar_transit_time: f64,
+    solar_transit_time: DateTime<T>,
 
+    // Solar transit offset from local midnight in hours
     /// Sunrise time in local hours
-    sunrise_time: f64,
+    sunrise_time: DateTime<T>,
 
     /// Sunset time in local hours
-    sunset_time: f64,
+    sunset_time: DateTime<T>,
 
     /// Hour angle at sunrise in degrees
     #[allow(unused)]
