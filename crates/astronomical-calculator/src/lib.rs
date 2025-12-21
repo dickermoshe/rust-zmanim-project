@@ -19,6 +19,9 @@
 // use crate::terms::{SUN_RISE, SUN_SET, SUN_TRANSIT};
 // use crate::time::*;
 mod freespa;
+pub(crate) mod tables;
+pub(crate) mod types;
+
 #[cfg(test)]
 extern crate std;
 
