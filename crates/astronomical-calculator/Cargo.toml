@@ -16,6 +16,7 @@ core_maths = "0.1.1"
 chrono = { version = "0.4.42", default-features = false }
 thiserror = { version = "2.0.17", default-features = false }
 chrono-tz = "0.10.4"
+sunrise-sunset-calculator = "1.0.1"
 
 
 [features]
@@ -42,6 +43,9 @@ unwrap_used = "deny"
 expect_used = "deny"
 panic = "deny"
 index_overflow = "deny"
+
+[lints.rust]
+missing_docs = "deny"
 
 [build-dependencies]
 bindgen = { version = "0.72.1", optional = true }

@@ -23,78 +23,11 @@ pub(crate) fn normalize_degrees_360(degrees: f64) -> f64 {
     limited
 }
 
-/// Normalizes an angle in degrees to the range [-180, 180].
-///
-/// This function takes any angle value (positive or negative) and converts it
-/// to an equivalent angle in the range [-180, 180]. Values outside this range
-/// are wrapped around using modulo arithmetic, with angles greater than 180
-/// being converted to their negative equivalent (e.g., 270° becomes -90°).
-///
-/// # Arguments
-///
-/// * `degrees` - The angle in degrees to normalize
-///
-/// # Returns
-///
-/// The normalized angle in degrees, in the range [-180, 180]
-pub(crate) fn normalize_degrees_180pm(degrees: f64) -> f64 {
-    let degrees = degrees / 360.0;
-    let mut limited = 360.0 * (degrees - degrees.floor());
-    if limited < -180.0 {
-        limited += 360.0;
-    } else if limited > 180.0 {
-        limited -= 360.0;
-    }
-    limited
-}
-
-/// Normalizes an angle in degrees to the range [0, 180].
-///
-/// This function takes any angle value (positive or negative) and converts it
-/// to an equivalent angle in the range [0, 180]. Values outside this range
-/// are wrapped around using modulo arithmetic.
-///
-/// # Arguments
-///
-/// * `degrees` - The angle in degrees to normalize
-///
-/// # Returns
-///
-/// The normalized angle in degrees, in the range [0, 180]
-pub(crate) fn normalize_degrees_180(degrees: f64) -> f64 {
-    let degrees = degrees / 180.0;
-    let mut limited = 180.0 * (degrees - degrees.floor());
-    if limited < 0.0 {
-        limited += 180.0;
-    }
-    limited
-}
-/// Normalizes a value to the unit interval [0, 1).
-///
-/// This function takes any real number and converts it to an equivalent value
-/// in the range [0, 1) by extracting the fractional part. Values outside this
-/// range are wrapped around using modulo arithmetic.
-///
-/// # Arguments
-///
-/// * `value` - The value to normalize
-///
-/// # Returns
-///
-/// The normalized value in the range [0, 1)
-pub(crate) fn normalize_unit_interval(value: f64) -> f64 {
-    let mut limited = value - value.floor();
-    if limited < 0.0 {
-        limited += 1.0;
-    }
-    limited
-}
-
 /// Evaluate a cubic polynomial at `x`.
 ///
 /// Interprets the arguments as coefficients of:
 ///
-/// \(a_3 x^3 + a_2 x^2 + a_1 x + a_0\)
+/// \(`a_3` x^3 + `a_2` x^2 + `a_1` x + `a_0`\)
 ///
 /// using Horner's method for numerical stability and efficiency.
 ///
@@ -127,4 +60,32 @@ pub(crate) fn polynomial(coeffs: &[f64], x: f64) -> f64 {
         result = result.mul_add(x, coeff);
     }
     result
+}
+
+/// Computes the floored modulo operation (Python-style modulo).
+///
+/// Unlike Rust's `%` operator which can return negative values, this function
+/// always returns a non-negative result in the range [0, m). This matches
+/// Python's modulo behavior and is useful for normalizing values to a positive range.
+///
+/// # Arguments
+///
+/// * `x` - The dividend
+/// * `m` - The modulus (must be positive)
+///
+/// # Returns
+///
+/// The remainder `x mod m` in the range 0, m)
+///
+/// # Examples
+///
+/// ```
+/// # fn floored_mod(x: f64, m: f64) -> f64 { ((x % m) + m) % m }
+/// assert_eq!(floored_mod(7.0, 3.0), 1.0);
+/// assert_eq!(floored_mod(-7.0, 3.0), 2.0);  // Unlike -7 % 3 which would be -1
+/// assert_eq!(floored_mod(0.5, 1.0), 0.5);
+/// assert_eq!(floored_mod(1.5, 1.0), 0.5);
+/// ```
+pub(crate) fn floored_mod(x: f64, m: f64) -> f64 {
+    ((x % m) + m) % m
 }

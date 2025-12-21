@@ -1,3 +1,7 @@
+//! Build script for the suncalc crate.
+//!
+//! This script conditionally compiles the SPA (Solar Position Algorithm) C library
+//! when the `__spa-sys` feature is enabled, which is used for testing purposes only.
 fn main() {
     // Only build the SPA C library when the __spa-sys feature is enabled
     #[cfg(feature = "__spa-sys")]
@@ -5,7 +9,7 @@ fn main() {
         use std::env;
         use std::path::PathBuf;
 
-        #[allow(clippy::panic)]
+        #[allow(clippy::panic, clippy::manual_assert)]
         if env::var("ALLOW_SPA_SYS_BUILD").map(|v| v != "1").unwrap_or(false) {
             panic!("The __spa-sys feature is only for testing purposes");
         }

@@ -1,4 +1,4 @@
-use chrono::{DateTime, Datelike, Duration, Offset, TimeZone, Timelike, Utc};
+use chrono::{DateTime, Datelike, Offset, TimeZone, Timelike};
 #[allow(unused_imports)]
 use core_maths::CoreFloat;
 
@@ -80,7 +80,7 @@ pub fn julian_day<T: TimeZone>(date: &DateTime<T>, delta_t: f64) -> f64 {
     let seconds = f64::from(date.second()) + f64::from(date.nanosecond()) / 1_000_000_000.0;
 
     // Time zone offset (UTC - local) in **hours**.
-    let tz_hours = date.offset().fix().local_minus_utc() as f64 / 3600.0;
+    let tz_hours = f64::from(date.offset().fix().local_minus_utc()) / 3600.0;
 
     // Convert calendar day + time-of-day to a fractional day value
     let day_decimal: f64 =
@@ -94,14 +94,14 @@ pub fn julian_day<T: TimeZone>(date: &DateTime<T>, delta_t: f64) -> f64 {
     }
 
     // Core Julian Day computation (for the proleptic Julian calendar)
-    let mut julian_day = ((365.25 * (f64::from(year) + 4716.0)) as i32 as f64
-        + (30.6001 * f64::from(month + 1)) as i32 as f64)
+    let mut julian_day = (f64::from((365.25 * (f64::from(year) + 4716.0)) as i32)
+        + f64::from((30.6001 * f64::from(month + 1)) as i32))
         + day_decimal
         - 1524.5;
     // Gregorian calendar correction for dates on/after 1582-10-15
     if julian_day > 2_299_160.0 {
         let a = f64::from(year / 100i32);
-        julian_day += 2.0 - a + (a / 4.0) as i32 as f64;
+        julian_day += 2.0 - a + f64::from((a / 4.0) as i32);
     }
     julian_day
 }
@@ -131,11 +131,6 @@ pub(crate) fn julian_ephemeris_millennium_from_julian_ephemeris_century(ephemeri
     ephemeris_century / 10.0
 }
 
-pub(crate) fn foobar<T: TimeZone>(datetime: &DateTime<T>, utc_midnight: &DateTime<Utc>, factor: f64) -> DateTime<T> {
-    (*utc_midnight + Duration::milliseconds((factor * 24.0 * 3600.0 * 1000.0) as i64))
-        .with_timezone(&datetime.timezone())
-}
-
 /// ΔT (Delta T) estimation functions.
 ///
 /// ΔT represents the difference between Terrestrial Time (TT) and Universal Time (UT1).
@@ -159,6 +154,7 @@ pub mod delta_t {
     /// # Errors
     /// Returns error for years outside the valid range (-500 to 3000 CE)
     #[allow(clippy::too_many_lines)] // Comprehensive polynomial fit across historical periods
+    #[must_use]
     pub fn estimate(decimal_year: f64) -> Option<f64> {
         let year = decimal_year;
 
@@ -269,6 +265,7 @@ pub mod delta_t {
     ///
     /// # Panics
     /// This function does not panic.
+    #[must_use]
     pub fn estimate_from_date(year: i32, month: u32) -> Option<f64> {
         if !(1..=12).contains(&month) {
             return None;

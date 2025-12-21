@@ -1,7 +1,12 @@
+extern crate std;
+
 #[allow(unused_imports)]
 use core_maths::CoreFloat;
 
-use crate::{math::*, terms::*};
+use crate::{
+    math::{eval_cubic, normalize_degrees_360},
+    terms::{B_TERMS, L_TERMS, PE_TERMS, R_TERMS, Y_TERMS},
+};
 
 // ============================================================================
 // Constants
@@ -39,156 +44,6 @@ const EARTH_POSITION_SCALE_FACTOR: f64 = 1.0e8;
 
 /// Scaling factor for nutation calculations (10^7 arcseconds)
 const NUTATION_SCALE_FACTOR: f64 = 36_000_000.0;
-
-// ============================================================================
-// Rise, Transit, and Set (RTS) Calculations
-// ============================================================================
-
-/// Calculates the sun's altitude angle at a given rise/transit/set time.
-///
-/// This is used iteratively to refine the calculated rise and set times.
-///
-/// # Arguments
-/// * `latitude` - Observer's latitude in degrees
-/// * `delta_prime` - Topocentric sun declination in degrees
-/// * `hour_angle_prime` - Topocentric local hour angle in degrees
-///
-/// # Returns
-/// Sun's altitude angle in degrees
-pub(crate) fn calculate_sun_altitude_for_rise_transit_set(
-    latitude: f64,
-    delta_prime: f64,
-    hour_angle_prime: f64,
-) -> f64 {
-    let latitude_rad = latitude.to_radians();
-    let delta_prime_rad = delta_prime.to_radians();
-    let hour_angle_prime_rad = hour_angle_prime.to_radians();
-
-    (latitude_rad.sin() * delta_prime_rad.sin()
-        + latitude_rad.cos() * delta_prime_rad.cos() * hour_angle_prime_rad.cos())
-    .asin()
-    .to_degrees()
-}
-
-/// Calculates the sun's hour angle at rise or set.
-///
-/// The hour angle is the angular distance along the celestial equator from the
-/// observer's meridian to the hour circle passing through the sun.
-///
-/// # Arguments
-/// * `latitude` - Observer's latitude in degrees
-/// * `declination` - Sun's declination in degrees
-/// * `altitude_at_horizon` - Sun's altitude at the horizon (negative for geometric horizon)
-///
-/// # Returns
-/// Hour angle in degrees if the sun rises/sets, or a large negative sentinel value if it doesn't
-pub(crate) fn calculate_sun_hour_angle_at_rise_set(
-    latitude: f64,
-    declination: f64,
-    altitude_at_horizon: f64,
-) -> Option<f64> {
-    let latitude_rad = latitude.to_radians();
-    let declination_rad = declination.to_radians();
-    let altitude_rad = altitude_at_horizon.to_radians();
-
-    let cos_hour_angle = (altitude_rad.sin() - latitude_rad.sin() * declination_rad.sin())
-        / (latitude_rad.cos() * declination_rad.cos());
-
-    // Check if the sun rises/sets at this location and date
-    if cos_hour_angle.abs() <= 1.0 {
-        Some(normalize_degrees_180(cos_hour_angle.acos().to_degrees()))
-    } else {
-        // Sun doesn't rise or set (polar day/night)
-        None
-    }
-}
-
-/// Calculates the approximate sun transit time (solar noon).
-///
-/// # Arguments
-/// * `right_ascension` - Sun's right ascension in degrees
-/// * `longitude` - Observer's longitude in degrees (positive east)
-/// * `greenwich_sidereal_time` - Greenwich apparent sidereal time in degrees
-///
-/// # Returns
-/// Approximate transit time as a fraction of a day (0.0 to 1.0)
-pub(crate) fn calculate_approximate_sun_transit_time(
-    right_ascension: f64,
-    longitude: f64,
-    greenwich_sidereal_time: f64,
-) -> f64 {
-    (right_ascension - longitude - greenwich_sidereal_time) / 360.0
-}
-
-/// Refines the approximate rise and set times.
-///
-/// # Arguments
-/// * `m_rts` - Array of [rise, transit, set] times as day fractions (modified in place)
-/// * `hour_angle` - Hour angle at rise/set in degrees
-pub(crate) fn calculate_approximate_sun_rise_and_set(m_rts: &mut [f64; 3], hour_angle: f64) {
-    let hour_angle_day_fraction = hour_angle / 360.0;
-    m_rts[SUN_RISE] = m_rts[SUN_TRANSIT] - hour_angle_day_fraction;
-    m_rts[SUN_SET] = m_rts[SUN_TRANSIT] + hour_angle_day_fraction;
-}
-
-/// Interpolates right ascension or declination values for rise/transit/set calculations.
-///
-/// Uses three values (day before, day of, day after) to interpolate the value
-/// at a specific time within the day.
-///
-/// # Arguments
-/// * `values` - Array of [previous_day, current_day, next_day] values
-/// * `time_fraction` - Time within the day as a fraction (0.0 to 1.0)
-///
-/// # Returns
-/// Interpolated value
-pub(crate) fn interpolate_right_ascension_declination_for_rts(values: &mut [f64; 3], time_fraction: f64) -> f64 {
-    let mut difference_minus = values[1] - values[0];
-    let mut difference_plus = values[2] - values[1];
-    // Handle discontinuities near 0°/360° for right ascension
-    if difference_minus.abs() >= 2.0 {
-        difference_minus = normalize_degrees_180pm(difference_minus);
-    }
-    if difference_plus.abs() >= 2.0 {
-        difference_plus = normalize_degrees_180pm(difference_plus);
-    }
-
-    // Parabolic interpolation
-    values[1]
-        + time_fraction * (difference_minus + difference_plus + (difference_plus - difference_minus) * time_fraction)
-            / 2.0
-}
-
-/// Calculates refined sun rise or set time.
-///
-/// # Arguments
-/// * `m_rts` - Approximate [rise, transit, set] times
-/// * `altitude_rts` - Calculated altitudes at those times
-/// * `delta_prime` - Interpolated declinations
-/// * `latitude` - Observer's latitude in degrees
-/// * `hour_angle_prime` - Calculated hour angles
-/// * `altitude_at_horizon` - Target altitude at horizon (accounting for refraction and sun radius)
-/// * `event_type` - Index indicating rise, transit, or set (SUN_RISE, SUN_TRANSIT, or SUN_SET)
-///
-/// # Returns
-/// Refined time as a day fraction
-pub(crate) fn calculate_sun_rise_and_set_time(
-    m_rts: [f64; 3],
-    altitude_rts: [f64; 3],
-    delta_prime: [f64; 3],
-    latitude: f64,
-    hour_angle_prime: [f64; 3],
-    altitude_at_horizon: f64,
-    event_type: usize,
-) -> f64 {
-    let approximate_time = m_rts[event_type];
-    let altitude_correction = (altitude_rts[event_type] - altitude_at_horizon)
-        / (360.0
-            * delta_prime[event_type].to_radians().cos()
-            * latitude.to_radians().cos()
-            * hour_angle_prime[event_type].to_radians().sin());
-    approximate_time + altitude_correction
-}
 
 // ============================================================================
 // Solar Position Calculations
@@ -701,7 +556,7 @@ pub(crate) fn calculate_topocentric_elevation_angle(
 /// * `geocentric_declination` - Geocentric declination in degrees
 ///
 /// # Returns
-/// Tuple of (topocentric_declination, parallax_correction_to_right_ascension) in degrees
+/// Tuple of (`topocentric_declination`, `parallax_correction_to_right_ascension`) in degrees
 pub(crate) fn calculate_right_ascension_parallax_and_topocentric_declination(
     latitude: f64,
     elevation_meters: f64,
@@ -830,7 +685,7 @@ pub(crate) fn calculate_earth_radius_vector(julian_millennium: f64) -> f64 {
 ///   - X4: Longitude of ascending node of Moon
 ///
 /// # Returns
-/// Tuple of (nutation_in_longitude, nutation_in_obliquity) in degrees
+/// Tuple of (`nutation_in_longitude`, `nutation_in_obliquity`) in degrees
 pub(crate) fn calculate_nutation_longitude_and_obliquity(
     julian_century: f64,
     fundamental_arguments: [f64; 5],
