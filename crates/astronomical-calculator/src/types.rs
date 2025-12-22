@@ -1,3 +1,5 @@
+use thiserror::Error;
+
 #[derive(Copy, Clone)]
 pub struct p_term {
     pub A: f64,
@@ -6,7 +8,6 @@ pub struct p_term {
 }
 
 #[derive(Copy, Clone)]
-#[repr(C)]
 pub struct tm {
     pub tm_sec: i64,
     pub tm_min: i64,
@@ -20,15 +21,8 @@ pub struct tm {
     pub tm_gmtoff: i64,
     pub tm_zone: *const ::core::ffi::c_char,
 }
+
 #[derive(Copy, Clone)]
-#[repr(C)]
-pub struct sol_pos {
-    pub z: f64,
-    pub a: f64,
-    pub E: i64,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct solar_day {
     pub ev: [tm; 11],
     pub t: [i64; 11],
@@ -36,15 +30,6 @@ pub struct solar_day {
     pub status: [i64; 11],
 }
 #[derive(Copy, Clone)]
-#[repr(C)]
-pub struct GeoCentricSolPos {
-    pub lat: f64,
-    pub lon: f64,
-    pub rad: f64,
-}
-pub type JulianDay = JulianDate;
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct JulianDate {
     pub JD: f64,
     pub JDE: f64,
@@ -52,4 +37,31 @@ pub struct JulianDate {
     pub JCE: f64,
     pub JME: f64,
     pub E: i64,
+}
+
+#[derive(Error, Debug)]
+pub enum SpaError {
+    #[error("ΔUT1 out of range")]
+    DeltaUt1OutOfRange,
+
+    #[error("Longitude out of range")]
+    LongitudeOutOfRange,
+
+    #[error("Latitude out of range")]
+    LatitudeOutOfRange,
+
+    #[error("Elevation out of range")]
+    ElevationOutOfRange,
+
+    #[error("Pressure out of range")]
+    PressureOutOfRange,
+
+    #[error("Temperature out of range")]
+    TemperatureOutOfRange,
+
+    #[error("Geometric dip out of range")]
+    GeometricDipOutOfRange,
+
+    #[error("Time conversion error")]
+    TimeConversionError,
 }

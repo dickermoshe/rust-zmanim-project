@@ -6,6 +6,8 @@
     unused_assignments,
     unused_mut
 )]
+use crate::spa::gmjtime_r;
+use crate::spa::MakeJulianDay;
 use crate::tables::*;
 use crate::types::*;
 use core::ops::Rem;
@@ -75,80 +77,7 @@ pub const EARTH_R: f64 = 6378136.6f64;
 pub const ABSOLUTEZERO: f64 = -273.15f64;
 pub const AP0: f64 = 1010.0f64;
 pub const AT0: f64 = 10.0f64;
-#[no_mangle]
-pub unsafe extern "C" fn get_delta_t(mut ut: *mut tm) -> f64 {
-    let mut dyear: f64 = 0.;
-    let mut imin: i64 = 0 as i64;
-    let mut imax: i64 = NDT - 1 as i64;
-    let mut i: i64 = 0;
-    dyear = (*ut).tm_year as f64
-        + 1900.0f64
-        + ((*ut).tm_mon as f64 + 1.0f64) / 12f64
-        + ((*ut).tm_mday as f64 - 1.0f64) / 365.0f64;
-    if freespa_delta_t_table[0 as i64 as usize] > dyear {
-        return 32.0f64 * ((dyear - 1820.0f64) / 100f64) * ((dyear - 1820.0f64) / 100f64) - 20f64;
-    }
-    if freespa_delta_t_table[(2 as i64 * imax) as usize] < dyear {
-        return 32.0f64 * ((dyear - 1820.0f64) / 100f64) * ((dyear - 1820.0f64) / 100f64) - 20f64;
-    }
-    while imax - imin > 1 as i64 {
-        i = (imin + imax) / 2 as i64;
-        if freespa_delta_t_table[(2 as i64 * i) as usize] > dyear {
-            imax = i;
-        } else if freespa_delta_t_table[(2 as i64 * i) as usize] < dyear {
-            imin = i;
-        } else {
-            return freespa_delta_t_table[(2 as i64 * i + 1 as i64) as usize];
-        }
-    }
-    return freespa_delta_t_table[(2 as i64 * imin + 1 as i64) as usize]
-        + (dyear - freespa_delta_t_table[(2 as i64 * imin) as usize])
-            * (freespa_delta_t_table[(2 as i64 * imax + 1 as i64) as usize]
-                - freespa_delta_t_table[(2 as i64 * imin + 1 as i64) as usize])
-            / (freespa_delta_t_table[(2 as i64 * imax) as usize] - freespa_delta_t_table[(2 as i64 * imin) as usize]);
-}
-#[no_mangle]
-pub unsafe extern "C" fn MakeJulianDay(mut ut: *mut tm, mut delta_t: *mut f64, mut delta_ut1: f64) -> JulianDay {
-    let mut month: i64 = 0;
-    let mut year: i64 = 0;
-    let mut day: f64 = 0.;
-    let mut a: f64 = 0.;
-    let mut dt: f64 = 0.;
-    let mut JD: JulianDay = JulianDate {
-        JD: 0f64,
-        JDE: 0.,
-        JC: 0.,
-        JCE: 0.,
-        JME: 0.,
-        E: 0,
-    };
-    JD.E = 0 as i64;
-    day = (*ut).tm_mday as f64
-        + ((*ut).tm_hour as f64 + ((*ut).tm_min as f64 + ((*ut).tm_sec as f64 + delta_ut1) / 60.0f64) / 60.0f64)
-            / 24f64;
-    month = (*ut).tm_mon + 1 as i64;
-    year = (*ut).tm_year + 1900 as i64;
-    if month < 3 as i64 {
-        month += 12 as i64;
-        year -= 1;
-    }
-    JD.JD =
-        trunc(365.25f64 * (year as f64 + 4716.0f64)) + trunc(30.6001f64 * (month as f64 + 1.0f64)) + day - 1524.5f64;
-    if JD.JD > 2299160.0f64 {
-        a = trunc(year as f64 / 100.0f64);
-        JD.JD += 2f64 - a + trunc(a / 4f64);
-    }
-    if !delta_t.is_null() {
-        dt = *delta_t;
-    } else {
-        dt = get_delta_t(ut);
-    }
-    JD.JDE = JD.JD + dt / 86400.0f64;
-    JD.JC = (JD.JD - JD0) / 36525.0f64;
-    JD.JCE = (JD.JDE - JD0) / 36525.0f64;
-    JD.JME = JD.JCE / 10.0f64;
-    return JD;
-}
+
 #[no_mangle]
 pub unsafe extern "C" fn SetIntLimits(mut v: f64, mut t: *mut i64) -> i64 {
     if v > INT_MIN as f64 && v < INT_MAX as f64 {
@@ -158,140 +87,7 @@ pub unsafe extern "C" fn SetIntLimits(mut v: f64, mut t: *mut i64) -> i64 {
     *t = 0 as i64;
     return 1 as i64;
 }
-#[no_mangle]
-pub unsafe extern "C" fn JDgmtime(mut JD: JulianDay, mut ut: *mut tm) -> *mut tm {
-    let mut A: f64 = 0.;
-    let mut B: f64 = 0.;
-    let mut C: f64 = 0.;
-    let mut D: f64 = 0.;
-    let mut F: f64 = 0.;
-    let mut G: f64 = 0.;
-    let mut I: f64 = 0.;
-    let mut Z: f64 = 0.;
-    let mut d: f64 = 0.;
-    Z = trunc(JD.JD + 0.5f64);
-    F = JD.JD - Z;
-    if Z < 2299161f64 {
-        A = Z;
-    } else {
-        B = trunc((Z - 1867216.25f64) / 36524.25f64);
-        A = Z + 1f64 + B - trunc(B / 4.0f64);
-    }
-    C = A + 1524f64;
-    D = trunc((C - 122.1f64) / 365.25f64);
-    G = trunc(365.25f64 * D);
-    I = trunc((C - G) / 30.6001f64);
-    d = C - G - trunc(30.6001f64 * I) + F - 0.5f64;
-    (*ut).tm_mday = trunc(d) as i64 + 1 as i64;
-    if I < 14f64 {
-        (*ut).tm_mon = (I - 2f64) as i64;
-    } else {
-        (*ut).tm_mon = (I - 14f64) as i64;
-    }
-    if (*ut).tm_mon > 1 as i64 {
-        if SetIntLimits(D - 4716f64 - 1900f64, &raw mut (*ut).tm_year) != 0 {
-            return ::core::ptr::null_mut::<tm>();
-        }
-    } else if SetIntLimits(D - 4715f64 - 1900f64, &raw mut (*ut).tm_year) != 0 {
-        return ::core::ptr::null_mut::<tm>();
-    }
-    d -= trunc(d);
-    d *= 86400f64;
-    d = round(d);
-    (*ut).tm_sec = d as i64 % 60 as i64;
-    d -= (*ut).tm_sec as f64;
-    d /= 60f64;
-    (*ut).tm_min = d as i64 % 60 as i64;
-    d -= (*ut).tm_min as f64;
-    d /= 60f64;
-    (*ut).tm_hour = d as i64 % 60 as i64;
-    d -= (*ut).tm_hour as f64;
-    return ut;
-}
-#[no_mangle]
-pub unsafe extern "C" fn gmjtime_r(mut t: *mut i64, mut ut: *mut tm) -> *mut tm {
-    let mut J: JulianDay = JulianDate {
-        JD: 0.,
-        JDE: 0.,
-        JC: 0.,
-        JCE: 0.,
-        JME: 0.,
-        E: 0,
-    };
-    J.JD = (*t - ETJD0 as i64) as f64 / 86400.0f64 + JD0;
-    return JDgmtime(J, ut);
-}
-#[no_mangle]
-pub unsafe extern "C" fn gmjtime(mut t: *mut i64) -> *mut tm {
-    static mut _tmbuf: tm = tm {
-        tm_sec: 0,
-        tm_min: 0,
-        tm_hour: 0,
-        tm_mday: 0,
-        tm_mon: 0,
-        tm_year: 0,
-        tm_wday: 0,
-        tm_yday: 0,
-        tm_isdst: 0,
-        tm_gmtoff: 0,
-        tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
-    };
-    return gmjtime_r(t, &raw mut _tmbuf);
-}
-#[no_mangle]
-pub unsafe extern "C" fn mkgmjtime(mut ut: *mut tm) -> i64 {
-    let mut J: JulianDay = JulianDate {
-        JD: 0.,
-        JDE: 0.,
-        JC: 0.,
-        JCE: 0.,
-        JME: 0.,
-        E: 0,
-    };
-    J = MakeJulianDay(ut, ::core::ptr::null_mut::<f64>(), 0f64);
-    return round((J.JD - JD0) * 86400f64) as i64 + ETJD0 as i64;
-}
-#[no_mangle]
-pub unsafe extern "C" fn JDmkgmjtime(mut J: JulianDay) -> i64 {
-    return round((J.JD - JD0) * 86400f64) as i64 + ETJD0 as i64;
-}
-#[no_mangle]
-pub unsafe extern "C" fn MakeJulianDayEpoch(mut t: i64, mut delta_t: *mut f64, mut delta_ut1: f64) -> JulianDay {
-    let mut ut: tm = tm {
-        tm_sec: 0,
-        tm_min: 0,
-        tm_hour: 0,
-        tm_mday: 0,
-        tm_mon: 0,
-        tm_year: 0,
-        tm_wday: 0,
-        tm_yday: 0,
-        tm_isdst: 0,
-        tm_gmtoff: 0,
-        tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
-    };
-    let mut p: *mut tm = ::core::ptr::null_mut::<tm>();
-    let mut JD: JulianDay = JulianDate {
-        JD: 0.,
-        JDE: 0.,
-        JC: 0.,
-        JCE: 0.,
-        JME: 0.,
-        E: 0,
-    };
-    p = gmjtime_r(&raw mut t, &raw mut ut);
-    if p.is_null() {
-        JD.JD = 0.0f64;
-        JD.JDE = 0.0f64;
-        JD.JC = 0.0f64;
-        JD.JCE = 0.0f64;
-        JD.JME = 0.0f64;
-        JD.E = _FREESPA_GMTIMEF;
-    } else {
-        JD = MakeJulianDay(&raw mut ut, delta_t, delta_ut1);
-    }
-    return JD;
-}
+
 #[no_mangle]
 pub unsafe extern "C" fn SummPTerms(mut p: *const p_term, mut N: i64, mut JD: JulianDay) -> f64 {
     let mut i: i64 = 0 as i64;
@@ -602,8 +398,8 @@ pub unsafe extern "C" fn InputCheck(
 }
 #[no_mangle]
 pub unsafe extern "C" fn SPA(
-    mut ut: *mut tm,
-    mut delta_t: *mut f64,
+    mut ut: &tm,
+    mut delta_t: f64,
     mut delta_ut1: f64,
     mut lon: f64,
     mut lat: f64,

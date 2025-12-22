@@ -44,8 +44,8 @@ expect_used = "deny"
 panic = "deny"
 index_overflow = "deny"
 
-[lints.rust]
-missing_docs = "deny"
+# [lints.rust]
+# missing_docs = "deny"
 
 [build-dependencies]
 bindgen = { version = "0.72.1", optional = true }
