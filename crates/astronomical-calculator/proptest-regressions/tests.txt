@@ -1,0 +1,10 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc e0f7b3643259fe48f8a1b60a5becb7d331bc81cf848f6c24d690109025bd34f6 # shrinks to datetime = 2073-10-12T11:00:00Z, longitude = 176.83201993310382, latitude = -55.76927244048005, elevation = 516.4027474567084, pressure = 1041.234691192761, temperature = -12.47274368734062
+cc 16168652ef2cfa4a50bd78403b93070ef59d969af8c0025616f5b5f12c23aac0 # shrinks to datetime = 1916-02-04T06:35:32Z, longitude = 61.15891146117636, latitude = -45.51900290745472, elevation = 761.3964913122323, pressure = 1011.5008880096354, temperature = 33.96605996526052
+cc a0f6b1f06e2d3478474e63fa4deaee322e1ac144a89dbbc9d19e5eeaaf776427 # shrinks to datetime = 1912-06-04T00:00:01Z, longitude = -148.71146597772685, latitude = -44.84171119035503, elevation = 418.72955457010255, pressure = 1035.6079405164446, temperature = -19.613927574716637
+cc 848a61cdab222cf0517eba46e01efac957ddbe59af46bd57d1943b58cea25e15 # shrinks to datetime = 2093-03-14T03:32:24Z, longitude = -50.852833308334674, latitude = -10.234254426868848

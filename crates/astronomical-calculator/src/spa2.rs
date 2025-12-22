@@ -129,17 +129,6 @@ fn round(x: f64) -> f64 {
 fn trunc(x: f64) -> f64 {
     x.trunc()
 }
-pub struct SpaCalculator {
-    ut: NaiveDateTime,
-    delta_t: Option<f64>,
-    delta_ut1: f64,
-    lon: f64,
-    lat: f64,
-    e: f64,
-    julian_date: OnceCell<JulianDate>,
-    geocentric_position: OnceCell<GeoCentricSolPos>,
-    solar_position: OnceCell<SolarPosition>,
-}
 
 fn validate_delta_ut1(delta_ut1: f64) -> Result<(), SpaError> {
     if !(-1.0..=1.0).contains(&delta_ut1) {
@@ -180,6 +169,31 @@ fn validate_temperature(temperature: f64) -> Result<(), SpaError> {
     }
     Ok(())
 }
+pub struct SpaCalculator {
+    ut: NaiveDateTime,
+    delta_t: Option<f64>,
+    delta_ut1: f64,
+    lon: f64,
+    lat: f64,
+    e: f64,
+    temperature: f64,
+    pressure: f64,
+    gdip: Option<f64>,
+    refraction: Refraction,
+    julian_date: OnceCell<JulianDate>,
+    geocentric_position: OnceCell<GeoCentricSolPos>,
+    solar_position: OnceCell<SolarPosition>,
+    solar_transit: OnceCell<Result<SolarInfo, SpaError>>,
+    prev_solar_midnight: OnceCell<Result<SolarInfo, SpaError>>,
+    next_solar_midnight: OnceCell<Result<SolarInfo, SpaError>>,
+}
+
+#[derive(Copy, Clone, Debug)]
+struct SolarInfo {
+    pos: SolarPosition,
+    ts: i64,
+}
+
 impl SpaCalculator {
     pub fn new(
         ut: NaiveDateTime,
@@ -188,21 +202,34 @@ impl SpaCalculator {
         lon_radians: f64,
         lat_radians: f64,
         elevation: f64,
+        temperature: f64,
+        pressure: f64,
+        gdip: Option<f64>,
+        refraction: Refraction,
     ) -> Result<Self, SpaError> {
         validate_delta_ut1(delta_ut1)?;
         validate_lon(lon_radians)?;
         validate_lat(lat_radians)?;
         validate_elevation(elevation)?;
+        validate_temperature(temperature)?;
+        validate_pressure(pressure)?;
         Ok(Self {
             ut,
             delta_t,
             delta_ut1,
             lon: lon_radians,
             lat: lat_radians,
+            temperature,
+            pressure,
             e: elevation,
             julian_date: OnceCell::new(),
             geocentric_position: OnceCell::new(),
             solar_position: OnceCell::new(),
+            solar_transit: OnceCell::new(),
+            prev_solar_midnight: OnceCell::new(),
+            next_solar_midnight: OnceCell::new(),
+            gdip,
+            refraction,
         })
     }
     pub fn get_julian_day(&mut self) -> &JulianDate {
@@ -264,12 +291,87 @@ impl SpaCalculator {
         let E = EoT(*self.get_julian_day(), *self.get_geocentric_position());
         JDgmtime(self.get_julian_day().JD + (self.lon + E) / PI / 2.0)
     }
+    pub fn get_solar_transit(&mut self) -> Result<i64, SpaError> {
+        let r = self.solar_transit.get_or_init(|| {
+            let t = mkgmjtime(self.ut);
+            let tc = FindSolTime(t, 12, 0, 0, self.delta_t, self.delta_ut1, self.lon)?;
+            let mut calculator = self.with_time(gmjtime_r(tc)?);
+            let pos = *calculator.get_solar_position();
+            let pos = match self.refraction {
+                Refraction::ApSolposBennet => pos.ApSolposBennet(self.gdip, self.e, self.pressure, self.temperature)?,
+                Refraction::ApSolposBennetNA => {
+                    pos.ApSolposBennetNA(self.gdip, self.e, self.pressure, self.temperature)?
+                }
+            };
+            Ok(SolarInfo { pos, ts: tc })
+        });
+        (*r).map(|i| i.ts)
+    }
+    pub fn get_prev_solar_midnight(&mut self) -> Result<i64, SpaError> {
+        let solar_transit = self.get_solar_transit()?;
+        let r = self.prev_solar_midnight.get_or_init(|| {
+            let tc = FindSolTime(solar_transit - 43200, 0, 0, 0, self.delta_t, self.delta_ut1, self.lon)?;
+            let mut calculator = self.with_time(gmjtime_r(tc)?);
+            let pos = *calculator.get_solar_position();
+            let pos = match self.refraction {
+                Refraction::ApSolposBennet => pos.ApSolposBennet(self.gdip, self.e, self.pressure, self.temperature)?,
+                Refraction::ApSolposBennetNA => {
+                    pos.ApSolposBennetNA(self.gdip, self.e, self.pressure, self.temperature)?
+                }
+            };
+            Ok(SolarInfo { pos, ts: tc })
+        });
+        (*r).map(|i| i.ts)
+    }
+    pub fn get_next_solar_midnight(&mut self) -> Result<i64, SpaError> {
+        let solar_transit = self.get_solar_transit()?;
+        let r = self.next_solar_midnight.get_or_init(|| {
+            let tc = FindSolTime(solar_transit + 43200, 0, 0, 0, self.delta_t, self.delta_ut1, self.lon)?;
+            let mut calculator = self.with_time(gmjtime_r(tc)?);
+            let pos = *calculator.get_solar_position();
+            let pos = match self.refraction {
+                Refraction::ApSolposBennet => pos.ApSolposBennet(self.gdip, self.e, self.pressure, self.temperature)?,
+                Refraction::ApSolposBennetNA => {
+                    pos.ApSolposBennetNA(self.gdip, self.e, self.pressure, self.temperature)?
+                }
+            };
+            Ok(SolarInfo { pos, ts: tc })
+        });
+        (*r).map(|i| i.ts)
+    }
+
+    fn with_time(&self, time: NaiveDateTime) -> Self {
+        Self {
+            ut: time,
+            delta_t: self.delta_t,
+            delta_ut1: self.delta_ut1,
+            lon: self.lon,
+            lat: self.lat,
+            e: self.e,
+            temperature: self.temperature,
+            pressure: self.pressure,
+            gdip: self.gdip,
+            refraction: self.refraction,
+            julian_date: OnceCell::new(),
+            geocentric_position: OnceCell::new(),
+            solar_position: OnceCell::new(),
+            solar_transit: OnceCell::new(),
+            prev_solar_midnight: OnceCell::new(),
+            next_solar_midnight: OnceCell::new(),
+        }
+    }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct SolarPosition {
     pub zenith: f64,
     pub azimuth: f64,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum Refraction {
+    ApSolposBennet,
+    ApSolposBennetNA,
 }
 
 impl SolarPosition {
@@ -644,13 +746,13 @@ pub fn JDmkgmjtime(J: &JulianDate) -> i64 {
     round((J.JD - JD0) * 86400.0) as i64 + ETJD0
 }
 
-enum SolarZenith {
+pub(crate) enum SolarZenith {
     AlwaysBelow,
     AlwaysAbove,
     BetweenHorizon(i64, f64),
 }
 
-fn FindSolZenith(
+pub(crate) fn FindSolZenith(
     t1: i64,
     t2: i64,
     z1: f64,
@@ -685,7 +787,18 @@ fn FindSolZenith(
     }
 
     let ut = gmjtime_r(tt)?;
-    let mut calculator = SpaCalculator::new(ut, delta_t, delta_ut1, lon, lat, e)?;
+    let mut calculator = SpaCalculator::new(
+        ut,
+        delta_t,
+        delta_ut1,
+        lon,
+        lat,
+        e,
+        T,
+        p,
+        gdip,
+        Refraction::ApSolposBennet,
+    )?;
     let mut P = refract(*calculator.get_solar_position(), gdip, e, p, T);
 
     let mut tb = tt;
@@ -712,7 +825,18 @@ fn FindSolZenith(
         }
 
         let ut = gmjtime_r(tt)?;
-        let mut calculator = SpaCalculator::new(ut, delta_t, delta_ut1, lon, lat, e)?;
+        let mut calculator = SpaCalculator::new(
+            ut,
+            delta_t,
+            delta_ut1,
+            lon,
+            lat,
+            e,
+            T,
+            p,
+            gdip,
+            Refraction::ApSolposBennet,
+        )?;
         P = refract(*calculator.get_solar_position(), gdip, e, p, T);
 
         if fabs(P.zenith - z) < fabs(eb) {
@@ -732,4 +856,10 @@ fn FindSolZenith(
         iter += 1;
     }
     Ok(SolarZenith::BetweenHorizon(tb, eb))
+}
+
+fn mkgmjtime(ut: NaiveDateTime) -> i64 {
+    let J = JulianDate::new(ut, None, 0.0);
+
+    return round((J.JD - JD0) * 86400 as f64) as i64 + ETJD0 as i64;
 }

@@ -39,7 +39,7 @@ pub struct JulianDate {
     pub E: i64,
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone, Copy)]
 pub enum SpaError {
     #[error("ΔUT1 out of range")]
     DeltaUt1OutOfRange,

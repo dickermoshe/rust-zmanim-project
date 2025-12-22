@@ -18,7 +18,7 @@ extern "C" {
 pub type size_t = usize;
 pub type __off_t = ::core::ffi::c_long;
 pub type __off64_t = ::core::ffi::c_long;
-pub type __time_t = ::core::ffi::c_long;
+pub type __time_t = i64;
 pub type time_t = __time_t;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -5580,6 +5580,21 @@ pub static mut SDMASK: ::core::ffi::c_int = _FREESPA_SUNRISE
     | _FREESPA_NADUSK
     | _FREESPA_ASDAWN
     | _FREESPA_ASDUSK;
+// /* solar_day strcut lists 11 solar events on a day
+//  * Index	Event
+//  * 0:		solar midnight before time t
+//  * 1:		solar transit closest to time t
+//  * 2:		solar midnight after time t
+//  * 3:		sunrise
+//  * 4:		sunset
+//  * 5:		civil dawn
+//  * 6:		civil dusk
+//  * 7:		nautical dawn
+//  * 8:		nautical dusk
+//  * 9:		astronomical dawn
+//  * 10:		astronomical dusk
+//  * The followin routine finds em.
+//  */
 #[no_mangle]
 pub unsafe extern "C" fn SolarDay(
     mut ut: *mut tm,
@@ -5800,12 +5815,14 @@ pub unsafe extern "C" fn SolarDay(
         lon,
         lat,
     );
+    // Prev
     put = gmjtime_r(&raw mut tp, &raw mut D.ev as *mut tm);
     D.t[0 as ::core::ffi::c_int as usize] = tp;
     D.status[0 as ::core::ffi::c_int as usize] = _FREESPA_EV_OK;
     D.E[0 as ::core::ffi::c_int as usize] = ::core::f32::NAN as ::core::ffi::c_double;
     Pp = SPA(put, delta_t, delta_ut1, lon, lat, e);
     Pp = refract.expect("non-null function pointer")(Pp, gdip, e, p, T);
+    //transit
     put = gmjtime_r(
         &raw mut tc,
         (&raw mut D.ev as *mut tm).offset(1 as ::core::ffi::c_int as isize),
@@ -5815,15 +5832,18 @@ pub unsafe extern "C" fn SolarDay(
     D.E[1 as ::core::ffi::c_int as usize] = ::core::f32::NAN as ::core::ffi::c_double;
     Pc = SPA(put, delta_t, delta_ut1, lon, lat, e);
     Pc = refract.expect("non-null function pointer")(Pc, gdip, e, p, T);
+    // next
     put = gmjtime_r(
         &raw mut tn,
         (&raw mut D.ev as *mut tm).offset(2 as ::core::ffi::c_int as isize),
     );
+
     D.t[2 as ::core::ffi::c_int as usize] = tn;
     D.status[2 as ::core::ffi::c_int as usize] = _FREESPA_EV_OK;
     D.E[2 as ::core::ffi::c_int as usize] = ::core::f32::NAN as ::core::ffi::c_double;
     Pn = SPA(put, delta_t, delta_ut1, lon, lat, e);
     Pn = refract.expect("non-null function pointer")(Pn, gdip, e, p, T);
+
     if !gdip.is_null() {
         dip = *gdip;
         if fabs(dip) > M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double {
