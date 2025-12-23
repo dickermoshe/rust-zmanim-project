@@ -1,0 +1,11 @@
+[project]
+name = "test-data"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "numpy>=2.4.0",
+    "pip-system-certs>=5.3",
+    "skyfield>=1.53",
+]
