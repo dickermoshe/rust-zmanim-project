@@ -53,7 +53,7 @@ fn solar_day_to_event(day: solar_day, index: usize) -> SolarEventResult {
     } else if day.status[index] == -1 {
         SolarEventResult::AlwaysBelow
     } else {
-        panic!("Invalid status: {}", day.status[index]);
+        self::panic!("Invalid status: {}", day.status[index]);
     }
 }
 
@@ -245,9 +245,11 @@ fn compare_solar_results(safe: SolarEventResult, unsafe_: SolarEventResult, name
             // Both indicate sun always below - OK
         }
         (safe_result, unsafe_result) => {
-            panic!(
+            self::panic!(
                 "Solar event results don't match: safe={:?}, unsafe={:?}, for method {}",
-                safe_result, unsafe_result, name,
+                safe_result,
+                unsafe_result,
+                name,
             );
         }
     }

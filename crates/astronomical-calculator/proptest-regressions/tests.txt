@@ -1,0 +1,10 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc c7db97f7b5174495feb277381a58ce77a29e0804ef51033070daf9b06ecbe484 # shrinks to datetime = 2099-01-06T12:00:00Z, longitude = -178.3249149346407, latitude = -63.548690821414986, elevation = 54.775513086479826, pressure = 1000.5964680021947, temperature = 24.55466472838456, refraction = ApSolposBennet, mut delta_t = 41.42968651147041, use_explicit_delta_t = true, delta_ut1 = 0.2755450683058992, mut gdip = -0.9046260971581731, use_explicit_gdip = false
+cc c9effa0d462d8ac3b98c10cc4e75d88d27186f716c3863dc76a9ccc28f5dca2d # shrinks to datetime = 1974-03-08T05:00:00Z, longitude = -85.48394285464568, latitude = 53.8051264779527, elevation = 148.00775687752272, pressure = 1008.1449548597491, temperature = 18.368938677671945, refraction = ApSolposBennetNA, mut delta_t = -46.28474545964533, use_explicit_delta_t = false, delta_ut1 = -0.38660158885659146, mut gdip = 0.3594844867440416, use_explicit_gdip = true
+cc 6099987a2de8a4b6017b835dc50a75542b64fce6fdb87629cfcd3580189caa2c # shrinks to datetime = 1995-04-01T00:00:00Z, longitude = -179.76932618938406, latitude = -60.321209448652205, elevation = 166.0511917389857, pressure = 1011.1260052287287, temperature = 22.551487528439402, refraction = ApSolposBennet, mut delta_t = -7.870933555140734, use_explicit_delta_t = true, delta_ut1 = -0.3091262823727901, mut gdip = -0.41275952417866674, use_explicit_gdip = false
+cc a558c2c66d33d4fd300616b1ae4a8c42ea3747ad78f761675ea2e85a55970756 # shrinks to datetime = 1928-12-03T08:10:00Z, longitude = 96.07531864840294, latitude = 86.59411841943617, elevation = 90.26428542748148, pressure = 1002.9665410741284, temperature = 19.15433716535166, refraction = ApSolposBennet, mut delta_t = -4.33838939535048, use_explicit_delta_t = true, delta_ut1 = -0.09783199928232862, mut gdip = 0.37783279167689793, use_explicit_gdip = true

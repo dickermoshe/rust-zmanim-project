@@ -1192,22 +1192,6 @@ fn heliocentric_radius(jd: &JulianDate) -> f64 {
     rad / 1.0e8
 }
 
-/// Safely convert f64 to i32 with bounds checking
-fn f64_to_i32(v: f64) -> Option<i32> {
-    if !v.is_finite() {
-        return None;
-    }
-
-    const MIN: f64 = i32::MIN as f64;
-    const MAX: f64 = i32::MAX as f64;
-
-    if (MIN..=MAX).contains(&v) {
-        Some(v as i32)
-    } else {
-        None
-    }
-}
-
 /// Convert Julian date to NaiveDateTime
 fn julian_date_to_datetime(julian_day: f64) -> Result<NaiveDateTime, CalculationError> {
     let unix_millis = julian_day_to_unix_millis(julian_day);
