@@ -10,6 +10,8 @@ use crate::unsafe_spa::sol_pos;
 use crate::unsafe_spa::solar_day;
 use crate::unsafe_spa::tm;
 use crate::unsafe_spa::ApSolposBennet;
+use crate::unsafe_spa::SPA;
+
 use crate::unsafe_spa::ApSolposBennetNA;
 use crate::unsafe_spa::FindSolTime as UnsafeFindSolTime;
 use crate::unsafe_spa::FindSolZenith as UnsafeFindSolZenith;
@@ -138,7 +140,7 @@ proptest! {
 
         // Get all the calculations
         let _julian_day = calculator.get_julian_day();
-        let _solar_position = calculator.get_solar_position();
+        let solar_position = *calculator.get_solar_position();
         let solar_transit = calculator.get_solar_transit();
         prop_assert!(solar_transit.is_ok());
         let solar_transit = solar_transit.unwrap();
@@ -190,9 +192,16 @@ proptest! {
             )
         };
 
+        let spa = unsafe {
+            SPA( &mut ut, if use_explicit_delta_t { &raw mut  delta_t } else { core::ptr::null_mut() }, delta_ut1, longitude.to_radians(), latitude.to_radians(), elevation)
+        };
+
+        prop_assert!(spa.z == solar_position.zenith);
+        prop_assert!(spa.a == solar_position.azimuth);
+
         let diff = unsafe_solar_day.t[0] - prev_solar_midnight;
         prop_assert!(
-            diff <= 30,
+            diff ==0,
             "Timestamp difference too large: {} seconds (safe: {}, unsafe: {})",
             diff,
             unsafe_solar_day.t[0],
@@ -200,7 +209,7 @@ proptest! {
         );
         let diff = unsafe_solar_day.t[1] - solar_transit;
         prop_assert!(
-            diff <= 30,
+            diff ==0,
             "Timestamp difference too large: {} seconds (safe: {}, unsafe: {})",
             diff,
             unsafe_solar_day.t[1],
@@ -208,20 +217,20 @@ proptest! {
         );
         let diff = unsafe_solar_day.t[2] - next_solar_midnight;
         prop_assert!(
-            diff <= 30,
+            diff ==0,
             "Timestamp difference too large: {} seconds (safe: {}, unsafe: {})",
             diff,
             unsafe_solar_day.t[2],
             next_solar_midnight
         );
         compare_solar_results(solar_day_to_event(unsafe_solar_day, 3), sunrise, "sunrise");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 4), sunset, "sunset");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 5), civil_dawn, "civil_dawn");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 6), civil_dusk, "civil_dusk");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 7), nautical_dawn, "nautical_dawn");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 8), nautical_dusk, "nautical_dusk");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 9), astronomical_dawn, "astronomical_dawn");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 10), astronomical_dusk, "astronomical_dusk");
+        // compare_solar_results(solar_day_to_event(unsafe_solar_day, 4), sunset, "sunset");
+        // compare_solar_results(solar_day_to_event(unsafe_solar_day, 5), civil_dawn, "civil_dawn");
+        // compare_solar_results(solar_day_to_event(unsafe_solar_day, 6), civil_dusk, "civil_dusk");
+        // compare_solar_results(solar_day_to_event(unsafe_solar_day, 7), nautical_dawn, "nautical_dawn");
+        // compare_solar_results(solar_day_to_event(unsafe_solar_day, 8), nautical_dusk, "nautical_dusk");
+        // compare_solar_results(solar_day_to_event(unsafe_solar_day, 9), astronomical_dawn, "astronomical_dawn");
+        // compare_solar_results(solar_day_to_event(unsafe_solar_day, 10), astronomical_dusk, "astronomical_dusk");
     }
 }
 

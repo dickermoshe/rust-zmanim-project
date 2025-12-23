@@ -45,7 +45,7 @@
 //!     SolarEventResult::AlwaysBelow => println!("Sun never rises (polar night)"),
 //! }
 //! ```
-// #![no_std]
+#![no_std]
 
 pub(crate) mod tables;
 
@@ -162,6 +162,15 @@ pub enum SolarEventResult {
     AlwaysAbove,
     /// Sun is always below the threshold (e.g., polar night)
     AlwaysBelow,
+}
+
+impl SolarEventResult {
+    pub fn timestamp(self) -> Option<i64> {
+        match self {
+            SolarEventResult::Occurs(ts) => Some(ts),
+            _ => None,
+        }
+    }
 }
 
 impl AstronomicalCalculator {
@@ -542,9 +551,8 @@ impl AstronomicalCalculator {
         let z1 = self
             .get_prev_midnight_info()
             .map(|i| i.position.zenith)
-            .unwrap_or(PI / 2.0);
-        let z2 = self.get_transit_info().map(|i| i.position.zenith).unwrap_or(PI / 2.0);
-
+            .unwrap(    );
+        let z2 = self.get_transit_info().map(|i| i.position.zenith).unwrap();
         let dip = self.compute_dip();
         let target_zenith = dip + PI / 2.0 + SUN_RADIUS;
 
@@ -842,7 +850,7 @@ impl AstronomicalCalculator {
         }
     }
 
-    /// Helper to find a solar event using find_solar_zenith
+    /// Helper to find a solar event using bisection search
     fn find_solar_event(
         &mut self,
         t1: i64,
@@ -851,6 +859,7 @@ impl AstronomicalCalculator {
         z2: f64,
         target_zenith: f64,
     ) -> Result<SolarEventResult, CalculationError> {
+
         // Check if the sun is always above or below the target zenith
         if target_zenith < z1 && target_zenith < z2 {
             return Ok(SolarEventResult::AlwaysBelow);
@@ -865,7 +874,7 @@ impl AstronomicalCalculator {
         let a = -((t2 as f64 * w).cos() * z1 - (t1 as f64 * w).cos() * z2) / b_denom;
         let b = (z1 - z2) / b_denom;
         let direction = if z2 < z1 { 1.0 } else { -1.0 };
-
+  
         // Initial guess
         let mut timestamp = t1 + ((target_zenith / b - a / b).acos() / w).round() as i64;
         if timestamp < t1 || timestamp > t2 {
@@ -874,12 +883,14 @@ impl AstronomicalCalculator {
 
         // Calculate solar position at initial guess
         let datetime = unix_to_datetime(timestamp)?;
+
         let mut calculator = self.with_time(datetime);
-        let position = match self.refraction {
+        let mut position = *calculator.get_solar_position();
+         position = match self.refraction {
             Refraction::ApSolposBennet => apply_refraction(
                 bennet_refraction,
                 inverse_bennet_refraction,
-                *calculator.get_solar_position(),
+                position,
                 self.gdip,
                 self.elevation,
                 self.pressure,
@@ -888,14 +899,13 @@ impl AstronomicalCalculator {
             Refraction::ApSolposBennetNA => apply_refraction(
                 bennet_na_refraction,
                 inverse_bennet_na_refraction,
-                *calculator.get_solar_position(),
+                position,
                 self.gdip,
                 self.elevation,
                 self.pressure,
                 self.temperature,
             )?,
         };
-
         let mut best_timestamp = timestamp;
         let mut best_error = position.zenith - target_zenith;
 
