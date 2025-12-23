@@ -59,6 +59,8 @@ use chrono::NaiveDateTime;
 use chrono::TimeZone;
 use chrono::Timelike;
 use chrono::Utc;
+use julian_day_converter::julian_day_to_unix_millis;
+use julian_day_converter::unix_millis_to_julian_day;
 
 use core::cell::OnceCell;
 use core::f64::consts::PI;
@@ -165,6 +167,28 @@ pub enum SolarEventResult {
 }
 
 impl SolarEventResult {
+    /// Extracts the timestamp from a solar event result.
+    ///
+    /// # Returns
+    ///
+    /// - `Some(timestamp)` if the event occurs at a specific time
+    /// - `None` if the sun is always above or always below the threshold
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use astronomical_calculator::{AstronomicalCalculator, Refraction};
+    /// use chrono::NaiveDateTime;
+    ///
+    /// let datetime = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+    /// let mut calc = AstronomicalCalculator::new(
+    ///     datetime, None, 0.0, 0.0, 0.0, 0.0, 20.0, 1013.25, None, Refraction::ApSolposBennet
+    /// ).unwrap();
+    ///
+    /// if let Some(ts) = calc.get_sunrise().unwrap().timestamp() {
+    ///     println!("Sunrise at timestamp: {}", ts);
+    /// }
+    /// ```
     pub fn timestamp(self) -> Option<i64> {
         match self {
             SolarEventResult::Occurs(ts) => Some(ts),
@@ -392,6 +416,9 @@ impl AstronomicalCalculator {
     /// A `Result` containing the Unix timestamp (seconds since 1970-01-01 00:00:00 UTC)
     /// of the solar transit, or an error if the calculation fails.
     pub fn get_solar_transit(&mut self) -> Result<i64, CalculationError> {
+        self._get_solar_transit().map(|i| i.timestamp)
+    }
+    fn _get_solar_transit(&mut self) -> Result<SolarInfo, CalculationError> {
         let r = self.solar_transit.get_or_init(|| {
             let t = datetime_to_unix(self.ut);
 
@@ -423,7 +450,7 @@ impl AstronomicalCalculator {
                 timestamp: tc,
             })
         });
-        (*r).map(|i| i.timestamp)
+        *r
     }
 
     /// Returns the time of the previous solar midnight (solar anti-transit).
@@ -436,6 +463,10 @@ impl AstronomicalCalculator {
     /// A `Result` containing the Unix timestamp of the previous solar midnight,
     /// or an error if the calculation fails.
     pub fn get_prev_solar_midnight(&mut self) -> Result<i64, CalculationError> {
+        self._get_prev_solar_midnight().map(|i| i.timestamp)
+    }
+
+    fn _get_prev_solar_midnight(&mut self) -> Result<SolarInfo, CalculationError> {
         let solar_transit = self.get_solar_transit()?;
         let r = self.prev_solar_midnight.get_or_init(|| {
             let tc = find_solar_time(
@@ -474,9 +505,8 @@ impl AstronomicalCalculator {
                 timestamp: tc,
             })
         });
-        (*r).map(|i| i.timestamp)
+        *r
     }
-
     /// Returns the time of the next solar midnight (solar anti-transit).
     ///
     /// Solar midnight is the moment when the Sun crosses the observer's anti-meridian,
@@ -487,6 +517,10 @@ impl AstronomicalCalculator {
     /// A `Result` containing the Unix timestamp of the next solar midnight,
     /// or an error if the calculation fails.
     pub fn get_next_solar_midnight(&mut self) -> Result<i64, CalculationError> {
+        self._get_next_solar_midnight().map(|i| i.timestamp)
+    }
+
+    fn _get_next_solar_midnight(&mut self) -> Result<SolarInfo, CalculationError> {
         let solar_transit = self.get_solar_transit()?;
         let r = self.next_solar_midnight.get_or_init(|| {
             let tc = find_solar_time(
@@ -525,7 +559,7 @@ impl AstronomicalCalculator {
                 timestamp: tc,
             })
         });
-        (*r).map(|i| i.timestamp)
+        *r
     }
 
     /// Returns the time of sunrise.
@@ -548,11 +582,8 @@ impl AstronomicalCalculator {
         let transit = self.get_solar_transit()?;
 
         // Get solar positions at boundaries - safe because we just computed them
-        let z1 = self
-            .get_prev_midnight_info()
-            .map(|i| i.position.zenith)
-            .unwrap(    );
-        let z2 = self.get_transit_info().map(|i| i.position.zenith).unwrap();
+        let z1 = self._get_prev_solar_midnight()?.position.zenith;
+        let z2 = self._get_solar_transit()?.position.zenith;
         let dip = self.compute_dip();
         let target_zenith = dip + PI / 2.0 + SUN_RADIUS;
 
@@ -581,11 +612,8 @@ impl AstronomicalCalculator {
         let next_midnight = self.get_next_solar_midnight()?;
 
         // Get solar positions at boundaries
-        let z1 = self.get_transit_info().map(|i| i.position.zenith).unwrap_or(PI / 2.0);
-        let z2 = self
-            .get_next_midnight_info()
-            .map(|i| i.position.zenith)
-            .unwrap_or(PI / 2.0);
+        let z1 = self._get_solar_transit()?.position.zenith;
+        let z2 = self._get_next_solar_midnight()?.position.zenith;
 
         let dip = self.compute_dip();
         let target_zenith = dip + PI / 2.0 + SUN_RADIUS;
@@ -616,11 +644,8 @@ impl AstronomicalCalculator {
         let prev_midnight = self.get_prev_solar_midnight()?;
         let transit = self.get_solar_transit()?;
 
-        let z1 = self
-            .get_prev_midnight_info()
-            .map(|i| i.position.zenith)
-            .unwrap_or(PI / 2.0);
-        let z2 = self.get_transit_info().map(|i| i.position.zenith).unwrap_or(PI / 2.0);
+        let z1 = self._get_prev_solar_midnight()?.position.zenith;
+        let z2 = self._get_solar_transit()?.position.zenith;
 
         let dip = self.compute_dip();
         // Civil twilight: 6° below horizon
@@ -652,11 +677,8 @@ impl AstronomicalCalculator {
         let transit = self.get_solar_transit()?;
         let next_midnight = self.get_next_solar_midnight()?;
 
-        let z1 = self.get_transit_info().map(|i| i.position.zenith).unwrap_or(PI / 2.0);
-        let z2 = self
-            .get_next_midnight_info()
-            .map(|i| i.position.zenith)
-            .unwrap_or(PI / 2.0);
+        let z1 = self._get_solar_transit()?.position.zenith;
+        let z2 = self._get_next_solar_midnight()?.position.zenith;
 
         let dip = self.compute_dip();
         let target_zenith = dip + PI / 2.0 + PI * 6.0 / 180.0;
@@ -687,11 +709,8 @@ impl AstronomicalCalculator {
         let prev_midnight = self.get_prev_solar_midnight()?;
         let transit = self.get_solar_transit()?;
 
-        let z1 = self
-            .get_prev_midnight_info()
-            .map(|i| i.position.zenith)
-            .unwrap_or(PI / 2.0);
-        let z2 = self.get_transit_info().map(|i| i.position.zenith).unwrap_or(PI / 2.0);
+        let z1 = self._get_prev_solar_midnight()?.position.zenith;
+        let z2 = self._get_solar_transit()?.position.zenith;
 
         let dip = self.compute_dip();
         // Nautical twilight: 12° below horizon + sun radius
@@ -723,11 +742,8 @@ impl AstronomicalCalculator {
         let transit = self.get_solar_transit()?;
         let next_midnight = self.get_next_solar_midnight()?;
 
-        let z1 = self.get_transit_info().map(|i| i.position.zenith).unwrap_or(PI / 2.0);
-        let z2 = self
-            .get_next_midnight_info()
-            .map(|i| i.position.zenith)
-            .unwrap_or(PI / 2.0);
+        let z1 = self._get_solar_transit()?.position.zenith;
+        let z2 = self._get_next_solar_midnight()?.position.zenith;
 
         let dip = self.compute_dip();
         let target_zenith = dip + PI / 2.0 + PI * 12.0 / 180.0 + SUN_RADIUS;
@@ -760,10 +776,10 @@ impl AstronomicalCalculator {
         let transit = self.get_solar_transit()?;
 
         let z1 = self
-            .get_prev_midnight_info()
+            ._get_prev_solar_midnight()
             .map(|i| i.position.zenith)
             .unwrap_or(PI / 2.0);
-        let z2 = self.get_transit_info().map(|i| i.position.zenith).unwrap_or(PI / 2.0);
+        let z2 = self._get_solar_transit()?.position.zenith;
 
         let dip = self.compute_dip();
         // Astronomical twilight: 18° below horizon + sun radius
@@ -796,11 +812,8 @@ impl AstronomicalCalculator {
         let transit = self.get_solar_transit()?;
         let next_midnight = self.get_next_solar_midnight()?;
 
-        let z1 = self.get_transit_info().map(|i| i.position.zenith).unwrap_or(PI / 2.0);
-        let z2 = self
-            .get_next_midnight_info()
-            .map(|i| i.position.zenith)
-            .unwrap_or(PI / 2.0);
+        let z1 = self._get_solar_transit()?.position.zenith;
+        let z2 = self._get_next_solar_midnight()?.position.zenith;
 
         let dip = self.compute_dip();
         let target_zenith = dip + PI / 2.0 + PI * 18.0 / 180.0 + SUN_RADIUS;
@@ -859,7 +872,6 @@ impl AstronomicalCalculator {
         z2: f64,
         target_zenith: f64,
     ) -> Result<SolarEventResult, CalculationError> {
-
         // Check if the sun is always above or below the target zenith
         if target_zenith < z1 && target_zenith < z2 {
             return Ok(SolarEventResult::AlwaysBelow);
@@ -874,7 +886,7 @@ impl AstronomicalCalculator {
         let a = -((t2 as f64 * w).cos() * z1 - (t1 as f64 * w).cos() * z2) / b_denom;
         let b = (z1 - z2) / b_denom;
         let direction = if z2 < z1 { 1.0 } else { -1.0 };
-  
+
         // Initial guess
         let mut timestamp = t1 + ((target_zenith / b - a / b).acos() / w).round() as i64;
         if timestamp < t1 || timestamp > t2 {
@@ -886,7 +898,7 @@ impl AstronomicalCalculator {
 
         let mut calculator = self.with_time(datetime);
         let mut position = *calculator.get_solar_position();
-         position = match self.refraction {
+        position = match self.refraction {
             Refraction::ApSolposBennet => apply_refraction(
                 bennet_refraction,
                 inverse_bennet_refraction,
@@ -983,21 +995,6 @@ impl AstronomicalCalculator {
         }
 
         Ok(SolarEventResult::Occurs(best_timestamp))
-    }
-
-    /// Helper to get the cached prev_solar_midnight info
-    fn get_prev_midnight_info(&self) -> Option<SolarInfo> {
-        self.prev_solar_midnight.get().and_then(|r| r.ok())
-    }
-
-    /// Helper to get the cached next_solar_midnight info
-    fn get_next_midnight_info(&self) -> Option<SolarInfo> {
-        self.next_solar_midnight.get().and_then(|r| r.ok())
-    }
-
-    /// Helper to get the cached solar_transit info
-    fn get_transit_info(&self) -> Option<SolarInfo> {
-        self.solar_transit.get().and_then(|r| r.ok())
     }
 }
 
@@ -1303,43 +1300,17 @@ fn apply_refraction(
 
 impl JulianDate {
     fn new(ut: NaiveDateTime, delta_t: Option<f64>, delta_ut1: f64) -> Self {
-        // Calculate fractional day including time and delta_ut1
-        let day = ut.day() as f64
-            + (ut.hour() as f64 + (ut.minute() as f64 + (ut.second() as f64 + delta_ut1) / 60.0) / 60.0) / 24.0;
-
-        // Adjust month and year for Julian calendar calculation
-        let mut month = ut.month();
-        let mut year = ut.year();
-        if month < 3 {
-            month += 12;
-            year -= 1;
-        }
-
-        // Calculate Julian Date
-        let mut jd = (365.25 * (year as f64 + 4716.0)).trunc() + (30.6001 * (month + 1) as f64).trunc() + day - 1524.5;
-
-        // Gregorian calendar correction
-        if jd > 2299160.0 {
-            let a = (year as f64 / 100.0).trunc();
-            jd += 2.0 - a + (a / 4.0).trunc();
-        }
-
-        // Calculate Julian Ephemeris Date
-        let jde = jd + delta_t.unwrap_or_else(|| get_delta_t(&ut)) / 86400.0;
-
-        // Calculate Julian centuries
+        let jd = unix_millis_to_julian_day((ut.and_utc().timestamp_millis() as f64 + (delta_ut1 * 1000.0)) as i64);
+        let dt = if let Some(delta_t) = delta_t {
+            delta_t
+        } else {
+            get_delta_t(&ut)
+        };
+        let jde = jd + dt / 86400.0;
         let jc = (jd - JD0) / 36525.0;
         let jce = (jde - JD0) / 36525.0;
         let jme = jce / 10.0;
-
-        JulianDate {
-            jde,
-            jd,
-            jc,
-            jce,
-            jme,
-            e: 0,
-        }
+        Self { jd, jde, jc, jce, jme }
     }
 
     fn from_unix_time(unix_time: i64, delta_t: Option<f64>, delta_ut1: f64) -> Result<Self, CalculationError> {
@@ -1480,8 +1451,6 @@ pub struct JulianDate {
     pub jce: f64,
     /// Julian Millennium from J2000.0 (TT)
     pub jme: f64,
-    /// Unix timestamp
-    pub e: i64,
 }
 
 /// Errors that can occur during solar position calculations.
@@ -1533,19 +1502,3 @@ pub enum CalculationError {
     #[error("Time conversion error")]
     TimeConversionError,
 }
-
-/// Convert Julian day as a 64-bit float to Unix timestamp milliseconds as a signed 64-bit integer
-///
-/// ## Example:
-/// ```
-/// use julian_day_converter::*;
-///
-/// let julian_day: f64 = 2_460_258.488768587;
-/// let unix_millis: i64 = julian_day_to_unix_millis(julian_day);
-/// ```
-fn julian_day_to_unix_millis(jd: f64) -> i64 {
-    ((jd - JULIAN_DAY_UNIX_EPOCH_DAYS) * 86_400_000.0).round() as i64
-}
-/// Public constant that may be useful to library users
-/// 1970-01-01 00:00:00 UTC
-const JULIAN_DAY_UNIX_EPOCH_DAYS: f64 = 2440587.5;

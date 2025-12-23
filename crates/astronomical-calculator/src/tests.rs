@@ -1,11 +1,9 @@
 #![allow(clippy::unwrap_used, clippy::panic, clippy::expect_used)]
 use chrono::DateTime;
-use chrono::NaiveDate;
 use chrono::NaiveDateTime;
 use chrono::Utc;
 use proptest::proptest;
 extern crate std;
-use crate::find_solar_time;
 use crate::unsafe_spa::sol_pos;
 use crate::unsafe_spa::solar_day;
 use crate::unsafe_spa::tm;
@@ -22,7 +20,7 @@ use std::*;
 
 fn naive_datetime_to_tm(dt: &NaiveDateTime) -> tm {
     tm {
-            timestamp: dt.and_utc().timestamp_millis()
+        timestamp: dt.and_utc().timestamp_millis(),
     }
 }
 
@@ -113,9 +111,6 @@ proptest! {
         use_explicit_gdip in proptest::bool::ANY,
 
     ) {
-
-
-
         let naive_datetime = datetime.naive_utc();
         let delta_t_option = if use_explicit_delta_t { Some(delta_t) } else { None };
         let gdip_option = if use_explicit_gdip { Some(gdip) } else { None };
@@ -180,9 +175,10 @@ proptest! {
         let spa = unsafe {
             SPA( &mut ut, if use_explicit_delta_t { &raw mut  delta_t } else { core::ptr::null_mut() }, delta_ut1, longitude.to_radians(), latitude.to_radians(), elevation)
         };
-
-        // prop_assert_eq!(spa.z, solar_position.zenith);
-        // prop_assert_eq!(spa.a, solar_position.azimuth);
+        let zenith_diff = (spa.z - solar_position.zenith).abs();
+        let azimuth_diff = (spa.a - solar_position.azimuth).abs();
+        prop_assert!(zenith_diff <= 1e-6, "Zenith difference too large: {} (safe: {}, unsafe: {})", zenith_diff, spa.z, solar_position.zenith);
+        prop_assert!(azimuth_diff <= 1e-6, "Azimuth difference too large: {} (safe: {}, unsafe: {})", azimuth_diff, spa.a, solar_position.azimuth);
         let diff = (unsafe_solar_day.t[0] - prev_solar_midnight).abs();
         prop_assert!(
             diff <= 5,
