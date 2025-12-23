@@ -2,6 +2,9 @@
 #![allow(warnings)]
 #![allow(expect_used)]
 
+use chrono::{DateTime, Datelike, TimeZone, Timelike, Utc};
+use julian_day_converter::{julian_day_to_unix_millis, unix_millis_to_julian_day};
+
 extern "C" {
     fn acos(__x: ::core::ffi::c_double) -> ::core::ffi::c_double;
     fn asin(__x: ::core::ffi::c_double) -> ::core::ffi::c_double;
@@ -23,17 +26,43 @@ pub type time_t = __time_t;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct tm {
-    pub tm_sec: ::core::ffi::c_int,
-    pub tm_min: ::core::ffi::c_int,
-    pub tm_hour: ::core::ffi::c_int,
-    pub tm_mday: ::core::ffi::c_int,
-    pub tm_mon: ::core::ffi::c_int,
-    pub tm_year: ::core::ffi::c_int,
-    pub tm_wday: ::core::ffi::c_int,
-    pub tm_yday: ::core::ffi::c_int,
-    pub tm_isdst: ::core::ffi::c_int,
-    pub tm_gmtoff: ::core::ffi::c_long,
-    pub tm_zone: *const ::core::ffi::c_char,
+    pub timestamp: i64,
+    
+    // pub tm_sec: ::core::ffi::c_int,
+    // pub tm_min: ::core::ffi::c_int,
+    // pub tm_hour: ::core::ffi::c_int,
+    // pub tm_mday: ::core::ffi::c_int,
+    // pub tm_mon: ::core::ffi::c_int,
+    // pub tm_year: ::core::ffi::c_int,
+    // pub tm_wday: ::core::ffi::c_int,
+    // pub tm_yday: ::core::ffi::c_int,
+    // pub tm_isdst: ::core::ffi::c_int,
+    // pub tm_gmtoff: ::core::ffi::c_long,
+    // pub tm_zone: *const ::core::ffi::c_char,
+}
+/// Methods which mimic the tm_xxx fields
+impl tm {
+    fn hour(&self) -> u32 {
+        Utc.timestamp_millis_opt(self.timestamp).unwrap().hour()
+    }
+    fn minute(&self) -> u32 {
+        Utc.timestamp_millis_opt(self.timestamp).unwrap().minute()
+    }
+    fn second(&self) -> f64 {
+        Utc.timestamp_millis_opt(self.timestamp).unwrap().second() as f64 + Utc.timestamp_millis_opt(self.timestamp).unwrap().nanosecond() as f64 / 1000000000.0
+    }
+    fn year(&self) -> i32 {
+        Utc.timestamp_millis_opt(self.timestamp).unwrap().year()
+    }
+    fn month(&self) -> u32 {
+        Utc.timestamp_millis_opt(self.timestamp).unwrap().month()
+    }
+    fn day(&self) -> u32 {
+        Utc.timestamp_millis_opt(self.timestamp).unwrap().day()
+    }
+
+
+
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -4453,10 +4482,10 @@ pub unsafe extern "C" fn get_delta_t(mut ut: *mut tm) -> ::core::ffi::c_double {
     let mut imin: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut imax: ::core::ffi::c_int = NDT - 1 as ::core::ffi::c_int;
     let mut i: ::core::ffi::c_int = 0;
-    dyear = (*ut).tm_year as ::core::ffi::c_double
-        + 1900.0f64
-        + ((*ut).tm_mon as ::core::ffi::c_double + 1.0f64) / 12 as ::core::ffi::c_int as ::core::ffi::c_double
-        + ((*ut).tm_mday as ::core::ffi::c_double - 1.0f64) / 365.0f64;
+
+    dyear = (*ut).year() as ::core::ffi::c_double
+        + ((*ut).month() as ::core::ffi::c_double ) / 12 as ::core::ffi::c_int as ::core::ffi::c_double
+        + ((*ut).day() as ::core::ffi::c_double - 1.0f64) / 365.0f64;
     if freespa_delta_t_table[0 as ::core::ffi::c_int as usize] > dyear {
         return 32.0f64
             * ((dyear - 1820.0f64) / 100 as ::core::ffi::c_int as ::core::ffi::c_double)
@@ -4492,11 +4521,6 @@ pub unsafe extern "C" fn MakeJulianDay(
     mut delta_t: *mut ::core::ffi::c_double,
     mut delta_ut1: ::core::ffi::c_double,
 ) -> JulianDay {
-    let mut month: ::core::ffi::c_int = 0;
-    let mut year: ::core::ffi::c_int = 0;
-    let mut day: ::core::ffi::c_double = 0.;
-    let mut a: ::core::ffi::c_double = 0.;
-    let mut dt: ::core::ffi::c_double = 0.;
     let mut JD: JulianDay = JulianDate {
         JD: 0 as ::core::ffi::c_int as ::core::ffi::c_double,
         JDE: 0.,
@@ -4505,27 +4529,8 @@ pub unsafe extern "C" fn MakeJulianDay(
         JME: 0.,
         E: 0,
     };
-    JD.E = 0 as ::core::ffi::c_int;
-    day = (*ut).tm_mday as ::core::ffi::c_double
-        + ((*ut).tm_hour as ::core::ffi::c_double
-            + ((*ut).tm_min as ::core::ffi::c_double + ((*ut).tm_sec as ::core::ffi::c_double + delta_ut1) / 60.0f64)
-                / 60.0f64)
-            / 24 as ::core::ffi::c_int as ::core::ffi::c_double;
-    month = (*ut).tm_mon + 1 as ::core::ffi::c_int;
-    year = (*ut).tm_year + 1900 as ::core::ffi::c_int;
-    if month < 3 as ::core::ffi::c_int {
-        month += 12 as ::core::ffi::c_int;
-        year -= 1;
-    }
-    JD.JD = trunc(365.25f64 * (year as ::core::ffi::c_double + 4716.0f64))
-        + trunc(30.6001f64 * (month as ::core::ffi::c_double + 1.0f64))
-        + day
-        - 1524.5f64;
-    if JD.JD > 2299160.0f64 {
-        a = trunc(year as ::core::ffi::c_double / 100.0f64);
-        JD.JD += 2 as ::core::ffi::c_int as ::core::ffi::c_double - a
-            + trunc(a / 4 as ::core::ffi::c_int as ::core::ffi::c_double);
-    }
+    JD.JD = unix_millis_to_julian_day(((*ut).timestamp as f64 + delta_ut1 * 1000.0) as i64);
+    let mut dt: ::core::ffi::c_double = 0.;
     if !delta_t.is_null() {
         dt = *delta_t;
     } else {
@@ -4535,7 +4540,7 @@ pub unsafe extern "C" fn MakeJulianDay(
     JD.JC = (JD.JD - JD0) / 36525.0f64;
     JD.JCE = (JD.JDE - JD0) / 36525.0f64;
     JD.JME = JD.JCE / 10.0f64;
-    return JD;
+    JD
 }
 #[no_mangle]
 pub unsafe extern "C" fn SetIntLimits(
@@ -4551,62 +4556,10 @@ pub unsafe extern "C" fn SetIntLimits(
 }
 #[no_mangle]
 pub unsafe extern "C" fn JDgmtime(mut JD: JulianDay, mut ut: *mut tm) -> *mut tm {
-    let mut A: ::core::ffi::c_double = 0.;
-    let mut B: ::core::ffi::c_double = 0.;
-    let mut C: ::core::ffi::c_double = 0.;
-    let mut D: ::core::ffi::c_double = 0.;
-    let mut F: ::core::ffi::c_double = 0.;
-    let mut G: ::core::ffi::c_double = 0.;
-    let mut I: ::core::ffi::c_double = 0.;
-    let mut Z: ::core::ffi::c_double = 0.;
-    let mut d: ::core::ffi::c_double = 0.;
-    Z = trunc(JD.JD + 0.5f64);
-    F = JD.JD - Z;
-    if Z < 2299161 as ::core::ffi::c_int as ::core::ffi::c_double {
-        A = Z;
-    } else {
-        B = trunc((Z - 1867216.25f64) / 36524.25f64);
-        A = Z + 1 as ::core::ffi::c_int as ::core::ffi::c_double + B - trunc(B / 4.0f64);
-    }
-    C = A + 1524 as ::core::ffi::c_int as ::core::ffi::c_double;
-    D = trunc((C - 122.1f64) / 365.25f64);
-    G = trunc(365.25f64 * D);
-    I = trunc((C - G) / 30.6001f64);
-    d = C - G - trunc(30.6001f64 * I) + F - 0.5f64;
-    (*ut).tm_mday = trunc(d) as ::core::ffi::c_int + 1 as ::core::ffi::c_int;
-    if I < 14 as ::core::ffi::c_int as ::core::ffi::c_double {
-        (*ut).tm_mon = (I - 2 as ::core::ffi::c_int as ::core::ffi::c_double) as ::core::ffi::c_int;
-    } else {
-        (*ut).tm_mon = (I - 14 as ::core::ffi::c_int as ::core::ffi::c_double) as ::core::ffi::c_int;
-    }
-    if (*ut).tm_mon > 1 as ::core::ffi::c_int {
-        if SetIntLimits(
-            D - 4716 as ::core::ffi::c_int as ::core::ffi::c_double
-                - 1900 as ::core::ffi::c_int as ::core::ffi::c_double,
-            &raw mut (*ut).tm_year,
-        ) != 0
-        {
-            return ::core::ptr::null_mut::<tm>();
-        }
-    } else if SetIntLimits(
-        D - 4715 as ::core::ffi::c_int as ::core::ffi::c_double - 1900 as ::core::ffi::c_int as ::core::ffi::c_double,
-        &raw mut (*ut).tm_year,
-    ) != 0
-    {
-        return ::core::ptr::null_mut::<tm>();
-    }
-    d -= trunc(d);
-    d *= 86400 as ::core::ffi::c_int as ::core::ffi::c_double;
-    d = round(d);
-    (*ut).tm_sec = d as ::core::ffi::c_int % 60 as ::core::ffi::c_int;
-    d -= (*ut).tm_sec as ::core::ffi::c_double;
-    d /= 60 as ::core::ffi::c_int as ::core::ffi::c_double;
-    (*ut).tm_min = d as ::core::ffi::c_int % 60 as ::core::ffi::c_int;
-    d -= (*ut).tm_min as ::core::ffi::c_double;
-    d /= 60 as ::core::ffi::c_int as ::core::ffi::c_double;
-    (*ut).tm_hour = d as ::core::ffi::c_int % 60 as ::core::ffi::c_int;
-    d -= (*ut).tm_hour as ::core::ffi::c_double;
-    return ut;
+    let datetime = julian_day_to_unix_millis(JD.JD);
+    (*ut).timestamp = datetime;
+    ut
+ 
 }
 #[no_mangle]
 pub unsafe extern "C" fn gmjtime_r(mut t: *mut time_t, mut ut: *mut tm) -> *mut tm {
@@ -4624,17 +4577,7 @@ pub unsafe extern "C" fn gmjtime_r(mut t: *mut time_t, mut ut: *mut tm) -> *mut 
 #[no_mangle]
 pub unsafe extern "C" fn gmjtime(mut t: *mut time_t) -> *mut tm {
     static mut _tmbuf: tm = tm {
-        tm_sec: 0,
-        tm_min: 0,
-        tm_hour: 0,
-        tm_mday: 0,
-        tm_mon: 0,
-        tm_year: 0,
-        tm_wday: 0,
-        tm_yday: 0,
-        tm_isdst: 0,
-        tm_gmtoff: 0,
-        tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+        timestamp:0
     };
     return gmjtime_r(t, &raw mut _tmbuf);
 }
@@ -4666,17 +4609,7 @@ pub unsafe extern "C" fn MakeJulianDayEpoch(
     mut delta_ut1: ::core::ffi::c_double,
 ) -> JulianDay {
     let mut ut: tm = tm {
-        tm_sec: 0,
-        tm_min: 0,
-        tm_hour: 0,
-        tm_mday: 0,
-        tm_mon: 0,
-        tm_year: 0,
-        tm_wday: 0,
-        tm_yday: 0,
-        tm_isdst: 0,
-        tm_gmtoff: 0,
-        tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+        timestamp:0
     };
     let mut p: *mut tm = ::core::ptr::null_mut::<tm>();
     let mut JD: JulianDay = JulianDate {
@@ -5314,17 +5247,7 @@ pub unsafe extern "C" fn TrueSolarTime(
 ) -> tm {
     let mut E: ::core::ffi::c_double = 0.;
     let mut nt: tm = tm {
-        tm_sec: 0 as ::core::ffi::c_int,
-        tm_min: 0,
-        tm_hour: 0,
-        tm_mday: 0,
-        tm_mon: 0,
-        tm_year: 0,
-        tm_wday: 0,
-        tm_yday: 0,
-        tm_isdst: 0,
-        tm_gmtoff: 0,
-        tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+        timestamp:0
     };
     let mut D: JulianDay = JulianDate {
         JD: 0.,
@@ -5374,17 +5297,8 @@ pub unsafe extern "C" fn FindSolTime(
     let mut dt: ::core::ffi::c_double = 1 as ::core::ffi::c_int as ::core::ffi::c_double;
     let mut iter: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut nt: tm = tm {
-        tm_sec: 0 as ::core::ffi::c_int,
-        tm_min: 0,
-        tm_hour: 0,
-        tm_mday: 0,
-        tm_mon: 0,
-        tm_year: 0,
-        tm_wday: 0,
-        tm_yday: 0,
-        tm_isdst: 0,
-        tm_gmtoff: 0,
-        tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+        
+        timestamp:0
     };
     let mut D: JulianDay = JulianDate {
         JD: 0.,
@@ -5409,9 +5323,9 @@ pub unsafe extern "C" fn FindSolTime(
     };
     D = MakeJulianDayEpoch(t, delta_t, delta_ut1);
     gmjtime_r(&raw mut t, &raw mut nt);
-    dt = (hour - nt.tm_hour) as ::core::ffi::c_double / 24.4f64;
-    dt += (min - nt.tm_min) as ::core::ffi::c_double / 1440.0f64;
-    dt += (sec - nt.tm_sec) as ::core::ffi::c_double / 86400.0f64;
+    dt = (hour - nt.hour() as i32) as ::core::ffi::c_double / 24.4f64;
+    dt += (min - nt.minute() as i32) as ::core::ffi::c_double / 1440.0f64;
+    dt += (sec - nt.second() as i32) as ::core::ffi::c_double / 86400.0f64;
     if dt > 0.5f64 {
         dt -= 1.0f64;
     }
@@ -5426,9 +5340,9 @@ pub unsafe extern "C" fn FindSolTime(
         E = EoT(lat, D, G);
         Dn.JD += (lon + E) / M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double;
         JDgmtime(Dn, &raw mut nt);
-        dt = (hour - nt.tm_hour) as ::core::ffi::c_double / 24.4f64;
-        dt += (min - nt.tm_min) as ::core::ffi::c_double / 1440.0f64;
-        dt += (sec - nt.tm_sec) as ::core::ffi::c_double / 86400.0f64;
+        dt = (hour - nt.hour() as i32) as ::core::ffi::c_double / 24.4f64;
+        dt += (min - nt.minute() as i32) as ::core::ffi::c_double / 1440.0f64;
+        dt += (sec - nt.second() as i32) as ::core::ffi::c_double / 86400.0f64;
         if dt > 0.5f64 {
             dt -= 1.0f64;
         }
@@ -5483,17 +5397,7 @@ pub unsafe extern "C" fn FindSolZenith(
     let mut tmax: time_t = 0;
     let mut tb: time_t = 0;
     let mut ut: tm = tm {
-        tm_sec: 0 as ::core::ffi::c_int,
-        tm_min: 0,
-        tm_hour: 0,
-        tm_mday: 0,
-        tm_mon: 0,
-        tm_year: 0,
-        tm_wday: 0,
-        tm_yday: 0,
-        tm_isdst: 0,
-        tm_gmtoff: 0,
-        tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+        timestamp:0
     };
     let mut put: *mut tm = ::core::ptr::null_mut::<tm>();
     let mut iter: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
@@ -5619,147 +5523,37 @@ pub unsafe extern "C" fn SolarDay(
     let mut D: solar_day = solar_day {
         ev: [
             tm {
-                tm_sec: 0 as ::core::ffi::c_int,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                        timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                    timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                timestamp:0
             },
             tm {
-                tm_sec: 0,
-                tm_min: 0,
-                tm_hour: 0,
-                tm_mday: 0,
-                tm_mon: 0,
-                tm_year: 0,
-                tm_wday: 0,
-                tm_yday: 0,
-                tm_isdst: 0,
-                tm_gmtoff: 0,
-                tm_zone: ::core::ptr::null::<::core::ffi::c_char>(),
+                timestamp:0
             },
         ],
         t: [0; 11],
