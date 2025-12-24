@@ -41,8 +41,8 @@
 //!     SolarEventResult::Occurs(timestamp) => {
 //!         println!("Sunrise at Unix timestamp: {}", timestamp);
 //!     }
-//!     SolarEventResult::AlwaysAbove => println!("Sun never sets (midnight sun)"),
-//!     SolarEventResult::AlwaysBelow => println!("Sun never rises (polar night)"),
+//!     SolarEventResult::AllDay => println!("Sun never sets (midnight sun)"),
+//!     SolarEventResult::AllNight => println!("Sun never rises (polar night)"),
 //! }
 //! ```
 #![no_std]
@@ -161,9 +161,9 @@ pub enum SolarEventResult {
     /// Event occurs at the given timestamp
     Occurs(i64),
     /// Sun is always above the threshold (e.g., midnight sun)
-    AlwaysAbove,
+    AllDay,
     /// Sun is always below the threshold (e.g., polar night)
-    AlwaysBelow,
+    AllNight,
 }
 
 impl SolarEventResult {
@@ -217,11 +217,11 @@ impl AstronomicalCalculator {
     ///
     /// # Returns
     ///
-    /// A `Result` containing the calculator or an [`SpaError`] if validation fails.
+    /// A `Result` containing the calculator or a [`CalculationError`] if validation fails.
     ///
     /// # Errors
     ///
-    /// Returns an error if any parameter is outside its valid range. See [`SpaError`] for details.
+    /// Returns an error if any parameter is outside its valid range. See [`CalculationError`] for details.
     ///
     /// # Example
     ///
@@ -258,10 +258,22 @@ impl AstronomicalCalculator {
         gdip: Option<f64>,
         refraction: Refraction,
     ) -> Result<Self, CalculationError> {
+        // Validate year range (-2000 to 6000)
+        let year = ut.year();
+        if !(-2000..=6000).contains(&year) {
+            return Err(CalculationError::TimeConversionError);
+        }
+
         let lon_radians = lon.to_radians();
         let lat_radians = lat.to_radians();
         if !(-1.0..=1.0).contains(&delta_ut1) {
             return Err(CalculationError::DeltaUt1OutOfRange);
+        }
+        // Validate delta_t range if explicitly provided
+        if let Some(dt) = delta_t {
+            if !(-8000.0..=8000.0).contains(&dt) {
+                return Err(CalculationError::TimeConversionError);
+            }
         }
         if !(-PI..=PI).contains(&lon_radians) {
             return Err(CalculationError::LongitudeOutOfRange);
@@ -269,14 +281,20 @@ impl AstronomicalCalculator {
         if !(-PI / 2.0..=PI / 2.0).contains(&lat_radians) {
             return Err(CalculationError::LatitudeOutOfRange);
         }
-        if elevation < -EARTH_R {
+        if !(-EARTH_R..=EARTH_R).contains(&elevation) {
             return Err(CalculationError::ElevationOutOfRange);
         }
         if pressure <= 0.0 || pressure > 5000.0 {
             return Err(CalculationError::PressureOutOfRange);
         }
-        if temperature < ABSOLUTEZERO {
+        if !(ABSOLUTEZERO..=6000.0).contains(&temperature) {
             return Err(CalculationError::TemperatureOutOfRange);
+        }
+        // Validate gdip range if provided
+        if let Some(gdip_val) = gdip {
+            if gdip_val.abs() > PI / 2.0 {
+                return Err(CalculationError::GeometricDipOutOfRange);
+            }
         }
         Ok(Self {
             ut,
@@ -874,10 +892,10 @@ impl AstronomicalCalculator {
     ) -> Result<SolarEventResult, CalculationError> {
         // Check if the sun is always above or below the target zenith
         if target_zenith < z1 && target_zenith < z2 {
-            return Ok(SolarEventResult::AlwaysBelow);
+            return Ok(SolarEventResult::AllNight);
         }
         if target_zenith > z1 && target_zenith > z2 {
-            return Ok(SolarEventResult::AlwaysAbove);
+            return Ok(SolarEventResult::AllDay);
         }
 
         // Use cosine interpolation to estimate crossing time
@@ -895,7 +913,6 @@ impl AstronomicalCalculator {
 
         // Calculate solar position at initial guess
         let datetime = unix_to_datetime(timestamp)?;
-
         let mut calculator = self.with_time(datetime);
         let mut position = *calculator.get_solar_position();
         position = match self.refraction {

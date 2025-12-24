@@ -34,9 +34,9 @@ fn solar_day_to_event(day: solar_day, index: usize) -> SolarEventResult {
     if day.status[index] == 0 {
         SolarEventResult::Occurs(day.t[index])
     } else if day.status[index] == 1 {
-        SolarEventResult::AlwaysAbove
+        SolarEventResult::AllDay
     } else if day.status[index] == -1 {
-        SolarEventResult::AlwaysBelow
+        SolarEventResult::AllNight
     } else {
         self::panic!("Invalid status: {}", day.status[index]);
     }
@@ -92,6 +92,177 @@ unsafe extern "C" fn unsafe_refract_bennet(pos: sol_pos, gdip: *mut f64, e: f64,
 unsafe extern "C" fn unsafe_refract_bennet_na(pos: sol_pos, gdip: *mut f64, e: f64, p: f64, t: f64) -> sol_pos {
     ApSolposBennetNA(pos, gdip, e, p, t)
 }
+#[allow(clippy::too_many_arguments)]
+fn compare(
+    datetime: DateTime<Utc>,
+    longitude: f64,
+    latitude: f64,
+    elevation: f64,
+    pressure: f64,
+    temperature: f64,
+    refraction: Refraction,
+    mut delta_t: f64,
+    use_explicit_delta_t: bool,
+    delta_ut1: f64,
+    mut gdip: f64,
+    use_explicit_gdip: bool,
+) -> Result<(), proptest::test_runner::TestCaseError> {
+    let naive_datetime = datetime.naive_utc();
+    let delta_t_option = if use_explicit_delta_t { Some(delta_t) } else { None };
+    let gdip_option = if use_explicit_gdip { Some(gdip) } else { None };
+    let calculator = AstronomicalCalculator::new(
+        naive_datetime,
+        delta_t_option,
+        delta_ut1,
+        longitude,
+        latitude,
+        elevation,
+        temperature,
+        pressure,
+        gdip_option,
+        refraction,
+    );
+    prop_assert!(calculator.is_ok());
+    let mut calculator = calculator.unwrap();
+
+    // Get all the calculations
+    let _julian_day = calculator.get_julian_day();
+    let solar_position = *calculator.get_solar_position();
+    let solar_transit = calculator.get_solar_transit();
+    prop_assert!(solar_transit.is_ok());
+    let solar_transit = solar_transit.unwrap();
+    let prev_solar_midnight = calculator.get_prev_solar_midnight();
+    prop_assert!(prev_solar_midnight.is_ok());
+    let prev_solar_midnight = prev_solar_midnight.unwrap();
+    let next_solar_midnight = calculator.get_next_solar_midnight();
+    prop_assert!(next_solar_midnight.is_ok());
+    let next_solar_midnight = next_solar_midnight.unwrap();
+    let sunrise = calculator.get_sunrise();
+    prop_assert!(sunrise.is_ok());
+    let sunrise = sunrise.unwrap();
+    let sunset = calculator.get_sunset();
+    prop_assert!(sunset.is_ok());
+    let sunset = sunset.unwrap();
+    let civil_dawn = calculator.get_civil_dawn();
+    prop_assert!(civil_dawn.is_ok());
+    let civil_dawn = civil_dawn.unwrap();
+    let civil_dusk = calculator.get_civil_dusk();
+    prop_assert!(civil_dusk.is_ok());
+    let civil_dusk = civil_dusk.unwrap();
+    let nautical_dawn = calculator.get_nautical_dawn();
+    prop_assert!(nautical_dawn.is_ok());
+    let nautical_dawn = nautical_dawn.unwrap();
+    let nautical_dusk = calculator.get_nautical_dusk();
+    prop_assert!(nautical_dusk.is_ok());
+    let nautical_dusk = nautical_dusk.unwrap();
+    let astronomical_dawn = calculator.get_astronomical_dawn();
+    prop_assert!(astronomical_dawn.is_ok());
+    let astronomical_dawn = astronomical_dawn.unwrap();
+    let astronomical_dusk = calculator.get_astronomical_dusk();
+    prop_assert!(astronomical_dusk.is_ok());
+    let astronomical_dusk = astronomical_dusk.unwrap();
+
+    // get the unsafe solar day
+    let mut ut = naive_datetime_to_tm(&naive_datetime);
+    let unsafe_solar_day = unsafe {
+        SolarDay(
+            &mut ut,
+            if use_explicit_delta_t {
+                &raw mut delta_t
+            } else {
+                core::ptr::null_mut()
+            }, // delta_t
+            delta_ut1, // delta_ut1
+            longitude.to_radians(),
+            latitude.to_radians(),
+            elevation,
+            if use_explicit_gdip {
+                &raw mut gdip
+            } else {
+                core::ptr::null_mut()
+            }, // gdip
+            pressure,
+            temperature,
+            Some(if refraction == Refraction::ApSolposBennet {
+                unsafe_refract_bennet
+            } else {
+                unsafe_refract_bennet_na
+            }),
+        )
+    };
+
+    let spa = unsafe {
+        SPA(
+            &mut ut,
+            if use_explicit_delta_t {
+                &raw mut delta_t
+            } else {
+                core::ptr::null_mut()
+            },
+            delta_ut1,
+            longitude.to_radians(),
+            latitude.to_radians(),
+            elevation,
+        )
+    };
+    let zenith_diff = (spa.z - solar_position.zenith).abs();
+    let azimuth_diff = (spa.a - solar_position.azimuth).abs();
+    prop_assert!(
+        zenith_diff <= 1e-6,
+        "Zenith difference too large: {} (safe: {}, unsafe: {})",
+        zenith_diff,
+        spa.z,
+        solar_position.zenith
+    );
+    prop_assert!(
+        azimuth_diff <= 1e-6,
+        "Azimuth difference too large: {} (safe: {}, unsafe: {})",
+        azimuth_diff,
+        spa.a,
+        solar_position.azimuth
+    );
+    let diff = (unsafe_solar_day.t[0] - prev_solar_midnight).abs();
+    prop_assert!(
+        diff <= 5,
+        "Timestamp difference too large: {} seconds (safe: {}, unsafe: {})",
+        diff,
+        unsafe_solar_day.t[0],
+        prev_solar_midnight
+    );
+    let diff = (unsafe_solar_day.t[1] - solar_transit).abs();
+    prop_assert!(
+        diff <= 5,
+        "Timestamp difference too large: {} seconds (safe: {}, unsafe: {})",
+        diff,
+        unsafe_solar_day.t[1],
+        solar_transit
+    );
+    let diff = (unsafe_solar_day.t[2] - next_solar_midnight).abs();
+    prop_assert!(
+        diff <= 5,
+        "Timestamp difference too large: {} seconds (safe: {}, unsafe: {})",
+        diff,
+        unsafe_solar_day.t[2],
+        next_solar_midnight
+    );
+    compare_solar_results(solar_day_to_event(unsafe_solar_day, 3), sunrise, "sunrise");
+    compare_solar_results(solar_day_to_event(unsafe_solar_day, 4), sunset, "sunset");
+    compare_solar_results(solar_day_to_event(unsafe_solar_day, 5), civil_dawn, "civil_dawn");
+    compare_solar_results(solar_day_to_event(unsafe_solar_day, 6), civil_dusk, "civil_dusk");
+    compare_solar_results(solar_day_to_event(unsafe_solar_day, 7), nautical_dawn, "nautical_dawn");
+    compare_solar_results(solar_day_to_event(unsafe_solar_day, 8), nautical_dusk, "nautical_dusk");
+    compare_solar_results(
+        solar_day_to_event(unsafe_solar_day, 9),
+        astronomical_dawn,
+        "astronomical_dawn",
+    );
+    compare_solar_results(
+        solar_day_to_event(unsafe_solar_day, 10),
+        astronomical_dusk,
+        "astronomical_dusk",
+    );
+    Ok(())
+}
 
 proptest! {
 
@@ -104,113 +275,16 @@ proptest! {
         pressure in 1000.0..=1013.25,
         temperature in 15.0..=25.0,
         refraction in refraction_strategy(),
-        mut delta_t in -60.0..60.0,
+        delta_t in -60.0..60.0,
         use_explicit_delta_t in proptest::bool::ANY,
         delta_ut1 in -1.0..1.0,
-        mut gdip in -1.5..=1.5,
+        gdip in -1.5..=1.5,
         use_explicit_gdip in proptest::bool::ANY,
 
     ) {
-        let naive_datetime = datetime.naive_utc();
-        let delta_t_option = if use_explicit_delta_t { Some(delta_t) } else { None };
-        let gdip_option = if use_explicit_gdip { Some(gdip) } else { None };
-        let calculator = AstronomicalCalculator::new(naive_datetime, delta_t_option, delta_ut1, longitude, latitude, elevation, temperature, pressure, gdip_option, refraction);
-        prop_assert!(calculator.is_ok());
-        let mut calculator = calculator.unwrap();
+        let result = compare(datetime, longitude, latitude, elevation, pressure, temperature, refraction, delta_t, use_explicit_delta_t, delta_ut1, gdip, use_explicit_gdip);
+        prop_assert!(result.is_ok());
 
-        // Get all the calculations
-        let _julian_day = calculator.get_julian_day();
-        let solar_position = *calculator.get_solar_position();
-        let solar_transit = calculator.get_solar_transit();
-        prop_assert!(solar_transit.is_ok());
-        let solar_transit = solar_transit.unwrap();
-        let prev_solar_midnight = calculator.get_prev_solar_midnight();
-        prop_assert!(prev_solar_midnight.is_ok());
-        let prev_solar_midnight = prev_solar_midnight.unwrap();
-        let next_solar_midnight = calculator.get_next_solar_midnight();
-        prop_assert!(next_solar_midnight.is_ok());
-        let next_solar_midnight = next_solar_midnight.unwrap();
-        let sunrise = calculator.get_sunrise();
-        prop_assert!(sunrise.is_ok());
-        let sunrise = sunrise.unwrap();
-        let sunset = calculator.get_sunset();
-        prop_assert!(sunset.is_ok());
-        let sunset = sunset.unwrap();
-        let civil_dawn = calculator.get_civil_dawn();
-        prop_assert!(civil_dawn.is_ok());
-        let civil_dawn = civil_dawn.unwrap();
-        let civil_dusk = calculator.get_civil_dusk();
-        prop_assert!(civil_dusk.is_ok());
-        let civil_dusk = civil_dusk.unwrap();
-        let nautical_dawn = calculator.get_nautical_dawn();
-        prop_assert!(nautical_dawn.is_ok());
-        let nautical_dawn = nautical_dawn.unwrap();
-        let nautical_dusk = calculator.get_nautical_dusk();
-        prop_assert!(nautical_dusk.is_ok());
-        let nautical_dusk = nautical_dusk.unwrap();
-        let astronomical_dawn = calculator.get_astronomical_dawn();
-        prop_assert!(astronomical_dawn.is_ok());
-        let astronomical_dawn = astronomical_dawn.unwrap();
-        let astronomical_dusk = calculator.get_astronomical_dusk();
-        prop_assert!(astronomical_dusk.is_ok());
-        let astronomical_dusk = astronomical_dusk.unwrap();
-
-        // get the unsafe solar day
-        let mut ut = naive_datetime_to_tm(&naive_datetime);
-        let unsafe_solar_day = unsafe {
-            SolarDay(
-                &mut ut,
-                if use_explicit_delta_t { &raw mut  delta_t } else { core::ptr::null_mut() }, // delta_t
-                delta_ut1,                    // delta_ut1
-                longitude.to_radians(),
-                latitude.to_radians(),
-                elevation,
-                if use_explicit_gdip { &raw mut  gdip } else { core::ptr::null_mut() }, // gdip
-                pressure,
-                temperature,
-                Some(if refraction == Refraction::ApSolposBennet { unsafe_refract_bennet } else { unsafe_refract_bennet_na }),
-            )
-        };
-
-        let spa = unsafe {
-            SPA( &mut ut, if use_explicit_delta_t { &raw mut  delta_t } else { core::ptr::null_mut() }, delta_ut1, longitude.to_radians(), latitude.to_radians(), elevation)
-        };
-        let zenith_diff = (spa.z - solar_position.zenith).abs();
-        let azimuth_diff = (spa.a - solar_position.azimuth).abs();
-        prop_assert!(zenith_diff <= 1e-6, "Zenith difference too large: {} (safe: {}, unsafe: {})", zenith_diff, spa.z, solar_position.zenith);
-        prop_assert!(azimuth_diff <= 1e-6, "Azimuth difference too large: {} (safe: {}, unsafe: {})", azimuth_diff, spa.a, solar_position.azimuth);
-        let diff = (unsafe_solar_day.t[0] - prev_solar_midnight).abs();
-        prop_assert!(
-            diff <= 5,
-            "Timestamp difference too large: {} seconds (safe: {}, unsafe: {})",
-            diff,
-            unsafe_solar_day.t[0],
-            prev_solar_midnight
-        );
-        let diff = (unsafe_solar_day.t[1] - solar_transit).abs();
-        prop_assert!(
-            diff <= 5,
-            "Timestamp difference too large: {} seconds (safe: {}, unsafe: {})",
-            diff,
-            unsafe_solar_day.t[1],
-            solar_transit
-        );
-        let diff = (unsafe_solar_day.t[2] - next_solar_midnight).abs();
-        prop_assert!(
-            diff <= 5,
-            "Timestamp difference too large: {} seconds (safe: {}, unsafe: {})",
-            diff,
-            unsafe_solar_day.t[2],
-            next_solar_midnight
-        );
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 3), sunrise, "sunrise");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 4), sunset, "sunset");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 5), civil_dawn, "civil_dawn");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 6), civil_dusk, "civil_dusk");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 7), nautical_dawn, "nautical_dawn");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 8), nautical_dusk, "nautical_dusk");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 9), astronomical_dawn, "astronomical_dawn");
-        compare_solar_results(solar_day_to_event(unsafe_solar_day, 10), astronomical_dusk, "astronomical_dusk");
     }
 }
 
@@ -227,10 +301,10 @@ fn compare_solar_results(safe: SolarEventResult, unsafe_: SolarEventResult, name
                 name,
             );
         }
-        (SolarEventResult::AlwaysAbove, SolarEventResult::AlwaysAbove) => {
+        (SolarEventResult::AllDay, SolarEventResult::AllDay) => {
             // Both indicate sun always above - OK
         }
-        (SolarEventResult::AlwaysBelow, SolarEventResult::AlwaysBelow) => {
+        (SolarEventResult::AllNight, SolarEventResult::AllNight) => {
             // Both indicate sun always below - OK
         }
         (safe_result, unsafe_result) => {
@@ -241,5 +315,1020 @@ fn compare_solar_results(safe: SolarEventResult, unsafe_: SolarEventResult, name
                 name,
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod validation_tests {
+    use super::*;
+    use crate::CalculationError;
+
+    #[test]
+    fn test_year_validation_boundary_min() {
+        let dt = NaiveDateTime::parse_from_str("-2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result.is_ok(), "Year -2000 should be valid");
+    }
+
+    #[test]
+    fn test_year_validation_boundary_max() {
+        let dt = NaiveDateTime::parse_from_str("6000-12-31 23:59:59", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result.is_ok(), "Year 6000 should be valid");
+    }
+
+    #[test]
+    fn test_year_validation_below_min() {
+        let dt = NaiveDateTime::parse_from_str("-2001-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result, Err(CalculationError::TimeConversionError)));
+    }
+
+    #[test]
+    fn test_year_validation_above_max() {
+        let dt = NaiveDateTime::parse_from_str("6001-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result, Err(CalculationError::TimeConversionError)));
+    }
+
+    #[test]
+    fn test_delta_t_validation_boundary_min() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result = AstronomicalCalculator::new(
+            dt,
+            Some(-8000.0),
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result.is_ok(), "Delta_t -8000.0 should be valid");
+    }
+
+    #[test]
+    fn test_delta_t_validation_boundary_max() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result = AstronomicalCalculator::new(
+            dt,
+            Some(8000.0),
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result.is_ok(), "Delta_t 8000.0 should be valid");
+    }
+
+    #[test]
+    fn test_delta_t_validation_below_min() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result = AstronomicalCalculator::new(
+            dt,
+            Some(-8000.1),
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result, Err(CalculationError::TimeConversionError)));
+    }
+
+    #[test]
+    fn test_delta_t_validation_above_max() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result = AstronomicalCalculator::new(
+            dt,
+            Some(8000.1),
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result, Err(CalculationError::TimeConversionError)));
+    }
+
+    #[test]
+    fn test_delta_ut1_validation_boundary() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_min = AstronomicalCalculator::new(
+            dt,
+            None,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_max = AstronomicalCalculator::new(
+            dt,
+            None,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result_min.is_ok(), "Delta_ut1 -1.0 should be valid");
+        assert!(result_max.is_ok(), "Delta_ut1 1.0 should be valid");
+    }
+
+    #[test]
+    fn test_delta_ut1_validation_out_of_range() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_below = AstronomicalCalculator::new(
+            dt,
+            None,
+            -1.1,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_above = AstronomicalCalculator::new(
+            dt,
+            None,
+            1.1,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result_below, Err(CalculationError::DeltaUt1OutOfRange)));
+        assert!(matches!(result_above, Err(CalculationError::DeltaUt1OutOfRange)));
+    }
+
+    #[test]
+    fn test_longitude_validation_boundary() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_min = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            -180.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_max = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            180.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result_min.is_ok(), "Longitude -180.0 should be valid");
+        assert!(result_max.is_ok(), "Longitude 180.0 should be valid");
+    }
+
+    #[test]
+    fn test_longitude_validation_out_of_range() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_below = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            -180.1,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_above = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            180.1,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result_below, Err(CalculationError::LongitudeOutOfRange)));
+        assert!(matches!(result_above, Err(CalculationError::LongitudeOutOfRange)));
+    }
+
+    #[test]
+    fn test_latitude_validation_boundary() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_min = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            -90.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_max = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            90.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result_min.is_ok(), "Latitude -90.0 should be valid");
+        assert!(result_max.is_ok(), "Latitude 90.0 should be valid");
+    }
+
+    #[test]
+    fn test_latitude_validation_out_of_range() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_below = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            -90.1,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_above = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            90.1,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result_below, Err(CalculationError::LatitudeOutOfRange)));
+        assert!(matches!(result_above, Err(CalculationError::LatitudeOutOfRange)));
+    }
+
+    #[test]
+    fn test_elevation_validation_boundary() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_min = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            -6378136.6,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_max = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            6378136.6,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result_min.is_ok(), "Elevation -EARTH_R should be valid");
+        assert!(result_max.is_ok(), "Elevation EARTH_R should be valid");
+    }
+
+    #[test]
+    fn test_elevation_validation_out_of_range() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_below = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            -6378137.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_above = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            6378137.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result_below, Err(CalculationError::ElevationOutOfRange)));
+        assert!(matches!(result_above, Err(CalculationError::ElevationOutOfRange)));
+    }
+
+    #[test]
+    fn test_pressure_validation_boundary() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_min = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            0.1,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_max = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            5000.0,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result_min.is_ok(), "Pressure 0.1 should be valid");
+        assert!(result_max.is_ok(), "Pressure 5000.0 should be valid");
+    }
+
+    #[test]
+    fn test_pressure_validation_out_of_range() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_zero = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            0.0,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_above = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            5000.1,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result_zero, Err(CalculationError::PressureOutOfRange)));
+        assert!(matches!(result_above, Err(CalculationError::PressureOutOfRange)));
+    }
+
+    #[test]
+    fn test_temperature_validation_boundary() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_min = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -273.15,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_max = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            6000.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(result_min.is_ok(), "Temperature -273.15 should be valid");
+        assert!(result_max.is_ok(), "Temperature 6000.0 should be valid");
+    }
+
+    #[test]
+    fn test_temperature_validation_out_of_range() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let result_below = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -273.16,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        let result_above = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            6000.1,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result_below, Err(CalculationError::TemperatureOutOfRange)));
+        assert!(matches!(result_above, Err(CalculationError::TemperatureOutOfRange)));
+    }
+
+    #[test]
+    fn test_gdip_validation_boundary() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        use core::f64::consts::PI;
+        let result_min = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            Some(-PI / 2.0),
+            Refraction::ApSolposBennet,
+        );
+        let result_max = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            Some(PI / 2.0),
+            Refraction::ApSolposBennet,
+        );
+        assert!(result_min.is_ok(), "Gdip -PI/2 should be valid");
+        assert!(result_max.is_ok(), "Gdip PI/2 should be valid");
+    }
+
+    #[test]
+    fn test_gdip_validation_out_of_range() {
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        use core::f64::consts::PI;
+        let result_below = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            Some(-PI / 2.0 - 0.1),
+            Refraction::ApSolposBennet,
+        );
+        let result_above = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            Some(PI / 2.0 + 0.1),
+            Refraction::ApSolposBennet,
+        );
+        assert!(matches!(result_below, Err(CalculationError::GeometricDipOutOfRange)));
+        assert!(matches!(result_above, Err(CalculationError::GeometricDipOutOfRange)));
+    }
+}
+
+#[cfg(test)]
+mod edge_case_tests {
+
+    use super::*;
+
+    #[test]
+    fn test_polar_region_at_solstice() {
+        for (lat, date) in [
+            (89.0, "2024-06-21 12:00:00"),
+            (89.0, "2024-12-21 12:00:00"),
+            (-89.0, "2024-06-21 12:00:00"),
+            (-89.0, "2024-12-21 12:00:00"),
+        ] {
+            let dt = NaiveDateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S").unwrap();
+            let result = compare(
+                dt.and_utc(),
+                0.0,
+                lat,
+                0.0,
+                20.0,
+                1013.25,
+                Refraction::ApSolposBennet,
+                0.0,
+                false,
+                0.0,
+                0.0,
+                false,
+            );
+            assert!(result.is_ok());
+        }
+        for (lat, date, expected) in [
+            (89.0, "2024-06-21 12:00:00", SolarEventResult::AllDay),
+            (89.0, "2024-12-21 12:00:00", SolarEventResult::AllNight),
+            (-89.0, "2024-06-21 12:00:00", SolarEventResult::AllNight),
+            (-89.0, "2024-12-21 12:00:00", SolarEventResult::AllDay),
+        ] {
+            let dt = NaiveDateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S").unwrap();
+            let mut calc = AstronomicalCalculator::new(
+                dt,
+                None,
+                0.0,
+                0.0,
+                lat,
+                0.0,
+                20.0,
+                1013.25,
+                None,
+                Refraction::ApSolposBennet,
+            )
+            .unwrap();
+            let sunrise = calc.get_sunrise().unwrap();
+            let sunset = calc.get_sunset().unwrap();
+
+            assert_eq!(sunrise, expected);
+            assert_eq!(sunset, expected);
+        }
+    }
+
+    // #[test]
+    // fn test_polar_region_at_solstice() {
+    //     // Test at North Pole during summer solstice - sun should always be above
+    //     let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+    //     let mut calc = AstronomicalCalculator::new(
+    //         dt,
+    //         None,
+    //         0.0,
+    //         0.0,
+    //         89.0,
+    //         0.0,
+    //         20.0,
+    //         1013.25,
+    //         None,
+    //         Refraction::ApSolposBennet,
+    //     )
+    //     .unwrap();
+
+    //     let sunrise = calc.get_sunrise().unwrap();
+    //     let sunset = calc.get_sunset().unwrap();
+
+    //     // At North Pole during summer, sun should always be above
+    //     assert!(
+    //         matches!(sunrise, SolarEventResult::AllDay) || matches!(sunset, SolarEventResult::AllDay),
+    //         "At North Pole during summer solstice, sun should be always above"
+    //     );
+    //     // Test at South Pole during winter solstice - sun should always be below
+    //     let dt = NaiveDateTime::parse_from_str("2024-12-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+    //     let mut calc = AstronomicalCalculator::new(
+    //         dt,
+    //         None,
+    //         0.0,
+    //         0.0,
+    //         -89.0,
+    //         0.0,
+    //         20.0,
+    //         1013.25,
+    //         None,
+    //         Refraction::ApSolposBennet,
+    //     )
+    //     .unwrap();
+
+    //     let sunrise = calc.get_sunrise().unwrap();
+    //     let sunset = calc.get_sunset().unwrap();
+
+    //     // At South Pole during winter, sun should always be below
+    //     assert!(
+    //         matches!(sunrise, SolarEventResult::AllNight) || matches!(sunset, SolarEventResult::AllNight),
+    //         "At South Pole during winter solstice, sun should be always below"
+    //     );
+    // }
+
+    #[test]
+    fn test_equator_sunrise_sunset() {
+        // Test at equator - should always have sunrise and sunset
+        let dt = NaiveDateTime::parse_from_str("2024-03-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let mut calc = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+
+        let sunrise = calc.get_sunrise().unwrap();
+        let sunset = calc.get_sunset().unwrap();
+
+        // At equator, should always have sunrise and sunset
+        assert!(
+            matches!(sunrise, SolarEventResult::Occurs(_)),
+            "At equator, should have sunrise"
+        );
+        assert!(
+            matches!(sunset, SolarEventResult::Occurs(_)),
+            "At equator, should have sunset"
+        );
+    }
+
+    #[test]
+    fn test_extreme_elevation() {
+        // Test with very high elevation (Mount Everest ~8848m)
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let mut calc = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            86.9250,
+            27.9881,
+            8848.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+
+        let position = calc.get_solar_position();
+        assert!(
+            position.zenith >= 0.0 && position.zenith <= std::f64::consts::PI,
+            "Solar position should be valid at high elevation"
+        );
+    }
+
+    #[test]
+    fn test_extreme_temperature() {
+        // Test with extreme temperatures
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+
+        // Very cold
+        let mut calc_cold = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -50.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+        let _ = calc_cold.get_solar_position();
+
+        // Very hot
+        let mut calc_hot = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            50.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+        let _ = calc_hot.get_solar_position();
+
+        // Should not panic
+    }
+
+    #[test]
+    fn test_extreme_pressure() {
+        // Test with extreme pressures
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+
+        // Low pressure (high altitude)
+        let mut calc_low = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            500.0,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+        let _ = calc_low.get_solar_position();
+
+        // High pressure (sea level, storm)
+        let mut calc_high = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1050.0,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+        let _ = calc_high.get_solar_position();
+
+        // Should not panic
+    }
+
+    #[test]
+    fn test_both_refraction_models() {
+        // Test that both refraction models work
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+
+        let mut calc_bennet = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            51.5,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+        let pos_bennet = calc_bennet.get_solar_position();
+
+        let mut calc_bennet_na = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            51.5,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennetNA,
+        )
+        .unwrap();
+        let pos_bennet_na = calc_bennet_na.get_solar_position();
+
+        // Both should produce valid positions
+        assert!(pos_bennet.zenith >= 0.0 && pos_bennet.zenith <= std::f64::consts::PI);
+        assert!(pos_bennet_na.zenith >= 0.0 && pos_bennet_na.zenith <= std::f64::consts::PI);
+    }
+
+    #[test]
+    fn test_solar_transit_at_equator() {
+        // Test solar transit calculation
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let mut calc = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+
+        let transit = calc.get_solar_transit();
+        assert!(transit.is_ok(), "Solar transit should be calculable");
+        let transit_ts = transit.unwrap();
+        assert!(transit_ts > 0, "Transit timestamp should be positive");
+    }
+
+    #[test]
+    fn test_all_twilight_types() {
+        // Test all twilight calculations
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let mut calc = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            51.5,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+
+        assert!(calc.get_civil_dawn().is_ok());
+        assert!(calc.get_civil_dusk().is_ok());
+        assert!(calc.get_nautical_dawn().is_ok());
+        assert!(calc.get_nautical_dusk().is_ok());
+        assert!(calc.get_astronomical_dawn().is_ok());
+        assert!(calc.get_astronomical_dusk().is_ok());
+    }
+
+    #[test]
+    fn test_solar_event_result_timestamp() {
+        // Test SolarEventResult::timestamp() method
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let mut calc = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            51.5,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+
+        let sunrise = calc.get_sunrise().unwrap();
+        if let Some(ts) = sunrise.timestamp() {
+            assert!(ts > 0, "Sunrise timestamp should be positive");
+        }
+
+        // Test AlwaysAbove case
+        assert!(SolarEventResult::AllDay.timestamp().is_none());
+        assert!(SolarEventResult::AllNight.timestamp().is_none());
+    }
+
+    #[test]
+    fn test_get_delta_t_function() {
+        // Test get_delta_t function
+        let dt_2024 = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let delta_t_2024 = crate::get_delta_t(&dt_2024);
+        assert!(
+            delta_t_2024 > 60.0 && delta_t_2024 < 80.0,
+            "Delta_t for 2024 should be around 69 seconds"
+        );
+
+        let dt_2000 = NaiveDateTime::parse_from_str("2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let delta_t_2000 = crate::get_delta_t(&dt_2000);
+        assert!(
+            delta_t_2000 > 60.0 && delta_t_2000 < 70.0,
+            "Delta_t for 2000 should be around 64 seconds"
+        );
+    }
+
+    #[test]
+    fn test_julian_day_calculation() {
+        // Test Julian day calculation
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        println!("{:?}", dt);
+        let mut calc = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+
+        let jd = calc.get_julian_day();
+        assert_eq!(jd.jd, 2460311.000000,);
+    }
+
+    #[test]
+    fn test_solar_time_calculation() {
+        // Test solar time calculation
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let mut calc = AstronomicalCalculator::new(
+            dt,
+            None,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+
+        let solar_time = calc.get_solar_time();
+        assert!(solar_time.is_ok(), "Solar time should be calculable");
     }
 }
