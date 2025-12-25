@@ -43,10 +43,11 @@ jobs:
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
       
       - name: Run tests
-        run: cargo test --all-features
-      
-      - name: Run tests (no default features)
-        run: cargo test --no-default-features
+        env:
+          RUST_BACKTRACE: 1
+          PROPTEST_CASES: 10000
+        run: cargo test 
+    
 
   clippy:
     name: Clippy

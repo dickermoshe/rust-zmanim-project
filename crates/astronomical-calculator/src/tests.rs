@@ -1,9 +1,13 @@
 #![allow(clippy::unwrap_used, clippy::panic, clippy::expect_used)]
 use chrono::DateTime;
 use chrono::NaiveDateTime;
+use chrono::TimeZone;
 use chrono::Utc;
 use proptest::proptest;
+use serde::Deserialize;
+use serde::Serialize;
 extern crate std;
+
 use crate::unsafe_spa::sol_pos;
 use crate::unsafe_spa::solar_day;
 use crate::unsafe_spa::tm;
@@ -23,12 +27,6 @@ fn naive_datetime_to_tm(dt: &NaiveDateTime) -> tm {
         timestamp: dt.and_utc().timestamp_millis(),
     }
 }
-
-// fn tm_to_naive_datetime(tm: &tm) -> NaiveDateTime {
-//     NaiveDate::from_ymd_opt(tm.tm_year + 1900, tm.tm_mon as u32 + 1, tm.tm_mday as u32)
-//         .and_then(|d| d.and_hms_opt(tm.tm_hour as u32, tm.tm_min as u32, tm.tm_sec as u32))
-//         .unwrap()
-// }
 
 fn solar_day_to_event(day: solar_day, index: usize) -> SolarEventResult {
     if day.status[index] == 0 {
@@ -962,58 +960,6 @@ mod edge_case_tests {
         }
     }
 
-    // #[test]
-    // fn test_polar_region_at_solstice() {
-    //     // Test at North Pole during summer solstice - sun should always be above
-    //     let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
-    //     let mut calc = AstronomicalCalculator::new(
-    //         dt,
-    //         None,
-    //         0.0,
-    //         0.0,
-    //         89.0,
-    //         0.0,
-    //         20.0,
-    //         1013.25,
-    //         None,
-    //         Refraction::ApSolposBennet,
-    //     )
-    //     .unwrap();
-
-    //     let sunrise = calc.get_sunrise().unwrap();
-    //     let sunset = calc.get_sunset().unwrap();
-
-    //     // At North Pole during summer, sun should always be above
-    //     assert!(
-    //         matches!(sunrise, SolarEventResult::AllDay) || matches!(sunset, SolarEventResult::AllDay),
-    //         "At North Pole during summer solstice, sun should be always above"
-    //     );
-    //     // Test at South Pole during winter solstice - sun should always be below
-    //     let dt = NaiveDateTime::parse_from_str("2024-12-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
-    //     let mut calc = AstronomicalCalculator::new(
-    //         dt,
-    //         None,
-    //         0.0,
-    //         0.0,
-    //         -89.0,
-    //         0.0,
-    //         20.0,
-    //         1013.25,
-    //         None,
-    //         Refraction::ApSolposBennet,
-    //     )
-    //     .unwrap();
-
-    //     let sunrise = calc.get_sunrise().unwrap();
-    //     let sunset = calc.get_sunset().unwrap();
-
-    //     // At South Pole during winter, sun should always be below
-    //     assert!(
-    //         matches!(sunrise, SolarEventResult::AllNight) || matches!(sunset, SolarEventResult::AllNight),
-    //         "At South Pole during winter solstice, sun should be always below"
-    //     );
-    // }
-
     #[test]
     fn test_equator_sunrise_sunset() {
         // Test at equator - should always have sunrise and sunset
@@ -1330,5 +1276,271 @@ mod edge_case_tests {
 
         let solar_time = calc.get_solar_time();
         assert!(solar_time.is_ok(), "Solar time should be calculable");
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct SunResult {
+    lat: f64,
+    lon: f64,
+    midday: f64,
+    sunrise: Option<f64>,
+    sunset: Option<f64>,
+    transit: f64,
+    now: std::string::String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct SunResults {
+    results: std::vec::Vec<SunResult>,
+}
+
+fn ts_to_dt(ts: f64) -> NaiveDateTime {
+    #[allow(deprecated)]
+    NaiveDateTime::from_timestamp_millis((ts * 1000.0) as i64).unwrap()
+}
+fn tz_ts_to_dt<T: TimeZone>(ts: f64, tz: T) -> DateTime<T> {
+    tz.timestamp_millis_opt((ts * 1000.0) as i64).unwrap()
+}
+
+/// Calculate tolerance in seconds based on latitude.
+/// 60 seconds until 45°, then exponential growth to 10000 seconds at poles.
+fn latitude_tolerance(lat: f64) -> i64 {
+    let abs_lat = lat.abs();
+    if abs_lat <= 45.0 {
+        // Constant 60 seconds until 45 degrees
+        60
+    } else {
+        // Exponential growth from 60 to 10000 seconds between 45° and 90°
+        // Formula: 60 * (10000/60)^((abs_lat - 45) / 45)
+        let base_tolerance: f64 = 60.0;
+        let max_tolerance: f64 = 10000.0;
+        let ratio: f64 = max_tolerance / base_tolerance;
+        let exponent: f64 = (abs_lat - 45.0) / 45.0;
+        (base_tolerance * ratio.powf(exponent)) as i64
+    }
+}
+
+#[test]
+fn test_suncalc_test_data() {
+    let data = std::fs::read_to_string("test_data/data.json").unwrap();
+    let results: SunResults = serde_json::from_str(&data).unwrap();
+
+    for (index, result) in results.results.iter().enumerate() {
+        let midday = ts_to_dt(result.midday);
+        let their_transit = ts_to_dt(result.transit);
+        let their_sunset = result.sunset.map(ts_to_dt);
+        let their_sunrise = result.sunrise.map(ts_to_dt);
+
+        let mut calc = AstronomicalCalculator::new(
+            midday,
+            None,
+            0.0,
+            result.lon,
+            result.lat,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+
+        let our_transit = ts_to_dt(calc.get_solar_transit().unwrap() as f64);
+        let diff = (our_transit - their_transit).abs().num_seconds();
+        let tolerance = latitude_tolerance(result.lat);
+
+        assert!(
+            diff <= tolerance,
+            "Transit timestamp difference too large: {} seconds (tolerance: {}), ours: {}, theirs: {}. Record: {:?} Index: {}",
+            diff,
+            tolerance,
+            our_transit,
+            their_transit,
+            result,
+            index
+        );
+        let our_sunset = calc
+            .get_sunset()
+            .map(|result| result.timestamp().map(|ts| ts_to_dt(ts as f64)))
+            .ok()
+            .flatten();
+
+        if let (Some(our), Some(their)) = (our_sunset, their_sunset) {
+            let diff = (our - their).abs().num_seconds();
+            let tolerance = latitude_tolerance(result.lat);
+            assert!(
+                diff <= tolerance,
+                "Sunset timestamp difference too large: {} seconds (tolerance: {}), ours: {}, theirs: {}. Record: {:?} Index: {}",
+                diff,
+                tolerance,
+                our,
+                their,
+                result,
+                index
+            );
+        }
+        let our_sunrise = calc
+            .get_sunrise()
+            .map(|result| result.timestamp().map(|ts| ts_to_dt(ts as f64)))
+            .ok()
+            .flatten();
+        if let (Some(our), Some(their)) = (our_sunrise, their_sunrise) {
+            let diff = (our - their).abs().num_seconds();
+            let tolerance = latitude_tolerance(result.lat);
+
+            assert!(
+                diff <= tolerance,
+                "Sunrise timestamp difference too large: {} seconds (tolerance: {}), ours: {}, theirs: {}. Record: {:?} Index: {}",
+                diff,
+                tolerance,
+                our,
+                their,
+                result,
+                index
+            );
+        }
+    }
+}
+
+#[test]
+fn test_geonames_csv_transit() {
+    use chrono::TimeZone;
+    use chrono_tz::Tz;
+    use csv::ReaderBuilder;
+    use rand::Rng;
+    use std::fs::File;
+    use std::io::BufReader;
+    #[allow(unused)]
+    #[derive(Debug, Deserialize)]
+    struct GeonamesRow {
+        geoname_id: std::string::String,
+        name: std::string::String,
+        ascii_name: std::string::String,
+        #[serde(default)]
+        alternate_names: std::string::String,
+        feature_class: std::string::String,
+        feature_code: std::string::String,
+        country_code: std::string::String,
+        cou_name_en: std::string::String,
+        #[serde(default)]
+        country_code_2: std::string::String,
+        #[serde(default)]
+        admin1_code: std::string::String,
+        #[serde(default)]
+        admin2_code: std::string::String,
+        #[serde(default)]
+        admin3_code: std::string::String,
+        #[serde(default)]
+        admin4_code: std::string::String,
+        population: std::string::String,
+        #[serde(default)]
+        elevation: std::string::String,
+        #[serde(default)]
+        dem: std::string::String,
+        timezone: std::string::String,
+        #[serde(default)]
+        modification_date: std::string::String,
+        #[serde(default)]
+        label_en: std::string::String,
+        coordinates: std::string::String,
+    }
+
+    // Open and read the CSV file
+    let file = File::open("test_data/cities.csv").expect("Failed to open CSV file");
+    let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(BufReader::new(file));
+
+    let mut rng = rand::thread_rng();
+
+    // Process each row
+    for (index, result) in rdr.deserialize().enumerate() {
+        let row: GeonamesRow = result.expect("Failed to parse CSV row");
+
+        // Parse coordinates (format: "lat,lon")
+        let coords: std::vec::Vec<&str> = row.coordinates.split(',').collect();
+        if coords.len() != 2 {
+            continue;
+        }
+
+        let lat: f64 = coords[0].trim().parse().unwrap();
+        let lon: f64 = coords[1].trim().parse().unwrap();
+
+        // Skip extreme latitudes that might cause issues
+        if lat.abs() > 75.0 {
+            continue;
+        }
+
+        // Parse timezone using chrono-tz
+        let tz: Tz = row.timezone.parse().unwrap();
+
+        // Generate a random input time between 1900 and 2100
+        let year = rng.gen_range(1900..=2100);
+        let month = rng.gen_range(1..=12);
+        let day = rng.gen_range(1..=28); // Use 28 to avoid month-end issues
+
+        // Create a naive datetime at midday
+        let dt = tz.with_ymd_and_hms(year, month, day, 12, 0, 0).unwrap();
+
+        // Create calculator and get transit
+        let mut calc = AstronomicalCalculator::new(
+            dt.naive_utc(),
+            None,
+            0.0,
+            lon,
+            lat,
+            0.0,
+            20.0,
+            1013.25,
+            None,
+            Refraction::ApSolposBennet,
+        )
+        .unwrap();
+
+        let transit = tz
+            .timestamp_millis_opt((calc.get_solar_transit().unwrap() as f64 * 1000.0) as i64)
+            .unwrap();
+
+        let diff = transit - dt;
+        let midday_to_transit_diff = diff.num_seconds().abs();
+        assert!(
+            midday_to_transit_diff <= 60 * 60 * 8,
+            "Midday to transit difference too large: {} seconds, input: {}, transit: {}. Record: {:?} Index: {}",
+            midday_to_transit_diff,
+            dt,
+            transit,
+            row,
+            index
+        );
+        // Sunrise is always before transit and sunset is always after transit
+        let sunrise = calc
+            .get_sunrise()
+            .map(|result| result.timestamp().map(|ts| tz_ts_to_dt(ts as f64, tz)))
+            .ok()
+            .flatten();
+        let sunset = calc
+            .get_sunset()
+            .map(|result| result.timestamp().map(|ts| tz_ts_to_dt(ts as f64, tz)))
+            .ok()
+            .flatten();
+        if let Some(sunrise) = sunrise {
+            assert!(
+                sunrise < transit,
+                "Sunrise should be before transit. Sunrise: {}, Transit: {}. Record: {:?} Index: {}",
+                sunrise,
+                transit,
+                row,
+                index
+            );
+        }
+        if let Some(sunset) = sunset {
+            assert!(
+                sunset > transit,
+                "Sunset should be after transit. Sunset: {}, Transit: {}. Record: {:?} Index: {}",
+                sunset,
+                transit,
+                row,
+                index
+            );
+        }
     }
 }

@@ -5,7 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "astral>=3.2",
+    "faker>=39.0.0",
     "numpy>=2.4.0",
     "pip-system-certs>=5.3",
+    "pydantic>=2.12.5",
+    "pyephem>=9.99",
+    "pytz>=2025.2",
     "skyfield>=1.53",
+    "tqdm>=4.67.1",
 ]

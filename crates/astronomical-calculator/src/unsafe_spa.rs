@@ -27,7 +27,6 @@ pub type time_t = __time_t;
 #[repr(C)]
 pub struct tm {
     pub timestamp: i64,
-    
     // pub tm_sec: ::core::ffi::c_int,
     // pub tm_min: ::core::ffi::c_int,
     // pub tm_hour: ::core::ffi::c_int,
@@ -49,7 +48,8 @@ impl tm {
         Utc.timestamp_millis_opt(self.timestamp).unwrap().minute()
     }
     fn second(&self) -> f64 {
-        Utc.timestamp_millis_opt(self.timestamp).unwrap().second() as f64 + Utc.timestamp_millis_opt(self.timestamp).unwrap().nanosecond() as f64 / 1000000000.0
+        Utc.timestamp_millis_opt(self.timestamp).unwrap().second() as f64
+            + Utc.timestamp_millis_opt(self.timestamp).unwrap().nanosecond() as f64 / 1000000000.0
     }
     fn year(&self) -> i32 {
         Utc.timestamp_millis_opt(self.timestamp).unwrap().year()
@@ -60,9 +60,6 @@ impl tm {
     fn day(&self) -> u32 {
         Utc.timestamp_millis_opt(self.timestamp).unwrap().day()
     }
-
-
-
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -4484,7 +4481,7 @@ pub unsafe extern "C" fn get_delta_t(mut ut: *mut tm) -> ::core::ffi::c_double {
     let mut i: ::core::ffi::c_int = 0;
 
     dyear = (*ut).year() as ::core::ffi::c_double
-        + ((*ut).month() as ::core::ffi::c_double ) / 12 as ::core::ffi::c_int as ::core::ffi::c_double
+        + ((*ut).month() as ::core::ffi::c_double) / 12 as ::core::ffi::c_int as ::core::ffi::c_double
         + ((*ut).day() as ::core::ffi::c_double - 1.0f64) / 365.0f64;
     if freespa_delta_t_table[0 as ::core::ffi::c_int as usize] > dyear {
         return 32.0f64
@@ -4559,7 +4556,6 @@ pub unsafe extern "C" fn JDgmtime(mut JD: JulianDay, mut ut: *mut tm) -> *mut tm
     let datetime = julian_day_to_unix_millis(JD.JD);
     (*ut).timestamp = datetime;
     ut
- 
 }
 #[no_mangle]
 pub unsafe extern "C" fn gmjtime_r(mut t: *mut time_t, mut ut: *mut tm) -> *mut tm {
@@ -4576,9 +4572,7 @@ pub unsafe extern "C" fn gmjtime_r(mut t: *mut time_t, mut ut: *mut tm) -> *mut 
 }
 #[no_mangle]
 pub unsafe extern "C" fn gmjtime(mut t: *mut time_t) -> *mut tm {
-    static mut _tmbuf: tm = tm {
-        timestamp:0
-    };
+    static mut _tmbuf: tm = tm { timestamp: 0 };
     return gmjtime_r(t, &raw mut _tmbuf);
 }
 #[no_mangle]
@@ -4608,9 +4602,7 @@ pub unsafe extern "C" fn MakeJulianDayEpoch(
     mut delta_t: *mut ::core::ffi::c_double,
     mut delta_ut1: ::core::ffi::c_double,
 ) -> JulianDay {
-    let mut ut: tm = tm {
-        timestamp:0
-    };
+    let mut ut: tm = tm { timestamp: 0 };
     let mut p: *mut tm = ::core::ptr::null_mut::<tm>();
     let mut JD: JulianDay = JulianDate {
         JD: 0.,
@@ -5246,9 +5238,7 @@ pub unsafe extern "C" fn TrueSolarTime(
     mut lat: ::core::ffi::c_double,
 ) -> tm {
     let mut E: ::core::ffi::c_double = 0.;
-    let mut nt: tm = tm {
-        timestamp:0
-    };
+    let mut nt: tm = tm { timestamp: 0 };
     let mut D: JulianDay = JulianDate {
         JD: 0.,
         JDE: 0.,
@@ -5296,10 +5286,8 @@ pub unsafe extern "C" fn FindSolTime(
     let mut E: ::core::ffi::c_double = 0.;
     let mut dt: ::core::ffi::c_double = 1 as ::core::ffi::c_int as ::core::ffi::c_double;
     let mut iter: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
-    let mut nt: tm = tm {
-        
-        timestamp:0
-    };
+    let mut ut0: tm = tm { timestamp: 0 };
+    let mut nt: tm = tm { timestamp: 0 };
     let mut D: JulianDay = JulianDate {
         JD: 0.,
         JDE: 0.,
@@ -5322,8 +5310,9 @@ pub unsafe extern "C" fn FindSolTime(
         rad: 0.,
     };
     D = MakeJulianDayEpoch(t, delta_t, delta_ut1);
-    gmjtime_r(&raw mut t, &raw mut nt);
-    dt = (hour - nt.hour() as i32) as ::core::ffi::c_double / 24.4f64;
+    gmjtime_r(&raw mut t, &raw mut ut0);
+    nt = TrueSolarTime(&raw mut ut0, delta_t, delta_ut1, lon, lat);
+    dt = (hour - nt.hour() as i32) as ::core::ffi::c_double / 24.0f64;
     dt += (min - nt.minute() as i32) as ::core::ffi::c_double / 1440.0f64;
     dt += (sec - nt.second() as i32) as ::core::ffi::c_double / 86400.0f64;
     if dt > 0.5f64 {
@@ -5340,7 +5329,7 @@ pub unsafe extern "C" fn FindSolTime(
         E = EoT(lat, D, G);
         Dn.JD += (lon + E) / M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double;
         JDgmtime(Dn, &raw mut nt);
-        dt = (hour - nt.hour() as i32) as ::core::ffi::c_double / 24.4f64;
+        dt = (hour - nt.hour() as i32) as ::core::ffi::c_double / 24.0f64;
         dt += (min - nt.minute() as i32) as ::core::ffi::c_double / 1440.0f64;
         dt += (sec - nt.second() as i32) as ::core::ffi::c_double / 86400.0f64;
         if dt > 0.5f64 {
@@ -5396,9 +5385,7 @@ pub unsafe extern "C" fn FindSolZenith(
     let mut tmin: time_t = 0;
     let mut tmax: time_t = 0;
     let mut tb: time_t = 0;
-    let mut ut: tm = tm {
-        timestamp:0
-    };
+    let mut ut: tm = tm { timestamp: 0 };
     let mut put: *mut tm = ::core::ptr::null_mut::<tm>();
     let mut iter: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     *tz = 0 as time_t;
@@ -5522,39 +5509,17 @@ pub unsafe extern "C" fn SolarDay(
 ) -> solar_day {
     let mut D: solar_day = solar_day {
         ev: [
-            tm {
-                timestamp:0
-            },
-            tm {
-                timestamp:0
-            },
-            tm {
-                        timestamp:0
-            },
-            tm {
-                timestamp:0
-            },
-            tm {
-                timestamp:0
-            },
-            tm {
-                timestamp:0
-            },
-            tm {
-                    timestamp:0
-            },
-            tm {
-                timestamp:0
-            },
-            tm {
-                timestamp:0
-            },
-            tm {
-                timestamp:0
-            },
-            tm {
-                timestamp:0
-            },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
+            tm { timestamp: 0 },
         ],
         t: [0; 11],
         E: [0.; 11],

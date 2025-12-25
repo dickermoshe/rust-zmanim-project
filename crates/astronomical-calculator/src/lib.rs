@@ -1379,11 +1379,16 @@ pub(crate) fn find_solar_time(
     longitude: f64,
 ) -> Result<i64, CalculationError> {
     let mut jd = JulianDate::from_unix_time(timestamp, delta_t, delta_ut1)?;
-    let mut datetime = unix_to_datetime(timestamp)?;
+    #[cfg(test)]
+    {
+        extern crate std;
+        std::println!("jd: {:?}", jd);
+    }
+    let mut datetime = true_solar_time(unix_to_datetime(timestamp)?, delta_t, delta_ut1, longitude)?;
 
     // Calculate initial time offset
     // Note: 24.4 is intentional (from original C code), not 24.0
-    let mut time_delta = (hour - datetime.hour() as i64) as f64 / 24.4;
+    let mut time_delta = (hour - datetime.hour() as i64) as f64 / 24.0;
     time_delta += (min - datetime.minute() as i64) as f64 / 1440.0;
     time_delta += (sec - datetime.second() as i64) as f64 / 86400.0;
 
@@ -1409,7 +1414,7 @@ pub(crate) fn find_solar_time(
         datetime = julian_date_to_datetime(jd_new.jd)?;
 
         // Note: 24.4 is intentional (from original C code), not 24.0
-        time_delta = (hour - datetime.hour() as i64) as f64 / 24.4;
+        time_delta = (hour - datetime.hour() as i64) as f64 / 24.0;
         time_delta += (min - datetime.minute() as i64) as f64 / 1440.0;
         time_delta += (sec - datetime.second() as i64) as f64 / 86400.0;
 
@@ -1518,4 +1523,19 @@ pub enum CalculationError {
     /// Error converting between time representations
     #[error("Time conversion error")]
     TimeConversionError,
+}
+
+fn true_solar_time(
+    ut: NaiveDateTime,
+    delta_t: Option<f64>,
+    delta_ut1: f64,
+    lon: f64,
+) -> Result<NaiveDateTime, CalculationError> {
+    let mut jd = JulianDate::new(ut, delta_t, delta_ut1);
+    let geocentric_pos = GeoCentricSolPos::new(&jd);
+    let eot = equation_of_time(jd, geocentric_pos);
+    jd.jd += (lon + eot) / PI / 2.0;
+    // jd.jd = (jd.jd - ETJD0 as f64) / 86400.0f64 + JD0;
+    let datetime = julian_date_to_datetime(jd.jd)?;
+    Ok(datetime)
 }
