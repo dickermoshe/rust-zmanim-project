@@ -38,7 +38,7 @@
 //!     15.0,              // temperature in Celsius
 //!     1013.0,            // pressure in millibars
 //!     None,              // optional geometric dip angle
-//!     Refraction::ApSolposBennet,  // refraction model
+//!     Refraction::ApSolposBennetNA,  // refraction model (recommended for precision)
 //! ).unwrap();
 //!
 //! // Get current solar position
@@ -126,7 +126,7 @@ const Z_MAXITER: i64 = 100; // Max iterations for zenith finding
 ///     20.0,                    // temperature: 20°C
 ///     1013.25,                 // pressure: 1013.25 mb
 ///     None,                    // geometric dip: None
-///     Refraction::ApSolposBennet,
+///     Refraction::ApSolposBennetNA,
 /// ).unwrap();
 ///
 /// // Get solar position
@@ -195,7 +195,7 @@ impl SolarEventResult {
     ///
     /// let datetime = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
     /// let mut calc = AstronomicalCalculator::new(
-    ///     datetime, None, 0.0, 0.0, 0.0, 0.0, 20.0, 1013.25, None, Refraction::ApSolposBennet
+    ///     datetime, None, 0.0, 0.0, 0.0, 0.0, 20.0, 1013.25, None, Refraction::ApSolposBennetNA
     /// ).unwrap();
     ///
     /// if let Some(ts) = calc.get_sunrise().unwrap().timestamp() {
@@ -255,7 +255,7 @@ impl AstronomicalCalculator {
     ///     22.0,                        // temperature (°C)
     ///     1013.25,                     // pressure (mb)
     ///     None,                        // geometric dip
-    ///     Refraction::ApSolposBennet,  // refraction model
+    ///     Refraction::ApSolposBennetNA,  // refraction model
     /// ).unwrap();
     /// ```
     #[allow(clippy::too_many_arguments)]
@@ -356,7 +356,7 @@ impl AstronomicalCalculator {
     /// let dt = NaiveDateTime::parse_from_str("2024-01-15 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
     /// let mut calc = AstronomicalCalculator::new(
     ///     dt, Some(69.0), 0.0, 0.0, 0.0, 0.0, 15.0, 1013.0,
-    ///     None, Refraction::ApSolposBennet
+    ///     None, Refraction::ApSolposBennetNA
     /// ).unwrap();
     ///
     /// let jd = calc.get_julian_day();
@@ -457,27 +457,13 @@ impl AstronomicalCalculator {
 
             let tc = find_solar_time(t, 12, 0, 0, self.delta_t, self.delta_ut1, self.lon_radians)?;
             let mut calculator = self.with_time(unix_to_datetime(tc)?);
-            let pos = *calculator.get_solar_position();
-            let pos = match self.refraction {
-                Refraction::ApSolposBennet => apply_refraction(
-                    bennet_refraction,
-                    inverse_bennet_refraction,
-                    pos,
-                    self.gdip,
-                    self.elevation,
-                    self.pressure,
-                    self.temperature,
-                )?,
-                Refraction::ApSolposBennetNA => apply_refraction(
-                    bennet_na_refraction,
-                    inverse_bennet_na_refraction,
-                    pos,
-                    self.gdip,
-                    self.elevation,
-                    self.pressure,
-                    self.temperature,
-                )?,
-            };
+            let pos = self.refraction.apply(
+                *calculator.get_solar_position(),
+                self.gdip,
+                self.elevation,
+                self.pressure,
+                self.temperature,
+            )?;
             Ok(SolarInfo {
                 position: pos,
                 timestamp: tc,
@@ -512,27 +498,13 @@ impl AstronomicalCalculator {
                 self.lon_radians,
             )?;
             let mut calculator = self.with_time(unix_to_datetime(tc)?);
-            let pos = *calculator.get_solar_position();
-            let pos = match self.refraction {
-                Refraction::ApSolposBennet => apply_refraction(
-                    bennet_refraction,
-                    inverse_bennet_refraction,
-                    pos,
-                    self.gdip,
-                    self.elevation,
-                    self.pressure,
-                    self.temperature,
-                )?,
-                Refraction::ApSolposBennetNA => apply_refraction(
-                    bennet_na_refraction,
-                    inverse_bennet_na_refraction,
-                    pos,
-                    self.gdip,
-                    self.elevation,
-                    self.pressure,
-                    self.temperature,
-                )?,
-            };
+            let pos = self.refraction.apply(
+                *calculator.get_solar_position(),
+                self.gdip,
+                self.elevation,
+                self.pressure,
+                self.temperature,
+            )?;
             Ok(SolarInfo {
                 position: pos,
                 timestamp: tc,
@@ -566,27 +538,13 @@ impl AstronomicalCalculator {
                 self.lon_radians,
             )?;
             let mut calculator = self.with_time(unix_to_datetime(tc)?);
-            let pos = *calculator.get_solar_position();
-            let pos = match self.refraction {
-                Refraction::ApSolposBennet => apply_refraction(
-                    bennet_refraction,
-                    inverse_bennet_refraction,
-                    pos,
-                    self.gdip,
-                    self.elevation,
-                    self.pressure,
-                    self.temperature,
-                )?,
-                Refraction::ApSolposBennetNA => apply_refraction(
-                    bennet_na_refraction,
-                    inverse_bennet_na_refraction,
-                    pos,
-                    self.gdip,
-                    self.elevation,
-                    self.pressure,
-                    self.temperature,
-                )?,
-            };
+            let pos = self.refraction.apply(
+                *calculator.get_solar_position(),
+                self.gdip,
+                self.elevation,
+                self.pressure,
+                self.temperature,
+            )?;
             Ok(SolarInfo {
                 position: pos,
                 timestamp: tc,
@@ -1036,28 +994,13 @@ impl AstronomicalCalculator {
 
         // Calculate solar position at initial guess
         let datetime = unix_to_datetime(timestamp)?;
-        let mut calculator = self.with_time(datetime);
-        let mut position = *calculator.get_solar_position();
-        position = match self.refraction {
-            Refraction::ApSolposBennet => apply_refraction(
-                bennet_refraction,
-                inverse_bennet_refraction,
-                position,
-                self.gdip,
-                self.elevation,
-                self.pressure,
-                self.temperature,
-            )?,
-            Refraction::ApSolposBennetNA => apply_refraction(
-                bennet_na_refraction,
-                inverse_bennet_na_refraction,
-                position,
-                self.gdip,
-                self.elevation,
-                self.pressure,
-                self.temperature,
-            )?,
-        };
+        let position = self.refraction.apply(
+            *self.with_time(datetime).get_solar_position(),
+            self.gdip,
+            self.elevation,
+            self.pressure,
+            self.temperature,
+        )?;
         let mut best_timestamp = timestamp;
         let mut best_error = position.zenith - target_zenith;
 
@@ -1093,26 +1036,13 @@ impl AstronomicalCalculator {
             // Calculate solar position
             let datetime = unix_to_datetime(timestamp)?;
             let mut calculator = self.with_time(datetime);
-            let position = match self.refraction {
-                Refraction::ApSolposBennet => apply_refraction(
-                    bennet_refraction,
-                    inverse_bennet_refraction,
-                    *calculator.get_solar_position(),
-                    self.gdip,
-                    self.elevation,
-                    self.pressure,
-                    self.temperature,
-                )?,
-                Refraction::ApSolposBennetNA => apply_refraction(
-                    bennet_na_refraction,
-                    inverse_bennet_na_refraction,
-                    *calculator.get_solar_position(),
-                    self.gdip,
-                    self.elevation,
-                    self.pressure,
-                    self.temperature,
-                )?,
-            };
+            let position = self.refraction.apply(
+                *calculator.get_solar_position(),
+                self.gdip,
+                self.elevation,
+                self.pressure,
+                self.temperature,
+            )?;
             // Update best result
             if (position.zenith - target_zenith).abs() < best_error.abs() {
                 best_error = position.zenith - target_zenith;
@@ -1163,13 +1093,49 @@ pub struct SolarPosition {
 /// # Variants
 ///
 /// - `ApSolposBennet`: Standard Bennett refraction model, suitable for most applications
-/// - `ApSolposBennetNA`: Bennett refraction model without atmospheric correction (assumes standard conditions)
+/// - `ApSolposBennetNA`: Bennett refraction model optimized for accuracy and matches closer with The Nautical Almanac.
+///   Recommended for precision astronomical calculations.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Refraction {
-    /// Bennett refraction model (recommended for most applications)
+    /// Bennett refraction model (suitable for most applications)
     ApSolposBennet,
-    /// Bennett refraction model without atmospheric correction
+    /// Bennett refraction model optimized for accuracy, matches closer with The Nautical Almanac (recommended for precision astronomical calculations)
     ApSolposBennetNA,
+    /// No refraction
+    NoRefraction,
+}
+
+impl Refraction {
+    fn apply(
+        self,
+        position: SolarPosition,
+        gdip: Option<f64>,
+        elevation: f64,
+        pressure: f64,
+        temperature: f64,
+    ) -> Result<SolarPosition, CalculationError> {
+        match self {
+            Refraction::ApSolposBennet => apply_refraction(
+                bennet_refraction,
+                inverse_bennet_refraction,
+                position,
+                gdip,
+                elevation,
+                pressure,
+                temperature,
+            ),
+            Refraction::ApSolposBennetNA => apply_refraction(
+                bennet_na_refraction,
+                inverse_bennet_na_refraction,
+                position,
+                gdip,
+                elevation,
+                pressure,
+                temperature,
+            ),
+            Refraction::NoRefraction => Ok(position),
+        }
+    }
 }
 
 /// Calculate ΔT (Terrestrial Time minus Universal Time) for a given date.
@@ -1376,12 +1342,12 @@ fn inverse_bennet_refraction(pressure: f64, temperature: f64, altitude: f64) -> 
     calculate_refraction(&IBENNET, pressure, temperature, altitude)
 }
 
-/// Bennet refraction model (no atmosphere)
+/// Bennet refraction model (optimized for accuracy)
 fn bennet_na_refraction(pressure: f64, temperature: f64, altitude: f64) -> f64 {
     calculate_refraction(&BENNETNA, pressure, temperature, altitude)
 }
 
-/// Inverse Bennet refraction model (no atmosphere)
+/// Inverse Bennet refraction model (optimized for accuracy)
 fn inverse_bennet_na_refraction(pressure: f64, temperature: f64, altitude: f64) -> f64 {
     calculate_refraction(&IBENNETNA, pressure, temperature, altitude)
 }

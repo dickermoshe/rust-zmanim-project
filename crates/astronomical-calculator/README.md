@@ -48,7 +48,7 @@ let mut calc = AstronomicalCalculator::new(
     20.0,                     // temperature in Celsius
     1013.25,                  // pressure in millibars
     None,                     // geometric dip (None = standard horizon)
-    Refraction::ApSolposBennet, // refraction model
+    Refraction::ApSolposBennetNA, // refraction model
 ).unwrap();
 
 // Get current solar position
