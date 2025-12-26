@@ -13,6 +13,7 @@ use crate::unsafe_spa::solar_day;
 use crate::unsafe_spa::tm;
 use crate::unsafe_spa::ApSolposBennet;
 use crate::unsafe_spa::SPA;
+use crate::CalculationError;
 
 use crate::unsafe_spa::ApSolposBennetNA;
 use crate::unsafe_spa::SolarDay;
@@ -1288,6 +1289,12 @@ struct SunResult {
     sunset: Option<f64>,
     transit: f64,
     now: std::string::String,
+    civil_dawn: Option<f64>,
+    nautical_dawn: Option<f64>,
+    astronomical_dawn: Option<f64>,
+    civil_dusk: Option<f64>,
+    nautical_dusk: Option<f64>,
+    astronomical_dusk: Option<f64>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -1304,20 +1311,117 @@ fn tz_ts_to_dt<T: TimeZone>(ts: f64, tz: T) -> DateTime<T> {
 }
 
 /// Calculate tolerance in seconds based on latitude.
-/// 60 seconds until 45°, then exponential growth to 10000 seconds at poles.
-fn latitude_tolerance(lat: f64) -> i64 {
+/// 60 seconds until 45° (300 seconds for astronomical), then exponential growth to 10000 seconds at poles.
+fn latitude_tolerance(lat: f64, time_type: TimeType) -> f64 {
     let abs_lat = lat.abs();
     if abs_lat <= 45.0 {
-        // Constant 60 seconds until 45 degrees
-        60
+        // Constant tolerance until 45 degrees
+        // Astronomical events need larger tolerance due to lower precision at extreme angles (18° below horizon)
+        time_type.base_tolerance() as f64
     } else {
-        // Exponential growth from 60 to 10000 seconds between 45° and 90°
-        // Formula: 60 * (10000/60)^((abs_lat - 45) / 45)
-        let base_tolerance: f64 = 60.0;
+        // Exponential growth from base to 10000 seconds between 45° and 90°
+        // Formula: base * (10000/base)^((abs_lat - 45) / 45)
+        let base_tolerance = time_type.base_tolerance() as f64;
         let max_tolerance: f64 = 10000.0;
         let ratio: f64 = max_tolerance / base_tolerance;
         let exponent: f64 = (abs_lat - 45.0) / 45.0;
-        (base_tolerance * ratio.powf(exponent)) as i64
+        base_tolerance * ratio.powf(exponent)
+    }
+}
+
+fn get_event_time(
+    calc: &mut AstronomicalCalculator,
+    getter: fn(&mut AstronomicalCalculator) -> Result<SolarEventResult, CalculationError>,
+) -> Option<NaiveDateTime> {
+    getter(calc)
+        .ok()
+        .and_then(|result| result.timestamp())
+        .map(|ts| ts_to_dt(ts as f64))
+}
+
+/// Assert that a list of Option<DateTime> values are in chronological order.
+/// Only compares consecutive pairs where both values are Some.
+///
+/// # Arguments
+/// * `events` - Slice of Option values to check
+/// * `names` - Slice of names for error messages (should match events length)
+/// * `context` - Additional context string for error messages
+/// * `row` - Record data for error messages
+/// * `index` - Index for error messages
+fn assert_events_in_order<T: PartialOrd + std::fmt::Display, C: std::fmt::Debug>(
+    events: &[Option<T>],
+    names: &[&str],
+    context: &str,
+    row: &C,
+    index: usize,
+) {
+    assert_eq!(
+        events.len(),
+        names.len(),
+        "Events and names slices must have the same length"
+    );
+
+    for i in 0..events.len().saturating_sub(1) {
+        if let (Some(prev), Some(next)) = (&events[i], &events[i + 1]) {
+            assert!(
+                prev < next,
+                "{}: {} should be before {}. {}: {}, {}: {}. Record: {:?} Index: {}",
+                context,
+                names[i],
+                names[i + 1],
+                names[i],
+                prev,
+                names[i + 1],
+                next,
+                row,
+                index
+            );
+        }
+    }
+}
+
+fn compare_times(
+    our: Option<NaiveDateTime>,
+    their: Option<NaiveDateTime>,
+    name: &str,
+    lat: f64,
+    result: &SunResult,
+    index: usize,
+    time_type: TimeType,
+) {
+    if let (Some(our), Some(their)) = (our, their) {
+        let diff = (our - their).abs().num_seconds();
+        let tolerance = latitude_tolerance(lat, time_type);
+
+        assert!(
+            diff <= tolerance as i64,
+            "{} timestamp difference too large: {} seconds (tolerance: {}), ours: {}, theirs: {}. Record: {:?} Index: {}",
+            name,
+            diff,
+            tolerance,
+            our,
+            their,
+            result,
+            index
+        );
+    }
+}
+
+enum TimeType {
+    Normal,
+    Civil,
+    Nautical,
+    Astronomical,
+}
+
+impl TimeType {
+    fn base_tolerance(&self) -> i64 {
+        match self {
+            TimeType::Normal => 60,
+            TimeType::Civil => 90,
+            TimeType::Nautical => 120,
+            TimeType::Astronomical => 300,
+        }
     }
 }
 
@@ -1331,6 +1435,12 @@ fn test_suncalc_test_data() {
         let their_transit = ts_to_dt(result.transit);
         let their_sunset = result.sunset.map(ts_to_dt);
         let their_sunrise = result.sunrise.map(ts_to_dt);
+        let their_civil_dawn = result.civil_dawn.map(ts_to_dt);
+        let their_nautical_dawn = result.nautical_dawn.map(ts_to_dt);
+        let their_astronomical_dawn = result.astronomical_dawn.map(ts_to_dt);
+        let their_civil_dusk = result.civil_dusk.map(ts_to_dt);
+        let their_nautical_dusk = result.nautical_dusk.map(ts_to_dt);
+        let their_astronomical_dusk = result.astronomical_dusk.map(ts_to_dt);
 
         let mut calc = AstronomicalCalculator::new(
             midday,
@@ -1347,57 +1457,92 @@ fn test_suncalc_test_data() {
         .unwrap();
 
         let our_transit = ts_to_dt(calc.get_solar_transit().unwrap() as f64);
-        let diff = (our_transit - their_transit).abs().num_seconds();
-        let tolerance = latitude_tolerance(result.lat);
-
-        assert!(
-            diff <= tolerance,
-            "Transit timestamp difference too large: {} seconds (tolerance: {}), ours: {}, theirs: {}. Record: {:?} Index: {}",
-            diff,
-            tolerance,
-            our_transit,
-            their_transit,
+        compare_times(
+            Some(our_transit),
+            Some(their_transit),
+            "Transit",
+            result.lat,
             result,
-            index
+            index,
+            TimeType::Normal,
         );
-        let our_sunset = calc
-            .get_sunset()
-            .map(|result| result.timestamp().map(|ts| ts_to_dt(ts as f64)))
-            .ok()
-            .flatten();
 
-        if let (Some(our), Some(their)) = (our_sunset, their_sunset) {
-            let diff = (our - their).abs().num_seconds();
-            let tolerance = latitude_tolerance(result.lat);
-            assert!(
-                diff <= tolerance,
-                "Sunset timestamp difference too large: {} seconds (tolerance: {}), ours: {}, theirs: {}. Record: {:?} Index: {}",
-                diff,
-                tolerance,
-                our,
-                their,
+        compare_times(
+            get_event_time(&mut calc, AstronomicalCalculator::get_sunset),
+            their_sunset,
+            "Sunset",
+            result.lat,
+            result,
+            index,
+            TimeType::Normal,
+        );
+        compare_times(
+            get_event_time(&mut calc, AstronomicalCalculator::get_sunrise),
+            their_sunrise,
+            "Sunrise",
+            result.lat,
+            result,
+            index,
+            TimeType::Normal,
+        );
+
+        // Skip twilight comparisons for high latitudes (>45° N or S)
+        // Twilight events become unreliable or don't occur at extreme latitudes
+        if result.lat.abs() <= 45.0 {
+            compare_times(
+                get_event_time(&mut calc, AstronomicalCalculator::get_astronomical_dawn),
+                their_astronomical_dawn,
+                "Astronomical dawn",
+                result.lat,
                 result,
-                index
+                index,
+                TimeType::Astronomical,
             );
-        }
-        let our_sunrise = calc
-            .get_sunrise()
-            .map(|result| result.timestamp().map(|ts| ts_to_dt(ts as f64)))
-            .ok()
-            .flatten();
-        if let (Some(our), Some(their)) = (our_sunrise, their_sunrise) {
-            let diff = (our - their).abs().num_seconds();
-            let tolerance = latitude_tolerance(result.lat);
 
-            assert!(
-                diff <= tolerance,
-                "Sunrise timestamp difference too large: {} seconds (tolerance: {}), ours: {}, theirs: {}. Record: {:?} Index: {}",
-                diff,
-                tolerance,
-                our,
-                their,
+            compare_times(
+                get_event_time(&mut calc, AstronomicalCalculator::get_astronomical_dusk),
+                their_astronomical_dusk,
+                "Astronomical dusk",
+                result.lat,
                 result,
-                index
+                index,
+                TimeType::Astronomical,
+            );
+            compare_times(
+                get_event_time(&mut calc, AstronomicalCalculator::get_civil_dawn),
+                their_civil_dawn,
+                "Civil dawn",
+                result.lat,
+                result,
+                index,
+                TimeType::Civil,
+            );
+            compare_times(
+                get_event_time(&mut calc, AstronomicalCalculator::get_nautical_dawn),
+                their_nautical_dawn,
+                "Nautical dawn",
+                result.lat,
+                result,
+                index,
+                TimeType::Nautical,
+            );
+            compare_times(
+                get_event_time(&mut calc, AstronomicalCalculator::get_civil_dusk),
+                their_civil_dusk,
+                "Civil dusk",
+                result.lat,
+                result,
+                index,
+                TimeType::Civil,
+            );
+            compare_times(
+                get_event_time(&mut calc, AstronomicalCalculator::get_nautical_dusk),
+                their_nautical_dusk,
+                "Nautical dusk",
+                result.lat,
+                result,
+                index,
+                TimeType::Nautical,
             );
         }
     }
@@ -1522,25 +1667,63 @@ fn test_geonames_csv_transit() {
             .map(|result| result.timestamp().map(|ts| tz_ts_to_dt(ts as f64, tz)))
             .ok()
             .flatten();
-        if let Some(sunrise) = sunrise {
-            assert!(
-                sunrise < transit,
-                "Sunrise should be before transit. Sunrise: {}, Transit: {}. Record: {:?} Index: {}",
+        let astronomical_dawn = calc
+            .get_astronomical_dawn()
+            .map(|result| result.timestamp().map(|ts| tz_ts_to_dt(ts as f64, tz)))
+            .ok()
+            .flatten();
+        let nautical_dawn = calc
+            .get_nautical_dawn()
+            .map(|result| result.timestamp().map(|ts| tz_ts_to_dt(ts as f64, tz)))
+            .ok()
+            .flatten();
+        let civil_dawn = calc
+            .get_civil_dawn()
+            .map(|result| result.timestamp().map(|ts| tz_ts_to_dt(ts as f64, tz)))
+            .ok()
+            .flatten();
+        let civil_dusk = calc
+            .get_civil_dusk()
+            .map(|result| result.timestamp().map(|ts| tz_ts_to_dt(ts as f64, tz)))
+            .ok()
+            .flatten();
+        let nautical_dusk = calc
+            .get_nautical_dusk()
+            .map(|result| result.timestamp().map(|ts| tz_ts_to_dt(ts as f64, tz)))
+            .ok()
+            .flatten();
+        let astronomical_dusk = calc
+            .get_astronomical_dusk()
+            .map(|result| result.timestamp().map(|ts| tz_ts_to_dt(ts as f64, tz)))
+            .ok()
+            .flatten();
+
+        assert_events_in_order(
+            &[
+                astronomical_dawn,
+                nautical_dawn,
+                civil_dawn,
                 sunrise,
-                transit,
-                row,
-                index
-            );
-        }
-        if let Some(sunset) = sunset {
-            assert!(
-                sunset > transit,
-                "Sunset should be after transit. Sunset: {}, Transit: {}. Record: {:?} Index: {}",
+                Some(transit),
                 sunset,
-                transit,
-                row,
-                index
-            );
-        }
+                civil_dusk,
+                nautical_dusk,
+                astronomical_dusk,
+            ],
+            &[
+                "Astronomical dawn",
+                "Nautical dawn",
+                "Civil dawn",
+                "Sunrise",
+                "Transit",
+                "Sunset",
+                "Civil dusk",
+                "Nautical dusk",
+                "Astronomical dusk",
+            ],
+            "Solar events",
+            &row,
+            index,
+        );
     }
 }

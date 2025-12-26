@@ -10,7 +10,9 @@ from skyfield.api import wgs84, load
 from skyfield.toposlib import GeographicPosition
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
+from timezonefinder import TimezoneFinder
 
+tf = TimezoneFinder()
 fake = Faker()
 
 
@@ -26,6 +28,12 @@ class Result(BaseModel):
     midday: float
     sunrise: float | None
     sunset: float | None
+    civil_dawn: float | None
+    civil_dusk: float | None
+    nautical_dawn: float | None
+    nautical_dusk: float | None
+    astronomical_dawn: float | None
+    astronomical_dusk: float | None
     transit: float
     now: str
 
@@ -118,6 +126,38 @@ def process_city(city_data: dict) -> dict | None:
         transit_dt = today_transit.astimezone(zone)
         sunset_dt = sunset.astimezone(zone) if sunset is not None else None
 
+        f = almanac.dark_twilight_day(eph, location)
+        times, events = almanac.find_discrete(yesterday_transit, today_transit, f)
+
+        def get_dawn_timestamp(event_id):
+            matches = times[events == event_id]
+            dt = matches[-1].astimezone(zone) if len(matches) > 0 else None
+            return dt.timestamp() if dt is not None else None
+
+        astronomical_dawn_dt = get_dawn_timestamp(1)
+        nautical_dawn_dt = get_dawn_timestamp(2)
+        civil_dawn_dt = get_dawn_timestamp(3)
+
+        times, events = almanac.find_discrete(today_transit, tomorrow_transit, f)
+
+        def get_dusk_timestamp(event_id):
+            matches = times[events == event_id]
+            dt = matches[0].astimezone(zone) if len(matches) > 0 else None
+            return dt.timestamp() if dt is not None else None
+
+        # Event IDs: 0=dark, 1=astronomical twilight, 2=nautical twilight, 3=civil twilight, 4=sun up
+        # For dusk (sun going down): transitions TO these states
+        # 4→3 = sunset, 3→2 = civil dusk, 2→1 = nautical dusk, 1→0 = astronomical dusk
+        astronomical_dusk_dt = get_dusk_timestamp(
+            0
+        )  # Transition to dark (from astronomical twilight)
+        nautical_dusk_dt = get_dusk_timestamp(
+            1
+        )  # Transition to astronomical twilight (from nautical twilight)
+        civil_dusk_dt = get_dusk_timestamp(
+            2
+        )  # Transition to nautical twilight (from civil twilight)
+
         return {
             "lat": lat,
             "lon": lon,
@@ -126,6 +166,12 @@ def process_city(city_data: dict) -> dict | None:
             "sunset": sunset_dt.timestamp() if sunset_dt is not None else None,
             "transit": transit_dt.timestamp(),
             "now": now.isoformat(),
+            "civil_dawn": civil_dawn_dt,
+            "nautical_dawn": nautical_dawn_dt,
+            "astronomical_dawn": astronomical_dawn_dt,
+            "astronomical_dusk": astronomical_dusk_dt,
+            "nautical_dusk": nautical_dusk_dt,
+            "civil_dusk": civil_dusk_dt,
         }
     except Exception as e:
         # Log error but don't crash - just skip this city
@@ -153,10 +199,16 @@ if __name__ == "__main__":
 
     # Add some random data to the list
     for _ in range(1000):
+        lat = fake.latitude()
+        lon = fake.longitude()
+        tz = tf.timezone_at(lat=lat, lng=lon)
+        if tz is None:
+            continue
+
         city_dicts.append(
             {
                 "name": fake.city(),
-                "timezone": fake.timezone(),
+                "timezone": tz,
                 "coordinates": f"{fake.latitude()},{fake.longitude()}",
                 "index": len(city_dicts),
             }

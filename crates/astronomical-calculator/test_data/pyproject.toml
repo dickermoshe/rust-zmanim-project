@@ -13,5 +13,6 @@ dependencies = [
     "pyephem>=9.99",
     "pytz>=2025.2",
     "skyfield>=1.53",
+    "timezonefinder>=8.2.0",
     "tqdm>=4.67.1",
 ]

@@ -5721,7 +5721,7 @@ pub unsafe extern "C" fn SolarDay(
         );
     }
     i += 1;
-    dip += SUN_RADIUS + M_PI * 6 as ::core::ffi::c_int as ::core::ffi::c_double / 180.0f64;
+    dip += M_PI * 6 as ::core::ffi::c_int as ::core::ffi::c_double / 180.0f64;
     if SDMASK & _FREESPA_NADAWN != 0 {
         D.status[i as usize] = FindSolZenith(
             tp,

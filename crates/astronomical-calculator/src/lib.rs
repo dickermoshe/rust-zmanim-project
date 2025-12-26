@@ -141,6 +141,8 @@ pub struct AstronomicalCalculator {
     next_solar_midnight: OnceCell<Result<SolarInfo, CalculationError>>,
     sunrise: OnceCell<Result<SolarEventResult, CalculationError>>,
     sunset: OnceCell<Result<SolarEventResult, CalculationError>>,
+    sea_level_sunrise: OnceCell<Result<SolarEventResult, CalculationError>>,
+    sea_level_sunset: OnceCell<Result<SolarEventResult, CalculationError>>,
     civil_dawn: OnceCell<Result<SolarEventResult, CalculationError>>,
     civil_dusk: OnceCell<Result<SolarEventResult, CalculationError>>,
     nautical_dawn: OnceCell<Result<SolarEventResult, CalculationError>>,
@@ -158,7 +160,7 @@ struct SolarInfo {
 /// Result of a solar event calculation (sunrise, sunset, twilight, etc.)
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum SolarEventResult {
-    /// Event occurs at the given timestamp
+    /// Event occurs at the given timestamp in seconds since the Unix epoch
     Occurs(i64),
     /// Sun is always above the threshold (e.g., midnight sun)
     AllDay,
@@ -315,6 +317,8 @@ impl AstronomicalCalculator {
             next_solar_midnight: OnceCell::new(),
             sunrise: OnceCell::new(),
             sunset: OnceCell::new(),
+            sea_level_sunrise: OnceCell::new(),
+            sea_level_sunset: OnceCell::new(),
             civil_dawn: OnceCell::new(),
             civil_dusk: OnceCell::new(),
             nautical_dawn: OnceCell::new(),
@@ -641,6 +645,134 @@ impl AstronomicalCalculator {
         result
     }
 
+    /// Get sunrise time offset by degrees below the horizon.
+    ///
+    /// Calculates the time when the sun reaches a specific angle below the horizon before sunrise.
+    /// This is useful for calculating custom twilight events or dawn times.
+    ///
+    /// # Arguments
+    ///
+    /// * `degrees` - The number of degrees below the horizon (e.g., 6.0 for civil dawn, 12.0 for nautical dawn, 18.0 for astronomical dawn)
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing a [`SolarEventResult`]:
+    /// - `Occurs(timestamp)`: The event occurs at the given Unix timestamp
+    /// - `AllDay`: Sun is always above the threshold
+    /// - `AllNight`: Sun never reaches the threshold
+    ///
+    /// # Note
+    ///
+    /// This function does not cache results. For better performance when calling multiple times,
+    /// use the specific methods like `get_civil_dawn()`, `get_nautical_dawn()`, etc.
+    pub fn get_sunrise_offset_by_degrees(&mut self, degrees: f64) -> Result<SolarEventResult, CalculationError> {
+        let prev_midnight = self.get_prev_solar_midnight()?;
+        let transit = self.get_solar_transit()?;
+
+        let z1 = self
+            ._get_prev_solar_midnight()
+            .map(|i| i.position.zenith)
+            .unwrap_or(PI / 2.0);
+        let z2 = self._get_solar_transit()?.position.zenith;
+
+        let dip = self.compute_dip();
+        let target_zenith = dip + PI / 2.0 + PI * degrees / 180.0;
+
+        self.find_solar_event(prev_midnight, transit, z1, z2, target_zenith)
+    }
+
+    /// Get sunset time offset by degrees below the horizon.
+    ///
+    /// Calculates the time when the sun reaches a specific angle below the horizon after sunset.
+    /// This is useful for calculating custom twilight events or dusk times.
+    ///
+    /// # Arguments
+    ///
+    /// * `degrees` - The number of degrees below the horizon (e.g., 6.0 for civil dusk, 12.0 for nautical dusk, 18.0 for astronomical dusk)
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing a [`SolarEventResult`]:
+    /// - `Occurs(timestamp)`: The event occurs at the given Unix timestamp
+    /// - `AllDay`: Sun is always above the threshold
+    /// - `AllNight`: Sun never reaches the threshold
+    ///
+    ///
+    /// # Note
+    ///
+    /// This function does not cache results. For better performance when calling multiple times,
+    /// use the specific methods like `get_civil_dusk()`, `get_nautical_dusk()`, etc.
+    pub fn get_sunset_offset_by_degrees(&mut self, degrees: f64) -> Result<SolarEventResult, CalculationError> {
+        let transit = self.get_solar_transit()?;
+        let next_midnight = self.get_next_solar_midnight()?;
+
+        let z1 = self._get_solar_transit()?.position.zenith;
+        let z2 = self._get_next_solar_midnight()?.position.zenith;
+
+        let dip = self.compute_dip();
+        let target_zenith = dip + PI / 2.0 + PI * degrees / 180.0;
+
+        self.find_solar_event(transit, next_midnight, z1, z2, target_zenith)
+    }
+
+    /// Get sea-level sunrise time.
+    ///
+    /// Calculates sunrise at sea level (elevation = 0 meters), without elevation adjustment.
+    /// This is important for twilight calculations, as the level of light during twilight
+    /// is not affected by elevation. Sea-level sunrise forms the base for dawn calculations
+    /// that are calculated as a dip below the horizon before sunrise.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing a [`SolarEventResult`]:
+    /// - `Occurs(timestamp)`: Sea-level sunrise occurs at the given Unix timestamp
+    /// - `AllDay`: Sun never sets (midnight sun / polar day)
+    /// - `AllNight`: Sun never rises (polar night)
+    ///
+    /// # See Also
+    ///
+    /// - [`get_sunrise()`](Self::get_sunrise) - Elevation-adjusted sunrise
+    pub fn get_sea_level_sunrise(&mut self) -> Result<SolarEventResult, CalculationError> {
+        if let Some(r) = self.sea_level_sunrise.get() {
+            return *r;
+        }
+
+        // Create a temporary calculator with elevation=0
+        let mut sea_level_calc = self.with_elevation(0.0);
+        let result = sea_level_calc.get_sunrise();
+        let _ = self.sea_level_sunrise.set(result);
+        result
+    }
+
+    /// Get sea-level sunset time.
+    ///
+    /// Calculates sunset at sea level (elevation = 0 meters), without elevation adjustment.
+    /// This is important for twilight calculations, as the level of light during twilight
+    /// is not affected by elevation. Sea-level sunset forms the base for dusk calculations
+    /// that are calculated as a dip below the horizon after sunset.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing a [`SolarEventResult`]:
+    /// - `Occurs(timestamp)`: Sea-level sunset occurs at the given Unix timestamp
+    /// - `AllDay`: Sun never sets (midnight sun / polar day)
+    /// - `AllNight`: Sun never rises (polar night)
+    ///
+    /// # See Also
+    ///
+    /// - [`get_sunset()`](Self::get_sunset) - Elevation-adjusted sunset
+    pub fn get_sea_level_sunset(&mut self) -> Result<SolarEventResult, CalculationError> {
+        if let Some(r) = self.sea_level_sunset.get() {
+            return *r;
+        }
+
+        // Create a temporary calculator with elevation=0
+        let mut sea_level_calc = self.with_elevation(0.0);
+        let result = sea_level_calc.get_sunset();
+        let _ = self.sea_level_sunset.set(result);
+        result
+    }
+
     /// Get civil dawn time (sun 6° below horizon)
     /// Uses zenith angle: 90° + 6° + geometric dip
     /// Returns the time of civil dawn (morning civil twilight).
@@ -659,17 +791,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let prev_midnight = self.get_prev_solar_midnight()?;
-        let transit = self.get_solar_transit()?;
-
-        let z1 = self._get_prev_solar_midnight()?.position.zenith;
-        let z2 = self._get_solar_transit()?.position.zenith;
-
-        let dip = self.compute_dip();
-        // Civil twilight: 6° below horizon
-        let target_zenith = dip + PI / 2.0 + PI * 6.0 / 180.0;
-
-        let result = self.find_solar_event(prev_midnight, transit, z1, z2, target_zenith);
+        let result = self.get_sunrise_offset_by_degrees(6.0);
         let _ = self.civil_dawn.set(result);
         result
     }
@@ -692,16 +814,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let transit = self.get_solar_transit()?;
-        let next_midnight = self.get_next_solar_midnight()?;
-
-        let z1 = self._get_solar_transit()?.position.zenith;
-        let z2 = self._get_next_solar_midnight()?.position.zenith;
-
-        let dip = self.compute_dip();
-        let target_zenith = dip + PI / 2.0 + PI * 6.0 / 180.0;
-
-        let result = self.find_solar_event(transit, next_midnight, z1, z2, target_zenith);
+        let result = self.get_sunset_offset_by_degrees(6.0);
         let _ = self.civil_dusk.set(result);
         result
     }
@@ -724,17 +837,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let prev_midnight = self.get_prev_solar_midnight()?;
-        let transit = self.get_solar_transit()?;
-
-        let z1 = self._get_prev_solar_midnight()?.position.zenith;
-        let z2 = self._get_solar_transit()?.position.zenith;
-
-        let dip = self.compute_dip();
-        // Nautical twilight: 12° below horizon + sun radius
-        let target_zenith = dip + PI / 2.0 + PI * 12.0 / 180.0 + SUN_RADIUS;
-
-        let result = self.find_solar_event(prev_midnight, transit, z1, z2, target_zenith);
+        let result = self.get_sunrise_offset_by_degrees(12.0);
         let _ = self.nautical_dawn.set(result);
         result
     }
@@ -757,16 +860,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let transit = self.get_solar_transit()?;
-        let next_midnight = self.get_next_solar_midnight()?;
-
-        let z1 = self._get_solar_transit()?.position.zenith;
-        let z2 = self._get_next_solar_midnight()?.position.zenith;
-
-        let dip = self.compute_dip();
-        let target_zenith = dip + PI / 2.0 + PI * 12.0 / 180.0 + SUN_RADIUS;
-
-        let result = self.find_solar_event(transit, next_midnight, z1, z2, target_zenith);
+        let result = self.get_sunset_offset_by_degrees(12.0);
         let _ = self.nautical_dusk.set(result);
         result
     }
@@ -790,20 +884,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let prev_midnight = self.get_prev_solar_midnight()?;
-        let transit = self.get_solar_transit()?;
-
-        let z1 = self
-            ._get_prev_solar_midnight()
-            .map(|i| i.position.zenith)
-            .unwrap_or(PI / 2.0);
-        let z2 = self._get_solar_transit()?.position.zenith;
-
-        let dip = self.compute_dip();
-        // Astronomical twilight: 18° below horizon + sun radius
-        let target_zenith = dip + PI / 2.0 + PI * 18.0 / 180.0 + SUN_RADIUS;
-
-        let result = self.find_solar_event(prev_midnight, transit, z1, z2, target_zenith);
+        let result = self.get_sunrise_offset_by_degrees(18.0);
         let _ = self.astronomical_dawn.set(result);
         result
     }
@@ -827,19 +908,42 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let transit = self.get_solar_transit()?;
-        let next_midnight = self.get_next_solar_midnight()?;
-
-        let z1 = self._get_solar_transit()?.position.zenith;
-        let z2 = self._get_next_solar_midnight()?.position.zenith;
-
-        let dip = self.compute_dip();
-        let target_zenith = dip + PI / 2.0 + PI * 18.0 / 180.0 + SUN_RADIUS;
-
-        let result = self.find_solar_event(transit, next_midnight, z1, z2, target_zenith);
+        let result = self.get_sunset_offset_by_degrees(18.0);
         let _ = self.astronomical_dusk.set(result);
         result
     }
+    /// Helper function for creating a copy of this `AstronomicalCalculator` with a new elevation
+    fn with_elevation(&self, elevation: f64) -> Self {
+        Self {
+            ut: self.ut,
+            delta_t: self.delta_t,
+            delta_ut1: self.delta_ut1,
+            lon_radians: self.lon_radians,
+            lat_radians: self.lat_radians,
+            elevation,
+            temperature: self.temperature,
+            pressure: self.pressure,
+            gdip: None, // Reset gdip when changing elevation
+            refraction: self.refraction,
+            julian_date: OnceCell::new(),
+            geocentric_position: OnceCell::new(),
+            solar_position: OnceCell::new(),
+            solar_transit: OnceCell::new(),
+            prev_solar_midnight: OnceCell::new(),
+            next_solar_midnight: OnceCell::new(),
+            sunrise: OnceCell::new(),
+            sunset: OnceCell::new(),
+            sea_level_sunrise: OnceCell::new(),
+            sea_level_sunset: OnceCell::new(),
+            civil_dawn: OnceCell::new(),
+            civil_dusk: OnceCell::new(),
+            nautical_dawn: OnceCell::new(),
+            nautical_dusk: OnceCell::new(),
+            astronomical_dawn: OnceCell::new(),
+            astronomical_dusk: OnceCell::new(),
+        }
+    }
+
     /// Helper function for creating a copy of this `AstronomicalCalculator` with a new time
     fn with_time(&self, time: NaiveDateTime) -> Self {
         Self {
@@ -861,6 +965,8 @@ impl AstronomicalCalculator {
             next_solar_midnight: OnceCell::new(),
             sunrise: OnceCell::new(),
             sunset: OnceCell::new(),
+            sea_level_sunrise: OnceCell::new(),
+            sea_level_sunset: OnceCell::new(),
             civil_dawn: OnceCell::new(),
             civil_dusk: OnceCell::new(),
             nautical_dawn: OnceCell::new(),
