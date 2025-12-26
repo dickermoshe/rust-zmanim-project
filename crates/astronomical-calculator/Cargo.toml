@@ -42,7 +42,6 @@ chrono-tz = "0.10.4"
 unwrap_used = "deny"
 expect_used = "deny"
 panic = "deny"
-index_overflow = "deny"
 excessive_precision = "allow"
 
 [lints.rust]

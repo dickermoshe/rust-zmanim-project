@@ -6,6 +6,17 @@
 //! on Earth. It accounts for atmospheric refraction, parallax, nutation, aberration, and other astronomical
 //! phenomena that affect solar position calculations.
 //!
+//! This is a Rust port of the [freespa](https://github.com/IEK-5/freespa) library, based on VSOP87 theory.
+//! The library is `no_std` compatible, making it suitable for embedded systems and constrained environments.
+//!
+//! ## Key Types
+//!
+//! - [`AstronomicalCalculator`] - Main calculator struct for solar position and event calculations
+//! - [`SolarPosition`] - Represents the Sun's position with zenith and azimuth angles
+//! - [`SolarEventResult`] - Result type for sunrise/sunset and twilight calculations
+//! - [`Refraction`] - Atmospheric refraction model selection
+//! - [`get_delta_t`] - Function to calculate ΔT (Terrestrial Time - Universal Time)
+//!
 //! ## Basic Usage
 //!
 //! ```
@@ -16,13 +27,13 @@
 //! let dt = NaiveDateTime::parse_from_str("2024-01-15 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
 //!
 //! // Create calculator for New York City
-//! // Note: angles must be in radians
+//! // Note: longitude and latitude are in degrees
 //! let mut calc = AstronomicalCalculator::new(
 //!     dt,
 //!     Some(69.0),        // delta_t: TT-UT in seconds (≈69s for 2024)
 //!     0.0,               // delta_ut1: UT1-UTC in seconds
-//!     -74.0_f64.to_radians(),  // longitude (negative = West)
-//!     40.7_f64.to_radians(),   // latitude (positive = North)
+//!     -74.0,             // longitude in degrees (negative = West)
+//!     40.7,              // latitude in degrees (positive = North)
 //!     0.0,               // elevation in meters
 //!     15.0,              // temperature in Celsius
 //!     1013.0,            // pressure in millibars
@@ -593,8 +604,8 @@ impl AstronomicalCalculator {
     ///
     /// A `Result` containing a [`SolarEventResult`]:
     /// - `Occurs(timestamp)`: Sunrise occurs at the given Unix timestamp
-    /// - `AlwaysAbove`: Sun never sets (midnight sun / polar day)
-    /// - `AlwaysBelow`: Sun never rises (polar night)
+    /// - `AllDay`: Sun never sets (midnight sun / polar day)
+    /// - `AllNight`: Sun never rises (polar night)
     pub fn get_sunrise(&mut self) -> Result<SolarEventResult, CalculationError> {
         if let Some(r) = self.sunrise.get() {
             return *r;
@@ -623,8 +634,8 @@ impl AstronomicalCalculator {
     ///
     /// A `Result` containing a [`SolarEventResult`]:
     /// - `Occurs(timestamp)`: Sunset occurs at the given Unix timestamp
-    /// - `AlwaysAbove`: Sun never sets (midnight sun / polar day)
-    /// - `AlwaysBelow`: Sun never rises (polar night)
+    /// - `AllDay`: Sun never sets (midnight sun / polar day)
+    /// - `AllNight`: Sun never rises (polar night)
     pub fn get_sunset(&mut self) -> Result<SolarEventResult, CalculationError> {
         if let Some(r) = self.sunset.get() {
             return *r;
@@ -773,8 +784,9 @@ impl AstronomicalCalculator {
         result
     }
 
-    /// Get civil dawn time (sun 6° below horizon)
-    /// Uses zenith angle: 90° + 6° + geometric dip
+    /// Get civil dawn time (sun 6° below horizon).
+    ///
+    /// Uses zenith angle: 90° + 6° + geometric dip.
     /// Returns the time of civil dawn (morning civil twilight).
     ///
     /// Civil dawn is when the Sun is 6° below the horizon in the morning.
@@ -784,8 +796,8 @@ impl AstronomicalCalculator {
     ///
     /// A `Result` containing a [`SolarEventResult`]:
     /// - `Occurs(timestamp)`: Civil dawn occurs at the given Unix timestamp
-    /// - `AlwaysAbove`: Sun is always above civil twilight threshold
-    /// - `AlwaysBelow`: Sun never reaches civil twilight threshold
+    /// - `AllDay`: Sun is always above civil twilight threshold
+    /// - `AllNight`: Sun never reaches civil twilight threshold
     pub fn get_civil_dawn(&mut self) -> Result<SolarEventResult, CalculationError> {
         if let Some(r) = self.civil_dawn.get() {
             return *r;
@@ -796,8 +808,9 @@ impl AstronomicalCalculator {
         result
     }
 
-    /// Get civil dusk time (sun 6° below horizon)
-    /// Uses zenith angle: 90° + 6° + geometric dip
+    /// Get civil dusk time (sun 6° below horizon).
+    ///
+    /// Uses zenith angle: 90° + 6° + geometric dip.
     /// Returns the time of civil dusk (evening civil twilight).
     ///
     /// Civil dusk is when the Sun is 6° below the horizon in the evening.
@@ -807,8 +820,8 @@ impl AstronomicalCalculator {
     ///
     /// A `Result` containing a [`SolarEventResult`]:
     /// - `Occurs(timestamp)`: Civil dusk occurs at the given Unix timestamp
-    /// - `AlwaysAbove`: Sun is always above civil twilight threshold
-    /// - `AlwaysBelow`: Sun never reaches civil twilight threshold
+    /// - `AllDay`: Sun is always above civil twilight threshold
+    /// - `AllNight`: Sun never reaches civil twilight threshold
     pub fn get_civil_dusk(&mut self) -> Result<SolarEventResult, CalculationError> {
         if let Some(r) = self.civil_dusk.get() {
             return *r;
@@ -819,8 +832,9 @@ impl AstronomicalCalculator {
         result
     }
 
-    /// Get nautical dawn time (sun 12° below horizon)
-    /// Uses zenith angle: 90° + 12° + sun radius + geometric dip
+    /// Get nautical dawn time (sun 12° below horizon).
+    ///
+    /// Uses zenith angle: 90° + 12° + geometric dip.
     /// Returns the time of nautical dawn (morning nautical twilight).
     ///
     /// Nautical dawn is when the Sun is 12° below the horizon in the morning.
@@ -830,8 +844,8 @@ impl AstronomicalCalculator {
     ///
     /// A `Result` containing a [`SolarEventResult`]:
     /// - `Occurs(timestamp)`: Nautical dawn occurs at the given Unix timestamp
-    /// - `AlwaysAbove`: Sun is always above nautical twilight threshold
-    /// - `AlwaysBelow`: Sun never reaches nautical twilight threshold
+    /// - `AllDay`: Sun is always above nautical twilight threshold
+    /// - `AllNight`: Sun never reaches nautical twilight threshold
     pub fn get_nautical_dawn(&mut self) -> Result<SolarEventResult, CalculationError> {
         if let Some(r) = self.nautical_dawn.get() {
             return *r;
@@ -842,8 +856,9 @@ impl AstronomicalCalculator {
         result
     }
 
-    /// Get nautical dusk time (sun 12° below horizon)
-    /// Uses zenith angle: 90° + 12° + sun radius + geometric dip
+    /// Get nautical dusk time (sun 12° below horizon).
+    ///
+    /// Uses zenith angle: 90° + 12° + geometric dip.
     /// Returns the time of nautical dusk (evening nautical twilight).
     ///
     /// Nautical dusk is when the Sun is 12° below the horizon in the evening.
@@ -853,8 +868,8 @@ impl AstronomicalCalculator {
     ///
     /// A `Result` containing a [`SolarEventResult`]:
     /// - `Occurs(timestamp)`: Nautical dusk occurs at the given Unix timestamp
-    /// - `AlwaysAbove`: Sun is always above nautical twilight threshold
-    /// - `AlwaysBelow`: Sun never reaches nautical twilight threshold
+    /// - `AllDay`: Sun is always above nautical twilight threshold
+    /// - `AllNight`: Sun never reaches nautical twilight threshold
     pub fn get_nautical_dusk(&mut self) -> Result<SolarEventResult, CalculationError> {
         if let Some(r) = self.nautical_dusk.get() {
             return *r;
@@ -865,8 +880,9 @@ impl AstronomicalCalculator {
         result
     }
 
-    /// Get astronomical dawn time (sun 18° below horizon)
-    /// Uses zenith angle: 90° + 18° + sun radius + geometric dip
+    /// Get astronomical dawn time (sun 18° below horizon).
+    ///
+    /// Uses zenith angle: 90° + 18° + geometric dip.
     /// Returns the time of astronomical dawn (morning astronomical twilight).
     ///
     /// Astronomical dawn is when the Sun is 18° below the horizon in the morning.
@@ -877,8 +893,8 @@ impl AstronomicalCalculator {
     ///
     /// A `Result` containing a [`SolarEventResult`]:
     /// - `Occurs(timestamp)`: Astronomical dawn occurs at the given Unix timestamp
-    /// - `AlwaysAbove`: Sun is always above astronomical twilight threshold
-    /// - `AlwaysBelow`: Sun never reaches astronomical twilight threshold (true astronomical night)
+    /// - `AllDay`: Sun is always above astronomical twilight threshold
+    /// - `AllNight`: Sun never reaches astronomical twilight threshold (true astronomical night)
     pub fn get_astronomical_dawn(&mut self) -> Result<SolarEventResult, CalculationError> {
         if let Some(r) = self.astronomical_dawn.get() {
             return *r;
@@ -889,8 +905,9 @@ impl AstronomicalCalculator {
         result
     }
 
-    /// Get astronomical dusk time (sun 18° below horizon)
-    /// Uses zenith angle: 90° + 18° + sun radius + geometric dip
+    /// Get astronomical dusk time (sun 18° below horizon).
+    ///
+    /// Uses zenith angle: 90° + 18° + geometric dip.
     /// Returns the time of astronomical dusk (evening astronomical twilight).
     ///
     /// Astronomical dusk is when the Sun is 18° below the horizon in the evening.
@@ -901,8 +918,8 @@ impl AstronomicalCalculator {
     ///
     /// A `Result` containing a [`SolarEventResult`]:
     /// - `Occurs(timestamp)`: Astronomical dusk occurs at the given Unix timestamp
-    /// - `AlwaysAbove`: Sun is always above astronomical twilight threshold
-    /// - `AlwaysBelow`: Sun never reaches astronomical twilight threshold (true astronomical night)
+    /// - `AllDay`: Sun is always above astronomical twilight threshold
+    /// - `AllNight`: Sun never reaches astronomical twilight threshold (true astronomical night)
     pub fn get_astronomical_dusk(&mut self) -> Result<SolarEventResult, CalculationError> {
         if let Some(r) = self.astronomical_dusk.get() {
             return *r;
@@ -1493,7 +1510,6 @@ pub(crate) fn find_solar_time(
     let mut datetime = true_solar_time(unix_to_datetime(timestamp)?, delta_t, delta_ut1, longitude)?;
 
     // Calculate initial time offset
-    // Note: 24.4 is intentional (from original C code), not 24.0
     let mut time_delta = (hour - datetime.hour() as i64) as f64 / 24.0;
     time_delta += (min - datetime.minute() as i64) as f64 / 1440.0;
     time_delta += (sec - datetime.second() as i64) as f64 / 86400.0;
@@ -1519,7 +1535,6 @@ pub(crate) fn find_solar_time(
         jd_new.jd += (longitude + eot) / PI / 2.0;
         datetime = julian_date_to_datetime(jd_new.jd)?;
 
-        // Note: 24.4 is intentional (from original C code), not 24.0
         time_delta = (hour - datetime.hour() as i64) as f64 / 24.0;
         time_delta += (min - datetime.minute() as i64) as f64 / 1440.0;
         time_delta += (sec - datetime.second() as i64) as f64 / 86400.0;
