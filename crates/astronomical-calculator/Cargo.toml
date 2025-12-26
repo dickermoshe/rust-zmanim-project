@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["astronomy", "solar", "sun", "sunrise", "sunset"]
 categories = ["science", "date-and-time"]
 rust-version = "1.70"
-exclude = ["./test_data/*"]
+exclude = ["test_data/"]
 
 
 [dependencies]
