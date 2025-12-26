@@ -1115,6 +1115,7 @@ pub struct SolarPosition {
 /// - `ApSolposBennet`: Standard Bennett refraction model, suitable for most applications
 /// - `ApSolposBennetNA`: Bennett refraction model optimized for accuracy and matches closer with The Nautical Almanac.
 ///   Recommended for precision astronomical calculations.
+/// - `NoRefraction`: No refraction
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Refraction {
     /// Bennett refraction model (suitable for most applications)
