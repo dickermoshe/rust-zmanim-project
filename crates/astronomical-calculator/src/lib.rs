@@ -24,7 +24,7 @@
 //! use chrono::NaiveDateTime;
 //!
 //! // Create a datetime (UTC)
-//! let dt = NaiveDateTime::parse_from_str("2024-01-15 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+//! let dt = NaiveDateTime::parse_from_str("2024-01-15 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap().and_utc();
 //!
 //! // Create calculator for New York City
 //! // Note: longitude and latitude are in degrees
@@ -65,13 +65,11 @@ mod tests;
 #[cfg(test)]
 mod unsafe_spa;
 
+use chrono::DateTime;
 use chrono::Datelike;
-use chrono::NaiveDateTime;
 use chrono::TimeZone;
 use chrono::Timelike;
 use chrono::Utc;
-use julian_day_converter::julian_day_to_unix_millis;
-use julian_day_converter::unix_millis_to_julian_day;
 
 use core::cell::OnceCell;
 use core::f64::consts::PI;
@@ -108,13 +106,30 @@ const Z_MAXITER: i64 = 100; // Max iterations for zenith finding
 /// This struct computes solar positions, sunrise/sunset times, twilight times, and solar transit times
 /// for a specific location and datetime. Results are cached for efficient repeated access.
 ///
+/// ## Event Determination Algorithm
+///
+/// **Important:** For correct results, the input time should be close to local noon for the given location.
+/// Using times far from noon may result in events being calculated for the wrong solar day.
+///
+/// When calculating solar events (sunrise, sunset, twilight) for a given input time, the library uses
+/// the following algorithm to determine which day's events to return:
+///
+/// 1. Find the closest solar transit (solar noon) to the input time
+/// 2. Get the sunset that immediately follows that transit
+/// 3. Get the sunrise that precedes that transit
+///
+/// This ensures that events are calculated for the appropriate solar day relative to the input time.
+/// In polar regions where multiple transits may occur in a 24-hour period (or none at all), the presence
+/// of additional transits before the closest one indicates polar day/night conditions.
+///
 /// # Example
 ///
 /// ```
 /// use astronomical_calculator::{AstronomicalCalculator, Refraction};
 /// use chrono::NaiveDateTime;
 ///
-/// let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+/// // For correct solar event calculations, use a time close to local noon
+/// let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap().and_utc();
 ///
 /// let mut calc = AstronomicalCalculator::new(
 ///     dt,
@@ -134,7 +149,7 @@ const Z_MAXITER: i64 = 100; // Max iterations for zenith finding
 /// assert!(pos.zenith >= 0.0 && pos.zenith <= std::f64::consts::PI);
 /// ```
 pub struct AstronomicalCalculator {
-    ut: NaiveDateTime,
+    ut: DateTime<Utc>,
     delta_t: Option<f64>,
     delta_ut1: f64,
     lon_radians: f64,
@@ -193,7 +208,7 @@ impl SolarEventResult {
     /// use astronomical_calculator::{AstronomicalCalculator, Refraction};
     /// use chrono::NaiveDateTime;
     ///
-    /// let datetime = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+    /// let datetime = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap().and_utc();
     /// let mut calc = AstronomicalCalculator::new(
     ///     datetime, None, 0.0, 0.0, 0.0, 0.0, 20.0, 1013.25, None, Refraction::ApSolposBennetNA
     /// ).unwrap();
@@ -215,9 +230,13 @@ impl AstronomicalCalculator {
     ///
     /// All input parameters are validated. If any parameter is out of range, an error is returned.
     ///
+    /// **Important:** For correct solar event calculations (sunrise, sunset, twilight), the input time
+    /// should be close to local noon for the given location. Using times far from noon may result in
+    /// events being calculated for the wrong solar day.
+    ///
     /// # Arguments
     ///
-    /// * `ut` - Universal Time as a [`NaiveDateTime`]
+    /// * `ut` - Universal Time as a [`DateTime<Utc>`]
     /// * `delta_t` - ΔT (TT-UT) in seconds. Use `Some(value)` for known ΔT, or `None` to calculate automatically
     /// * `delta_ut1` - ΔUT1 (UT1-UTC) in seconds, typically in range [-0.9, 0.9]. Use 0.0 if unknown
     /// * `lon` - Longitude in degrees (positive East, negative West)
@@ -242,7 +261,8 @@ impl AstronomicalCalculator {
     /// use astronomical_calculator::{AstronomicalCalculator, Refraction, get_delta_t};
     /// use chrono::NaiveDateTime;
     ///
-    /// let dt = NaiveDateTime::parse_from_str("2024-06-21 15:30:00", "%Y-%m-%d %H:%M:%S").unwrap();
+    /// // For correct solar event calculations, use a time close to local noon
+    /// let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap().and_utc();
     ///
     /// // Paris: 48.8566°N, 2.3522°E
     /// let mut calc = AstronomicalCalculator::new(
@@ -260,7 +280,7 @@ impl AstronomicalCalculator {
     /// ```
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        ut: NaiveDateTime,
+        ut: DateTime<Utc>,
         delta_t: Option<f64>,
         delta_ut1: f64,
         lon: f64,
@@ -353,7 +373,7 @@ impl AstronomicalCalculator {
     /// use astronomical_calculator::{AstronomicalCalculator, Refraction};
     /// use chrono::NaiveDateTime;
     ///
-    /// let dt = NaiveDateTime::parse_from_str("2024-01-15 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+    /// let dt = NaiveDateTime::parse_from_str("2024-01-15 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap().and_utc();
     /// let mut calc = AstronomicalCalculator::new(
     ///     dt, Some(69.0), 0.0, 0.0, 0.0, 0.0, 15.0, 1013.0,
     ///     None, Refraction::ApSolposBennetNA
@@ -433,8 +453,8 @@ impl AstronomicalCalculator {
     ///
     /// # Returns
     ///
-    /// A `Result` containing the solar time as a [`NaiveDateTime`], or an error if time conversion fails.
-    pub fn get_solar_time(&mut self) -> Result<NaiveDateTime, CalculationError> {
+    /// A `Result` containing the solar time as a [`DateTime<Utc>`], or an error if time conversion fails.
+    pub fn get_solar_time(&mut self) -> Result<DateTime<Utc>, CalculationError> {
         let e = equation_of_time(*self.get_julian_day(), *self.get_geocentric_position());
         julian_date_to_datetime(self.get_julian_day().jd + (self.lon_radians + e) / PI / 2.0)
     }
@@ -920,7 +940,7 @@ impl AstronomicalCalculator {
     }
 
     /// Helper function for creating a copy of this `AstronomicalCalculator` with a new time
-    fn with_time(&self, time: NaiveDateTime) -> Self {
+    fn with_time(&self, time: DateTime<Utc>) -> Self {
         Self {
             ut: time,
             delta_t: self.delta_t,
@@ -1164,12 +1184,12 @@ impl Refraction {
 /// use astronomical_calculator::get_delta_t;
 /// use chrono::NaiveDateTime;
 ///
-/// let dt = NaiveDateTime::parse_from_str("2024-01-15 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+/// let dt = NaiveDateTime::parse_from_str("2024-01-15 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap().and_utc();
 /// let delta_t = get_delta_t(&dt);
 /// println!("ΔT for 2024: {:.2} seconds", delta_t);
 /// // Output: approximately 69 seconds
 /// ```
-pub fn get_delta_t(ut: &NaiveDateTime) -> f64 {
+pub fn get_delta_t(ut: &DateTime<Utc>) -> f64 {
     let mut imin: i64 = 0;
     let mut imax: i64 = 1244;
     let dyear = ut.year() as f64 + ut.month() as f64 / 12.0 + (ut.day() as f64 - 1.0) / 365.0;
@@ -1305,17 +1325,16 @@ fn heliocentric_radius(jd: &JulianDate) -> f64 {
     rad / 1.0e8
 }
 
-/// Convert Julian date to NaiveDateTime
-fn julian_date_to_datetime(julian_day: f64) -> Result<NaiveDateTime, CalculationError> {
-    let unix_millis = julian_day_to_unix_millis(julian_day);
+/// Convert Julian date to DateTime<Utc>
+fn julian_date_to_datetime(julian_day: f64) -> Result<DateTime<Utc>, CalculationError> {
+    let unix_millis = jd_to_timestamp(julian_day);
     Utc.timestamp_millis_opt(unix_millis)
         .single()
-        .map(|dt| dt.naive_utc())
         .ok_or(CalculationError::TimeConversionError)
 }
 
-/// Convert Unix timestamp to NaiveDateTime
-fn unix_to_datetime(timestamp: i64) -> Result<NaiveDateTime, CalculationError> {
+/// Convert Unix timestamp to DateTime<Utc>
+fn unix_to_datetime(timestamp: i64) -> Result<DateTime<Utc>, CalculationError> {
     julian_date_to_datetime((timestamp - ETJD0) as f64 / 86400.0 + JD0)
 }
 
@@ -1405,8 +1424,8 @@ fn apply_refraction(
 // ============================================================================
 
 impl JulianDate {
-    fn new(ut: NaiveDateTime, delta_t: Option<f64>, delta_ut1: f64) -> Self {
-        let jd = unix_millis_to_julian_day((ut.and_utc().timestamp_millis() as f64 + (delta_ut1 * 1000.0)) as i64);
+    fn new(ut: DateTime<Utc>, delta_t: Option<f64>, delta_ut1: f64) -> Self {
+        let jd = timestamp_to_jd((ut.timestamp_millis() as f64 + (delta_ut1 * 1000.0)) as i64);
         let dt = if let Some(delta_t) = delta_t {
             delta_t
         } else {
@@ -1524,8 +1543,8 @@ fn julian_date_to_unix(jd: &JulianDate) -> i64 {
     ((jd.jd - JD0) * 86400.0).round() as i64 + ETJD0
 }
 
-/// Convert NaiveDateTime to Unix timestamp
-fn datetime_to_unix(datetime: NaiveDateTime) -> i64 {
+/// Convert DateTime<Utc> to Unix timestamp
+fn datetime_to_unix(datetime: DateTime<Utc>) -> i64 {
     let jd = JulianDate::new(datetime, None, 0.0);
     ((jd.jd - JD0) * 86400.0).round() as i64 + ETJD0
 }
@@ -1613,11 +1632,11 @@ pub enum CalculationError {
 }
 
 fn true_solar_time(
-    ut: NaiveDateTime,
+    ut: DateTime<Utc>,
     delta_t: Option<f64>,
     delta_ut1: f64,
     lon: f64,
-) -> Result<NaiveDateTime, CalculationError> {
+) -> Result<DateTime<Utc>, CalculationError> {
     let mut jd = JulianDate::new(ut, delta_t, delta_ut1);
     let geocentric_pos = GeoCentricSolPos::new(&jd);
     let eot = equation_of_time(jd, geocentric_pos);
@@ -1625,4 +1644,12 @@ fn true_solar_time(
     // jd.jd = (jd.jd - ETJD0 as f64) / 86400.0f64 + JD0;
     let datetime = julian_date_to_datetime(jd.jd)?;
     Ok(datetime)
+}
+
+pub(crate) fn jd_to_timestamp(jd: f64) -> i64 {
+    ((jd - 2440587.5) * 86400000.0).round() as i64
+}
+
+pub(crate) fn timestamp_to_jd(ms: i64) -> f64 {
+    (ms as f64 / 86400000.0) + 2440587.5
 }

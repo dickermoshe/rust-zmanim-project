@@ -3,7 +3,8 @@
 #![allow(expect_used)]
 
 use chrono::{DateTime, Datelike, TimeZone, Timelike, Utc};
-use julian_day_converter::{julian_day_to_unix_millis, unix_millis_to_julian_day};
+
+use crate::{jd_to_timestamp, timestamp_to_jd};
 
 extern "C" {
     fn acos(__x: ::core::ffi::c_double) -> ::core::ffi::c_double;
@@ -4526,7 +4527,7 @@ pub unsafe extern "C" fn MakeJulianDay(
         JME: 0.,
         E: 0,
     };
-    JD.JD = unix_millis_to_julian_day(((*ut).timestamp as f64 + delta_ut1 * 1000.0) as i64);
+    JD.JD = timestamp_to_jd(((*ut).timestamp as f64 + delta_ut1 * 1000.0) as i64);
     let mut dt: ::core::ffi::c_double = 0.;
     if !delta_t.is_null() {
         dt = *delta_t;
@@ -4553,7 +4554,7 @@ pub unsafe extern "C" fn SetIntLimits(
 }
 #[no_mangle]
 pub unsafe extern "C" fn JDgmtime(mut JD: JulianDay, mut ut: *mut tm) -> *mut tm {
-    let datetime = julian_day_to_unix_millis(JD.JD);
+    let datetime = jd_to_timestamp(JD.JD);
     (*ut).timestamp = datetime;
     ut
 }

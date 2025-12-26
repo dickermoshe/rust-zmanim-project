@@ -10,6 +10,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let elevation = 23.0; // meters above sea level
 
     // Get current date and create noon UTC time for today
+    // IMPORTANT: Input time should be close to local noon for correct solar event calculations.
+    // Using times far from noon may result in events being calculated for the wrong solar day.
     let now_timestamp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_err(|_| "System time is before Unix epoch")?
@@ -28,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create calculator for Lakewood, NJ
     let mut calc = AstronomicalCalculator::new(
-        dt.naive_utc(),
+        dt.to_utc(),
         None,                         // Calculate ΔT automatically
         0.0,                          // ΔUT1 (use 0.0 if unknown)
         longitude,                    // longitude in degrees (negative = West)

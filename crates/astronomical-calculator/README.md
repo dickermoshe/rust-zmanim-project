@@ -67,6 +67,10 @@ match calc.get_sunrise().unwrap() {
 }
 ```
 
+## Input Time Considerations
+
+**Important:** When calculating solar events (sunrise, sunset, twilight), the input time should be close to local noon for the given location. This ensures that events are calculated for the correct solar day. Using times far from noon may result in events being calculated for the wrong day.
+
 ## Installation
 
 Add the library to your `Cargo.toml`:

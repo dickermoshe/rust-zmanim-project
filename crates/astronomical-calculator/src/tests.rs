@@ -23,9 +23,9 @@ use crate::SolarEventResult;
 use proptest::prelude::*;
 use std::*;
 
-fn naive_datetime_to_tm(dt: &NaiveDateTime) -> tm {
+fn naive_datetime_to_tm(dt: &DateTime<Utc>) -> tm {
     tm {
-        timestamp: dt.and_utc().timestamp_millis(),
+        timestamp: dt.timestamp_millis(),
     }
 }
 
@@ -106,7 +106,7 @@ fn compare(
     mut gdip: f64,
     use_explicit_gdip: bool,
 ) -> Result<(), proptest::test_runner::TestCaseError> {
-    let naive_datetime = datetime.naive_utc();
+    let naive_datetime = datetime;
     let delta_t_option = if use_explicit_delta_t { Some(delta_t) } else { None };
     let gdip_option = if use_explicit_gdip { Some(gdip) } else { None };
     let calculator = AstronomicalCalculator::new(
@@ -324,7 +324,9 @@ mod validation_tests {
 
     #[test]
     fn test_year_validation_boundary_min() {
-        let dt = NaiveDateTime::parse_from_str("-2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("-2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result = AstronomicalCalculator::new(
             dt,
             None,
@@ -342,7 +344,9 @@ mod validation_tests {
 
     #[test]
     fn test_year_validation_boundary_max() {
-        let dt = NaiveDateTime::parse_from_str("6000-12-31 23:59:59", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("6000-12-31 23:59:59", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result = AstronomicalCalculator::new(
             dt,
             None,
@@ -360,7 +364,9 @@ mod validation_tests {
 
     #[test]
     fn test_year_validation_below_min() {
-        let dt = NaiveDateTime::parse_from_str("-2001-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("-2001-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result = AstronomicalCalculator::new(
             dt,
             None,
@@ -378,7 +384,9 @@ mod validation_tests {
 
     #[test]
     fn test_year_validation_above_max() {
-        let dt = NaiveDateTime::parse_from_str("6001-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("6001-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result = AstronomicalCalculator::new(
             dt,
             None,
@@ -396,7 +404,9 @@ mod validation_tests {
 
     #[test]
     fn test_delta_t_validation_boundary_min() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result = AstronomicalCalculator::new(
             dt,
             Some(-8000.0),
@@ -414,7 +424,9 @@ mod validation_tests {
 
     #[test]
     fn test_delta_t_validation_boundary_max() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result = AstronomicalCalculator::new(
             dt,
             Some(8000.0),
@@ -432,7 +444,9 @@ mod validation_tests {
 
     #[test]
     fn test_delta_t_validation_below_min() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result = AstronomicalCalculator::new(
             dt,
             Some(-8000.1),
@@ -450,7 +464,9 @@ mod validation_tests {
 
     #[test]
     fn test_delta_t_validation_above_max() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result = AstronomicalCalculator::new(
             dt,
             Some(8000.1),
@@ -468,7 +484,9 @@ mod validation_tests {
 
     #[test]
     fn test_delta_ut1_validation_boundary() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_min = AstronomicalCalculator::new(
             dt,
             None,
@@ -499,7 +517,9 @@ mod validation_tests {
 
     #[test]
     fn test_delta_ut1_validation_out_of_range() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_below = AstronomicalCalculator::new(
             dt,
             None,
@@ -530,7 +550,9 @@ mod validation_tests {
 
     #[test]
     fn test_longitude_validation_boundary() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_min = AstronomicalCalculator::new(
             dt,
             None,
@@ -561,7 +583,9 @@ mod validation_tests {
 
     #[test]
     fn test_longitude_validation_out_of_range() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_below = AstronomicalCalculator::new(
             dt,
             None,
@@ -592,7 +616,9 @@ mod validation_tests {
 
     #[test]
     fn test_latitude_validation_boundary() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_min = AstronomicalCalculator::new(
             dt,
             None,
@@ -623,7 +649,9 @@ mod validation_tests {
 
     #[test]
     fn test_latitude_validation_out_of_range() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_below = AstronomicalCalculator::new(
             dt,
             None,
@@ -654,7 +682,9 @@ mod validation_tests {
 
     #[test]
     fn test_elevation_validation_boundary() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_min = AstronomicalCalculator::new(
             dt,
             None,
@@ -685,7 +715,9 @@ mod validation_tests {
 
     #[test]
     fn test_elevation_validation_out_of_range() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_below = AstronomicalCalculator::new(
             dt,
             None,
@@ -716,7 +748,9 @@ mod validation_tests {
 
     #[test]
     fn test_pressure_validation_boundary() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_min = AstronomicalCalculator::new(
             dt,
             None,
@@ -747,7 +781,9 @@ mod validation_tests {
 
     #[test]
     fn test_pressure_validation_out_of_range() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_zero = AstronomicalCalculator::new(
             dt,
             None,
@@ -778,7 +814,9 @@ mod validation_tests {
 
     #[test]
     fn test_temperature_validation_boundary() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_min = AstronomicalCalculator::new(
             dt,
             None,
@@ -809,7 +847,9 @@ mod validation_tests {
 
     #[test]
     fn test_temperature_validation_out_of_range() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let result_below = AstronomicalCalculator::new(
             dt,
             None,
@@ -840,7 +880,9 @@ mod validation_tests {
 
     #[test]
     fn test_gdip_validation_boundary() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         use core::f64::consts::PI;
         let result_min = AstronomicalCalculator::new(
             dt,
@@ -872,7 +914,9 @@ mod validation_tests {
 
     #[test]
     fn test_gdip_validation_out_of_range() {
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         use core::f64::consts::PI;
         let result_below = AstronomicalCalculator::new(
             dt,
@@ -916,9 +960,11 @@ mod edge_case_tests {
             (-89.0, "2024-06-21 12:00:00"),
             (-89.0, "2024-12-21 12:00:00"),
         ] {
-            let dt = NaiveDateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S").unwrap();
+            let dt = NaiveDateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S")
+                .unwrap()
+                .and_utc();
             let result = compare(
-                dt.and_utc(),
+                dt,
                 0.0,
                 lat,
                 0.0,
@@ -939,7 +985,9 @@ mod edge_case_tests {
             (-89.0, "2024-06-21 12:00:00", SolarEventResult::AllNight),
             (-89.0, "2024-12-21 12:00:00", SolarEventResult::AllDay),
         ] {
-            let dt = NaiveDateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S").unwrap();
+            let dt = NaiveDateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S")
+                .unwrap()
+                .and_utc();
             let mut calc = AstronomicalCalculator::new(
                 dt,
                 None,
@@ -964,7 +1012,9 @@ mod edge_case_tests {
     #[test]
     fn test_equator_sunrise_sunset() {
         // Test at equator - should always have sunrise and sunset
-        let dt = NaiveDateTime::parse_from_str("2024-03-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-03-21 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let mut calc = AstronomicalCalculator::new(
             dt,
             None,
@@ -996,7 +1046,9 @@ mod edge_case_tests {
     #[test]
     fn test_extreme_elevation() {
         // Test with very high elevation (Mount Everest ~8848m)
-        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let mut calc = AstronomicalCalculator::new(
             dt,
             None,
@@ -1021,7 +1073,9 @@ mod edge_case_tests {
     #[test]
     fn test_extreme_temperature() {
         // Test with extreme temperatures
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
 
         // Very cold
         let mut calc_cold = AstronomicalCalculator::new(
@@ -1061,7 +1115,9 @@ mod edge_case_tests {
     #[test]
     fn test_extreme_pressure() {
         // Test with extreme pressures
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
 
         // Low pressure (high altitude)
         let mut calc_low = AstronomicalCalculator::new(
@@ -1101,7 +1157,9 @@ mod edge_case_tests {
     #[test]
     fn test_both_refraction_models() {
         // Test that both refraction models work
-        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
 
         let mut calc_bennet = AstronomicalCalculator::new(
             dt,
@@ -1141,7 +1199,9 @@ mod edge_case_tests {
     #[test]
     fn test_solar_transit_at_equator() {
         // Test solar transit calculation
-        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let mut calc = AstronomicalCalculator::new(
             dt,
             None,
@@ -1165,7 +1225,9 @@ mod edge_case_tests {
     #[test]
     fn test_all_twilight_types() {
         // Test all twilight calculations
-        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let mut calc = AstronomicalCalculator::new(
             dt,
             None,
@@ -1191,7 +1253,9 @@ mod edge_case_tests {
     #[test]
     fn test_solar_event_result_timestamp() {
         // Test SolarEventResult::timestamp() method
-        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let mut calc = AstronomicalCalculator::new(
             dt,
             None,
@@ -1219,14 +1283,18 @@ mod edge_case_tests {
     #[test]
     fn test_get_delta_t_function() {
         // Test get_delta_t function
-        let dt_2024 = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt_2024 = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let delta_t_2024 = crate::get_delta_t(&dt_2024);
         assert!(
             delta_t_2024 > 60.0 && delta_t_2024 < 80.0,
             "Delta_t for 2024 should be around 69 seconds"
         );
 
-        let dt_2000 = NaiveDateTime::parse_from_str("2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt_2000 = NaiveDateTime::parse_from_str("2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let delta_t_2000 = crate::get_delta_t(&dt_2000);
         assert!(
             delta_t_2000 > 60.0 && delta_t_2000 < 70.0,
@@ -1237,7 +1305,9 @@ mod edge_case_tests {
     #[test]
     fn test_julian_day_calculation() {
         // Test Julian day calculation
-        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         println!("{:?}", dt);
         let mut calc = AstronomicalCalculator::new(
             dt,
@@ -1260,7 +1330,9 @@ mod edge_case_tests {
     #[test]
     fn test_solar_time_calculation() {
         // Test solar time calculation
-        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let dt = NaiveDateTime::parse_from_str("2024-06-21 12:00:00", "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_utc();
         let mut calc = AstronomicalCalculator::new(
             dt,
             None,
@@ -1431,7 +1503,7 @@ fn test_suncalc_test_data() {
     let results: SunResults = serde_json::from_str(&data).unwrap();
 
     for (index, result) in results.results.iter().enumerate() {
-        let midday = ts_to_dt(result.midday);
+        let midday = ts_to_dt(result.midday).and_utc();
         let their_transit = ts_to_dt(result.transit);
         let their_sunset = result.sunset.map(ts_to_dt);
         let their_sunrise = result.sunrise.map(ts_to_dt);
@@ -1628,7 +1700,7 @@ fn test_geonames_csv_transit() {
 
         // Create calculator and get transit
         let mut calc = AstronomicalCalculator::new(
-            dt.naive_utc(),
+            dt.to_utc(),
             None,
             0.0,
             lon,
@@ -1641,9 +1713,7 @@ fn test_geonames_csv_transit() {
         )
         .unwrap();
 
-        let transit = tz
-            .timestamp_millis_opt((calc.get_solar_transit().unwrap() as f64 * 1000.0) as i64)
-            .unwrap();
+        let transit = tz_ts_to_dt(calc.get_solar_transit().unwrap() as f64, tz);
 
         let diff = transit - dt;
         let midday_to_transit_diff = diff.num_seconds().abs();
