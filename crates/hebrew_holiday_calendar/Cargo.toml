@@ -2,6 +2,13 @@
 name = "hebrew_holiday_calendar"
 version = "0.1.0"
 edition = "2021"
+description = "A comprehensive Rust library for working with the Hebrew calendar, including holidays, Torah readings (parshiyot), and calendar calculations with no_std support"
+license = "LGPL-2.1"
+repository = "https://github.com/dickermoshe/hebrew_holiday_calendar"
+readme = "README.md"
+keywords = ["hebrew", "calendar", "jewish", "holidays", "torah"]
+categories = ["date-and-time", "no-std"]
+exclude = [".github", "kosher-java", "target"]
 
 [features]
 default = []
@@ -37,7 +44,6 @@ rev = "478273"
 unwrap_used = "warn"
 expect_used = "warn"
 panic = "warn"
-index_overflow = "warn"
 
 
 [lints]
