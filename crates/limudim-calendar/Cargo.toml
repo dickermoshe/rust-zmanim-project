@@ -1,0 +1,36 @@
+[package]
+name = "limudim"
+version = "0.1.0"
+edition = "2021"
+license = "LGPL-2.1"
+readme = "README.md"
+
+[features]
+default = []
+defmt = ["dep:defmt", "hebrew_holiday_calendar/defmt"]
+
+[dependencies]
+defmt = { version = "1.0.1", optional = true }
+hebrew_holiday_calendar = { version = "0.2.0" , default-features = false}
+
+[dependencies.chrono]
+version = "0.4.41"
+default-features = false
+
+[dependencies.num_enum]
+version = "0.7.5"
+default-features = false
+
+[dependencies.icu_calendar]
+version = "2.0.3"
+features = ["unstable"]
+default-features = false
+
+[workspace.lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+
+
+[lints]
+workspace = true
