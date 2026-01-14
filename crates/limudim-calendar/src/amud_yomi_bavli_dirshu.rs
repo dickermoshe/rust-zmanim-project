@@ -219,4 +219,12 @@ mod tests {
         assert_eq!(limud.side, Side::Aleph);
         assert_eq!(limud.tractate, Tractate::Niddah);
     }
+    #[test]
+    fn amud_yomi_bavli_2025_23_9() {
+        let test_date = from_gregorian_date(2025, 2, 3);
+        let limud = AmudYomiBavliDirshu::default().limud(test_date).expect("limud exists");
+        assert_eq!(limud.page, 34);
+        assert_eq!(limud.side, Side::Aleph);
+        assert_eq!(limud.tractate, Tractate::Pesachim);
+    }
 }
