@@ -5,6 +5,7 @@ description = "A comprehensive Rust library for calculating Jewish learning sche
 edition = "2021"
 license = "LGPL-2.1"
 readme = "README.md"
+exclude = ["limudim-wasm"]
 
 [features]
 default = []
