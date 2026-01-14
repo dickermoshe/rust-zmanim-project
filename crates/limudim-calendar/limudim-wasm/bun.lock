@@ -1,0 +1,32 @@
+{
+  "lockfileVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "limudim-wasm",
+      "dependencies": {
+        "@faker-js/faker": "^10.2.0",
+        "@hebcal/core": "^6.0.8",
+        "@hebcal/learning": "^6.6.0",
+      },
+    },
+  },
+  "packages": {
+    "@faker-js/faker": ["@faker-js/faker@10.2.0", "", {}, "sha512-rTXwAsIxpCqzUnZvrxVh3L0QA0NzToqWBLAhV+zDV3MIIwiQhAZHMdPCIaj5n/yADu/tyk12wIPgL6YHGXJP+g=="],
+
+    "@hebcal/core": ["@hebcal/core@6.0.8", "", { "dependencies": { "@hebcal/hdate": "^0.21.1", "@hebcal/noaa": "^0.9.2", "quick-lru": "^7.3.0", "temporal-polyfill": "^0.3.0", "tslib": "^2.8.1" } }, "sha512-UgH1OOD09dcvES5EgeF6VSYqWAIC2fq+EjNsCid9fl2RRlDhO931puRZp4AFCSZ6Mp6iO//XqZ7NfQ4ZUs3LFw=="],
+
+    "@hebcal/hdate": ["@hebcal/hdate@0.21.1", "", {}, "sha512-YeDYuo29OUmAug1B3Jnnkn/s6AZ28V0mCChsi8HdcZKlTVi8VrKQ2Iryo6CKW4d+NkdNuAmnOzOI/bH2DxYckA=="],
+
+    "@hebcal/learning": ["@hebcal/learning@6.6.0", "", { "dependencies": { "@hebcal/core": "^6.0.0", "@hebcal/hdate": "^0.21.0" } }, "sha512-x/rJRWYQXEjD6KO51TqhSibO9NAEwxqqD2tou7TUKrJZyJprp0yWxl8oC7kSC7aZNskieCxWWPvtphEEOQk2CQ=="],
+
+    "@hebcal/noaa": ["@hebcal/noaa@0.9.2", "", { "dependencies": { "temporal-polyfill": "^0.3.0" } }, "sha512-pw6hixqxdgkhaxj/5aQgaBYevLUaerUvEIPNUSKYn2B77NOH4xZQF1A3YZlXel8MzGHyVbtB434uS4QAOMjZWQ=="],
+
+    "quick-lru": ["quick-lru@7.3.0", "", {}, "sha512-k9lSsjl36EJdK7I06v7APZCbyGT2vMTsYSRX1Q2nbYmnkBqgUhRkAuzH08Ciotteu/PLJmIF2+tti7o3C/ts2g=="],
+
+    "temporal-polyfill": ["temporal-polyfill@0.3.0", "", { "dependencies": { "temporal-spec": "0.3.0" } }, "sha512-qNsTkX9K8hi+FHDfHmf22e/OGuXmfBm9RqNismxBrnSmZVJKegQ+HYYXT+R7Ha8F/YSm2Y34vmzD4cxMu2u95g=="],
+
+    "temporal-spec": ["temporal-spec@0.3.0", "", {}, "sha512-n+noVpIqz4hYgFSMOSiINNOUOMFtV5cZQNCmmszA6GiVFVRt3G7AqVyhXjhCSmowvQn+NsGn+jMDMKJYHd3bSQ=="],
+
+    "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
+  }
+}
