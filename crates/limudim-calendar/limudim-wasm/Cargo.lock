@@ -165,7 +165,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
 
 [[package]]
-name = "limudim"
+name = "limudim-calendar"
 version = "0.1.0"
 dependencies = [
  "hebrew_holiday_calendar",
@@ -177,7 +177,7 @@ name = "limudim-wasm"
 version = "0.1.0"
 dependencies = [
  "icu_calendar",
- "limudim",
+ "limudim-calendar",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

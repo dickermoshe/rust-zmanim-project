@@ -1,6 +1,6 @@
 use icu_calendar::{cal::Hebrew, Date};
-use limudim::LimudCalendar;
-use limudim::{
+use limudim_calendar::LimudCalendar;
+use limudim_calendar::{
     Amud, AmudYomiBavliDirshu, Daf, DafHashavuaBavli, DafYomiBavli, DafYomiYerushalmiVilna, LimudCalculator, Mishna,
     MishnaYomis, Mishnas, PirkeiAvos, PirkeiAvosUnit, Side, TehillimMonthly, TehillimUnit, Tractate,
 };

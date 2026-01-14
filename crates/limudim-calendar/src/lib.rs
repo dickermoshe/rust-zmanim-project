@@ -11,9 +11,9 @@
 //!
 //! ## Example
 //! ```
-//! use limudim::{DafYomiBavli, LimudCalculator};
+//! use limudim_calendar::{DafYomiBavli, LimudCalculator};
 //! use icu_calendar::{cal::Hebrew, Date};
-//! use limudim::LimudCalendar;
+//! use limudim_calendar::LimudCalendar;
 //!
 //! let date = Date::try_new_iso(2020, 1, 5).unwrap().to_calendar(Hebrew);
 //! let daf = date.limud(DafYomiBavli::default());

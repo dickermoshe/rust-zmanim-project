@@ -1,5 +1,5 @@
 [package]
-name = "limudim"
+name = "limudim-calendar"
 version = "0.1.0"
 description = "A comprehensive Rust library for calculating Jewish learning schedules with the Hebrew calendar with no_std support"
 edition = "2021"
