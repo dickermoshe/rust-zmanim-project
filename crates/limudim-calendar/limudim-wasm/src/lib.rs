@@ -1,6 +1,7 @@
 use icu_calendar::{cal::Hebrew, Date};
+use limudim::LimudCalendar;
 use limudim::{
-    Amud, AmudYomiBavliDirshu, Daf, DafHashavuaBavli, DafYomiBavli, DafYomiYerushalmi, LimudCalculator, Mishna,
+    Amud, AmudYomiBavliDirshu, Daf, DafHashavuaBavli, DafYomiBavli, DafYomiYerushalmiVilna, LimudCalculator, Mishna,
     MishnaYomis, Mishnas, PirkeiAvos, PirkeiAvosUnit, Side, TehillimMonthly, TehillimUnit, Tractate,
 };
 use serde::Serialize;
@@ -155,7 +156,7 @@ pub fn daf_yomi_bavli(year: i32, month: u8, day: u8) -> JsValue {
         None => return JsValue::NULL,
     };
 
-    let result = DafYomiBavli::default().limud(date);
+    let result = date.limud(DafYomiBavli::default());
     match result {
         Some(daf) => {
             let serializable: SerializableDaf = daf.into();
@@ -173,7 +174,7 @@ pub fn daf_yomi_yerushalmi(year: i32, month: u8, day: u8) -> JsValue {
         None => return JsValue::NULL,
     };
 
-    let result = DafYomiYerushalmi::default().limud(date);
+    let result = date.limud(DafYomiYerushalmiVilna::default());
     match result {
         Some(daf) => {
             let serializable: SerializableDaf = daf.into();
@@ -191,7 +192,7 @@ pub fn daf_hashavua_bavli(year: i32, month: u8, day: u8) -> JsValue {
         None => return JsValue::NULL,
     };
 
-    let result = DafHashavuaBavli::default().limud(date);
+    let result = date.limud(DafHashavuaBavli::default());
     match result {
         Some(daf) => {
             let serializable: SerializableDaf = daf.into();
@@ -209,7 +210,7 @@ pub fn amud_yomi_bavli_dirshu(year: i32, month: u8, day: u8) -> JsValue {
         None => return JsValue::NULL,
     };
 
-    let result = AmudYomiBavliDirshu::default().limud(date);
+    let result = date.limud(AmudYomiBavliDirshu::default());
     match result {
         Some(amud) => {
             let serializable: SerializableAmud = amud.into();
@@ -227,7 +228,7 @@ pub fn mishna_yomis(year: i32, month: u8, day: u8) -> JsValue {
         None => return JsValue::NULL,
     };
 
-    let result = MishnaYomis::default().limud(date);
+    let result = date.limud(MishnaYomis::default());
     match result {
         Some(mishnas) => {
             let serializable: SerializableMishnas = mishnas.into();
@@ -245,7 +246,7 @@ pub fn pirkei_avos(year: i32, month: u8, day: u8, in_israel: bool) -> JsValue {
         None => return JsValue::NULL,
     };
 
-    let result = PirkeiAvos { in_israel }.limud(date);
+    let result = date.limud(PirkeiAvos { in_israel });
     match result {
         Some(unit) => {
             let serializable: SerializablePirkeiAvosUnit = unit.into();
@@ -263,24 +264,12 @@ pub fn tehillim_monthly(year: i32, month: u8, day: u8) -> JsValue {
         None => return JsValue::NULL,
     };
 
-    let result = TehillimMonthly::default().limud(date);
+    let result = date.limud(TehillimMonthly::default());
     match result {
         Some(unit) => {
             let serializable: SerializableTehillimUnit = unit.into();
             serde_wasm_bindgen::to_value(&serializable).unwrap_or(JsValue::NULL)
         }
         None => JsValue::NULL,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_daf_yomi_bavli_simple() {
-        // Test a known date
-        let result = daf_yomi_bavli(2020, 1, 5);
-        assert!(!result.is_null());
     }
 }

@@ -1,8 +1,9 @@
 use crate::{
     constants::MISHNA_YOMIS_CYCLE_DAYS,
     date::{from_gregorian_date, DateExt},
-    limud_calculator::{CycleFinder, LimudCalculator},
+    limud_calculator::{CycleFinder, InternalLimudCalculator},
     units::{Mishna, Tractate, ALL_TRACTATES},
+    LimudCalculator,
 };
 
 const fn chapters(tractate: Tractate) -> usize {
@@ -157,11 +158,13 @@ fn iter_mishna() -> impl Iterator<Item = Mishna> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+/// Represents a pair of mishnayos.
 pub struct Mishnas(pub Mishna, pub Mishna);
 
 #[derive(Default)]
+/// Calculates the Mishna Yomis schedule.
 pub struct MishnaYomis;
-impl LimudCalculator<Mishnas> for MishnaYomis {
+impl InternalLimudCalculator<Mishnas> for MishnaYomis {
     fn cycle_finder(&self) -> crate::limud_calculator::CycleFinder {
         CycleFinder::Initial(from_gregorian_date(1947, 5, 20))
     }
@@ -192,6 +195,7 @@ impl LimudCalculator<Mishnas> for MishnaYomis {
         hebrew_date.add_days(MISHNA_YOMIS_CYCLE_DAYS)
     }
 }
+impl LimudCalculator<Mishnas> for MishnaYomis {}
 
 #[cfg(test)]
 #[allow(clippy::expect_used)]

@@ -3,7 +3,8 @@ use hebrew_holiday_calendar::HebrewHolidayCalendar;
 use crate::{
     date::{from_hebrew_date, HebrewDate},
     interval::Interval,
-    limud_calculator::{CycleFinder, LimudCalculator},
+    limud_calculator::{CycleFinder, InternalLimudCalculator},
+    LimudCalculator,
 };
 
 /// Cumulative ending psalm for each day of the month (0-indexed by day-1)
@@ -16,6 +17,7 @@ const DEFAULT_UNITS: [u8; 30] = [
 /// Represents a Tehillim (Psalms) reading unit
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[allow(missing_docs)]
 pub enum TehillimUnit {
     /// A range of complete psalms (e.g., psalms 1-9)
     Psalms { start: u8, end: u8 },
@@ -28,6 +30,7 @@ pub enum TehillimUnit {
 }
 
 #[derive(Default)]
+/// Calculates the Tehillim (Psalms) monthly schedule.
 pub struct TehillimMonthly;
 
 /// Find the 1st of the current Hebrew month and the last day of the month
@@ -45,7 +48,7 @@ fn find_monthly_cycle(date: HebrewDate) -> (HebrewDate, HebrewDate) {
     (start, end)
 }
 
-impl LimudCalculator<TehillimUnit> for TehillimMonthly {
+impl InternalLimudCalculator<TehillimUnit> for TehillimMonthly {
     fn cycle_finder(&self) -> CycleFinder {
         CycleFinder::Perpetual(find_monthly_cycle)
     }
@@ -89,6 +92,7 @@ impl LimudCalculator<TehillimUnit> for TehillimMonthly {
         Some(TehillimUnit::Psalms { start, end: stop })
     }
 }
+impl LimudCalculator<TehillimUnit> for TehillimMonthly {}
 
 #[cfg(test)]
 #[allow(clippy::expect_used)]

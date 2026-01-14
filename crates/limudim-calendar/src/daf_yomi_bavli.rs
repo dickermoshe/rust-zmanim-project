@@ -6,8 +6,9 @@ use crate::{
     constants::{BAVLI_DAF_COUNT_EARLY, BAVLI_DAF_COUNT_MODERN, SHEKALIM_EXPANSION_CYCLE},
     date::{from_gregorian_date, DateExt, HebrewDate},
     interval::Interval,
-    limud_calculator::{CycleFinder, LimudCalculator},
+    limud_calculator::{CycleFinder, InternalLimudCalculator},
     units::{Daf, Tractate, BAVLI_TRACTATES},
+    LimudCalculator,
 };
 
 pub const fn start_daf(tractate: Tractate, _iteration: i32) -> u16 {
@@ -93,9 +94,10 @@ fn iter_daf(iteration: i32) -> impl Iterator<Item = Daf> {
 }
 
 #[derive(Default)]
+/// Calculates the Daf Yomi Bavli schedule.
 pub struct DafYomiBavli {}
 
-impl LimudCalculator<Daf> for DafYomiBavli {
+impl InternalLimudCalculator<Daf> for DafYomiBavli {
     fn cycle_finder(&self) -> CycleFinder {
         CycleFinder::Initial(from_gregorian_date(1923, 9, 11))
     }
@@ -126,6 +128,7 @@ impl LimudCalculator<Daf> for DafYomiBavli {
     }
 }
 
+impl LimudCalculator<Daf> for DafYomiBavli {}
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod tests {

@@ -7,7 +7,7 @@ pub enum CycleFinder {
     Perpetual(PerpetualCycleFinder),
 }
 
-pub trait LimudCalculator<T> {
+pub(crate) trait InternalLimudCalculator<T> {
     fn limud(&self, limud_date: HebrewDate) -> Option<T> {
         let cycle = self.find_cycle(limud_date)?;
         if cycle.end_date < limud_date {
@@ -46,3 +46,6 @@ pub trait LimudCalculator<T> {
     }
     fn unit_for_interval(&self, interval: &Interval, limud_date: &HebrewDate) -> Option<T>;
 }
+/// Trait for calculators that can be used to calculate the limud for a given date.
+#[allow(private_bounds)]
+pub trait LimudCalculator<T>: InternalLimudCalculator<T> {}

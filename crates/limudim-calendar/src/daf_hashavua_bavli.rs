@@ -4,8 +4,9 @@ use crate::{
     constants::BAVLI_DAF_COUNT_MODERN,
     date::{from_gregorian_date, DateExt, HebrewDate},
     interval::Interval,
-    limud_calculator::{CycleFinder, LimudCalculator},
+    limud_calculator::{CycleFinder, InternalLimudCalculator},
     units::{Daf, Tractate, BAVLI_TRACTATES},
+    LimudCalculator,
 };
 
 const fn start_daf(tractate: Tractate, _iteration: i32) -> u16 {
@@ -84,9 +85,10 @@ fn iter_daf(iteration: i32) -> impl Iterator<Item = Daf> {
 }
 
 #[derive(Default)]
+/// Calculates the Daf Hashavua Bavli schedule.
 pub struct DafHashavuaBavli {}
 
-impl LimudCalculator<Daf> for DafHashavuaBavli {
+impl InternalLimudCalculator<Daf> for DafHashavuaBavli {
     fn interval_end_calculation(_cycle: crate::cycle::Cycle, hebrew_date: HebrewDate) -> Option<HebrewDate> {
         let day_number = hebrew_date.day_of_week_number();
         hebrew_date.add_days(7 - day_number)
@@ -106,6 +108,7 @@ impl LimudCalculator<Daf> for DafHashavuaBavli {
     }
 }
 
+impl LimudCalculator<Daf> for DafHashavuaBavli {}
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod tests {

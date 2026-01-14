@@ -4,8 +4,9 @@ use crate::{
     constants::BAVLI_TOTAL_AMUDIM,
     date::{from_gregorian_date, DateExt, HebrewDate},
     interval::Interval,
-    limud_calculator::{CycleFinder, LimudCalculator},
+    limud_calculator::{CycleFinder, InternalLimudCalculator},
     units::*,
+    LimudCalculator,
 };
 
 pub const fn start_daf(tractate: Tractate, _iteration: i32) -> Amud {
@@ -80,9 +81,10 @@ fn iter_amud(iteration: i32) -> impl Iterator<Item = Amud> {
     BAVLI_TRACTATES.iter().flat_map(move |i| iter(*i, iteration))
 }
 #[derive(Default)]
+/// Calculates the Amud Yomi Bavli Dirshu schedule.
 pub struct AmudYomiBavliDirshu {}
 
-impl LimudCalculator<Amud> for AmudYomiBavliDirshu {
+impl InternalLimudCalculator<Amud> for AmudYomiBavliDirshu {
     fn cycle_finder(&self) -> CycleFinder {
         CycleFinder::Initial(from_gregorian_date(2023, 10, 16))
     }
@@ -103,6 +105,7 @@ impl LimudCalculator<Amud> for AmudYomiBavliDirshu {
         iter.nth(offset as usize)
     }
 }
+impl LimudCalculator<Amud> for AmudYomiBavliDirshu {}
 
 #[cfg(test)]
 #[allow(clippy::expect_used)]

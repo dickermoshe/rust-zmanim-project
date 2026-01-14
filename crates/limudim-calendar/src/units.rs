@@ -1,5 +1,6 @@
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[allow(missing_docs)]
 pub enum Tractate {
     Berachos,
     Peah,
@@ -218,12 +219,15 @@ pub const YERUSHALMI_TRACTATES: [Tractate; 39] = [
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[allow(missing_docs)]
 pub struct Daf {
     pub tractate: Tractate,
+    /// The page number of the amud. Starts at 2 for Talmud Bavli and 1 for Talmud Yerushalmi.
     pub page: u16,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[allow(missing_docs)]
 pub enum Side {
     Aleph,
     Bet,
@@ -231,13 +235,15 @@ pub enum Side {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[allow(missing_docs)]
 pub struct Amud {
     pub tractate: Tractate,
+    /// The page number of the amud. Starts at 2 for Talmud Bavli and 1 for Talmud Yerushalmi.
     pub page: u16,
     pub side: Side,
 }
 impl Amud {
-    pub const fn new(tractate: Tractate, page: u16, side: Side) -> Self {
+    pub(crate) const fn new(tractate: Tractate, page: u16, side: Side) -> Self {
         Self { tractate, page, side }
     }
     fn next(&self) -> Self {
@@ -290,6 +296,7 @@ impl AmudIter {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[allow(missing_docs)]
 pub struct Mishna {
     pub tractate: Tractate,
     pub chapter: usize,

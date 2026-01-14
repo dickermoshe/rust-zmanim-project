@@ -4,7 +4,8 @@ use crate::{
     cycle::Cycle,
     date::{from_hebrew_date, DateExt, HebrewDate},
     interval::Interval,
-    limud_calculator::{CycleFinder, LimudCalculator},
+    limud_calculator::{CycleFinder, InternalLimudCalculator},
+    LimudCalculator,
 };
 
 /// Represents a Pirkei Avos reading unit
@@ -13,15 +14,18 @@ use crate::{
 pub enum PirkeiAvosUnit {
     /// A single perek (chapter)
     Single(u8),
-    /// Combined perakim (when weeks are compressed)
+    /// Two consecutive perekim (chapters)
     Combined(u8, u8),
 }
 
+#[derive(Default)]
+/// Calculates the Pirkei Avos schedule.
 pub struct PirkeiAvos {
+    /// Whether the calculator is for Israel or the diaspora
     pub in_israel: bool,
 }
 
-impl LimudCalculator<PirkeiAvosUnit> for PirkeiAvos {
+impl InternalLimudCalculator<PirkeiAvosUnit> for PirkeiAvos {
     fn cycle_finder(&self) -> CycleFinder {
         if self.in_israel {
             CycleFinder::Perpetual(Self::find_yearly_cycle_israel)
@@ -91,8 +95,16 @@ impl LimudCalculator<PirkeiAvosUnit> for PirkeiAvos {
         false
     }
 }
+impl LimudCalculator<PirkeiAvosUnit> for PirkeiAvos {}
 
 impl PirkeiAvos {
+    /// Create a new Pirkei Avos calculator.
+    ///
+    /// # Arguments
+    /// * `in_israel` - Whether the calculator is for Israel or the diaspora
+    ///
+    /// # Returns
+    /// A new Pirkei Avos calculator.
     pub fn new(in_israel: bool) -> Self {
         Self { in_israel }
     }
