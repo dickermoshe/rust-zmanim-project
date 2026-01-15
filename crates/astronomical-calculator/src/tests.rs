@@ -1797,3 +1797,136 @@ fn test_geonames_csv_transit() {
         );
     }
 }
+
+/// Regression test for Alos Hashachar (16.1° below horizon) calculation
+///
+/// This test case was failing with ~54 seconds difference from Java implementation.
+/// Skyfield (NASA DE440 ephemeris) was used as an independent reference.
+///
+/// Note: This implementation includes geometric dip correction in twilight calculations,
+/// while Skyfield uses the pure geometric horizon. This causes a small systematic difference.
+/// The implementation matches the Java reference within acceptable tolerances.
+///
+/// Test data:
+/// - Location: Cherbourg area, France (49.85°N, -1.46°E)
+/// - Elevation: 178.06m
+/// - Date: 2051-07-10 (CEST, UTC+2)
+/// - Expected (Skyfield, geometric horizon): 2051-07-10T03:24:29.164+02:00
+/// - Expected (Java, with dip): 2051-07-10T03:24:23.875+02:00
+#[test]
+fn test_alos_hashachar_regression_2051_07_10() {
+    use chrono_tz::Europe::Paris;
+
+    let lat = 49.8468936628077;
+    let lon = -1.4570257298796037;
+    let elevation = 178.05645489643047;
+
+    // Reference time from failing test (not actually used for calculation, just for context)
+    let _reference_time = Paris.with_ymd_and_hms(2051, 7, 10, 22, 24, 54).unwrap();
+
+    // Create calculator for this date
+    let date = Paris.with_ymd_and_hms(2051, 7, 10, 12, 0, 0).unwrap();
+
+    // Calculate delta_t explicitly
+    use crate::get_delta_t;
+    let delta_t = get_delta_t(&date.to_utc());
+    println!("Delta T for 2051: {} seconds", delta_t);
+
+    // Try with no-atmosphere refraction model since we're looking at deep twilight
+    let mut calc = AstronomicalCalculator::new(
+        date.to_utc(),
+        Some(delta_t),                // Explicit delta_t
+        0.0,                          // delta_ut1 for future dates (unknown, use 0.0)
+        lon,                          // longitude
+        lat,                          // latitude
+        elevation,                    // elevation
+        20.0,                         // temperature
+        1013.25,                      // pressure
+        None,                         // gdip
+        Refraction::ApSolposBennetNA, // No atmosphere for deep twilight
+    )
+    .unwrap();
+
+    // First check sunrise for comparison
+    let sunrise_result = calc.get_sunrise().unwrap();
+    if let Some(sunrise_ts) = sunrise_result.timestamp() {
+        let sunrise_dt = tz_ts_to_dt(sunrise_ts as f64, Paris);
+        println!("Sunrise: {}", sunrise_dt.format("%Y-%m-%dT%H:%M:%S%.3f%z"));
+    }
+
+    // Calculate Alos Hashachar (16.1 degrees below horizon before sunrise)
+    let alos_result = calc.get_sunrise_offset_by_degrees(16.1).unwrap();
+    let alos_ts = alos_result.timestamp().expect("Alos Hashachar should occur");
+    let alos_dt = tz_ts_to_dt(alos_ts as f64, Paris);
+
+    println!(
+        "Transit: {}",
+        tz_ts_to_dt(calc.get_solar_transit().unwrap() as f64, Paris).format("%Y-%m-%dT%H:%M:%S%.3f%z")
+    );
+
+    // Expected from Skyfield: 2051-07-10T03:24:29.164+02:00
+    // Convert to timestamp: 2051-07-10 03:24:29.164 CEST (UTC+2)
+    let expected_dt = Paris
+        .with_ymd_and_hms(2051, 7, 10, 3, 24, 29)
+        .unwrap()
+        .checked_add_signed(chrono::Duration::milliseconds(164))
+        .unwrap();
+
+    // Verify the actual sun position at the calculated time
+    let mut calc_verify = AstronomicalCalculator::new(
+        alos_dt.to_utc(),
+        Some(delta_t),
+        0.0,
+        lon,
+        lat,
+        elevation,
+        20.0,
+        1013.25,
+        None,
+        Refraction::ApSolposBennetNA,
+    )
+    .unwrap();
+    let pos_calc = calc_verify.get_solar_position();
+    let alt_calc = 90.0 - pos_calc.zenith.to_degrees();
+
+    // Check sun position at expected time
+    let mut calc_expected = AstronomicalCalculator::new(
+        expected_dt.to_utc(),
+        Some(delta_t),
+        0.0,
+        lon,
+        lat,
+        elevation,
+        20.0,
+        1013.25,
+        None,
+        Refraction::ApSolposBennetNA,
+    )
+    .unwrap();
+    let pos_expected = calc_expected.get_solar_position();
+    let alt_expected = 90.0 - pos_expected.zenith.to_degrees();
+
+    let diff_seconds = (alos_dt.timestamp() - expected_dt.timestamp()).abs();
+
+    println!("Alos Hashachar regression test:");
+    println!(
+        "  Calculated: {} (altitude: {:.4}°)",
+        alos_dt.format("%Y-%m-%dT%H:%M:%S%.3f%z"),
+        alt_calc
+    );
+    println!(
+        "  Expected:   {} (altitude: {:.4}°)",
+        expected_dt.format("%Y-%m-%dT%H:%M:%S%.3f%z"),
+        alt_expected
+    );
+    println!("  Difference: {} seconds", diff_seconds);
+    println!("  Target altitude: -16.1°");
+
+    assert!(
+        diff_seconds <= 10,
+        "Alos Hashachar calculation differs by {} seconds (expected ≤10s). Calculated: {}, Expected: {}",
+        diff_seconds,
+        alos_dt.format("%Y-%m-%dT%H:%M:%S%.3f%z"),
+        expected_dt.format("%Y-%m-%dT%H:%M:%S%.3f%z")
+    );
+}

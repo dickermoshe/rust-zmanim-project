@@ -5344,7 +5344,7 @@ pub unsafe extern "C" fn FindSolTime(
     }
     return JDmkgmjtime(D);
 }
-pub const Z_EPS: ::core::ffi::c_double = M_PI * 0.05f64 / 180.0f64;
+pub const Z_EPS: ::core::ffi::c_double = M_PI * 0.005f64 / 180.0f64; // 0.005 degrees ≈ 18 arcseconds
 pub const MAXRAT: ::core::ffi::c_int = 2 as ::core::ffi::c_int;
 pub const Z_MAXITER: ::core::ffi::c_int = 100 as ::core::ffi::c_int;
 #[no_mangle]
@@ -5671,7 +5671,10 @@ pub unsafe extern "C" fn SolarDay(
         );
     }
     i += 1;
-    dip += M_PI * 6 as ::core::ffi::c_int as ::core::ffi::c_double / 180.0f64;
+    // For twilight events, use geometric horizon (no dip correction)
+    // Civil dawn/dusk: 6 degrees below geometric horizon
+    let mut twilight_zenith: ::core::ffi::c_double = M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double
+        + M_PI * 6 as ::core::ffi::c_int as ::core::ffi::c_double / 180.0f64;
     if SDMASK & _FREESPA_CVDAWN != 0 {
         D.status[i as usize] = FindSolZenith(
             tp,
@@ -5687,7 +5690,7 @@ pub unsafe extern "C" fn SolarDay(
             p,
             T,
             refract,
-            dip + M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double,
+            twilight_zenith,
             (&raw mut D.t as *mut time_t).offset(i as isize),
             (&raw mut D.E as *mut ::core::ffi::c_double).offset(i as isize),
         );
@@ -5712,7 +5715,7 @@ pub unsafe extern "C" fn SolarDay(
             p,
             T,
             refract,
-            dip + M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double,
+            twilight_zenith,
             (&raw mut D.t as *mut time_t).offset(i as isize),
             (&raw mut D.E as *mut ::core::ffi::c_double).offset(i as isize),
         );
@@ -5722,7 +5725,9 @@ pub unsafe extern "C" fn SolarDay(
         );
     }
     i += 1;
-    dip += M_PI * 6 as ::core::ffi::c_int as ::core::ffi::c_double / 180.0f64;
+    // Nautical dawn/dusk: 12 degrees below geometric horizon
+    twilight_zenith = M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double
+        + M_PI * 12 as ::core::ffi::c_int as ::core::ffi::c_double / 180.0f64;
     if SDMASK & _FREESPA_NADAWN != 0 {
         D.status[i as usize] = FindSolZenith(
             tp,
@@ -5738,7 +5743,7 @@ pub unsafe extern "C" fn SolarDay(
             p,
             T,
             refract,
-            dip + M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double,
+            twilight_zenith,
             (&raw mut D.t as *mut time_t).offset(i as isize),
             (&raw mut D.E as *mut ::core::ffi::c_double).offset(i as isize),
         );
@@ -5763,7 +5768,7 @@ pub unsafe extern "C" fn SolarDay(
             p,
             T,
             refract,
-            dip + M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double,
+            twilight_zenith,
             (&raw mut D.t as *mut time_t).offset(i as isize),
             (&raw mut D.E as *mut ::core::ffi::c_double).offset(i as isize),
         );
@@ -5773,7 +5778,9 @@ pub unsafe extern "C" fn SolarDay(
         );
     }
     i += 1;
-    dip += M_PI * 6 as ::core::ffi::c_int as ::core::ffi::c_double / 180.0f64;
+    // Astronomical dawn/dusk: 18 degrees below geometric horizon
+    twilight_zenith = M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double
+        + M_PI * 18 as ::core::ffi::c_int as ::core::ffi::c_double / 180.0f64;
     if SDMASK & _FREESPA_ASDAWN != 0 {
         D.status[i as usize] = FindSolZenith(
             tp,
@@ -5789,7 +5796,7 @@ pub unsafe extern "C" fn SolarDay(
             p,
             T,
             refract,
-            dip + M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double,
+            twilight_zenith,
             (&raw mut D.t as *mut time_t).offset(i as isize),
             (&raw mut D.E as *mut ::core::ffi::c_double).offset(i as isize),
         );
@@ -5814,7 +5821,7 @@ pub unsafe extern "C" fn SolarDay(
             p,
             T,
             refract,
-            dip + M_PI / 2 as ::core::ffi::c_int as ::core::ffi::c_double,
+            twilight_zenith,
             (&raw mut D.t as *mut time_t).offset(i as isize),
             (&raw mut D.E as *mut ::core::ffi::c_double).offset(i as isize),
         );

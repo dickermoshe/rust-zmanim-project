@@ -97,7 +97,7 @@ const AT0: f64 = 10.0f64; // Standard temperature in Celsius
 // Iteration and convergence parameters
 const FRACDAYSEC: f64 = 1.1574074074074073e-05f64; // Fractional day per second
 const MAX_FPITER: i64 = 20; // Max iterations for fixed point
-const Z_EPS: f64 = PI * 0.05f64 / 180.0f64; // Zenith convergence tolerance
+const Z_EPS: f64 = PI * 0.005f64 / 180.0f64; // Zenith convergence tolerance (0.005 degrees ≈ 18 arcseconds)
 const MAXRAT: i64 = 2; // Max ratio for bisection adjustment
 const Z_MAXITER: i64 = 100; // Max iterations for zenith finding
 
@@ -664,8 +664,10 @@ impl AstronomicalCalculator {
             .unwrap_or(PI / 2.0);
         let z2 = self._get_solar_transit()?.position.zenith;
 
-        let dip = self.compute_dip();
-        let target_zenith = dip + PI / 2.0 + PI * degrees / 180.0;
+        // Twilight events are measured from the geometric horizon (not the elevated horizon),
+        // so we don't include geometric dip. The "degrees" parameter represents the solar
+        // depression angle below the geometric horizon.
+        let target_zenith = PI / 2.0 + PI * degrees / 180.0;
 
         self.find_solar_event(prev_midnight, transit, z1, z2, target_zenith)
     }
@@ -698,8 +700,10 @@ impl AstronomicalCalculator {
         let z1 = self._get_solar_transit()?.position.zenith;
         let z2 = self._get_next_solar_midnight()?.position.zenith;
 
-        let dip = self.compute_dip();
-        let target_zenith = dip + PI / 2.0 + PI * degrees / 180.0;
+        // Twilight events are measured from the geometric horizon (not the elevated horizon),
+        // so we don't include geometric dip. The "degrees" parameter represents the solar
+        // depression angle below the geometric horizon.
+        let target_zenith = PI / 2.0 + PI * degrees / 180.0;
 
         self.find_solar_event(transit, next_midnight, z1, z2, target_zenith)
     }
@@ -764,7 +768,7 @@ impl AstronomicalCalculator {
 
     /// Get civil dawn time (sun 6° below horizon).
     ///
-    /// Uses zenith angle: 90° + 6° + geometric dip.
+    /// Uses zenith angle: 90° + 6° (measured from geometric horizon).
     /// Returns the time of civil dawn (morning civil twilight).
     ///
     /// Civil dawn is when the Sun is 6° below the horizon in the morning.
