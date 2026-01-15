@@ -1308,7 +1308,6 @@ mod edge_case_tests {
         let dt = NaiveDateTime::parse_from_str("2024-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
             .unwrap()
             .and_utc();
-        println!("{:?}", dt);
         let mut calc = AstronomicalCalculator::new(
             dt,
             None,
@@ -1356,6 +1355,7 @@ mod edge_case_tests {
 struct SunResult {
     lat: f64,
     lon: f64,
+    elevation: f64,
     midday: f64,
     sunrise: Option<f64>,
     sunset: Option<f64>,
@@ -1520,10 +1520,10 @@ fn test_suncalc_test_data() {
             0.0,
             result.lon,
             result.lat,
-            0.0,
+            result.elevation,
             20.0,
             1013.25,
-            None,
+            Some(0.0),
             Refraction::ApSolposBennet,
         )
         .unwrap();

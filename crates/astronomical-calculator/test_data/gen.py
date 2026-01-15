@@ -1,5 +1,5 @@
 from skyfield.timelib import Time
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator, validator
 import csv
 from faker import Faker
 import datetime as dt
@@ -20,11 +20,21 @@ class City(BaseModel):
     name: str
     timezone: str
     coordinates: str
+    elevation: float = Field(
+        default=0.0,
+    )  # Emtpy string to 0 meters
+
+    @field_validator("elevation", mode="before")
+    def validate_elevation(cls, v):
+        if v == "":
+            return 0.0
+        return float(v)
 
 
 class Result(BaseModel):
     lat: float
     lon: float
+    elevation: float
     midday: float
     sunrise: float | None
     sunset: float | None
@@ -107,6 +117,7 @@ def process_city(city_data: dict) -> dict | None:
         lat, lon = city_data["coordinates"].split(",")
         lat = float(lat)
         lon = float(lon)
+        elevation = city_data["elevation"]
 
         zone = timezone(city_data["timezone"])
         now = zone.localize(
@@ -115,7 +126,7 @@ def process_city(city_data: dict) -> dict | None:
             )
         )
         midday = now.replace(hour=12, minute=0, second=0, microsecond=0)
-        location = wgs84.latlon(lat, lon)
+        location = wgs84.latlon(lat, lon, elevation)
 
         today_transit = find_transit(now, location)
         yesterday_transit = find_transit(now - dt.timedelta(days=1), location)
@@ -161,6 +172,7 @@ def process_city(city_data: dict) -> dict | None:
         return {
             "lat": lat,
             "lon": lon,
+            "elevation": elevation,
             "midday": midday.timestamp(),
             "sunrise": sunrise_dt.timestamp() if sunrise_dt is not None else None,
             "sunset": sunset_dt.timestamp() if sunset_dt is not None else None,
@@ -192,6 +204,7 @@ if __name__ == "__main__":
             "name": city.name,
             "timezone": city.timezone,
             "coordinates": city.coordinates,
+            "elevation": city.elevation,
             "index": index,
         }
         for index, city in enumerate(cities)
@@ -210,6 +223,7 @@ if __name__ == "__main__":
                 "name": fake.city(),
                 "timezone": tz,
                 "coordinates": f"{fake.latitude()},{fake.longitude()}",
+                "elevation": fake.random_int(min=0, max=1000),
                 "index": len(city_dicts),
             }
         )
