@@ -113,15 +113,11 @@ mod tests {
         let iterations = get_test_iterations();
 
         for i in 0..iterations {
-            let Some((rust_location, date_time, _java_time_and_place)) =
-                java_rnd::random_time_and_place(&jvm, &mut rng)
+            let Some((mut rust_calculator, java_calendar, tz)) =
+                java_rnd::random_zmanim_calendars(&jvm, &mut rng)
             else {
                 continue;
             };
-            let tz = date_time.timezone();
-            let candle_lighting_offset = chrono::Duration::minutes(rng.gen_range(0..=60));
-            let use_astronomical_chatzos = rng.gen_bool(0.5);
-            let ateret_torah_sunset_offset = chrono::Duration::minutes(rng.gen_range(0..=60));
             //TODO
             // Randomly test with or without timezone in location
             if !Location::<chrono_tz::Tz>::near_anti_meridian(rust_calculator.location.longitude)
@@ -130,68 +126,39 @@ mod tests {
                 rust_calculator.location.timezone = None;
             }
 
-            for use_astronomical_chatzos_for_other_zmanim in [true, false] {
-                let config = CalculatorConfig::new(
-                    use_astronomical_chatzos,
-                    candle_lighting_offset,
-                    use_astronomical_chatzos_for_other_zmanim,
-                    ateret_torah_sunset_offset,
-                );
-                let Some(mut rust_calculator) =
-                    ZmanimCalculator::new(rust_location, date_time.naive_local().date(), config)
-                else {
-                    continue;
-                };
-                let Some(java_time_and_place) =
-                    java_bindings::JavaTimeAndPlace::new(&jvm, &rust_location, &date_time)
-                else {
-                    continue;
-                };
-                let Some(java_calendar) = java_bindings::JavaZmanimCalendar::new(
-                    &jvm,
-                    java_time_and_place,
-                    candle_lighting_offset,
-                    use_astronomical_chatzos,
-                    use_astronomical_chatzos_for_other_zmanim,
-                    ateret_torah_sunset_offset,
-                ) else {
-                    continue;
-                };
+            let rust_result = rust_calculator.calculate(zman);
+            let java_result = java_calendar.get_zman(zman);
 
-                let rust_result = rust_calculator.calculate(zman);
-                let java_result = java_calendar.get_zman(zman);
+            // Convert from Utc to the local timezone for comparison
+            let rust_result_tz = rust_result.map(|dt| tz.from_utc_datetime(&dt.naive_utc()));
 
-                // Convert from Utc to the local timezone for comparison
-                let rust_result_tz = rust_result.map(|dt| tz.from_utc_datetime(&dt.naive_utc()));
+            let mut max_diff = max_diff_override.unwrap_or(MAX_DIFF_SECONDS);
 
-                let mut max_diff = max_diff_override.unwrap_or(MAX_DIFF_SECONDS);
-
-                // If this zman uses elevation, enlarge the max diff based on the elevation
-                if zman.uses_elevation() {
-                    max_diff += (rust_calculator.location.elevation * 0.1) as i64;
-                    assert!(
-                        max_diff > 0 && max_diff < 100,
-                        "Max diff is out of range for {:?}: {} meters",
-                        zman.java_function_name(),
-                        rust_calculator.location.elevation
-                    );
-                }
-
-                assert_times_close(
-                    rust_result_tz,
-                    java_result,
-                    max_diff,
-                    &format!(
-                        "Iteration {}: {:?} at {:?}, Location: ({}, {}), Elevation: {}",
-                        i,
-                        zman.java_function_name(),
-                        rust_calculator.date,
-                        rust_calculator.location.latitude,
-                        rust_calculator.location.longitude,
-                        rust_calculator.location.elevation,
-                    ),
+            // If this zman uses elevation, enlarge the max diff based on the elevation
+            if zman.uses_elevation() {
+                max_diff += (rust_calculator.location.elevation * 0.1) as i64;
+                assert!(
+                    max_diff > 0 && max_diff < 100,
+                    "Max diff is out of range for {:?}: {} meters",
+                    zman.java_function_name(),
+                    rust_calculator.location.elevation
                 );
             }
+
+            assert_times_close(
+                rust_result_tz,
+                java_result,
+                max_diff,
+                &format!(
+                    "Iteration {}: {:?} at {:?}, Location: ({}, {}), Elevation: {}",
+                    i,
+                    zman.java_function_name(),
+                    rust_calculator.date,
+                    rust_calculator.location.latitude,
+                    rust_calculator.location.longitude,
+                    rust_calculator.location.elevation,
+                ),
+            );
         }
     }
 
