@@ -4,11 +4,12 @@ use std::str::FromStr;
 
 use crate::{
     java_tests::java_bindings::{JavaTimeAndPlace, JavaZmanimCalendar},
-    Location, ZmanimCalculator,
+    CalculatorConfig, Location, ZmanimCalculator,
 };
 
 use super::*;
-use chrono::{Datelike, Duration, TimeZone, Timelike, Utc};
+use chrono::{Duration, TimeZone};
+use chrono_tz::Tz;
 use j4rs::Jvm;
 use lazy_static::lazy_static;
 use rand::Rng;
@@ -60,22 +61,21 @@ pub fn random_time_and_place<Rng: rand::Rng>(
 pub fn random_zmanim_calendars<'a>(
     jvm: &'a Jvm,
     rng: &mut impl Rng,
-) -> Option<(
-    ZmanimCalculator,
-    Location<chrono_tz::Tz>,
-    DateTime<chrono_tz::Tz>,
-    JavaZmanimCalendar<'a>,
-)> {
+) -> Option<(ZmanimCalculator<Tz>, JavaZmanimCalendar<'a>, Tz)> {
     let (rust_time_and_place, date_time, java_time_and_place) = random_time_and_place(jvm, rng)?;
     let candle_lighting_offset = Duration::minutes(rng.gen_range(0..=60));
     let use_astronomical_chatzos = rng.gen_bool(0.5);
     let use_astronomical_chatzos_for_other_zmanim = rng.gen_bool(0.5);
     let ateret_torah_sunset_offset = Duration::minutes(rng.gen_range(0..=60));
-    let rust_calculator = ZmanimCalculator::new(
+    let config = CalculatorConfig::new(
         use_astronomical_chatzos,
         candle_lighting_offset,
         use_astronomical_chatzos_for_other_zmanim,
+        ateret_torah_sunset_offset,
     );
+    let rust_calculator =
+        ZmanimCalculator::new(rust_time_and_place, date_time.naive_local().date(), config)?;
+
     let java_calendar = JavaZmanimCalendar::new(
         jvm,
         java_time_and_place,
@@ -85,10 +85,5 @@ pub fn random_zmanim_calendars<'a>(
         ateret_torah_sunset_offset,
     )?;
 
-    Some((
-        rust_calculator,
-        rust_time_and_place,
-        date_time,
-        java_calendar,
-    ))
+    Some((rust_calculator, java_calendar, date_time.timezone()))
 }

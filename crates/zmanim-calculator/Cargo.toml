@@ -9,21 +9,22 @@ license = "LGPL-2.1"
 default = ["std"]
 std = []
 defmt = ["dep:defmt", "hebrew_holiday_calendar/defmt"]
+tz = ["dep:chrono-tz"]
 
 [dependencies]
 hebrew_holiday_calendar = "0.2.0"
-defmt = { version = "1.0.1", optional = true }
+astronomical-calculator = "0.3.1"
 icu_calendar = { version = "2.0.3", features = [
     "unstable",
 ], default-features = false }
-astronomical-calculator = "0.3.0"
 chrono = { version = "0.4.41", default-features = false }
-heapless = "0.9.2"
 time = { version = "0.3.44", default-features = false }
-j4rs = "0.24.0"
+defmt = { version = "1.0.1", optional = true }
+chrono-tz = { version = "0.10.4", default-features = false, optional = true }
 
 [dev-dependencies]
 lazy_static = "1.5.0"
+j4rs = "0.24.0"
 num_enum = "0.7.5"
 proptest = "1.9.0"
 rand = "0.8.5"
