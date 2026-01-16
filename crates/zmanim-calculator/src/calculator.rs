@@ -1,6 +1,5 @@
 use astronomical_calculator::{AstronomicalCalculator, Refraction};
-use chrono::offset::Offset;
-use chrono::{DateTime, Datelike, Duration, LocalResult, NaiveDate, TimeDelta, TimeZone, Utc};
+use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc};
 
 use crate::{
     math::multiply_duration,
