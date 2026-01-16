@@ -1384,16 +1384,16 @@ fn tz_ts_to_dt<T: TimeZone>(ts: f64, tz: T) -> DateTime<T> {
 
 /// Calculate tolerance in seconds based on latitude.
 /// 60 seconds until 45° (300 seconds for astronomical), then exponential growth to 10000 seconds at poles.
-fn latitude_tolerance(lat: f64, time_type: TimeType) -> f64 {
+fn latitude_tolerance(lat: f64) -> f64 {
     let abs_lat = lat.abs();
     if abs_lat <= 45.0 {
         // Constant tolerance until 45 degrees
         // Astronomical events need larger tolerance due to lower precision at extreme angles (18° below horizon)
-        time_type.base_tolerance() as f64
+        60.0
     } else {
         // Exponential growth from base to 10000 seconds between 45° and 90°
         // Formula: base * (10000/base)^((abs_lat - 45) / 45)
-        let base_tolerance = time_type.base_tolerance() as f64;
+        let base_tolerance = 60.0;
         let max_tolerance: f64 = 10000.0;
         let ratio: f64 = max_tolerance / base_tolerance;
         let exponent: f64 = (abs_lat - 45.0) / 45.0;
@@ -1459,11 +1459,10 @@ fn compare_times(
     lat: f64,
     result: &SunResult,
     index: usize,
-    time_type: TimeType,
 ) {
     if let (Some(our), Some(their)) = (our, their) {
         let diff = (our - their).abs().num_seconds();
-        let tolerance = latitude_tolerance(lat, time_type);
+        let tolerance = latitude_tolerance(lat);
 
         assert!(
             diff <= tolerance as i64,
@@ -1476,24 +1475,6 @@ fn compare_times(
             result,
             index
         );
-    }
-}
-
-enum TimeType {
-    Normal,
-    Civil,
-    Nautical,
-    Astronomical,
-}
-
-impl TimeType {
-    fn base_tolerance(&self) -> i64 {
-        match self {
-            TimeType::Normal => 60,
-            TimeType::Civil => 90,
-            TimeType::Nautical => 120,
-            TimeType::Astronomical => 300,
-        }
     }
 }
 
@@ -1536,7 +1517,6 @@ fn test_suncalc_test_data() {
             result.lat,
             result,
             index,
-            TimeType::Normal,
         );
 
         compare_times(
@@ -1546,7 +1526,6 @@ fn test_suncalc_test_data() {
             result.lat,
             result,
             index,
-            TimeType::Normal,
         );
         compare_times(
             get_event_time(&mut calc, AstronomicalCalculator::get_sunrise),
@@ -1555,7 +1534,6 @@ fn test_suncalc_test_data() {
             result.lat,
             result,
             index,
-            TimeType::Normal,
         );
 
         // Skip twilight comparisons for high latitudes (>45° N or S)
@@ -1568,7 +1546,6 @@ fn test_suncalc_test_data() {
                 result.lat,
                 result,
                 index,
-                TimeType::Astronomical,
             );
 
             compare_times(
@@ -1578,7 +1555,6 @@ fn test_suncalc_test_data() {
                 result.lat,
                 result,
                 index,
-                TimeType::Astronomical,
             );
             compare_times(
                 get_event_time(&mut calc, AstronomicalCalculator::get_civil_dawn),
@@ -1587,7 +1563,6 @@ fn test_suncalc_test_data() {
                 result.lat,
                 result,
                 index,
-                TimeType::Civil,
             );
             compare_times(
                 get_event_time(&mut calc, AstronomicalCalculator::get_nautical_dawn),
@@ -1596,7 +1571,6 @@ fn test_suncalc_test_data() {
                 result.lat,
                 result,
                 index,
-                TimeType::Nautical,
             );
             compare_times(
                 get_event_time(&mut calc, AstronomicalCalculator::get_civil_dusk),
@@ -1605,7 +1579,6 @@ fn test_suncalc_test_data() {
                 result.lat,
                 result,
                 index,
-                TimeType::Civil,
             );
             compare_times(
                 get_event_time(&mut calc, AstronomicalCalculator::get_nautical_dusk),
@@ -1614,7 +1587,6 @@ fn test_suncalc_test_data() {
                 result.lat,
                 result,
                 index,
-                TimeType::Nautical,
             );
         }
     }

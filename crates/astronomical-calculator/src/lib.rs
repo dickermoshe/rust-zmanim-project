@@ -148,6 +148,7 @@ const Z_MAXITER: i64 = 100; // Max iterations for zenith finding
 /// let pos = calc.get_solar_position();
 /// assert!(pos.zenith >= 0.0 && pos.zenith <= std::f64::consts::PI);
 /// ```
+#[derive(Debug, Clone)]
 pub struct AstronomicalCalculator {
     ut: DateTime<Utc>,
     delta_t: Option<f64>,
