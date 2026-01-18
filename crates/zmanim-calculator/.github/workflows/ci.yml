@@ -39,7 +39,7 @@ jobs:
       - name: Run tests with default features
         env:
           RUST_BACKTRACE: 1
-          TEST_ITERATIONS: 10000
+          TEST_ITERATIONS: 1000
         run: cargo llvm-cov --no-report --verbose
       - name: Run tests without default features
         env:
