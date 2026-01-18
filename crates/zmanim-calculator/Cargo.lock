@@ -1402,6 +1402,7 @@ dependencies = [
  "astronomical-calculator",
  "chrono",
  "chrono-tz",
+ "core_maths",
  "defmt",
  "hebrew_holiday_calendar",
  "icu_calendar",

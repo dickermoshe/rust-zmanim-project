@@ -1,4 +1,6 @@
 use astronomical_calculator::{AstronomicalCalculator, Refraction};
+#[allow(unused_imports)]
+use core_maths::*;
 
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc};
 
