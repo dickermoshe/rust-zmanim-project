@@ -8,9 +8,9 @@ use std::{str::FromStr, string::String, string::ToString};
 use crate::calculator::ZmanimCalculator;
 use crate::types::zman::ZmanLike;
 use crate::{
-    AlosZman, CandleLightingZman, ChatzosZman, Location, MinchaGedolaZman, MinchaKetanaZman,
-    PlagHaminchaZman, SeaLevelNeitzZman, SeaLevelShkiaZman, SofZmanShmaZman, SofZmanTfilaZman,
-    TzaisZman,
+    math::multiply_duration, AlosZman, CandleLightingZman, ChatzosZman, Location, MinchaGedolaZman,
+    MinchaKetanaZman, NeitzZman, PlagHaminchaZman, SeaLevelNeitzZman, SeaLevelShkiaZman, ShkiaZman,
+    SofZmanShmaZman, SofZmanTfilaZman, TzaisZman,
 };
 
 const LAKEWOOD_LAT: f64 = 40.0721087;
@@ -38,6 +38,11 @@ fn new_calc(elevation_m: f64) -> ZmanimCalculator<Tz> {
         Default::default(),
     )
     .unwrap()
+}
+
+fn calc_for(lat: f64, lon: f64, elevation: f64, tz: Tz, date: NaiveDate) -> ZmanimCalculator<Tz> {
+    let location = Location::new(lat, lon, elevation, Some(tz)).unwrap();
+    ZmanimCalculator::new(location, date, Default::default()).unwrap()
 }
 
 fn fmt_local(dt: DateTime<Utc>) -> String {
@@ -93,6 +98,146 @@ fn shaah_zmanis_by_degrees_and_offset(
     let start = start - Duration::minutes(offset_minutes);
     let end = end + Duration::minutes(offset_minutes);
     calc.get_temporal_hour_from_times(&start, &end).unwrap()
+}
+
+#[test]
+fn test_new_without_timezone_uses_longitude_offset() {
+    let location = Location::new(0.0, 30.0, 0.0, Option::<Utc>::None).unwrap();
+    let calc = ZmanimCalculator::new(
+        location,
+        NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
+        Default::default(),
+    );
+    assert!(calc.is_some());
+}
+
+#[test]
+fn test_temporal_hour() {
+    let mut calc = new_calc(0.0);
+    let temporal = calc.temporal_hour().unwrap();
+    assert!(temporal.num_seconds() > 0);
+}
+
+#[test]
+fn test_shaah_zmanis_from_zmanim() {
+    let mut calc = new_calc(0.0);
+    let shaah = calc
+        .get_shaah_zmanis_from_zmanim(AlosZman::Degrees16Point1, TzaisZman::Degrees16Point1)
+        .unwrap();
+    assert!(shaah.num_seconds() > 0);
+}
+
+#[test]
+fn test_local_mean_time_invalid_hours() {
+    let mut calc = new_calc(0.0);
+    let date = lakewood_date();
+    #[allow(clippy::clone_on_copy)]
+    let location = calc.location.clone();
+    assert!(calc.local_mean_time(date, &location, -1.0).is_none());
+}
+
+#[test]
+fn test_half_day_based_zman_negative_hours() {
+    let mut calc = new_calc(0.0);
+    let sunrise = calc.sunrise().unwrap();
+    let sunset = calc.sunset().unwrap();
+    let shaah = calc
+        .get_half_day_based_shaah_zmanis_from_times(&sunrise, &sunset)
+        .unwrap();
+    let expected = sunset + multiply_duration(shaah, -1.0).unwrap();
+    let actual = calc
+        .get_half_day_based_zman_from_times(&sunrise, &sunset, -1.0)
+        .unwrap();
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn test_high_latitude_sunrise_sunset_ordering() {
+    let date = NaiveDate::from_ymd_opt(2017, 3, 21).unwrap();
+    let mut calc = calc_for(64.1466, -21.9426, 0.0, chrono_tz::Atlantic::Reykjavik, date);
+    #[allow(clippy::expect_used)]
+    let sunrise = calc.sunrise().expect("expected sunrise at equinox");
+    #[allow(clippy::expect_used)]
+    let sunset = calc.sunset().expect("expected sunset at equinox");
+    assert!(sunrise < sunset);
+
+    let dawn = calc.sunrise_offset_by_degrees(6.0).unwrap();
+    let dusk = calc.sunset_offset_by_degrees(6.0).unwrap();
+    assert!(dawn < sunrise);
+    assert!(dusk > sunset);
+}
+
+#[test]
+fn test_extreme_elevation_shifts_sunrise_sunset() {
+    let date = NaiveDate::from_ymd_opt(2017, 10, 17).unwrap();
+    let mut high = calc_for(27.9881, 86.9250, 8848.0, chrono_tz::Asia::Kathmandu, date);
+    let mut sea = calc_for(27.9881, 86.9250, 0.0, chrono_tz::Asia::Kathmandu, date);
+
+    let sunrise_high = high.sunrise().unwrap();
+    let sunrise_sea = sea.sunrise().unwrap();
+    assert!(sunrise_high < sunrise_sea);
+
+    let sunset_high = high.sunset().unwrap();
+    let sunset_sea = sea.sunset().unwrap();
+    assert!(sunset_high > sunset_sea);
+}
+
+#[test]
+fn test_polar_day_returns_none_for_sun_times() {
+    let date = NaiveDate::from_ymd_opt(2017, 6, 21).unwrap();
+    let mut calc = calc_for(69.6492, 18.9553, 0.0, chrono_tz::Europe::Oslo, date);
+
+    assert!(calc.sunrise().is_none());
+    assert!(calc.sunset().is_none());
+    assert!(calc.sea_level_sunrise().is_none());
+    assert!(calc.sea_level_sunset().is_none());
+    assert!(calc.sunrise_offset_by_degrees(6.0).is_none());
+    assert!(calc.sunset_offset_by_degrees(6.0).is_none());
+    assert!(calc.get_shaah_zmanis_mga().is_none());
+}
+
+#[test]
+fn test_new_returns_none_for_invalid_location() {
+    let location = Location {
+        latitude: f64::NAN,
+        longitude: 0.0,
+        elevation: 0.0,
+        timezone: Some(Utc),
+    };
+    let calc = ZmanimCalculator::new(
+        location,
+        NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
+        Default::default(),
+    );
+    assert!(calc.is_none());
+}
+
+#[test]
+fn test_reykjavik_equinox_java_expected_times() {
+    let date = NaiveDate::from_ymd_opt(2017, 3, 21).unwrap();
+    let mut calc = calc_for(64.1466, -21.9426, 0.0, chrono_tz::Atlantic::Reykjavik, date);
+
+    assert_zman_str(&mut calc, NeitzZman, "2017-03-21T07:24:24Z");
+    assert_zman_str(&mut calc, ShkiaZman, "2017-03-21T19:46:56Z");
+    assert_zman_str(&mut calc, SeaLevelNeitzZman, "2017-03-21T07:24:24Z");
+    assert_zman_str(&mut calc, SeaLevelShkiaZman, "2017-03-21T19:46:56Z");
+    assert_zman_str(&mut calc, ChatzosZman::Astronomical, "2017-03-21T13:34:59Z");
+}
+
+#[test]
+fn test_everest_java_expected_times() {
+    let date = NaiveDate::from_ymd_opt(2017, 10, 17).unwrap();
+    let mut calc = calc_for(27.9881, 86.9250, 8848.0, chrono_tz::Asia::Kathmandu, date);
+
+    assert_zman_str(&mut calc, NeitzZman, "2017-10-17T05:44:49+05:45");
+    assert_zman_str(&mut calc, ShkiaZman, "2017-10-17T17:40:04+05:45");
+    assert_zman_str(&mut calc, SeaLevelNeitzZman, "2017-10-17T05:58:42+05:45");
+    assert_zman_str(&mut calc, SeaLevelShkiaZman, "2017-10-17T17:26:12+05:45");
+    assert_zman_str(
+        &mut calc,
+        ChatzosZman::Astronomical,
+        "2017-10-17T11:42:44+05:45",
+    );
 }
 
 #[test]

@@ -1277,12 +1277,74 @@ impl ZmanLike for TzaisZman {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use crate::types::zman::ZmanLike;
+    use crate::{Location, ZmanimCalculator};
+    use chrono::NaiveDate;
+    use chrono_tz::Tz;
+
+    fn polar_day_calc() -> ZmanimCalculator<Tz> {
+        let date = NaiveDate::from_ymd_opt(2017, 6, 21).unwrap();
+        let location = Location::new(69.6492, 18.9553, 0.0, Some(chrono_tz::Europe::Oslo)).unwrap();
+        ZmanimCalculator::new(location, date, Default::default()).unwrap()
+    }
 
     #[test]
     fn test_bain_hashmashos_degrees_above_horizon() {
         assert!(!BainHashmashosZman::RabbeinuTam13Point24Degrees.degrees_above_horizon());
+    }
+
+    #[test]
+    fn test_polar_day_zmanim_return_none() {
+        let alos_variants = [
+            AlosZman::Minutes60,
+            AlosZman::Minutes72,
+            AlosZman::Minutes72Zmanis,
+            AlosZman::Minutes90,
+            AlosZman::Minutes90Zmanis,
+            AlosZman::Minutes96,
+            AlosZman::Minutes96Zmanis,
+            AlosZman::Minutes120,
+            AlosZman::Minutes120Zmanis,
+        ];
+        for zman in alos_variants {
+            let mut calc = polar_day_calc();
+            assert!(zman.calculate(&mut calc).is_none());
+        }
+
+        let bain_variants = [
+            BainHashmashosZman::RabbeinuTam58Point5Minutes,
+            BainHashmashosZman::RabbeinuTam13Point5MinutesBefore7Point083Degrees,
+            BainHashmashosZman::RabbeinuTam2Stars,
+            BainHashmashosZman::Yereim18Minutes,
+            BainHashmashosZman::Yereim16Point875Minutes,
+            BainHashmashosZman::Yereim13Point5Minutes,
+        ];
+        for zman in bain_variants {
+            let mut calc = polar_day_calc();
+            assert!(zman.calculate(&mut calc).is_none());
+        }
+
+        let mut calc = polar_day_calc();
+        assert!(CandleLightingZman.calculate(&mut calc).is_none());
+
+        let mut calc = polar_day_calc();
+        assert!(ChatzosZman::HalfDay.calculate(&mut calc).is_none());
+
+        let mincha_variants = [
+            MinchaGedolaZman::Degrees16Point1,
+            MinchaGedolaZman::Minutes72,
+            MinchaGedolaZman::AhavatShalom,
+            MinchaGedolaZman::AteretTorah,
+            MinchaGedolaZman::BaalHatanya,
+            MinchaGedolaZman::BaalHatanyaGreaterThan30,
+            MinchaGedolaZman::GreaterThan30,
+        ];
+        for zman in mincha_variants {
+            let mut calc = polar_day_calc();
+            assert!(zman.calculate(&mut calc).is_none());
+        }
     }
 }
