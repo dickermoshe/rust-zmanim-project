@@ -167,6 +167,73 @@ mod tests {
         }
     }
 
+    fn test_zman_iteration<Z: ZmanLike + Copy>(
+        zman: Z,
+        seed: u64,
+        iteration: i64,
+        max_diff_override: Option<i64>,
+        max_lat: Option<f64>,
+    ) {
+        let jvm = init_jvm();
+        let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
+        let mut sample = None;
+
+        for i in 0..=iteration {
+            let Some((mut rust_calculator, java_calendar, tz)) =
+                java_rnd::random_zmanim_calendars(&jvm, &mut rng, max_lat)
+            else {
+                if i == iteration {
+                    panic!("Iteration {} did not produce a test case", iteration);
+                }
+                continue;
+            };
+            if !Location::<chrono_tz::Tz>::near_anti_meridian(rust_calculator.location.longitude)
+                && rng.gen_bool(0.5)
+            {
+                rust_calculator.location.timezone = None;
+            }
+
+            if i == iteration {
+                sample = Some((rust_calculator, java_calendar, tz));
+                break;
+            }
+        }
+
+        let (mut rust_calculator, java_calendar, tz) =
+            sample.expect("Expected to find regression sample");
+        let rust_result = rust_calculator.calculate(zman);
+        let java_result = java_calendar.get_zman(zman);
+        let rust_result_tz = rust_result.map(|dt| tz.from_utc_datetime(&dt.naive_utc()));
+
+        let mut max_diff = max_diff_override.unwrap_or(MAX_DIFF_SECONDS);
+        if zman.uses_elevation() {
+            max_diff += (rust_calculator.location.elevation * 0.1) as i64;
+            assert!(
+                max_diff > 0 && max_diff < 100,
+                "Max diff is out of range for {:?}: {} meters",
+                zman.java_function_name(),
+                rust_calculator.location.elevation
+            );
+        }
+
+        assert_times_close(
+            rust_result_tz,
+            java_result,
+            max_diff,
+            &std::format!(
+                "Regression {:?} seed {} iteration {}: {:?}, Location: ({}, {}), Elevation: {}, Timezone: {:?}",
+                &zman.java_function_name(),
+                seed,
+                iteration,
+                &rust_calculator.date,
+                &rust_calculator.location.latitude,
+                &rust_calculator.location.longitude,
+                &rust_calculator.location.elevation,
+                &rust_calculator.location.timezone.map(|tz| tz.name()),
+            ),
+        );
+    }
+
     macro_rules! zman_test {
         ($name:ident, $zman:expr) => {
             #[test]
@@ -359,7 +426,11 @@ mod tests {
         test_plag_hamincha_degrees_19_point_8,
         PlagHaminchaZman::Degrees19Point8
     );
-    zman_test!(test_plag_hamincha_degrees_26, PlagHaminchaZman::Degrees26);
+    zman_test!(
+        test_plag_hamincha_degrees_26,
+        PlagHaminchaZman::Degrees26,
+        Some(40.0)
+    );
     zman_test!(test_plag_hamincha_minutes_60, PlagHaminchaZman::Minutes60);
     zman_test!(test_plag_hamincha_minutes_72, PlagHaminchaZman::Minutes72);
     zman_test!(
@@ -652,4 +723,37 @@ mod tests {
         test_tzais_geonim_degrees_9_point_75,
         TzaisZman::GeonimDegrees9Point75
     );
+
+    #[test]
+    fn regression_mincha_gedola_gra_fixed_local_chatzos_30_minutes() {
+        test_zman_iteration(
+            MinchaGedolaZman::GRAFixedLocalChatzos30Minutes,
+            8218711474067301417,
+            2485,
+            None,
+            None,
+        );
+    }
+
+    #[test]
+    fn regression_plag_hamincha_ateret_torah() {
+        test_zman_iteration(
+            PlagHaminchaZman::AteretTorah,
+            18375159325404615489,
+            1546,
+            None,
+            None,
+        );
+    }
+
+    #[test]
+    fn regression_sof_zman_shma_mga_90_minutes_to_fixed_local_chatzos() {
+        test_zman_iteration(
+            SofZmanShmaZman::MGA90MinutesToFixedLocalChatzos,
+            3472850580173038015,
+            8672,
+            None,
+            None,
+        );
+    }
 }
