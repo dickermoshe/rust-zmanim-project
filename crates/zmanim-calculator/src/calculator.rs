@@ -141,36 +141,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         let temporal_hour = self.get_temporal_hour_from_times(start_of_day, end_of_day)?;
         Some(*start_of_day + (temporal_hour * 6))
     }
-    #[allow(unused)]
-    pub(crate) fn get_percent_of_shaah_zmanis_from_degrees(
-        &mut self,
-        degrees: f64,
-        sunset: bool,
-    ) -> Option<f64> {
-        let sea_level_sunrise = self.sea_level_sunrise();
-        let sea_level_sunset = self.sea_level_sunset();
 
-        let twilight = if sunset {
-            self.sunset_offset_by_degrees(degrees)
-        } else {
-            self.sunrise_offset_by_degrees(degrees)
-        };
-
-        match (sea_level_sunrise, sea_level_sunset, twilight) {
-            (Some(sunrise), Some(sunset_time), Some(twilight_time)) => {
-                let shaah_zmanis =
-                    (sunset_time.timestamp_millis() - sunrise.timestamp_millis()) as f64 / 12.0;
-                let rise_set_to_twilight = if sunset {
-                    twilight_time - sunset_time
-                } else {
-                    sunrise - twilight_time
-                };
-                let rise_set_to_twilight_millis = rise_set_to_twilight.num_milliseconds() as f64;
-                Some(rise_set_to_twilight_millis / shaah_zmanis)
-            }
-            _ => None,
-        }
-    }
     pub(crate) fn get_shaah_zmanis_gra(&mut self) -> Option<Duration> {
         let sunrise = self.sunrise()?;
         let sunset = self.sunset()?;
@@ -276,11 +247,9 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         synchronous: bool,
     ) -> Option<DateTime<Utc>> {
         if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let mut chatzos = ChatzosZman::Astronomical.calculate(self);
-            if chatzos.is_none() {
-                chatzos = self.transit();
-            }
-            let chatzos = chatzos?;
+            let chatzos = ChatzosZman::Astronomical
+                .calculate(self)
+                .or_else(|| self.transit())?;
 
             self.get_half_day_based_zman_from_times(start_of_day, &chatzos, 3.0)
         } else {
@@ -368,6 +337,121 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         } else {
             self.get_shaah_zmanis_based_zman_from_times(start_of_day?, end_of_day, 10.75)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used)]
+
+    use super::*;
+    use crate::{math::multiply_duration, AlosZman, Location, TzaisZman};
+    use chrono::{NaiveDate, Utc};
+    use chrono_tz::Tz;
+
+    fn lakewood_calc() -> ZmanimCalculator<Tz> {
+        let tz = chrono_tz::America::New_York;
+        let location = Location::new(40.0721087, -74.2400243, 0.0, Some(tz)).unwrap();
+        ZmanimCalculator::new(
+            location,
+            NaiveDate::from_ymd_opt(2017, 10, 17).unwrap(),
+            Default::default(),
+        )
+        .unwrap()
+    }
+
+    fn calc_for(
+        lat: f64,
+        lon: f64,
+        elevation: f64,
+        tz: Tz,
+        date: NaiveDate,
+    ) -> ZmanimCalculator<Tz> {
+        let location = Location::new(lat, lon, elevation, Some(tz)).unwrap();
+        ZmanimCalculator::new(location, date, Default::default()).unwrap()
+    }
+
+    #[test]
+    fn test_new_without_timezone_uses_longitude_offset() {
+        let location = Location::new(0.0, 30.0, 0.0, Option::<Utc>::None).unwrap();
+        let calc = ZmanimCalculator::new(
+            location,
+            NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
+            Default::default(),
+        );
+        assert!(calc.is_some());
+    }
+
+    #[test]
+    fn test_temporal_hour() {
+        let mut calc = lakewood_calc();
+        let temporal = calc.temporal_hour().unwrap();
+        assert!(temporal.num_seconds() > 0);
+    }
+
+    #[test]
+    fn test_shaah_zmanis_from_zmanim() {
+        let mut calc = lakewood_calc();
+        let shaah = calc
+            .get_shaah_zmanis_from_zmanim(AlosZman::Degrees16Point1, TzaisZman::Degrees16Point1)
+            .unwrap();
+        assert!(shaah.num_seconds() > 0);
+    }
+
+    #[test]
+    fn test_local_mean_time_invalid_hours() {
+        let mut calc = lakewood_calc();
+        let date = NaiveDate::from_ymd_opt(2017, 10, 17).unwrap();
+        #[allow(clippy::clone_on_copy)]
+        let location = calc.location.clone();
+        assert!(calc.local_mean_time(date, &location, -1.0).is_none());
+    }
+
+    #[test]
+    fn test_half_day_based_zman_negative_hours() {
+        let mut calc = lakewood_calc();
+        let sunrise = calc.sunrise().unwrap();
+        let sunset = calc.sunset().unwrap();
+        let shaah = calc
+            .get_half_day_based_shaah_zmanis_from_times(&sunrise, &sunset)
+            .unwrap();
+        let expected = sunset + multiply_duration(shaah, -1.0).unwrap();
+        let actual = calc
+            .get_half_day_based_zman_from_times(&sunrise, &sunset, -1.0)
+            .unwrap();
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_high_latitude_sunrise_sunset_ordering() {
+        let date = NaiveDate::from_ymd_opt(2017, 3, 21).unwrap();
+        let mut calc: ZmanimCalculator<Tz> =
+            calc_for(64.1466, -21.9426, 0.0, chrono_tz::Atlantic::Reykjavik, date);
+        #[allow(clippy::expect_used)]
+        let sunrise = calc.sunrise().expect("expected sunrise at equinox");
+        #[allow(clippy::expect_used)]
+        let sunset = calc.sunset().expect("expected sunset at equinox");
+        assert!(sunrise < sunset);
+
+        let dawn = calc.sunrise_offset_by_degrees(6.0).unwrap();
+        let dusk = calc.sunset_offset_by_degrees(6.0).unwrap();
+        assert!(dawn < sunrise);
+        assert!(dusk > sunset);
+    }
+
+    #[test]
+    fn test_extreme_elevation_shifts_sunrise_sunset() {
+        let date = NaiveDate::from_ymd_opt(2017, 10, 17).unwrap();
+        let mut high = calc_for(27.9881, 86.9250, 8848.0, chrono_tz::Asia::Kathmandu, date);
+        let mut sea = calc_for(27.9881, 86.9250, 0.0, chrono_tz::Asia::Kathmandu, date);
+
+        let sunrise_high = high.sunrise().unwrap();
+        let sunrise_sea = sea.sunrise().unwrap();
+        assert!(sunrise_high < sunrise_sea);
+
+        let sunset_high = high.sunset().unwrap();
+        let sunset_sea = sea.sunset().unwrap();
+        assert!(sunset_high > sunset_sea);
     }
 }
 

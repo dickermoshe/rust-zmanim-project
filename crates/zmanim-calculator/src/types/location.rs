@@ -45,6 +45,34 @@ impl<T: TimeZone> Location<T> {
         longitude.abs() > ANTI_MERIDIAN_THRESHOLD
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::Utc;
+
+    #[test]
+    fn test_location_rejects_anti_meridian_without_timezone() {
+        let location = Location::new(0.0, 150.1, 0.0, Option::<Utc>::None);
+        assert!(location.is_none());
+    }
+
+    #[test]
+    fn test_location_rejects_out_of_range_coords() {
+        let bad_longitude = Location::new(0.0, 181.0, 0.0, Some(Utc));
+        assert!(bad_longitude.is_none());
+
+        let bad_latitude = Location::new(91.0, 0.0, 0.0, Some(Utc));
+        assert!(bad_latitude.is_none());
+    }
+
+    #[test]
+    fn test_location_rejects_negative_elevation() {
+        let location = Location::new(0.0, 0.0, -1.0, Some(Utc));
+        assert!(location.is_none());
+    }
+}
+
 #[cfg(feature = "defmt")]
 impl defmt::Format for Location<Utc> {
     fn format(&self, fmt: defmt::Formatter) {

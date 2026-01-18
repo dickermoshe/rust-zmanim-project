@@ -18,7 +18,7 @@ pub fn get_test_iterations() -> i64 {
     env::var("TEST_ITERATIONS")
         .ok()
         .and_then(|s| s.parse().ok())
-        .unwrap_or(10)
+        .unwrap_or(100)
 }
 
 // /// Default Epsilon for floating point comparisons.

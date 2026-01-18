@@ -1275,3 +1275,14 @@ impl ZmanLike for TzaisZman {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::zman::ZmanLike;
+
+    #[test]
+    fn test_bain_hashmashos_degrees_above_horizon() {
+        assert!(!BainHashmashosZman::RabbeinuTam13Point24Degrees.degrees_above_horizon());
+    }
+}
