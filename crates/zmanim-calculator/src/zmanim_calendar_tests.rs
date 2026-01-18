@@ -2,7 +2,8 @@
 
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use chrono_tz::Tz;
-use std::str::FromStr;
+extern crate std;
+use std::{str::FromStr, string::String, string::ToString};
 
 use crate::calculator::ZmanimCalculator;
 use crate::types::zman::ZmanLike;

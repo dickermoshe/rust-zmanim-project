@@ -1,12 +1,15 @@
 [package]
-name = "zmanim-calendar"
+name = "zmanim-calculator"
 version = "0.1.0"
-description = "A comprehensive Rust library for calculating Zmanim with the Hebrew calendar with no_std support"
+description = "A comprehensive Rust library for calculating Zmanim with no_std support"
 edition = "2021"
 license = "LGPL-2.1"
+repository = "https://github.com/dickermoshe/zmanim-calculator"
+homepage = "https://github.com/dickermoshe/zmanim-calculator"
+documentation = "https://docs.rs/zmanim-calculator"
 
 [features]
-default = ["std"]
+default = []
 std = []
 defmt = ["dep:defmt", "hebrew_holiday_calendar/defmt"]
 tz = ["dep:chrono-tz"]

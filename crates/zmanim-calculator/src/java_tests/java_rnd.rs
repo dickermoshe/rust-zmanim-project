@@ -1,5 +1,6 @@
 //! A set of functions which generate random pairs of Java and Rust objects.
 //! This is used in our testing framework to create random test cases.
+extern crate std;
 use std::str::FromStr;
 
 use crate::{

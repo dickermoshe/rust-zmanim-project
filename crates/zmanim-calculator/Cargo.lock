@@ -1396,7 +1396,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "zmanim-calendar"
+name = "zmanim-calculator"
 version = "0.1.0"
 dependencies = [
  "astronomical-calculator",

@@ -1,0 +1,80 @@
+name: Rust
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: llvm-tools-preview
+          cache: false
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
+      - name: Check Java version
+        run: java --version
+      - name: Build Java submodule
+        working-directory: ./kosher-java
+        run: mvn package -Dmaven.test.skip -Dmaven.javadoc.skip=true -Dmaven.source.skip=true
+      - name: Build Rust project
+        run: cargo build
+      - name: Run tests with default features
+        env:
+          RUST_BACKTRACE: 1
+          TEST_ITERATIONS: 10000
+        run: cargo test --verbose
+      - name: Run tests without default features
+        env:
+          RUST_BACKTRACE: 1
+          TEST_ITERATIONS: 100
+        run: cargo test --verbose --no-default-features
+      - name: Generate Codecov report
+        run: cargo llvm-cov --codecov --output-path codecov.json
+      - name: Upload Codecov report
+        uses: codecov/codecov-action@v5
+        with:
+          files: codecov.json
+          fail_ci_if_error: true
+
+  formatting:
+    name: cargo fmt
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt
+      - name: Rustfmt Check
+        uses: actions-rust-lang/rustfmt@v1
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+      - name: Clippy check
+        run: cargo clippy -- -D warnings

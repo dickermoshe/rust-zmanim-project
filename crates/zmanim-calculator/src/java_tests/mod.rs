@@ -5,6 +5,8 @@ use chrono::DateTime;
 use j4rs::{ClasspathEntry, Jvm, JvmBuilder};
 mod java_bindings;
 mod java_rnd;
+extern crate std;
+
 use std::env;
 use std::sync::Once;
 
@@ -106,7 +108,7 @@ mod tests {
         max_diff_override: Option<i64>,
         max_lat: Option<f64>,
     ) {
-        println!(
+        std::println!(
             "Testing {:?} with seed: {} (set TEST_SEED={} to reproduce)",
             zman.java_function_name(),
             seed,
@@ -151,15 +153,15 @@ mod tests {
                 rust_result_tz,
                 java_result,
                 max_diff,
-                &format!(
+                &std::format!(
                     "Iteration {}: {:?} at {:?}, Location: ({}, {}), Elevation: {}, Timezone: {:?}",
                     i,
-                    zman.java_function_name(),
-                    rust_calculator.date,
-                    rust_calculator.location.latitude,
-                    rust_calculator.location.longitude,
-                    rust_calculator.location.elevation,
-                    rust_calculator.location.timezone.map(|tz| tz.name()),
+                    &zman.java_function_name(),
+                    &rust_calculator.date,
+                    &rust_calculator.location.latitude,
+                    &rust_calculator.location.longitude,
+                    &rust_calculator.location.elevation,
+                    &rust_calculator.location.timezone.map(|tz| tz.name()),
                 ),
             );
         }
