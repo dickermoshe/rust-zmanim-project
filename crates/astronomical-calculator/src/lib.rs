@@ -643,6 +643,7 @@ impl AstronomicalCalculator {
     /// # Arguments
     ///
     /// * `degrees` - The number of degrees below the horizon (e.g., 6.0 for civil dawn, 12.0 for nautical dawn, 18.0 for astronomical dawn)
+    /// * `geometric` - Whether to use the geometric horizon (true) or the elevated horizon (false).    
     ///
     /// # Returns
     ///
@@ -655,7 +656,11 @@ impl AstronomicalCalculator {
     ///
     /// This function does not cache results. For better performance when calling multiple times,
     /// use the specific methods like `get_civil_dawn()`, `get_nautical_dawn()`, etc.
-    pub fn get_sunrise_offset_by_degrees(&mut self, degrees: f64) -> Result<SolarEventResult, CalculationError> {
+    pub fn get_sunrise_offset_by_degrees(
+        &mut self,
+        degrees: f64,
+        geometric: bool,
+    ) -> Result<SolarEventResult, CalculationError> {
         let prev_midnight = self.get_prev_solar_midnight()?;
         let transit = self.get_solar_transit()?;
 
@@ -665,10 +670,9 @@ impl AstronomicalCalculator {
             .unwrap_or(PI / 2.0);
         let z2 = self._get_solar_transit()?.position.zenith;
 
-        // Twilight events are measured from the geometric horizon (not the elevated horizon),
-        // so we don't include geometric dip. The "degrees" parameter represents the solar
-        // depression angle below the geometric horizon.
-        let target_zenith = PI / 2.0 + PI * degrees / 180.0;
+        let dip = if geometric { 0.0 } else { self.compute_dip() };
+
+        let target_zenith = dip + PI / 2.0 + PI * degrees / 180.0;
 
         self.find_solar_event(prev_midnight, transit, z1, z2, target_zenith)
     }
@@ -681,6 +685,7 @@ impl AstronomicalCalculator {
     /// # Arguments
     ///
     /// * `degrees` - The number of degrees below the horizon (e.g., 6.0 for civil dusk, 12.0 for nautical dusk, 18.0 for astronomical dusk)
+    /// * `geometric` - Whether to use the geometric horizon (true) or the elevated horizon (false).
     ///
     /// # Returns
     ///
@@ -694,17 +699,20 @@ impl AstronomicalCalculator {
     ///
     /// This function does not cache results. For better performance when calling multiple times,
     /// use the specific methods like `get_civil_dusk()`, `get_nautical_dusk()`, etc.
-    pub fn get_sunset_offset_by_degrees(&mut self, degrees: f64) -> Result<SolarEventResult, CalculationError> {
+    pub fn get_sunset_offset_by_degrees(
+        &mut self,
+        degrees: f64,
+        geometric: bool,
+    ) -> Result<SolarEventResult, CalculationError> {
         let transit = self.get_solar_transit()?;
         let next_midnight = self.get_next_solar_midnight()?;
 
         let z1 = self._get_solar_transit()?.position.zenith;
         let z2 = self._get_next_solar_midnight()?.position.zenith;
 
-        // Twilight events are measured from the geometric horizon (not the elevated horizon),
-        // so we don't include geometric dip. The "degrees" parameter represents the solar
-        // depression angle below the geometric horizon.
-        let target_zenith = PI / 2.0 + PI * degrees / 180.0;
+        let dip = if geometric { 0.0 } else { self.compute_dip() };
+
+        let target_zenith = dip + PI / 2.0 + PI * degrees / 180.0;
 
         self.find_solar_event(transit, next_midnight, z1, z2, target_zenith)
     }
@@ -786,7 +794,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let result = self.get_sunrise_offset_by_degrees(6.0);
+        let result = self.get_sunrise_offset_by_degrees(6.0, true);
         let _ = self.civil_dawn.set(result);
         result
     }
@@ -810,7 +818,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let result = self.get_sunset_offset_by_degrees(6.0);
+        let result = self.get_sunset_offset_by_degrees(6.0, true);
         let _ = self.civil_dusk.set(result);
         result
     }
@@ -834,7 +842,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let result = self.get_sunrise_offset_by_degrees(12.0);
+        let result = self.get_sunrise_offset_by_degrees(12.0, true);
         let _ = self.nautical_dawn.set(result);
         result
     }
@@ -858,7 +866,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let result = self.get_sunset_offset_by_degrees(12.0);
+        let result = self.get_sunset_offset_by_degrees(12.0, true);
         let _ = self.nautical_dusk.set(result);
         result
     }
@@ -883,7 +891,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let result = self.get_sunrise_offset_by_degrees(18.0);
+        let result = self.get_sunrise_offset_by_degrees(18.0, true);
         let _ = self.astronomical_dawn.set(result);
         result
     }
@@ -908,7 +916,7 @@ impl AstronomicalCalculator {
             return *r;
         }
 
-        let result = self.get_sunset_offset_by_degrees(18.0);
+        let result = self.get_sunset_offset_by_degrees(18.0, true);
         let _ = self.astronomical_dusk.set(result);
         result
     }

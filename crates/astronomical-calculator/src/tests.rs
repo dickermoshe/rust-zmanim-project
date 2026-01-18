@@ -1827,7 +1827,7 @@ fn test_alos_hashachar_regression_2051_07_10() {
     }
 
     // Calculate Alos Hashachar (16.1 degrees below horizon before sunrise)
-    let alos_result = calc.get_sunrise_offset_by_degrees(16.1).unwrap();
+    let alos_result = calc.get_sunrise_offset_by_degrees(16.1, true).unwrap();
     let alos_ts = alos_result.timestamp().expect("Alos Hashachar should occur");
     let alos_dt = tz_ts_to_dt(alos_ts as f64, Paris);
 
