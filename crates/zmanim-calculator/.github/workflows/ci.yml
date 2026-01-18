@@ -40,14 +40,14 @@ jobs:
         env:
           RUST_BACKTRACE: 1
           TEST_ITERATIONS: 100
-        run: cargo llvm-cov --no-report --verbose --ignore-filename-regex "src[\\\\/]java_tests[\\\\/]|src[\\\\/]zmanim_calendar_tests\\.rs|src[\\\\/]types[\\\\/]zman\\.rs"
+        run: cargo llvm-cov --no-report --verbose
       - name: Run tests without default features
         env:
           RUST_BACKTRACE: 1
           TEST_ITERATIONS: 100
         run: cargo test --verbose --no-default-features
       - name: Generate Codecov report
-        run: cargo llvm-cov --codecov --output-path codecov.json --no-run --ignore-filename-regex "src[\\\\/]java_tests[\\\\/]|src[\\\\/]zmanim_calendar_tests\\.rs|src[\\\\/]types[\\\\/]zman\\.rs"
+        run: cargo llvm-cov --codecov --output-path codecov.json --no-run
       - name: Upload Codecov report
         uses: codecov/codecov-action@v5
         with:
