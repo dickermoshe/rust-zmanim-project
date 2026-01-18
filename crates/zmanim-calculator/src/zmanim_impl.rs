@@ -191,29 +191,27 @@ impl ZmanLike for BainHashmashosZman {
             BainHashmashosZman::Yereim18Minutes => {
                 let sunset = calc.sunset()?;
                 Some(sunset - Duration::minutes(18))
-            }
-            BainHashmashosZman::Yereim3Point05Degrees => calc.sunset_offset_by_degrees(-3.05),
+            } // BainHashmashosZman::Yereim3Point05Degrees => calc.sunset_offset_by_degrees(-3.05),
             BainHashmashosZman::Yereim16Point875Minutes => {
                 let sunset = calc.sunset()?;
                 Some(sunset - Duration::milliseconds((16.875 * 60.0 * 1000.0) as i64))
-            }
-            BainHashmashosZman::Yereim2Point8Degrees => calc.sunset_offset_by_degrees(-2.8),
+            } // BainHashmashosZman::Yereim2Point8Degrees => calc.sunset_offset_by_degrees(-2.8),
             BainHashmashosZman::Yereim13Point5Minutes => {
                 let sunset = calc.sunset()?;
                 Some(sunset - Duration::milliseconds((13.5 * 60.0 * 1000.0) as i64))
-            }
-            BainHashmashosZman::Yereim2Point1Degrees => calc.sunset_offset_by_degrees(-2.1),
+            } // BainHashmashosZman::Yereim2Point1Degrees => calc.sunset_offset_by_degrees(-2.1),
         }
     }
 
     #[cfg(test)]
-    fn degrees_near_horizon(&self) -> bool {
-        matches!(
-            self,
-            BainHashmashosZman::Yereim2Point8Degrees
-                | BainHashmashosZman::Yereim3Point05Degrees
-                | BainHashmashosZman::Yereim2Point1Degrees
-        )
+    fn degrees_above_horizon(&self) -> bool {
+        false
+        // matches!(
+        //     self,
+        //     BainHashmashosZman::Yereim2Point8Degrees
+        //         | BainHashmashosZman::Yereim3Point05Degrees
+        //         | BainHashmashosZman::Yereim2Point1Degrees
+        // )
     }
     #[cfg(test)]
     fn uses_elevation(&self) -> bool {
@@ -240,13 +238,13 @@ impl ZmanLike for BainHashmashosZman {
             }
             BainHashmashosZman::RabbeinuTam2Stars => "getBainHashmashosRT2Stars",
             BainHashmashosZman::Yereim18Minutes => "getBainHashmashosYereim18Minutes",
-            BainHashmashosZman::Yereim3Point05Degrees => "getBainHashmashosYereim3Point05Degrees",
+            // BainHashmashosZman::Yereim3Point05Degrees => "getBainHashmashosYereim3Point05Degrees",
             BainHashmashosZman::Yereim16Point875Minutes => {
                 "getBainHashmashosYereim16Point875Minutes"
             }
-            BainHashmashosZman::Yereim2Point8Degrees => "getBainHashmashosYereim2Point8Degrees",
+            // BainHashmashosZman::Yereim2Point8Degrees => "getBainHashmashosYereim2Point8Degrees",
             BainHashmashosZman::Yereim13Point5Minutes => "getBainHashmashosYereim13Point5Minutes",
-            BainHashmashosZman::Yereim2Point1Degrees => "getBainHashmashosYereim2Point1Degrees",
+            // BainHashmashosZman::Yereim2Point1Degrees => "getBainHashmashosYereim2Point1Degrees",
         }
     }
 }

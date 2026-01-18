@@ -35,9 +35,12 @@ pub enum BainHashmashosZman {
     Yereim13Point5Minutes,
     Yereim16Point875Minutes,
     Yereim18Minutes,
-    Yereim2Point1Degrees,
-    Yereim2Point8Degrees,
-    Yereim3Point05Degrees,
+    // This is not supported by our library until
+    // we can figure out how to handle refraction/elevation for degree
+    // calculations for when the sun is above the horizon.
+    // Yereim2Point1Degrees,
+    // Yereim2Point8Degrees,
+    // Yereim3Point05Degrees,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

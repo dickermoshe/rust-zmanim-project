@@ -13,7 +13,7 @@ tz = ["dep:chrono-tz"]
 
 [dependencies]
 hebrew_holiday_calendar = "0.2.0"
-astronomical-calculator = "0.3.1"
+astronomical-calculator = "0.4.0"
 icu_calendar = { version = "2.0.3", features = [
     "unstable",
 ], default-features = false }

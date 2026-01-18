@@ -34,6 +34,7 @@ fn random_date_time(rng: &mut impl Rng, tz: &chrono_tz::Tz) -> DateTime<chrono_t
 }
 
 pub fn random_time_and_place<Rng: rand::Rng>(
+    max_lat: Option<f64>,
     jvm: &Jvm,
     rng: &mut Rng,
 ) -> Option<(
@@ -47,7 +48,7 @@ pub fn random_time_and_place<Rng: rand::Rng>(
     // We are allowing for a n second difference between results. If we test for locations
     // too close to the poles, we would need to allow for a much larger room for error
     // which would start to affect the effectiveness of the tests.
-    let latitude = rng.gen_range(-45.0..=45.0);
+    let latitude = rng.gen_range(-max_lat.unwrap_or(45.0)..=max_lat.unwrap_or(45.0));
     let longitude = rng.gen_range(-180.0..=180.0);
     let elevation = rng.gen_range(-0.0..=400.0);
     let timezone_id = FINDER.get_tz_name(longitude, latitude);
@@ -61,8 +62,10 @@ pub fn random_time_and_place<Rng: rand::Rng>(
 pub fn random_zmanim_calendars<'a>(
     jvm: &'a Jvm,
     rng: &mut impl Rng,
+    max_lat: Option<f64>,
 ) -> Option<(ZmanimCalculator<Tz>, JavaZmanimCalendar<'a>, Tz)> {
-    let (rust_time_and_place, date_time, java_time_and_place) = random_time_and_place(jvm, rng)?;
+    let (rust_time_and_place, date_time, java_time_and_place) =
+        random_time_and_place(max_lat, jvm, rng)?;
     let candle_lighting_offset = Duration::minutes(rng.gen_range(0..=60));
     let use_astronomical_chatzos = rng.gen_bool(0.5);
     let use_astronomical_chatzos_for_other_zmanim = rng.gen_bool(0.5);

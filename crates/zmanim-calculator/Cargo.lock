@@ -69,9 +69,9 @@ checksum = "a23eb6b1614318a8071c9b2521f36b424b2c83db5eb3a0fead4a6c0809af6e61"
 
 [[package]]
 name = "astronomical-calculator"
-version = "0.3.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bf6302207d8d065294ff41557bcab633881f1218cdb199fd6eaa925a7cb0ab2"
+checksum = "c7b42653306c65342e392cf0c772b1cb6be281a1ad68a41f13499f453ac6e788"
 dependencies = [
  "chrono",
  "core_maths",

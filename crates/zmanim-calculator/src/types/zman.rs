@@ -9,7 +9,7 @@ pub trait ZmanLike {
     #[cfg(test)]
     fn java_function_name(&self) -> &str;
     #[cfg(test)]
-    fn degrees_near_horizon(&self) -> bool {
+    fn degrees_above_horizon(&self) -> bool {
         false
     }
 }

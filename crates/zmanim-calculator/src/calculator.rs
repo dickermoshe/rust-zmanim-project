@@ -1,5 +1,5 @@
 use astronomical_calculator::{AstronomicalCalculator, Refraction};
-use chrono::offset::Offset;
+
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc};
 
 use crate::{
@@ -13,9 +13,11 @@ pub struct ZmanimCalculator<Tz: TimeZone> {
     pub location: Location<Tz>,
     pub date: NaiveDate,
     pub config: CalculatorConfig,
-    pub(crate) sea_level_calc: AstronomicalCalculator,
-    pub(crate) sea_level_no_refraction_calc: AstronomicalCalculator,
-    pub(crate) elevation_calc: AstronomicalCalculator,
+    pub(crate) a_calc: AstronomicalCalculator,
+    pub(crate) sl_calc: AstronomicalCalculator,
+    // pub(crate) sea_level_calc: AstronomicalCalculator,
+    // pub(crate) sea_level_no_refraction_calc: AstronomicalCalculator,
+    // pub(crate) elevation_calc: AstronomicalCalculator,
 }
 
 impl<Tz: TimeZone> ZmanimCalculator<Tz> {
@@ -47,26 +49,12 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             Refraction::ApSolposBennet,
         )
         .ok()?;
-        let sea_level_no_refraction_calc = AstronomicalCalculator::new(
-            localnoon,
-            None,
-            0.0,
-            location.longitude,
-            location.latitude,
-            0.0,
-            22.0,
-            1013.25,
-            None,
-            Refraction::ApSolposBennet,
-        )
-        .ok()?;
         Some(Self {
             location,
             date,
             config,
-            elevation_calc,
-            sea_level_calc,
-            sea_level_no_refraction_calc,
+            a_calc: elevation_calc,
+            sl_calc: sea_level_calc,
         })
     }
     fn local_noon<T: TimeZone>(date: NaiveDate, location: &Location<T>) -> Option<DateTime<Utc>> {
@@ -85,45 +73,35 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         zman.calculate(self)
     }
     pub(crate) fn transit(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(self.sea_level_calc.get_solar_transit().ok()?, 0)
+        Utc.timestamp_opt(self.a_calc.get_solar_transit().ok()?, 0)
             .single()
     }
 
     pub(crate) fn sunrise(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(self.elevation_calc.get_sunrise().ok()?.timestamp()?, 0)
+        Utc.timestamp_opt(self.a_calc.get_sunrise().ok()?.timestamp()?, 0)
             .single()
     }
     pub(crate) fn sunset(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(self.elevation_calc.get_sunset().ok()?.timestamp()?, 0)
+        Utc.timestamp_opt(self.a_calc.get_sunset().ok()?.timestamp()?, 0)
             .single()
     }
     pub(crate) fn sea_level_sunrise(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(
-            self.sea_level_calc
-                .get_sea_level_sunrise()
-                .ok()?
-                .timestamp()?,
-            0,
-        )
-        .single()
+        Utc.timestamp_opt(self.sl_calc.get_sea_level_sunrise().ok()?.timestamp()?, 0)
+            .single()
     }
     pub(crate) fn sea_level_sunset(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(
-            self.sea_level_calc
-                .get_sea_level_sunset()
-                .ok()?
-                .timestamp()?,
-            0,
-        )
-        .single()
+        Utc.timestamp_opt(self.sl_calc.get_sea_level_sunset().ok()?.timestamp()?, 0)
+            .single()
     }
     pub(crate) fn sunrise_offset_by_degrees(
         &mut self,
         offset_zenith: f64,
     ) -> Option<DateTime<Utc>> {
+        // If we are calculating a position above the horizon, we need to use the astronomical calculator
+        // to offset from the real sunrise.
         Utc.timestamp_opt(
-            self.sea_level_no_refraction_calc
-                .get_sunrise_offset_by_degrees(offset_zenith)
+            self.a_calc
+                .get_sunrise_offset_by_degrees(offset_zenith, offset_zenith > 0.0)
                 .ok()?
                 .timestamp()?,
             0,
@@ -131,9 +109,11 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         .single()
     }
     pub(crate) fn sunset_offset_by_degrees(&mut self, offset_zenith: f64) -> Option<DateTime<Utc>> {
+        // If we are calculating a position above the horizon, we need to use the astronomical calculator
+        // to offset from the real sunset.
         Utc.timestamp_opt(
-            self.sea_level_no_refraction_calc
-                .get_sunset_offset_by_degrees(offset_zenith)
+            self.a_calc
+                .get_sunset_offset_by_degrees(offset_zenith, offset_zenith > 0.0)
                 .ok()?
                 .timestamp()?,
             0,
@@ -226,36 +206,35 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         if !(0.0..24.0).contains(&hours) {
             return None;
         }
-        let longitude_offset =
-            Duration::milliseconds((location.longitude * 4.0 * 60.0 * 1000.0) as i64);
-        let hours_offset = Duration::milliseconds((hours * 3600.0 * 1000.0) as i64);
-        let adjusted_date = if let Some(timezone) = &location.timezone {
-            let local_midnight = timezone
-                .with_ymd_and_hms(date.year(), date.month(), date.day(), 0, 0, 0)
-                .single()?;
-            let tz_offset_hours = local_midnight.offset().fix().local_minus_utc() as f64 / 3600.0;
-            let local_mean_time_offset_hours = (location.longitude / 15.0) - tz_offset_hours;
-            if local_mean_time_offset_hours >= 20.0 {
-                date.checked_add_signed(Duration::days(1))?
-            } else if local_mean_time_offset_hours <= -20.0 {
-                date.checked_add_signed(Duration::days(-1))?
-            } else {
-                date
+
+        if let Some(timezone) = &location.timezone {
+            #[allow(clippy::unwrap_used)]
+            let midnight = date.and_hms_opt(0, 0, 0).unwrap();
+
+            let lmt_nanos = (hours * 3600.0 * 1_000_000_000.0).round() as i64;
+            let lmt_dt = midnight + Duration::nanoseconds(lmt_nanos);
+
+            let offset_nanos = (location.longitude * 240.0 * 1_000_000_000.0).round() as i64;
+
+            let mut utc = Utc.from_utc_datetime(&(lmt_dt - Duration::nanoseconds(offset_nanos)));
+
+            for _ in 0..4 {
+                let local_date = utc.with_timezone(timezone).date_naive();
+                let diff_days = (local_date - date).num_days();
+                if diff_days == 0 {
+                    break;
+                }
+                utc -= Duration::days(diff_days);
             }
+
+            Some(utc)
         } else {
-            date
-        };
-        let midnight = Utc
-            .with_ymd_and_hms(
-                adjusted_date.year(),
-                adjusted_date.month(),
-                adjusted_date.day(),
-                0,
-                0,
-                0,
-            )
-            .single()?;
-        Some(midnight + hours_offset - longitude_offset)
+            let lmt_seconds = (hours * 3600.0).round() as i64;
+            #[allow(clippy::unwrap_used)]
+            let lmt_dt = date.and_hms_opt(0, 0, 0).unwrap() + Duration::seconds(lmt_seconds);
+            let offset_seconds = (location.longitude * 240.0).round() as i64;
+            Some((lmt_dt - Duration::seconds(offset_seconds)).and_utc())
+        }
     }
     pub(crate) fn get_half_day_based_zman_from_times(
         &mut self,
