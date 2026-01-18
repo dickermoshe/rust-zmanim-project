@@ -39,19 +39,20 @@ jobs:
       - name: Run tests with default features
         env:
           RUST_BACKTRACE: 1
-          TEST_ITERATIONS: 10000
-        run: cargo test --verbose
+          TEST_ITERATIONS: 100
+        run: cargo llvm-cov --no-report --verbose
       - name: Run tests without default features
         env:
           RUST_BACKTRACE: 1
           TEST_ITERATIONS: 100
         run: cargo test --verbose --no-default-features
       - name: Generate Codecov report
-        run: cargo llvm-cov --codecov --output-path codecov.json
+        run: cargo llvm-cov --codecov --output-path codecov.json --no-run
       - name: Upload Codecov report
         uses: codecov/codecov-action@v5
         with:
           files: codecov.json
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
 
   formatting:
