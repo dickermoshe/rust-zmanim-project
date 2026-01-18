@@ -17,9 +17,6 @@ pub struct ZmanimCalculator<Tz: TimeZone> {
     pub config: CalculatorConfig,
     pub(crate) a_calc: AstronomicalCalculator,
     pub(crate) sl_calc: AstronomicalCalculator,
-    // pub(crate) sea_level_calc: AstronomicalCalculator,
-    // pub(crate) sea_level_no_refraction_calc: AstronomicalCalculator,
-    // pub(crate) elevation_calc: AstronomicalCalculator,
 }
 
 impl<Tz: TimeZone> ZmanimCalculator<Tz> {

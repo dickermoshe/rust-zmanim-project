@@ -32,7 +32,8 @@ jobs:
         run: java --version
       - name: Build Java submodule
         working-directory: ./kosher-java
-        run: mvn package -Dmaven.test.skip -Dmaven.javadoc.skip=true -Dmaven.source.skip=true
+        shell: bash
+        run: mvn -DskipTests -Dmaven.javadoc.skip=true -Dmaven.source.skip=true package
       - name: Build Rust project
         run: cargo build
       - name: Run tests with default features
