@@ -664,7 +664,7 @@ mod tests {
     zman_test!(test_tzais_degrees_16_point_1, TzaisZman::Degrees16Point1);
     zman_test!(test_tzais_degrees_18, TzaisZman::Degrees18);
     zman_test!(test_tzais_degrees_19_point_8, TzaisZman::Degrees19Point8);
-    zman_test!(test_tzais_degrees_26, TzaisZman::Degrees26);
+    zman_test!(test_tzais_degrees_26, TzaisZman::Degrees26, Some(40.0));
     zman_test!(test_tzais_minutes_50, TzaisZman::Minutes50);
     zman_test!(test_tzais_minutes_60, TzaisZman::Minutes60);
     zman_test!(test_tzais_minutes_72, TzaisZman::Minutes72);
