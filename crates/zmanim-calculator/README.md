@@ -1,7 +1,7 @@
 # Zmanim Calculator
 
 [![CI](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml)
-[![Codecov](https://codecov.io/gh/dickermoshe/zmanim-calculator/branch/master/graph/badge.svg)](https://codecov.io/gh/dickermoshe/zmanim-calculator)
+[![Codecov](https://codecov.io/gh/dickermoshe/zmanim-calculator/branch/main/graph/badge.svg)](https://codecov.io/gh/dickermoshe/zmanim-calculator)
 
 ## Install
 
