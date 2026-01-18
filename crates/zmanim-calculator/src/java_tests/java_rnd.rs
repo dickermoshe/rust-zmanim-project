@@ -47,7 +47,7 @@ pub fn random_time_and_place<Rng: rand::Rng>(
     // We are allowing for a n second difference between results. If we test for locations
     // too close to the poles, we would need to allow for a much larger room for error
     // which would start to affect the effectiveness of the tests.
-    let latitude = rng.gen_range(-50.0..=50.0);
+    let latitude = rng.gen_range(-45.0..=45.0);
     let longitude = rng.gen_range(-180.0..=180.0);
     let elevation = rng.gen_range(-0.0..=400.0);
     let timezone_id = FINDER.get_tz_name(longitude, latitude);

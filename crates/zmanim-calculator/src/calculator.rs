@@ -1,4 +1,5 @@
 use astronomical_calculator::{AstronomicalCalculator, Refraction};
+use chrono::offset::Offset;
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc};
 
 use crate::{
@@ -56,7 +57,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             22.0,
             1013.25,
             None,
-            Refraction::NoRefraction,
+            Refraction::ApSolposBennet,
         )
         .ok()?;
         Some(Self {
@@ -215,7 +216,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         let tzais_time = tzais.calculate(self)?;
         self.get_temporal_hour_from_times(&alos_time, &tzais_time)
     }
-    #[allow(unused)]
+
     pub(crate) fn local_mean_time(
         &mut self,
         date: NaiveDate,
@@ -225,12 +226,36 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         if !(0.0..24.0).contains(&hours) {
             return None;
         }
-        let offset = Duration::seconds((location.longitude * 4.0 * 60.0) as i64);
-        let hours = Duration::seconds((hours * 3600.0) as i64);
-        let middnight = Utc
-            .with_ymd_and_hms(date.year(), date.month(), date.day(), 0, 0, 0)
+        let longitude_offset =
+            Duration::milliseconds((location.longitude * 4.0 * 60.0 * 1000.0) as i64);
+        let hours_offset = Duration::milliseconds((hours * 3600.0 * 1000.0) as i64);
+        let adjusted_date = if let Some(timezone) = &location.timezone {
+            let local_midnight = timezone
+                .with_ymd_and_hms(date.year(), date.month(), date.day(), 0, 0, 0)
+                .single()?;
+            let tz_offset_hours = local_midnight.offset().fix().local_minus_utc() as f64 / 3600.0;
+            let local_mean_time_offset_hours = (location.longitude / 15.0) - tz_offset_hours;
+            if local_mean_time_offset_hours >= 20.0 {
+                date.checked_add_signed(Duration::days(1))?
+            } else if local_mean_time_offset_hours <= -20.0 {
+                date.checked_add_signed(Duration::days(-1))?
+            } else {
+                date
+            }
+        } else {
+            date
+        };
+        let midnight = Utc
+            .with_ymd_and_hms(
+                adjusted_date.year(),
+                adjusted_date.month(),
+                adjusted_date.day(),
+                0,
+                0,
+                0,
+            )
             .single()?;
-        Some(middnight + hours - offset)
+        Some(midnight + hours_offset - longitude_offset)
     }
     pub(crate) fn get_half_day_based_zman_from_times(
         &mut self,

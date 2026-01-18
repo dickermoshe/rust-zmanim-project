@@ -205,6 +205,16 @@ impl ZmanLike for BainHashmashosZman {
             BainHashmashosZman::Yereim2Point1Degrees => calc.sunset_offset_by_degrees(-2.1),
         }
     }
+
+    #[cfg(test)]
+    fn degrees_near_horizon(&self) -> bool {
+        matches!(
+            self,
+            BainHashmashosZman::Yereim2Point8Degrees
+                | BainHashmashosZman::Yereim3Point05Degrees
+                | BainHashmashosZman::Yereim2Point1Degrees
+        )
+    }
     #[cfg(test)]
     fn uses_elevation(&self) -> bool {
         // Minutes variants use calc.sunset() which uses elevation_calc
@@ -302,9 +312,9 @@ impl ZmanLike for MinchaGedolaZman {
     fn calculate<T: TimeZone>(&self, calc: &mut ZmanimCalculator<T>) -> Option<DateTime<Utc>> {
         match self {
             MinchaGedolaZman::SunriseSunset => {
-                let sunrise = calc.sunrise()?;
+                let sunrise = calc.sunrise();
                 let sunset = calc.sunset()?;
-                calc.get_mincha_gedola_from_times(Some(&sunrise), &sunset, true)
+                calc.get_mincha_gedola_from_times(sunrise.as_ref(), &sunset, true)
             }
             MinchaGedolaZman::Degrees16Point1 => {
                 if calc.config.use_astronomical_chatzos_for_other_zmanim {
@@ -312,9 +322,9 @@ impl ZmanLike for MinchaGedolaZman {
                     let tzais = TzaisZman::Degrees16Point1.calculate(calc)?;
                     calc.get_half_day_based_zman_from_times(&chatzos, &tzais, 0.5)
                 } else {
-                    let alos = AlosZman::Degrees16Point1.calculate(calc)?;
+                    let alos = AlosZman::Degrees16Point1.calculate(calc);
                     let tzais = TzaisZman::Degrees16Point1.calculate(calc)?;
-                    calc.get_mincha_gedola_from_times(Some(&alos), &tzais, true)
+                    calc.get_mincha_gedola_from_times(alos.as_ref(), &tzais, true)
                 }
             }
             MinchaGedolaZman::Minutes30 => {
@@ -327,9 +337,9 @@ impl ZmanLike for MinchaGedolaZman {
                     let tzais = TzaisZman::Minutes72.calculate(calc)?;
                     calc.get_half_day_based_zman_from_times(&chatzos, &tzais, 0.5)
                 } else {
-                    let alos = AlosZman::Minutes72.calculate(calc)?;
+                    let alos = AlosZman::Minutes72.calculate(calc);
                     let tzais = TzaisZman::Minutes72.calculate(calc)?;
-                    calc.get_mincha_gedola_from_times(Some(&alos), &tzais, true)
+                    calc.get_mincha_gedola_from_times(alos.as_ref(), &tzais, true)
                 }
             }
             MinchaGedolaZman::AhavatShalom => {
@@ -346,14 +356,14 @@ impl ZmanLike for MinchaGedolaZman {
                 }
             }
             MinchaGedolaZman::AteretTorah => {
-                let alos = AlosZman::Minutes72Zmanis.calculate(calc)?;
+                let alos = AlosZman::Minutes72Zmanis.calculate(calc);
                 let tzais = TzaisZman::AteretTorah.calculate(calc)?;
-                calc.get_mincha_gedola_from_times(Some(&alos), &tzais, false)
+                calc.get_mincha_gedola_from_times(alos.as_ref(), &tzais, false)
             }
             MinchaGedolaZman::BaalHatanya => {
-                let sunrise = calc.sunrise_offset_by_degrees(1.583)?;
+                let sunrise = calc.sunrise_offset_by_degrees(1.583);
                 let sunset = calc.sunset_offset_by_degrees(1.583)?;
-                calc.get_mincha_gedola_from_times(Some(&sunrise), &sunset, true)
+                calc.get_mincha_gedola_from_times(sunrise.as_ref(), &sunset, true)
             }
             MinchaGedolaZman::BaalHatanyaGreaterThan30 => {
                 let mincha_30 = MinchaGedolaZman::Minutes30.calculate(calc)?;
@@ -417,19 +427,19 @@ impl ZmanLike for MinchaKetanaZman {
     fn calculate<T: TimeZone>(&self, calc: &mut ZmanimCalculator<T>) -> Option<DateTime<Utc>> {
         match self {
             MinchaKetanaZman::SunriseSunset => {
-                let sunrise = calc.sunrise()?;
+                let sunrise = calc.sunrise();
                 let sunset = calc.sunset()?;
-                calc.get_mincha_ketana_from_times(Some(&sunrise), &sunset, true)
+                calc.get_mincha_ketana_from_times(sunrise.as_ref(), &sunset, true)
             }
             MinchaKetanaZman::Degrees16Point1 => {
-                let alos = AlosZman::Degrees16Point1.calculate(calc)?;
+                let alos = AlosZman::Degrees16Point1.calculate(calc);
                 let tzais = TzaisZman::Degrees16Point1.calculate(calc)?;
-                calc.get_mincha_ketana_from_times(Some(&alos), &tzais, true)
+                calc.get_mincha_ketana_from_times(alos.as_ref(), &tzais, true)
             }
             MinchaKetanaZman::Minutes72 => {
-                let alos = AlosZman::Minutes72.calculate(calc)?;
+                let alos = AlosZman::Minutes72.calculate(calc);
                 let tzais = TzaisZman::Minutes72.calculate(calc)?;
-                calc.get_mincha_ketana_from_times(Some(&alos), &tzais, true)
+                calc.get_mincha_ketana_from_times(alos.as_ref(), &tzais, true)
             }
             MinchaKetanaZman::AhavatShalom => {
                 let tzais = TzaisZman::GeonimDegrees3Point8.calculate(calc)?;
@@ -439,14 +449,14 @@ impl ZmanLike for MinchaKetanaZman {
                 Some(tzais - (shaah_zmanis * 5 / 2))
             }
             MinchaKetanaZman::AteretTorah => {
-                let alos = AlosZman::Minutes72Zmanis.calculate(calc)?;
+                let alos = AlosZman::Minutes72Zmanis.calculate(calc);
                 let tzais = TzaisZman::AteretTorah.calculate(calc)?;
-                calc.get_mincha_ketana_from_times(Some(&alos), &tzais, false)
+                calc.get_mincha_ketana_from_times(alos.as_ref(), &tzais, false)
             }
             MinchaKetanaZman::BaalHatanya => {
-                let sunrise = calc.sunrise_offset_by_degrees(1.583)?;
+                let sunrise = calc.sunrise_offset_by_degrees(1.583);
                 let sunset = calc.sunset_offset_by_degrees(1.583)?;
-                calc.get_mincha_ketana_from_times(Some(&sunrise), &sunset, true)
+                calc.get_mincha_ketana_from_times(sunrise.as_ref(), &sunset, true)
             }
             MinchaKetanaZman::GRAFixedLocalChatzosToSunset => {
                 let chatzos = ChatzosZman::FixedLocal.calculate(calc)?;
@@ -520,9 +530,9 @@ impl ZmanLike for PlagHaminchaZman {
     fn calculate<T: TimeZone>(&self, calc: &mut ZmanimCalculator<T>) -> Option<DateTime<Utc>> {
         match self {
             PlagHaminchaZman::SunriseSunset => {
-                let sunrise = calc.sunrise()?;
+                let sunrise = calc.sunrise();
                 let sunset = calc.sunset()?;
-                calc.get_plag_hamincha_from_times(Some(&sunrise), &sunset, true)
+                calc.get_plag_hamincha_from_times(sunrise.as_ref(), &sunset, true)
             }
             PlagHaminchaZman::AhavatShalom => {
                 let tzais = TzaisZman::GeonimDegrees3Point8.calculate(calc)?;
@@ -532,89 +542,89 @@ impl ZmanLike for PlagHaminchaZman {
                 Some(tzais - (shaah_zmanis * 5 / 4))
             }
             PlagHaminchaZman::Degrees16Point1ToTzaisGeonim7Point083 => {
-                let alos = AlosZman::Degrees16Point1.calculate(calc)?;
+                let alos = AlosZman::Degrees16Point1.calculate(calc);
                 let tzais = TzaisZman::GeonimDegrees7Point083.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, false)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, false)
             }
             PlagHaminchaZman::AlosToSunset => {
-                let alos = AlosZman::Degrees16Point1.calculate(calc)?;
+                let alos = AlosZman::Degrees16Point1.calculate(calc);
                 let sunset = calc.sunset()?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &sunset, false)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &sunset, false)
             }
             PlagHaminchaZman::Minutes60 => {
-                let alos = AlosZman::Minutes60.calculate(calc)?;
+                let alos = AlosZman::Minutes60.calculate(calc);
                 let tzais = TzaisZman::Minutes60.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Minutes72 => {
-                let alos = AlosZman::Minutes72.calculate(calc)?;
+                let alos = AlosZman::Minutes72.calculate(calc);
                 let tzais = TzaisZman::Minutes72.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Minutes72Zmanis => {
-                let alos = AlosZman::Minutes72Zmanis.calculate(calc)?;
+                let alos = AlosZman::Minutes72Zmanis.calculate(calc);
                 let tzais = TzaisZman::Minutes72Zmanis.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Minutes90 => {
-                let alos = AlosZman::Minutes90.calculate(calc)?;
+                let alos = AlosZman::Minutes90.calculate(calc);
                 let tzais = TzaisZman::Minutes90.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Minutes90Zmanis => {
-                let alos = AlosZman::Minutes90Zmanis.calculate(calc)?;
+                let alos = AlosZman::Minutes90Zmanis.calculate(calc);
                 let tzais = TzaisZman::Minutes90Zmanis.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Minutes96 => {
-                let alos = AlosZman::Minutes96.calculate(calc)?;
+                let alos = AlosZman::Minutes96.calculate(calc);
                 let tzais = TzaisZman::Minutes96.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Minutes96Zmanis => {
-                let alos = AlosZman::Minutes96Zmanis.calculate(calc)?;
+                let alos = AlosZman::Minutes96Zmanis.calculate(calc);
                 let tzais = TzaisZman::Minutes96Zmanis.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Minutes120 => {
-                let alos = AlosZman::Minutes120.calculate(calc)?;
+                let alos = AlosZman::Minutes120.calculate(calc);
                 let tzais = TzaisZman::Minutes120.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Minutes120Zmanis => {
-                let alos = AlosZman::Minutes120Zmanis.calculate(calc)?;
+                let alos = AlosZman::Minutes120Zmanis.calculate(calc);
                 let tzais = TzaisZman::Minutes120Zmanis.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Degrees16Point1 => {
-                let alos = AlosZman::Degrees16Point1.calculate(calc)?;
+                let alos = AlosZman::Degrees16Point1.calculate(calc);
                 let tzais = TzaisZman::Degrees16Point1.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Degrees18 => {
-                let alos = AlosZman::Degrees18.calculate(calc)?;
+                let alos = AlosZman::Degrees18.calculate(calc);
                 let tzais = TzaisZman::Degrees18.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Degrees19Point8 => {
-                let alos = AlosZman::Degrees19Point8.calculate(calc)?;
+                let alos = AlosZman::Degrees19Point8.calculate(calc);
                 let tzais = TzaisZman::Degrees19Point8.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::Degrees26 => {
-                let alos = AlosZman::Degrees26.calculate(calc)?;
+                let alos = AlosZman::Degrees26.calculate(calc);
                 let tzais = TzaisZman::Degrees26.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, true)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, true)
             }
             PlagHaminchaZman::AteretTorah => {
-                let alos = AlosZman::Minutes72Zmanis.calculate(calc)?;
+                let alos = AlosZman::Minutes72Zmanis.calculate(calc);
                 let tzais = TzaisZman::AteretTorah.calculate(calc)?;
-                calc.get_plag_hamincha_from_times(Some(&alos), &tzais, false)
+                calc.get_plag_hamincha_from_times(alos.as_ref(), &tzais, false)
             }
             PlagHaminchaZman::BaalHatanya => {
-                let sunrise = calc.sunrise_offset_by_degrees(1.583)?;
+                let sunrise = calc.sunrise_offset_by_degrees(1.583);
                 let sunset = calc.sunset_offset_by_degrees(1.583)?;
-                calc.get_plag_hamincha_from_times(Some(&sunrise), &sunset, true)
+                calc.get_plag_hamincha_from_times(sunrise.as_ref(), &sunset, true)
             }
             PlagHaminchaZman::GRAFixedLocalChatzosToSunset => {
                 let chatzos = ChatzosZman::FixedLocal.calculate(calc)?;
@@ -681,19 +691,19 @@ impl ZmanLike for SamuchLeMinchaKetanaZman {
     fn calculate<T: TimeZone>(&self, calc: &mut ZmanimCalculator<T>) -> Option<DateTime<Utc>> {
         match self {
             SamuchLeMinchaKetanaZman::GRA => {
-                let sunrise = calc.sunrise()?;
+                let sunrise = calc.sunrise();
                 let sunset = calc.sunset()?;
-                calc.get_samuch_le_mincha_ketana_from_times(Some(&sunrise), &sunset, true)
+                calc.get_samuch_le_mincha_ketana_from_times(sunrise.as_ref(), &sunset, true)
             }
             SamuchLeMinchaKetanaZman::Degrees16Point1 => {
-                let alos = AlosZman::Degrees16Point1.calculate(calc)?;
+                let alos = AlosZman::Degrees16Point1.calculate(calc);
                 let tzais = TzaisZman::Degrees16Point1.calculate(calc)?;
-                calc.get_samuch_le_mincha_ketana_from_times(Some(&alos), &tzais, true)
+                calc.get_samuch_le_mincha_ketana_from_times(alos.as_ref(), &tzais, true)
             }
             SamuchLeMinchaKetanaZman::Minutes72 => {
-                let alos = AlosZman::Minutes72.calculate(calc)?;
+                let alos = AlosZman::Minutes72.calculate(calc);
                 let tzais = TzaisZman::Minutes72.calculate(calc)?;
-                calc.get_samuch_le_mincha_ketana_from_times(Some(&alos), &tzais, true)
+                calc.get_samuch_le_mincha_ketana_from_times(alos.as_ref(), &tzais, true)
             }
         }
     }
@@ -812,58 +822,58 @@ impl ZmanLike for SofZmanShmaZman {
         match self {
             SofZmanShmaZman::GRA => {
                 let sunrise = calc.sunrise()?;
-                let sunset = calc.sunset()?;
-                calc.get_sof_zman_shma_from_times(&sunrise, Some(&sunset), true)
+                let sunset = calc.sunset();
+                calc.get_sof_zman_shma_from_times(&sunrise, sunset.as_ref(), true)
             }
             SofZmanShmaZman::MGA => {
                 let alos = AlosZman::Minutes72.calculate(calc)?;
-                let tzais = TzaisZman::Minutes72.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes72.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::MGA19Point8Degrees => {
                 let alos = AlosZman::Degrees19Point8.calculate(calc)?;
-                let tzais = TzaisZman::Degrees19Point8.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Degrees19Point8.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::MGA16Point1Degrees => {
                 let alos = AlosZman::Degrees16Point1.calculate(calc)?;
-                let tzais = TzaisZman::Degrees16Point1.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Degrees16Point1.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::MGA18Degrees => {
                 let alos = AlosZman::Degrees18.calculate(calc)?;
-                let tzais = TzaisZman::Degrees18.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Degrees18.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::MGA72Minutes => {
                 let alos = AlosZman::Minutes72.calculate(calc)?;
-                let tzais = TzaisZman::Minutes72.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes72.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::MGA72MinutesZmanis => {
                 let alos = AlosZman::Minutes72Zmanis.calculate(calc)?;
-                let tzais = TzaisZman::Minutes72Zmanis.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes72Zmanis.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::MGA90Minutes => {
                 let alos = AlosZman::Minutes90.calculate(calc)?;
-                let tzais = TzaisZman::Minutes90.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes90.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::MGA90MinutesZmanis => {
                 let alos = AlosZman::Minutes90Zmanis.calculate(calc)?;
-                let tzais = TzaisZman::Minutes90Zmanis.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes90Zmanis.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::MGA96Minutes => {
                 let alos = AlosZman::Minutes96.calculate(calc)?;
-                let tzais = TzaisZman::Minutes96.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes96.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::MGA96MinutesZmanis => {
                 let alos = AlosZman::Minutes96Zmanis.calculate(calc)?;
-                let tzais = TzaisZman::Minutes96Zmanis.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes96Zmanis.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::Hours3BeforeChatzos => {
                 let chatzos = ChatzosZman::Astronomical.calculate(calc)?;
@@ -871,18 +881,18 @@ impl ZmanLike for SofZmanShmaZman {
             }
             SofZmanShmaZman::MGA120Minutes => {
                 let alos = AlosZman::Minutes120.calculate(calc)?;
-                let tzais = TzaisZman::Minutes120.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes120.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanShmaZman::Alos16Point1ToSunset => {
                 let alos = AlosZman::Degrees16Point1.calculate(calc)?;
-                let sunset = calc.sunset()?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&sunset), false)
+                let sunset = calc.sunset();
+                calc.get_sof_zman_shma_from_times(&alos, sunset.as_ref(), false)
             }
             SofZmanShmaZman::Alos16Point1ToTzaisGeonim7Point083Degrees => {
                 let alos = AlosZman::Degrees16Point1.calculate(calc)?;
-                let tzais = TzaisZman::GeonimDegrees7Point083.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), false)
+                let tzais = TzaisZman::GeonimDegrees7Point083.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), false)
             }
             SofZmanShmaZman::KolEliyahu => {
                 let chatzos = ChatzosZman::FixedLocal.calculate(calc)?;
@@ -892,13 +902,13 @@ impl ZmanLike for SofZmanShmaZman {
             }
             SofZmanShmaZman::AteretTorah => {
                 let alos = AlosZman::Minutes72Zmanis.calculate(calc)?;
-                let tzais = TzaisZman::AteretTorah.calculate(calc)?;
-                calc.get_sof_zman_shma_from_times(&alos, Some(&tzais), false)
+                let tzais = TzaisZman::AteretTorah.calculate(calc);
+                calc.get_sof_zman_shma_from_times(&alos, tzais.as_ref(), false)
             }
             SofZmanShmaZman::BaalHatanya => {
                 let sunrise = calc.sunrise_offset_by_degrees(1.583)?;
-                let sunset = calc.sunset_offset_by_degrees(1.583)?;
-                calc.get_sof_zman_shma_from_times(&sunrise, Some(&sunset), true)
+                let sunset = calc.sunset_offset_by_degrees(1.583);
+                calc.get_sof_zman_shma_from_times(&sunrise, sunset.as_ref(), true)
             }
             SofZmanShmaZman::FixedLocal => {
                 let chatzos = ChatzosZman::FixedLocal.calculate(calc)?;
@@ -1006,58 +1016,58 @@ impl ZmanLike for SofZmanTfilaZman {
         match self {
             SofZmanTfilaZman::GRA => {
                 let sunrise = calc.sunrise()?;
-                let sunset = calc.sunset()?;
-                calc.get_sof_zman_tfila_from_times(&sunrise, Some(&sunset), true)
+                let sunset = calc.sunset();
+                calc.get_sof_zman_tfila_from_times(&sunrise, sunset.as_ref(), true)
             }
             SofZmanTfilaZman::MGA => {
                 let alos = AlosZman::Minutes72.calculate(calc)?;
-                let tzais = TzaisZman::Minutes72.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes72.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::MGA19Point8Degrees => {
                 let alos = AlosZman::Degrees19Point8.calculate(calc)?;
-                let tzais = TzaisZman::Degrees19Point8.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Degrees19Point8.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::MGA16Point1Degrees => {
                 let alos = AlosZman::Degrees16Point1.calculate(calc)?;
-                let tzais = TzaisZman::Degrees16Point1.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Degrees16Point1.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::MGA18Degrees => {
                 let alos = AlosZman::Degrees18.calculate(calc)?;
-                let tzais = TzaisZman::Degrees18.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Degrees18.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::MGA72Minutes => {
                 let alos = AlosZman::Minutes72.calculate(calc)?;
-                let tzais = TzaisZman::Minutes72.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes72.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::MGA72MinutesZmanis => {
                 let alos = AlosZman::Minutes72Zmanis.calculate(calc)?;
-                let tzais = TzaisZman::Minutes72Zmanis.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes72Zmanis.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::MGA90Minutes => {
                 let alos = AlosZman::Minutes90.calculate(calc)?;
-                let tzais = TzaisZman::Minutes90.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes90.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::MGA90MinutesZmanis => {
                 let alos = AlosZman::Minutes90Zmanis.calculate(calc)?;
-                let tzais = TzaisZman::Minutes90Zmanis.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes90Zmanis.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::MGA96Minutes => {
                 let alos = AlosZman::Minutes96.calculate(calc)?;
-                let tzais = TzaisZman::Minutes96.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes96.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::MGA96MinutesZmanis => {
                 let alos = AlosZman::Minutes96Zmanis.calculate(calc)?;
-                let tzais = TzaisZman::Minutes96Zmanis.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes96Zmanis.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::Hours2BeforeChatzos => {
                 let chatzos = ChatzosZman::Astronomical.calculate(calc)?;
@@ -1065,18 +1075,18 @@ impl ZmanLike for SofZmanTfilaZman {
             }
             SofZmanTfilaZman::MGA120Minutes => {
                 let alos = AlosZman::Minutes120.calculate(calc)?;
-                let tzais = TzaisZman::Minutes120.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), true)
+                let tzais = TzaisZman::Minutes120.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), true)
             }
             SofZmanTfilaZman::AteretTorah => {
                 let alos = AlosZman::Minutes72Zmanis.calculate(calc)?;
-                let tzais = TzaisZman::AteretTorah.calculate(calc)?;
-                calc.get_sof_zman_tfila_from_times(&alos, Some(&tzais), false)
+                let tzais = TzaisZman::AteretTorah.calculate(calc);
+                calc.get_sof_zman_tfila_from_times(&alos, tzais.as_ref(), false)
             }
             SofZmanTfilaZman::BaalHatanya => {
                 let sunrise = calc.sunrise_offset_by_degrees(1.583)?;
-                let sunset = calc.sunset_offset_by_degrees(1.583)?;
-                calc.get_sof_zman_tfila_from_times(&sunrise, Some(&sunset), true)
+                let sunset = calc.sunset_offset_by_degrees(1.583);
+                calc.get_sof_zman_tfila_from_times(&sunrise, sunset.as_ref(), true)
             }
             SofZmanTfilaZman::FixedLocal => {
                 let chatzos = ChatzosZman::FixedLocal.calculate(calc)?;

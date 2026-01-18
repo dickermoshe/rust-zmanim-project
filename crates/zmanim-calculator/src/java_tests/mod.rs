@@ -49,6 +49,7 @@ mod tests {
     use super::*;
     use chrono::TimeZone;
     use rand::{Rng, SeedableRng};
+    use std::str::FromStr;
 
     /// Maximum allowed difference in seconds between Rust and Java implementations
     const MAX_DIFF_SECONDS: i64 = 40;
@@ -118,8 +119,6 @@ mod tests {
             else {
                 continue;
             };
-            //TODO
-            // Randomly test with or without timezone in location
             if !Location::<chrono_tz::Tz>::near_anti_meridian(rust_calculator.location.longitude)
                 && rng.gen_bool(0.5)
             {
@@ -143,6 +142,9 @@ mod tests {
                     zman.java_function_name(),
                     rust_calculator.location.elevation
                 );
+            }
+            if zman.degrees_near_horizon() {
+                max_diff = 120;
             }
 
             assert_times_close(

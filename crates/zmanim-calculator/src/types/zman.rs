@@ -8,4 +8,8 @@ pub trait ZmanLike {
     fn uses_elevation(&self) -> bool;
     #[cfg(test)]
     fn java_function_name(&self) -> &str;
+    #[cfg(test)]
+    fn degrees_near_horizon(&self) -> bool {
+        false
+    }
 }
