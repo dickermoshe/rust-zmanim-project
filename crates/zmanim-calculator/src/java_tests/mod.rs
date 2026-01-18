@@ -1,4 +1,4 @@
-#![allow(clippy::unwrap_used)]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 #![allow(clippy::panic)]
 
 use chrono::DateTime;
@@ -164,6 +164,12 @@ mod tests {
                     &rust_calculator.location.timezone.map(|tz| tz.name()),
                 ),
             );
+            // for fixed chatzos, make sure that the date is the same at the naive data
+            if let Some(java_result) = java_result {
+                if zman.java_function_name() == "getFixedLocalChatzos" {
+                    assert_eq!(rust_calculator.date, java_result.naive_local().date());
+                }
+            }
         }
     }
 
@@ -728,6 +734,17 @@ mod tests {
     fn regression_mincha_gedola_gra_fixed_local_chatzos_30_minutes() {
         test_zman_iteration(
             MinchaGedolaZman::GRAFixedLocalChatzos30Minutes,
+            8218711474067301417,
+            2485,
+            None,
+            None,
+        );
+    }
+
+    #[test]
+    fn regression_fixed_local_chatzos() {
+        test_zman_iteration(
+            ChatzosZman::FixedLocal,
             8218711474067301417,
             2485,
             None,

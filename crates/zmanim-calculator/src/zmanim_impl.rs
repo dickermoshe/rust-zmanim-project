@@ -395,6 +395,7 @@ impl ZmanLike for MinchaGedolaZman {
             self,
             MinchaGedolaZman::SunriseSunset
                 | MinchaGedolaZman::Minutes72
+                | MinchaGedolaZman::AteretTorah
                 | MinchaGedolaZman::GreaterThan30
         )
     }
@@ -466,11 +467,12 @@ impl ZmanLike for MinchaKetanaZman {
     #[cfg(test)]
     fn uses_elevation(&self) -> bool {
         // SunriseSunset uses sunrise(); Minutes72 uses Alos72/Tzais72 (both use elevation)
-        // GRAFixedLocalChatzosToSunset uses sunset()
+        // AteretTorah uses sunset; GRAFixedLocalChatzosToSunset uses sunset()
         matches!(
             self,
             MinchaKetanaZman::SunriseSunset
                 | MinchaKetanaZman::Minutes72
+                | MinchaKetanaZman::AteretTorah
                 | MinchaKetanaZman::GRAFixedLocalChatzosToSunset
         )
     }
@@ -647,6 +649,7 @@ impl ZmanLike for PlagHaminchaZman {
                 | PlagHaminchaZman::Minutes96Zmanis
                 | PlagHaminchaZman::Minutes120
                 | PlagHaminchaZman::Minutes120Zmanis
+                | PlagHaminchaZman::AteretTorah
                 | PlagHaminchaZman::GRAFixedLocalChatzosToSunset
         )
     }
