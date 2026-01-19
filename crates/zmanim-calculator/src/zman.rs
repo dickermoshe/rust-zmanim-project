@@ -125,6 +125,7 @@ impl<'a> Event<'a> {
             }
         }
     }
+    #[cfg(test)]
     fn uses_elevation(&self) -> bool {
         match self {
             Event::Sunrise | Event::Sunset => true,
@@ -191,6 +192,7 @@ impl<'a, Tz: TimeZone> Zman<Tz> for ZmanEvent<'a> {
 }
 
 pub struct BainHashmashosRt2Stars {
+    #[cfg(test)]
     name: &'static str,
 }
 
@@ -214,6 +216,7 @@ impl<Tz: TimeZone> Zman<Tz> for BainHashmashosRt2Stars {
 }
 
 pub struct MinchaGedolaAhavatShalom {
+    #[cfg(test)]
     name: &'static str,
 }
 
@@ -242,6 +245,7 @@ impl<Tz: TimeZone> Zman<Tz> for MinchaGedolaAhavatShalom {
 }
 
 pub struct MinchaGedolaGreaterThan30 {
+    #[cfg(test)]
     name: &'static str,
 }
 
@@ -266,6 +270,7 @@ impl<Tz: TimeZone> Zman<Tz> for MinchaGedolaGreaterThan30 {
 }
 
 pub struct MinchaGedolaBaalHatanyaGreaterThan30 {
+    #[cfg(test)]
     name: &'static str,
 }
 
@@ -290,6 +295,7 @@ impl<Tz: TimeZone> Zman<Tz> for MinchaGedolaBaalHatanyaGreaterThan30 {
 }
 
 pub struct MinchaKetanaAhavatShalom {
+    #[cfg(test)]
     name: &'static str,
 }
 
@@ -311,6 +317,7 @@ impl<Tz: TimeZone> Zman<Tz> for MinchaKetanaAhavatShalom {
 }
 
 pub struct PlagAhavatShalom {
+    #[cfg(test)]
     name: &'static str,
 }
 
@@ -428,6 +435,7 @@ pub const BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES: Zman
         "getBainHashmashosRT13Point5MinutesBefore7Point083Degrees",
     );
 pub const BAIN_HASHMASHOS_RT_2_STARS: BainHashmashosRt2Stars = BainHashmashosRt2Stars {
+    #[cfg(test)]
     name: "getBainHashmashosRT2Stars",
 };
 pub const BAIN_HASHMASHOS_YEREIM_18_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
@@ -495,6 +503,7 @@ pub const MINCHA_GEDOLA_MINUTES_72: ZmanEvent<'static> = ZmanEvent::new(
     "getMinchaGedola72Minutes",
 );
 pub const MINCHA_GEDOLA_AHAVAT_SHALOM: MinchaGedolaAhavatShalom = MinchaGedolaAhavatShalom {
+    #[cfg(test)]
     name: "getMinchaGedolaAhavatShalom",
 };
 pub const MINCHA_GEDOLA_ATERET_TORAH: ZmanEvent<'static> = ZmanEvent::new(
@@ -507,6 +516,7 @@ pub const MINCHA_GEDOLA_BAAL_HATANYA: ZmanEvent<'static> = ZmanEvent::new(
 );
 pub const MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30: MinchaGedolaBaalHatanyaGreaterThan30 =
     MinchaGedolaBaalHatanyaGreaterThan30 {
+        #[cfg(test)]
         name: "getMinchaGedolaBaalHatanyaGreaterThan30",
     };
 pub const MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
@@ -514,6 +524,7 @@ pub const MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES: ZmanEvent<'static> =
     "getMinchaGedolaGRAFixedLocalChatzos30Minutes",
 );
 pub const MINCHA_GEDOLA_GREATER_THAN_30: MinchaGedolaGreaterThan30 = MinchaGedolaGreaterThan30 {
+    #[cfg(test)]
     name: "getMinchaGedolaGreaterThan30",
 };
 
@@ -538,6 +549,7 @@ pub const MINCHA_KETANA_MINUTES_72: ZmanEvent<'static> = ZmanEvent::new(
     "getMinchaKetana72Minutes",
 );
 pub const MINCHA_KETANA_AHAVAT_SHALOM: MinchaKetanaAhavatShalom = MinchaKetanaAhavatShalom {
+    #[cfg(test)]
     name: "getMinchaKetanaAhavatShalom",
 };
 pub const MINCHA_KETANA_ATERET_TORAH: ZmanEvent<'static> = ZmanEvent::new(
@@ -587,6 +599,7 @@ pub const PLAG_HAMINCHA_SUNRISE_SUNSET: ZmanEvent<'static> = ZmanEvent::new(
     "getPlagHamincha",
 );
 pub const PLAG_HAMINCHA_AHAVAT_SHALOM: PlagAhavatShalom = PlagAhavatShalom {
+    #[cfg(test)]
     name: "getPlagAhavatShalom",
 };
 pub const PLAG_HAMINCHA_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083: ZmanEvent<'static> = ZmanEvent::new(
