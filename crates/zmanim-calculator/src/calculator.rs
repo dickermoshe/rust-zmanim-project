@@ -6,8 +6,8 @@ use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc};
 
 use crate::{
     math::multiply_duration,
-    types::{config::CalculatorConfig, location::Location, zman::ZmanLike},
-    ChatzosZman,
+    types::{config::CalculatorConfig, location::Location},
+    zman::{Zman, CHATZOS_ASTRONOMICAL},
 };
 
 #[derive(Clone, Debug)]
@@ -68,7 +68,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
                 .checked_sub_signed(TimeDelta::seconds((location.longitude * 4.0 * 60.0) as i64))
         }
     }
-    pub fn calculate(&mut self, zman: impl ZmanLike) -> Option<DateTime<Utc>> {
+    pub fn calculate(&mut self, zman: impl Zman<Tz>) -> Option<DateTime<Utc>> {
         zman.calculate(self)
     }
     pub(crate) fn transit(&mut self) -> Option<DateTime<Utc>> {
@@ -133,15 +133,6 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         Some((*end_of_day - start_of_day) / 12)
     }
 
-    pub(crate) fn get_sun_transit_from_times(
-        &mut self,
-        start_of_day: &DateTime<Utc>,
-        end_of_day: &DateTime<Utc>,
-    ) -> Option<DateTime<Utc>> {
-        let temporal_hour = self.get_temporal_hour_from_times(start_of_day, end_of_day)?;
-        Some(*start_of_day + (temporal_hour * 6))
-    }
-
     pub(crate) fn get_shaah_zmanis_gra(&mut self) -> Option<Duration> {
         let sunrise = self.sunrise()?;
         let sunset = self.sunset()?;
@@ -159,8 +150,8 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
     #[allow(unused)]
     pub(crate) fn get_shaah_zmanis_from_zmanim(
         &mut self,
-        alos: impl ZmanLike,
-        tzais: impl ZmanLike,
+        alos: impl Zman<Tz>,
+        tzais: impl Zman<Tz>,
     ) -> Option<Duration> {
         let alos_time = alos.calculate(self)?;
         let tzais_time = tzais.calculate(self)?;
@@ -247,7 +238,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         synchronous: bool,
     ) -> Option<DateTime<Utc>> {
         if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = ChatzosZman::Astronomical
+            let chatzos = CHATZOS_ASTRONOMICAL
                 .calculate(self)
                 .or_else(|| self.transit())?;
 
@@ -259,26 +250,20 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
 
     pub(crate) fn get_mincha_gedola_from_times(
         &mut self,
-
         start_of_day: Option<&DateTime<Utc>>,
         end_of_day: &DateTime<Utc>,
         synchronous: bool,
     ) -> Option<DateTime<Utc>> {
         if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = ChatzosZman::Astronomical.calculate(self)?;
+            let chatzos = CHATZOS_ASTRONOMICAL
+                .calculate(self)
+                .or_else(|| self.transit())?;
             self.get_half_day_based_zman_from_times(&chatzos, end_of_day, 0.5)
         } else {
             self.get_shaah_zmanis_based_zman_from_times(start_of_day?, end_of_day, 6.5)
         }
     }
 
-    pub(crate) fn get_shaah_zmanis_mga(&mut self) -> Option<Duration> {
-        let sunrise = self.sunrise()?;
-        let sunset = self.sunset()?;
-        let alos72 = sunrise - Duration::minutes(72);
-        let tzais72 = sunset + Duration::minutes(72);
-        self.get_temporal_hour_from_times(&alos72, &tzais72)
-    }
     pub(crate) fn get_samuch_le_mincha_ketana_from_times(
         &mut self,
 
@@ -287,8 +272,9 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         synchronous: bool,
     ) -> Option<DateTime<Utc>> {
         if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = ChatzosZman::Astronomical.calculate(self)?;
-
+            let chatzos = CHATZOS_ASTRONOMICAL
+                .calculate(self)
+                .or_else(|| self.transit())?;
             self.get_half_day_based_zman_from_times(&chatzos, end_of_day, 3.0)
         } else {
             self.get_shaah_zmanis_based_zman_from_times(start_of_day?, end_of_day, 9.0)
@@ -302,8 +288,9 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         synchronous: bool,
     ) -> Option<DateTime<Utc>> {
         if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = ChatzosZman::Astronomical.calculate(self)?;
-
+            let chatzos = CHATZOS_ASTRONOMICAL
+                .calculate(self)
+                .or_else(|| self.transit())?;
             self.get_half_day_based_zman_from_times(&chatzos, end_of_day, 3.5)
         } else {
             self.get_shaah_zmanis_based_zman_from_times(start_of_day?, end_of_day, 9.5)
@@ -316,7 +303,9 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         synchronous: bool,
     ) -> Option<DateTime<Utc>> {
         if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = ChatzosZman::Astronomical.calculate(self)?;
+            let chatzos = CHATZOS_ASTRONOMICAL
+                .calculate(self)
+                .or_else(|| self.transit())?;
 
             self.get_half_day_based_zman_from_times(start_of_day, &chatzos, 4.0)
         } else {
@@ -331,8 +320,9 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         synchronous: bool,
     ) -> Option<DateTime<Utc>> {
         if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = ChatzosZman::Astronomical.calculate(self)?;
-
+            let chatzos = CHATZOS_ASTRONOMICAL
+                .calculate(self)
+                .or_else(|| self.transit())?;
             self.get_half_day_based_zman_from_times(&chatzos, end_of_day, 4.75)
         } else {
             self.get_shaah_zmanis_based_zman_from_times(start_of_day?, end_of_day, 10.75)

@@ -10,7 +10,6 @@ extern crate std;
 use std::env;
 use std::sync::Once;
 
-use crate::types::zman::ZmanLike;
 use crate::*;
 
 /// Default number of iterations for randomized tests.
@@ -48,6 +47,8 @@ pub fn init_jvm() -> Jvm {
 
 #[cfg(test)]
 mod tests {
+    use crate::zman::*;
+
     use super::*;
     use chrono::TimeZone;
     use rand::{Rng, SeedableRng};
@@ -102,15 +103,15 @@ mod tests {
     /// * `zman` - The Zman to test
     /// * `seed` - Random seed for reproducibility
     /// * `max_diff_override` - Optional override for max difference (if None, uses MAX_DIFF_SECONDS)
-    fn test_zman_vs_java<Z: ZmanLike + Copy>(
-        zman: Z,
+    fn test_zman_vs_java(
+        zman: &'static dyn Zman<chrono_tz::Tz>,
         seed: u64,
         max_diff_override: Option<i64>,
         max_lat: Option<f64>,
     ) {
         std::println!(
             "Testing {:?} with seed: {} (set TEST_SEED={} to reproduce)",
-            zman.java_function_name(),
+            zman.name(),
             seed,
             seed
         );
@@ -130,7 +131,7 @@ mod tests {
                 rust_calculator.location.timezone = None;
             }
 
-            let rust_result = rust_calculator.calculate(zman);
+            let rust_result = zman.calculate(&mut rust_calculator);
             let java_result = java_calendar.get_zman(zman);
 
             // Convert from Utc to the local timezone for comparison
@@ -144,7 +145,7 @@ mod tests {
                 assert!(
                     max_diff > 0 && max_diff < 100,
                     "Max diff is out of range for {:?}: {} meters",
-                    zman.java_function_name(),
+                    zman.name(),
                     rust_calculator.location.elevation
                 );
             }
@@ -156,7 +157,7 @@ mod tests {
                 &std::format!(
                     "Iteration {}: {:?} at {:?}, Location: ({}, {}), Elevation: {}, Timezone: {:?}",
                     i,
-                    &zman.java_function_name(),
+                    &zman.name(),
                     &rust_calculator.date,
                     &rust_calculator.location.latitude,
                     &rust_calculator.location.longitude,
@@ -166,15 +167,15 @@ mod tests {
             );
             // for fixed chatzos, make sure that the date is the same at the naive data
             if let Some(java_result) = java_result {
-                if zman.java_function_name() == "getFixedLocalChatzos" {
+                if zman.name() == "getFixedLocalChatzos" {
                     assert_eq!(rust_calculator.date, java_result.naive_local().date());
                 }
             }
         }
     }
 
-    fn test_zman_iteration<Z: ZmanLike + Copy>(
-        zman: Z,
+    fn test_zman_iteration(
+        zman: &'static dyn Zman<chrono_tz::Tz>,
         seed: u64,
         iteration: i64,
         max_diff_override: Option<i64>,
@@ -207,7 +208,7 @@ mod tests {
 
         let (mut rust_calculator, java_calendar, tz) =
             sample.expect("Expected to find regression sample");
-        let rust_result = rust_calculator.calculate(zman);
+        let rust_result = zman.calculate(&mut rust_calculator);
         let java_result = java_calendar.get_zman(zman);
         let rust_result_tz = rust_result.map(|dt| tz.from_utc_datetime(&dt.naive_utc()));
 
@@ -217,7 +218,7 @@ mod tests {
             assert!(
                 max_diff > 0 && max_diff < 100,
                 "Max diff is out of range for {:?}: {} meters",
-                zman.java_function_name(),
+                zman.name(),
                 rust_calculator.location.elevation
             );
         }
@@ -228,7 +229,7 @@ mod tests {
             max_diff,
             &std::format!(
                 "Regression {:?} seed {} iteration {}: {:?}, Location: ({}, {}), Elevation: {}, Timezone: {:?}",
-                &zman.java_function_name(),
+                &zman.name(),
                 seed,
                 iteration,
                 &rust_calculator.date,
@@ -244,65 +245,65 @@ mod tests {
         ($name:ident, $zman:expr) => {
             #[test]
             fn $name() {
-                test_zman_vs_java($zman, get_test_seed(), None, None);
+                test_zman_vs_java(&$zman, get_test_seed(), None, None);
             }
         };
         ($name:ident, $zman:expr, $max_lat:expr) => {
             #[test]
             fn $name() {
-                test_zman_vs_java($zman, get_test_seed(), None, $max_lat);
+                test_zman_vs_java(&$zman, get_test_seed(), None, $max_lat);
             }
         };
     }
 
-    zman_test!(test_neitz, NeitzZman);
-    zman_test!(test_shkia, ShkiaZman);
-    zman_test!(test_sea_level_neitz, SeaLevelNeitzZman);
-    zman_test!(test_sea_level_shkia, SeaLevelShkiaZman);
+    zman_test!(test_neitz, SUNRISE);
+    zman_test!(test_shkia, SUNSET);
+    zman_test!(test_sea_level_neitz, SEA_LEVEL_SUNRISE);
+    zman_test!(test_sea_level_shkia, SEA_LEVEL_SUNSET);
 
-    zman_test!(test_alos_minutes_120, AlosZman::Minutes120);
-    zman_test!(test_alos_minutes_120_zmanis, AlosZman::Minutes120Zmanis);
-    zman_test!(test_alos_degrees_16_point_1, AlosZman::Degrees16Point1);
-    zman_test!(test_alos_degrees_18, AlosZman::Degrees18);
-    zman_test!(test_alos_degrees_19, AlosZman::Degrees19);
-    zman_test!(test_alos_degrees_19_point_8, AlosZman::Degrees19Point8);
-    zman_test!(test_alos_degrees_26, AlosZman::Degrees26, Some(40.0));
-    zman_test!(test_alos_minutes_60, AlosZman::Minutes60);
-    zman_test!(test_alos_minutes_72, AlosZman::Minutes72);
-    zman_test!(test_alos_minutes_72_zmanis, AlosZman::Minutes72Zmanis);
-    zman_test!(test_alos_minutes_90, AlosZman::Minutes90);
-    zman_test!(test_alos_minutes_90_zmanis, AlosZman::Minutes90Zmanis);
-    zman_test!(test_alos_minutes_96, AlosZman::Minutes96);
-    zman_test!(test_alos_minutes_96_zmanis, AlosZman::Minutes96Zmanis);
-    zman_test!(test_alos_baal_hatanya, AlosZman::BaalHatanya);
+    zman_test!(test_alos_minutes_120, ALOS_120_MINUTES);
+    zman_test!(test_alos_minutes_120_zmanis, ALOS_120_ZMANIS);
+    zman_test!(test_alos_degrees_16_point_1, ALOS_16_POINT_1_DEGREES);
+    zman_test!(test_alos_degrees_18, ALOS_18_DEGREES);
+    zman_test!(test_alos_degrees_19, ALOS_19_DEGREES);
+    zman_test!(test_alos_degrees_19_point_8, ALOS_19_POINT_8_DEGREES);
+    zman_test!(test_alos_degrees_26, ALOS_26_DEGREES, Some(40.0));
+    zman_test!(test_alos_minutes_60, ALOS_60_MINUTES);
+    zman_test!(test_alos_minutes_72, ALOS_72_MINUTES);
+    zman_test!(test_alos_minutes_72_zmanis, ALOS_72_ZMANIS);
+    zman_test!(test_alos_minutes_90, ALOS_90_MINUTES);
+    zman_test!(test_alos_minutes_90_zmanis, ALOS_90_ZMANIS);
+    zman_test!(test_alos_minutes_96, ALOS_96_MINUTES);
+    zman_test!(test_alos_minutes_96_zmanis, ALOS_96_ZMANIS);
+    zman_test!(test_alos_baal_hatanya, ALOS_BAAL_HATANYA);
 
     zman_test!(
         test_bain_hashmashos_rabbeinu_tam_13_point_24_degrees,
-        BainHashmashosZman::RabbeinuTam13Point24Degrees
+        BAIN_HASHMASHOS_RT_13_POINT_24_DEGREES
     );
     zman_test!(
         test_bain_hashmashos_rabbeinu_tam_13_point_5_minutes_before_7_point_083_degrees,
-        BainHashmashosZman::RabbeinuTam13Point5MinutesBefore7Point083Degrees
+        BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES
     );
     zman_test!(
         test_bain_hashmashos_rabbeinu_tam_2_stars,
-        BainHashmashosZman::RabbeinuTam2Stars
+        BAIN_HASHMASHOS_RT_2_STARS
     );
     zman_test!(
         test_bain_hashmashos_rabbeinu_tam_58_point_5_minutes,
-        BainHashmashosZman::RabbeinuTam58Point5Minutes
+        BAIN_HASHMASHOS_RT_58_POINT_5_MINUTES
     );
     zman_test!(
         test_bain_hashmashos_yereim_13_point_5_minutes,
-        BainHashmashosZman::Yereim13Point5Minutes
+        BAIN_HASHMASHOS_YEREIM_13_POINT_5_MINUTES
     );
     zman_test!(
         test_bain_hashmashos_yereim_16_point_875_minutes,
-        BainHashmashosZman::Yereim16Point875Minutes
+        BAIN_HASHMASHOS_YEREIM_16_POINT_875_MINUTES
     );
     zman_test!(
         test_bain_hashmashos_yereim_18_minutes,
-        BainHashmashosZman::Yereim18Minutes
+        BAIN_HASHMASHOS_YEREIM_18_MINUTES
     );
     // zman_test!(
     //     test_bain_hashmashos_yereim_2_point_1_degrees,
@@ -317,423 +318,396 @@ mod tests {
     //     BainHashmashosZman::Yereim3Point05Degrees
     // );
 
-    zman_test!(test_candle_lighting, CandleLightingZman);
+    zman_test!(test_candle_lighting, CANDLE_LIGHTING);
 
-    zman_test!(test_chatzos_astronomical, ChatzosZman::Astronomical);
-    zman_test!(test_chatzos_half_day, ChatzosZman::HalfDay);
-    zman_test!(test_chatzos_fixed_local, ChatzosZman::FixedLocal);
+    zman_test!(test_chatzos_astronomical, CHATZOS_ASTRONOMICAL);
+    zman_test!(test_chatzos_half_day, CHATZOS_HALF_DAY);
+    zman_test!(test_chatzos_fixed_local, CHATZOS_FIXED_LOCAL);
 
     zman_test!(
         test_mincha_gedola_sunrise_sunset,
-        MinchaGedolaZman::SunriseSunset
+        MINCHA_GEDOLA_SUNRISE_SUNSET
     );
     zman_test!(
         test_mincha_gedola_degrees_16_point_1,
-        MinchaGedolaZman::Degrees16Point1
+        MINCHA_GEDOLA_16_POINT_1_DEGREES
     );
-    zman_test!(test_mincha_gedola_minutes_30, MinchaGedolaZman::Minutes30);
-    zman_test!(test_mincha_gedola_minutes_72, MinchaGedolaZman::Minutes72);
+    zman_test!(test_mincha_gedola_minutes_30, MINCHA_GEDOLA_MINUTES_30);
+    zman_test!(test_mincha_gedola_minutes_72, MINCHA_GEDOLA_MINUTES_72);
     zman_test!(
         test_mincha_gedola_ahavat_shalom,
-        MinchaGedolaZman::AhavatShalom
+        MINCHA_GEDOLA_AHAVAT_SHALOM
     );
-    zman_test!(
-        test_mincha_gedola_ateret_torah,
-        MinchaGedolaZman::AteretTorah
-    );
-    zman_test!(
-        test_mincha_gedola_baal_hatanya,
-        MinchaGedolaZman::BaalHatanya
-    );
+    zman_test!(test_mincha_gedola_ateret_torah, MINCHA_GEDOLA_ATERET_TORAH);
+    zman_test!(test_mincha_gedola_baal_hatanya, MINCHA_GEDOLA_BAAL_HATANYA);
     zman_test!(
         test_mincha_gedola_baal_hatanya_greater_than_30,
-        MinchaGedolaZman::BaalHatanyaGreaterThan30
+        MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30
     );
     zman_test!(
         test_mincha_gedola_gra_fixed_local_chatzos_30_minutes,
-        MinchaGedolaZman::GRAFixedLocalChatzos30Minutes
+        MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES
     );
     zman_test!(
         test_mincha_gedola_greater_than_30,
-        MinchaGedolaZman::GreaterThan30
+        MINCHA_GEDOLA_GREATER_THAN_30
     );
 
     zman_test!(
         test_mincha_ketana_sunrise_sunset,
-        MinchaKetanaZman::SunriseSunset
+        MINCHA_KETANA_SUNRISE_SUNSET
     );
     zman_test!(
         test_mincha_ketana_degrees_16_point_1,
-        MinchaKetanaZman::Degrees16Point1
+        MINCHA_KETANA_16_POINT_1_DEGREES
     );
-    zman_test!(test_mincha_ketana_minutes_72, MinchaKetanaZman::Minutes72);
+    zman_test!(test_mincha_ketana_minutes_72, MINCHA_KETANA_MINUTES_72);
     zman_test!(
         test_mincha_ketana_ahavat_shalom,
-        MinchaKetanaZman::AhavatShalom
+        MINCHA_KETANA_AHAVAT_SHALOM
     );
-    zman_test!(
-        test_mincha_ketana_ateret_torah,
-        MinchaKetanaZman::AteretTorah
-    );
-    zman_test!(
-        test_mincha_ketana_baal_hatanya,
-        MinchaKetanaZman::BaalHatanya
-    );
+    zman_test!(test_mincha_ketana_ateret_torah, MINCHA_KETANA_ATERET_TORAH);
+    zman_test!(test_mincha_ketana_baal_hatanya, MINCHA_KETANA_BAAL_HATANYA);
     zman_test!(
         test_mincha_ketana_gra_fixed_local_chatzos_to_sunset,
-        MinchaKetanaZman::GRAFixedLocalChatzosToSunset
+        MINCHA_KETANA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET
     );
 
     zman_test!(
         test_misheyakir_degrees_10_point_2,
-        MisheyakirZman::Degrees10Point2
+        MISHEYAKIR_10_POINT_2_DEGREES
     );
-    zman_test!(test_misheyakir_degrees_11, MisheyakirZman::Degrees11);
+    zman_test!(test_misheyakir_degrees_11, MISHEYAKIR_11_DEGREES);
     zman_test!(
         test_misheyakir_degrees_11_point_5,
-        MisheyakirZman::Degrees11Point5
+        MISHEYAKIR_11_POINT_5_DEGREES
     );
     zman_test!(
         test_misheyakir_degrees_7_point_65,
-        MisheyakirZman::Degrees7Point65
+        MISHEYAKIR_7_POINT_65_DEGREES
     );
     zman_test!(
         test_misheyakir_degrees_9_point_5,
-        MisheyakirZman::Degrees9Point5
+        MISHEYAKIR_9_POINT_5_DEGREES
     );
 
     zman_test!(
         test_plag_hamincha_ahavat_shalom,
-        PlagHaminchaZman::AhavatShalom
+        PLAG_HAMINCHA_AHAVAT_SHALOM
     );
     zman_test!(
         test_plag_hamincha_degrees_16_point_1_to_tzais_geonim_7_point_083,
-        PlagHaminchaZman::Degrees16Point1ToTzaisGeonim7Point083
+        PLAG_HAMINCHA_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083
     );
     zman_test!(
         test_plag_hamincha_alos_to_sunset,
-        PlagHaminchaZman::AlosToSunset
+        PLAG_HAMINCHA_ALOS_TO_SUNSET
     );
     zman_test!(
         test_plag_hamincha_sunrise_sunset,
-        PlagHaminchaZman::SunriseSunset
+        PLAG_HAMINCHA_SUNRISE_SUNSET
     );
-    zman_test!(test_plag_hamincha_minutes_120, PlagHaminchaZman::Minutes120);
+    zman_test!(test_plag_hamincha_minutes_120, PLAG_HAMINCHA_120_MINUTES);
     zman_test!(
         test_plag_hamincha_minutes_120_zmanis,
-        PlagHaminchaZman::Minutes120Zmanis
+        PLAG_HAMINCHA_120_ZMANIS
     );
     zman_test!(
         test_plag_hamincha_degrees_16_point_1,
-        PlagHaminchaZman::Degrees16Point1
+        PLAG_HAMINCHA_16_POINT_1_DEGREES
     );
-    zman_test!(test_plag_hamincha_degrees_18, PlagHaminchaZman::Degrees18);
+    zman_test!(test_plag_hamincha_degrees_18, PLAG_HAMINCHA_18_DEGREES);
     zman_test!(
         test_plag_hamincha_degrees_19_point_8,
-        PlagHaminchaZman::Degrees19Point8
+        PLAG_HAMINCHA_19_POINT_8_DEGREES
     );
     zman_test!(
         test_plag_hamincha_degrees_26,
-        PlagHaminchaZman::Degrees26,
+        PLAG_HAMINCHA_26_DEGREES,
         Some(40.0)
     );
-    zman_test!(test_plag_hamincha_minutes_60, PlagHaminchaZman::Minutes60);
-    zman_test!(test_plag_hamincha_minutes_72, PlagHaminchaZman::Minutes72);
+    zman_test!(test_plag_hamincha_minutes_60, PLAG_HAMINCHA_60_MINUTES);
+    zman_test!(test_plag_hamincha_minutes_72, PLAG_HAMINCHA_72_MINUTES);
     zman_test!(
         test_plag_hamincha_minutes_72_zmanis,
-        PlagHaminchaZman::Minutes72Zmanis
+        PLAG_HAMINCHA_72_ZMANIS
     );
-    zman_test!(test_plag_hamincha_minutes_90, PlagHaminchaZman::Minutes90);
+    zman_test!(test_plag_hamincha_minutes_90, PLAG_HAMINCHA_90_MINUTES);
     zman_test!(
         test_plag_hamincha_minutes_90_zmanis,
-        PlagHaminchaZman::Minutes90Zmanis
+        PLAG_HAMINCHA_90_ZMANIS
     );
-    zman_test!(test_plag_hamincha_minutes_96, PlagHaminchaZman::Minutes96);
+    zman_test!(test_plag_hamincha_minutes_96, PLAG_HAMINCHA_96_MINUTES);
     zman_test!(
         test_plag_hamincha_minutes_96_zmanis,
-        PlagHaminchaZman::Minutes96Zmanis
+        PLAG_HAMINCHA_96_ZMANIS
     );
-    zman_test!(
-        test_plag_hamincha_ateret_torah,
-        PlagHaminchaZman::AteretTorah
-    );
-    zman_test!(
-        test_plag_hamincha_baal_hatanya,
-        PlagHaminchaZman::BaalHatanya
-    );
+    zman_test!(test_plag_hamincha_ateret_torah, PLAG_HAMINCHA_ATERET_TORAH);
+    zman_test!(test_plag_hamincha_baal_hatanya, PLAG_HAMINCHA_BAAL_HATANYA);
     zman_test!(
         test_plag_hamincha_gra_fixed_local_chatzos_to_sunset,
-        PlagHaminchaZman::GRAFixedLocalChatzosToSunset
+        PLAG_HAMINCHA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET
     );
 
     zman_test!(
         test_samuch_le_mincha_ketana_degrees_16_point_1,
-        SamuchLeMinchaKetanaZman::Degrees16Point1
+        SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES
     );
     zman_test!(
         test_samuch_le_mincha_ketana_minutes_72,
-        SamuchLeMinchaKetanaZman::Minutes72
+        SAMUCH_LE_MINCHA_KETANA_72_MINUTES
     );
     zman_test!(
         test_samuch_le_mincha_ketana_gra,
-        SamuchLeMinchaKetanaZman::GRA
+        SAMUCH_LE_MINCHA_KETANA_GRA
     );
 
     zman_test!(
         test_sof_zman_achilas_chametz_baal_hatanya,
-        SofZmanAchilasChametzZman::BaalHatanya
+        SOF_ZMAN_ACHILAS_CHAMETZ_BAAL_HATANYA
     );
     zman_test!(
         test_sof_zman_achilas_chametz_gra,
-        SofZmanAchilasChametzZman::GRA
+        SOF_ZMAN_ACHILAS_CHAMETZ_GRA
     );
     zman_test!(
         test_sof_zman_achilas_chametz_mga_16_point_1_degrees,
-        SofZmanAchilasChametzZman::MGA16Point1Degrees
+        SOF_ZMAN_ACHILAS_CHAMETZ_MGA_16_POINT_1_DEGREES
     );
     zman_test!(
         test_sof_zman_achilas_chametz_mga_72_minutes,
-        SofZmanAchilasChametzZman::MGA72Minutes
+        SOF_ZMAN_ACHILAS_CHAMETZ_MGA_72_MINUTES
     );
 
     zman_test!(
         test_sof_zman_biur_chametz_baal_hatanya,
-        SofZmanBiurChametzZman::BaalHatanya
+        SOF_ZMAN_BIUR_CHAMETZ_BAAL_HATANYA
     );
-    zman_test!(test_sof_zman_biur_chametz_gra, SofZmanBiurChametzZman::GRA);
+    zman_test!(test_sof_zman_biur_chametz_gra, SOF_ZMAN_BIUR_CHAMETZ_GRA);
     zman_test!(
         test_sof_zman_biur_chametz_mga_16_point_1_degrees,
-        SofZmanBiurChametzZman::MGA16Point1Degrees
+        SOF_ZMAN_BIUR_CHAMETZ_MGA_16_POINT_1_DEGREES
     );
     zman_test!(
         test_sof_zman_biur_chametz_mga_72_minutes,
-        SofZmanBiurChametzZman::MGA72Minutes
+        SOF_ZMAN_BIUR_CHAMETZ_MGA_72_MINUTES
     );
 
     zman_test!(
         test_sof_zman_shma_hours_3_before_chatzos,
-        SofZmanShmaZman::Hours3BeforeChatzos
+        SOF_ZMAN_SHMA_HOURS_3_BEFORE_CHATZOS
     );
     zman_test!(
         test_sof_zman_shma_alos_16_point_1_to_sunset,
-        SofZmanShmaZman::Alos16Point1ToSunset
+        SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_SUNSET
     );
     zman_test!(
         test_sof_zman_shma_alos_16_point_1_to_tzais_geonim_7_point_083_degrees,
-        SofZmanShmaZman::Alos16Point1ToTzaisGeonim7Point083Degrees
+        SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083
     );
-    zman_test!(
-        test_sof_zman_shma_ateret_torah,
-        SofZmanShmaZman::AteretTorah
-    );
-    zman_test!(
-        test_sof_zman_shma_baal_hatanya,
-        SofZmanShmaZman::BaalHatanya
-    );
-    zman_test!(test_sof_zman_shma_fixed_local, SofZmanShmaZman::FixedLocal);
-    zman_test!(test_sof_zman_shma_gra, SofZmanShmaZman::GRA);
+    zman_test!(test_sof_zman_shma_ateret_torah, SOF_ZMAN_SHMA_ATERET_TORAH);
+    zman_test!(test_sof_zman_shma_baal_hatanya, SOF_ZMAN_SHMA_BAAL_HATANYA);
+    zman_test!(test_sof_zman_shma_fixed_local, SOF_ZMAN_SHMA_FIXED_LOCAL);
+    zman_test!(test_sof_zman_shma_gra, SOF_ZMAN_SHMA_GRA);
     zman_test!(
         test_sof_zman_shma_gra_sunrise_to_fixed_local_chatzos,
-        SofZmanShmaZman::GRASunriseToFixedLocalChatzos
+        SOF_ZMAN_SHMA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS
     );
-    zman_test!(test_sof_zman_shma_kol_eliyahu, SofZmanShmaZman::KolEliyahu);
-    zman_test!(test_sof_zman_shma_mga, SofZmanShmaZman::MGA);
+    zman_test!(test_sof_zman_shma_kol_eliyahu, SOF_ZMAN_SHMA_KOL_ELIYAHU);
+    zman_test!(test_sof_zman_shma_mga, SOF_ZMAN_SHMA_MGA);
     zman_test!(
         test_sof_zman_shma_mga_120_minutes,
-        SofZmanShmaZman::MGA120Minutes
+        SOF_ZMAN_SHMA_MGA_120_MINUTES
     );
     zman_test!(
         test_sof_zman_shma_mga_16_point_1_degrees,
-        SofZmanShmaZman::MGA16Point1Degrees
+        SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES
     );
     zman_test!(
         test_sof_zman_shma_mga_16_point_1_degrees_to_fixed_local_chatzos,
-        SofZmanShmaZman::MGA16Point1DegreesToFixedLocalChatzos
+        SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES_TO_FIXED_LOCAL_CHATZOS
     );
     zman_test!(
         test_sof_zman_shma_mga_18_degrees,
-        SofZmanShmaZman::MGA18Degrees
+        SOF_ZMAN_SHMA_MGA_18_DEGREES
     );
     zman_test!(
         test_sof_zman_shma_mga_18_degrees_to_fixed_local_chatzos,
-        SofZmanShmaZman::MGA18DegreesToFixedLocalChatzos
+        SOF_ZMAN_SHMA_MGA_18_DEGREES_TO_FIXED_LOCAL_CHATZOS
     );
     zman_test!(
         test_sof_zman_shma_mga_19_point_8_degrees,
-        SofZmanShmaZman::MGA19Point8Degrees
+        SOF_ZMAN_SHMA_MGA_19_POINT_8_DEGREES
     );
     zman_test!(
         test_sof_zman_shma_mga_72_minutes,
-        SofZmanShmaZman::MGA72Minutes
+        SOF_ZMAN_SHMA_MGA_72_MINUTES
     );
     zman_test!(
         test_sof_zman_shma_mga_72_minutes_to_fixed_local_chatzos,
-        SofZmanShmaZman::MGA72MinutesToFixedLocalChatzos
+        SOF_ZMAN_SHMA_MGA_72_MINUTES_TO_FIXED_LOCAL_CHATZOS
     );
     zman_test!(
         test_sof_zman_shma_mga_72_minutes_zmanis,
-        SofZmanShmaZman::MGA72MinutesZmanis
+        SOF_ZMAN_SHMA_MGA_72_ZMANIS
     );
     zman_test!(
         test_sof_zman_shma_mga_90_minutes,
-        SofZmanShmaZman::MGA90Minutes
+        SOF_ZMAN_SHMA_MGA_90_MINUTES
     );
     zman_test!(
         test_sof_zman_shma_mga_90_minutes_to_fixed_local_chatzos,
-        SofZmanShmaZman::MGA90MinutesToFixedLocalChatzos
+        SOF_ZMAN_SHMA_MGA_90_MINUTES_TO_FIXED_LOCAL_CHATZOS
     );
     zman_test!(
         test_sof_zman_shma_mga_90_minutes_zmanis,
-        SofZmanShmaZman::MGA90MinutesZmanis
+        SOF_ZMAN_SHMA_MGA_90_ZMANIS
     );
     zman_test!(
         test_sof_zman_shma_mga_96_minutes,
-        SofZmanShmaZman::MGA96Minutes
+        SOF_ZMAN_SHMA_MGA_96_MINUTES
     );
     zman_test!(
         test_sof_zman_shma_mga_96_minutes_zmanis,
-        SofZmanShmaZman::MGA96MinutesZmanis
+        SOF_ZMAN_SHMA_MGA_96_ZMANIS
     );
 
     zman_test!(
         test_sof_zman_tfila_hours_2_before_chatzos,
-        SofZmanTfilaZman::Hours2BeforeChatzos
+        SOF_ZMAN_TFILA_HOURS_2_BEFORE_CHATZOS
     );
     zman_test!(
         test_sof_zman_tfila_ateret_torah,
-        SofZmanTfilaZman::AteretTorah
+        SOF_ZMAN_TFILA_ATERET_TORAH
     );
     zman_test!(
         test_sof_zman_tfila_baal_hatanya,
-        SofZmanTfilaZman::BaalHatanya
+        SOF_ZMAN_TFILA_BAAL_HATANYA
     );
-    zman_test!(
-        test_sof_zman_tfila_fixed_local,
-        SofZmanTfilaZman::FixedLocal
-    );
-    zman_test!(test_sof_zman_tfila_gra, SofZmanTfilaZman::GRA);
+    zman_test!(test_sof_zman_tfila_fixed_local, SOF_ZMAN_TFILA_FIXED_LOCAL);
+    zman_test!(test_sof_zman_tfila_gra, SOF_ZMAN_TFILA_GRA);
     zman_test!(
         test_sof_zman_tfila_gra_sunrise_to_fixed_local_chatzos,
-        SofZmanTfilaZman::GRASunriseToFixedLocalChatzos
+        SOF_ZMAN_TFILA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS
     );
-    zman_test!(test_sof_zman_tfila_mga, SofZmanTfilaZman::MGA);
+    zman_test!(test_sof_zman_tfila_mga, SOF_ZMAN_TFILA_MGA);
     zman_test!(
         test_sof_zman_tfila_mga_120_minutes,
-        SofZmanTfilaZman::MGA120Minutes
+        SOF_ZMAN_TFILA_MGA_120_MINUTES
     );
     zman_test!(
         test_sof_zman_tfila_mga_16_point_1_degrees,
-        SofZmanTfilaZman::MGA16Point1Degrees
+        SOF_ZMAN_TFILA_MGA_16_POINT_1_DEGREES
     );
     zman_test!(
         test_sof_zman_tfila_mga_18_degrees,
-        SofZmanTfilaZman::MGA18Degrees
+        SOF_ZMAN_TFILA_MGA_18_DEGREES
     );
     zman_test!(
         test_sof_zman_tfila_mga_19_point_8_degrees,
-        SofZmanTfilaZman::MGA19Point8Degrees
+        SOF_ZMAN_TFILA_MGA_19_POINT_8_DEGREES
     );
     zman_test!(
         test_sof_zman_tfila_mga_72_minutes,
-        SofZmanTfilaZman::MGA72Minutes
+        SOF_ZMAN_TFILA_MGA_72_MINUTES
     );
     zman_test!(
         test_sof_zman_tfila_mga_72_minutes_zmanis,
-        SofZmanTfilaZman::MGA72MinutesZmanis
+        SOF_ZMAN_TFILA_MGA_72_ZMANIS
     );
     zman_test!(
         test_sof_zman_tfila_mga_90_minutes,
-        SofZmanTfilaZman::MGA90Minutes
+        SOF_ZMAN_TFILA_MGA_90_MINUTES
     );
     zman_test!(
         test_sof_zman_tfila_mga_90_minutes_zmanis,
-        SofZmanTfilaZman::MGA90MinutesZmanis
+        SOF_ZMAN_TFILA_MGA_90_ZMANIS
     );
     zman_test!(
         test_sof_zman_tfila_mga_96_minutes,
-        SofZmanTfilaZman::MGA96Minutes
+        SOF_ZMAN_TFILA_MGA_96_MINUTES
     );
     zman_test!(
         test_sof_zman_tfila_mga_96_minutes_zmanis,
-        SofZmanTfilaZman::MGA96MinutesZmanis
+        SOF_ZMAN_TFILA_MGA_96_ZMANIS
     );
 
-    zman_test!(test_tzais_degrees_8_point_5, TzaisZman::Degrees8Point5);
-    zman_test!(test_tzais_minutes_120, TzaisZman::Minutes120);
-    zman_test!(test_tzais_minutes_120_zmanis, TzaisZman::Minutes120Zmanis);
-    zman_test!(test_tzais_degrees_16_point_1, TzaisZman::Degrees16Point1);
-    zman_test!(test_tzais_degrees_18, TzaisZman::Degrees18);
-    zman_test!(test_tzais_degrees_19_point_8, TzaisZman::Degrees19Point8);
-    zman_test!(test_tzais_degrees_26, TzaisZman::Degrees26, Some(40.0));
-    zman_test!(test_tzais_minutes_50, TzaisZman::Minutes50);
-    zman_test!(test_tzais_minutes_60, TzaisZman::Minutes60);
-    zman_test!(test_tzais_minutes_72, TzaisZman::Minutes72);
-    zman_test!(test_tzais_minutes_72_zmanis, TzaisZman::Minutes72Zmanis);
-    zman_test!(test_tzais_minutes_90, TzaisZman::Minutes90);
-    zman_test!(test_tzais_minutes_90_zmanis, TzaisZman::Minutes90Zmanis);
-    zman_test!(test_tzais_minutes_96, TzaisZman::Minutes96);
-    zman_test!(test_tzais_minutes_96_zmanis, TzaisZman::Minutes96Zmanis);
-    zman_test!(test_tzais_ateret_torah, TzaisZman::AteretTorah);
-    zman_test!(test_tzais_baal_hatanya, TzaisZman::BaalHatanya);
-    zman_test!(test_tzais_geonim_3_point_65, TzaisZman::Geonim3Point65);
-    zman_test!(test_tzais_geonim_3_point_676, TzaisZman::Geonim3Point676);
+    zman_test!(test_tzais_degrees_8_point_5, TZAIS_DEGREES_8_POINT_5);
+    zman_test!(test_tzais_minutes_120, TZAIS_MINUTES_120);
+    zman_test!(test_tzais_minutes_120_zmanis, TZAIS_120_ZMANIS);
+    zman_test!(test_tzais_degrees_16_point_1, TZAIS_16_POINT_1_DEGREES);
+    zman_test!(test_tzais_degrees_18, TZAIS_18_DEGREES);
+    zman_test!(test_tzais_degrees_19_point_8, TZAIS_19_POINT_8_DEGREES);
+    zman_test!(test_tzais_degrees_26, TZAIS_26_DEGREES, Some(40.0));
+    zman_test!(test_tzais_minutes_50, TZAIS_MINUTES_50);
+    zman_test!(test_tzais_minutes_60, TZAIS_MINUTES_60);
+    zman_test!(test_tzais_minutes_72, TZAIS_MINUTES_72);
+    zman_test!(test_tzais_minutes_72_zmanis, TZAIS_72_ZMANIS);
+    zman_test!(test_tzais_minutes_90, TZAIS_MINUTES_90);
+    zman_test!(test_tzais_minutes_90_zmanis, TZAIS_90_ZMANIS);
+    zman_test!(test_tzais_minutes_96, TZAIS_MINUTES_96);
+    zman_test!(test_tzais_minutes_96_zmanis, TZAIS_96_ZMANIS);
+    zman_test!(test_tzais_ateret_torah, TZAIS_ATERET_TORAH);
+    zman_test!(test_tzais_baal_hatanya, TZAIS_BAAL_HATANYA);
+    zman_test!(test_tzais_geonim_3_point_65, TZAIS_GEONIM_3_POINT_65);
+    zman_test!(test_tzais_geonim_3_point_676, TZAIS_GEONIM_3_POINT_676);
     zman_test!(
         test_tzais_geonim_degrees_3_point_7,
-        TzaisZman::GeonimDegrees3Point7
+        TZAIS_GEONIM_DEGREES_3_POINT_7
     );
     zman_test!(
         test_tzais_geonim_degrees_3_point_8,
-        TzaisZman::GeonimDegrees3Point8
+        TZAIS_GEONIM_DEGREES_3_POINT_8
     );
     zman_test!(
         test_tzais_geonim_degrees_4_point_37,
-        TzaisZman::GeonimDegrees4Point37
+        TZAIS_GEONIM_DEGREES_4_POINT_37
     );
     zman_test!(
         test_tzais_geonim_degrees_4_point_61,
-        TzaisZman::GeonimDegrees4Point61
+        TZAIS_GEONIM_DEGREES_4_POINT_61
     );
     zman_test!(
         test_tzais_geonim_degrees_4_point_8,
-        TzaisZman::GeonimDegrees4Point8
+        TZAIS_GEONIM_DEGREES_4_POINT_8
     );
     zman_test!(
         test_tzais_geonim_degrees_5_point_88,
-        TzaisZman::GeonimDegrees5Point88
+        TZAIS_GEONIM_DEGREES_5_POINT_88
     );
     zman_test!(
         test_tzais_geonim_degrees_5_point_95,
-        TzaisZman::GeonimDegrees5Point95
+        TZAIS_GEONIM_DEGREES_5_POINT_95
     );
     zman_test!(
         test_tzais_geonim_degrees_6_point_45,
-        TzaisZman::GeonimDegrees6Point45
+        TZAIS_GEONIM_DEGREES_6_POINT_45
     );
     zman_test!(
         test_tzais_geonim_degrees_7_point_083,
-        TzaisZman::GeonimDegrees7Point083
+        TZAIS_GEONIM_DEGREES_7_POINT_083
     );
     zman_test!(
         test_tzais_geonim_degrees_7_point_67,
-        TzaisZman::GeonimDegrees7Point67
+        TZAIS_GEONIM_DEGREES_7_POINT_67
     );
     zman_test!(
         test_tzais_geonim_degrees_8_point_5,
-        TzaisZman::GeonimDegrees8Point5
+        TZAIS_GEONIM_DEGREES_8_POINT_5
     );
     zman_test!(
         test_tzais_geonim_degrees_9_point_3,
-        TzaisZman::GeonimDegrees9Point3
+        TZAIS_GEONIM_DEGREES_9_POINT_3
     );
     zman_test!(
         test_tzais_geonim_degrees_9_point_75,
-        TzaisZman::GeonimDegrees9Point75
+        TZAIS_GEONIM_DEGREES_9_POINT_75
     );
 
     #[test]
     fn regression_mincha_gedola_gra_fixed_local_chatzos_30_minutes() {
         test_zman_iteration(
-            MinchaGedolaZman::GRAFixedLocalChatzos30Minutes,
+            &MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES,
             8218711474067301417,
             2485,
             None,
@@ -743,19 +717,13 @@ mod tests {
 
     #[test]
     fn regression_fixed_local_chatzos() {
-        test_zman_iteration(
-            ChatzosZman::FixedLocal,
-            8218711474067301417,
-            2485,
-            None,
-            None,
-        );
+        test_zman_iteration(&CHATZOS_FIXED_LOCAL, 8218711474067301417, 2485, None, None);
     }
 
     #[test]
     fn regression_plag_hamincha_ateret_torah() {
         test_zman_iteration(
-            PlagHaminchaZman::AteretTorah,
+            &PLAG_HAMINCHA_ATERET_TORAH,
             18375159325404615489,
             1546,
             None,
@@ -766,7 +734,7 @@ mod tests {
     #[test]
     fn regression_sof_zman_shma_mga_90_minutes_to_fixed_local_chatzos() {
         test_zman_iteration(
-            SofZmanShmaZman::MGA90MinutesToFixedLocalChatzos,
+            &SOF_ZMAN_SHMA_MGA_90_MINUTES_TO_FIXED_LOCAL_CHATZOS,
             3472850580173038015,
             8672,
             None,

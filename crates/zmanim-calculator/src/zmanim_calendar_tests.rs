@@ -6,12 +6,9 @@ extern crate std;
 use std::{str::FromStr, string::String, string::ToString};
 
 use crate::calculator::ZmanimCalculator;
-use crate::types::zman::ZmanLike;
-use crate::{
-    math::multiply_duration, AlosZman, CandleLightingZman, ChatzosZman, Location, MinchaGedolaZman,
-    MinchaKetanaZman, NeitzZman, PlagHaminchaZman, SeaLevelNeitzZman, SeaLevelShkiaZman, ShkiaZman,
-    SofZmanShmaZman, SofZmanTfilaZman, TzaisZman,
-};
+
+use crate::zman::*;
+use crate::{math::multiply_duration, Location};
 
 const LAKEWOOD_LAT: f64 = 40.0721087;
 const LAKEWOOD_LON: f64 = -74.2400243;
@@ -51,17 +48,17 @@ fn fmt_local(dt: DateTime<Utc>) -> String {
         .to_string()
 }
 
-fn assert_zman_str<Z: ZmanLike>(calc: &mut ZmanimCalculator<Tz>, zman: Z, expected: &str) {
-    let dt = calc.calculate(zman).unwrap();
+fn assert_zman_str(calc: &mut ZmanimCalculator<Tz>, zman: &dyn Zman<Tz>, expected: &str) {
+    let dt = zman.calculate(calc).unwrap();
     assert_time_str(dt, expected, None);
 }
-fn assert_zman_str_with_max_time_diff<Z: ZmanLike>(
+fn assert_zman_str_with_max_time_diff(
     calc: &mut ZmanimCalculator<Tz>,
-    zman: Z,
+    zman: &dyn Zman<Tz>,
     expected: &str,
     max_time_diff_seconds: Option<i64>,
 ) {
-    let dt = calc.calculate(zman).unwrap();
+    let dt = zman.calculate(calc).unwrap();
     assert_time_str(dt, expected, max_time_diff_seconds);
 }
 
@@ -130,9 +127,9 @@ fn test_temporal_hour() {
 #[test]
 fn test_shaah_zmanis_from_zmanim() {
     let mut calc = new_calc(0.0);
-    let shaah = calc
-        .get_shaah_zmanis_from_zmanim(AlosZman::Degrees16Point1, TzaisZman::Degrees16Point1)
-        .unwrap();
+    let alos = ALOS_16_POINT_1_DEGREES.calculate(&mut calc).unwrap();
+    let tzais = TZAIS_16_POINT_1_DEGREES.calculate(&mut calc).unwrap();
+    let shaah = calc.get_temporal_hour_from_times(&alos, &tzais).unwrap();
     assert!(shaah.num_seconds() > 0);
 }
 
@@ -202,7 +199,6 @@ fn test_polar_day_returns_none_for_sun_times() {
     assert!(calc.sea_level_sunset().is_none());
     assert!(calc.sunrise_offset_by_degrees(6.0).is_none());
     assert!(calc.sunset_offset_by_degrees(6.0).is_none());
-    assert!(calc.get_shaah_zmanis_mga().is_none());
 }
 
 #[test]
@@ -226,11 +222,11 @@ fn test_reykjavik_equinox_java_expected_times() {
     let date = NaiveDate::from_ymd_opt(2017, 3, 21).unwrap();
     let mut calc = calc_for(64.1466, -21.9426, 0.0, chrono_tz::Atlantic::Reykjavik, date);
 
-    assert_zman_str(&mut calc, NeitzZman, "2017-03-21T07:24:24Z");
-    assert_zman_str(&mut calc, ShkiaZman, "2017-03-21T19:46:56Z");
-    assert_zman_str(&mut calc, SeaLevelNeitzZman, "2017-03-21T07:24:24Z");
-    assert_zman_str(&mut calc, SeaLevelShkiaZman, "2017-03-21T19:46:56Z");
-    assert_zman_str(&mut calc, ChatzosZman::Astronomical, "2017-03-21T13:34:59Z");
+    assert_zman_str(&mut calc, &SUNRISE, "2017-03-21T07:24:24Z");
+    assert_zman_str(&mut calc, &SUNSET, "2017-03-21T19:46:56Z");
+    assert_zman_str(&mut calc, &SEA_LEVEL_SUNRISE, "2017-03-21T07:24:24Z");
+    assert_zman_str(&mut calc, &SEA_LEVEL_SUNSET, "2017-03-21T19:46:56Z");
+    assert_zman_str(&mut calc, &CHATZOS_ASTRONOMICAL, "2017-03-21T13:34:59Z");
 }
 
 #[test]
@@ -238,33 +234,23 @@ fn test_everest_java_expected_times() {
     let date = NaiveDate::from_ymd_opt(2017, 10, 17).unwrap();
     let mut calc = calc_for(27.9881, 86.9250, 8826.0, chrono_tz::Asia::Kathmandu, date);
     // At very high elevation our refraction model and javas refraction model start to differ slightly, so we allow for a larger time difference.
+    assert_zman_str_with_max_time_diff(&mut calc, &SUNRISE, "2017-10-17T05:44:49+05:45", Some(120));
+    assert_zman_str_with_max_time_diff(&mut calc, &SUNSET, "2017-10-17T17:40:04+05:45", Some(120));
     assert_zman_str_with_max_time_diff(
         &mut calc,
-        NeitzZman,
-        "2017-10-17T05:44:49+05:45",
-        Some(120),
-    );
-    assert_zman_str_with_max_time_diff(
-        &mut calc,
-        ShkiaZman,
-        "2017-10-17T17:40:04+05:45",
-        Some(120),
-    );
-    assert_zman_str_with_max_time_diff(
-        &mut calc,
-        SeaLevelNeitzZman,
+        &SEA_LEVEL_SUNRISE,
         "2017-10-17T05:58:42+05:45",
         Some(120),
     );
     assert_zman_str_with_max_time_diff(
         &mut calc,
-        SeaLevelShkiaZman,
+        &SEA_LEVEL_SUNSET,
         "2017-10-17T17:26:12+05:45",
         Some(120),
     );
     assert_zman_str_with_max_time_diff(
         &mut calc,
-        ChatzosZman::Astronomical,
+        &CHATZOS_ASTRONOMICAL,
         "2017-10-17T11:42:44+05:45",
         Some(120),
     );
@@ -274,84 +260,90 @@ fn test_everest_java_expected_times() {
 fn test_default_zmanim_times() {
     let mut calc = new_calc(0.0);
 
-    assert_eq!(calc.calculate(SeaLevelNeitzZman), calc.sea_level_sunrise());
-    assert_eq!(calc.calculate(SeaLevelShkiaZman), calc.sea_level_sunset());
+    assert_eq!(
+        SEA_LEVEL_SUNRISE.calculate(&mut calc),
+        calc.sea_level_sunrise()
+    );
+    assert_eq!(
+        SEA_LEVEL_SUNSET.calculate(&mut calc),
+        calc.sea_level_sunset()
+    );
 
     assert_zman_str(
         &mut new_calc(0.0),
-        TzaisZman::Degrees8Point5,
+        &TZAIS_DEGREES_8_POINT_5,
         "2017-10-17T18:54:29-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        TzaisZman::Degrees19Point8,
+        &TZAIS_19_POINT_8_DEGREES,
         "2017-10-17T19:53:34-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        TzaisZman::Minutes60,
+        &TZAIS_MINUTES_60,
         "2017-10-17T19:13:58-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        TzaisZman::Minutes90Zmanis,
+        &TZAIS_90_ZMANIS,
         "2017-10-17T19:36:59-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        TzaisZman::Minutes72,
+        &TZAIS_MINUTES_72,
         "2017-10-17T19:25:58-04:00",
     );
 
     assert_zman_str(
         &mut new_calc(0.0),
-        AlosZman::Degrees16Point1,
+        &ALOS_16_POINT_1_DEGREES,
         "2017-10-17T05:49:30-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        AlosZman::Degrees19Point8,
+        &ALOS_19_POINT_8_DEGREES,
         "2017-10-17T05:30:07-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        AlosZman::Minutes60,
+        &ALOS_60_MINUTES,
         "2017-10-17T06:09:51-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        AlosZman::Minutes90Zmanis,
+        &ALOS_90_ZMANIS,
         "2017-10-17T05:46:50-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        AlosZman::Minutes72,
+        &ALOS_72_MINUTES,
         "2017-10-17T05:57:51-04:00",
     );
 
     assert_zman_str(
         &mut new_calc(0.0),
-        ChatzosZman::Astronomical,
+        &CHATZOS_ASTRONOMICAL,
         "2017-10-17T12:41:55-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        MinchaGedolaZman::SunriseSunset,
+        &MINCHA_GEDOLA_SUNRISE_SUNSET,
         "2017-10-17T13:09:35-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        MinchaKetanaZman::SunriseSunset,
+        &MINCHA_KETANA_SUNRISE_SUNSET,
         "2017-10-17T15:55:37-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        PlagHaminchaZman::SunriseSunset,
+        &PLAG_HAMINCHA_SUNRISE_SUNSET,
         "2017-10-17T17:04:48-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        CandleLightingZman,
+        &CANDLE_LIGHTING,
         "2017-10-17T17:55:58-04:00",
     );
 }
@@ -369,12 +361,12 @@ fn test_default_zmanim_calculations() {
 
     assert_zman_str(
         &mut new_calc(0.0),
-        SofZmanShmaZman::GRA,
+        &SOF_ZMAN_SHMA_GRA,
         "2017-10-17T09:55:53-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        SofZmanShmaZman::MGA,
+        &SOF_ZMAN_SHMA_MGA,
         "2017-10-17T09:19:53-04:00",
     );
 
@@ -388,12 +380,12 @@ fn test_default_zmanim_calculations() {
 
     assert_zman_str(
         &mut new_calc(0.0),
-        SofZmanTfilaZman::GRA,
+        &SOF_ZMAN_TFILA_GRA,
         "2017-10-17T10:51:14-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        SofZmanTfilaZman::MGA,
+        &SOF_ZMAN_TFILA_MGA,
         "2017-10-17T10:27:14-04:00",
     );
 }
@@ -413,10 +405,6 @@ fn test_default_shaah_zmanis() {
     assert_duration_ms_close(shaah_gra, 3_320_608);
 
     let mut calc = new_calc(0.0);
-    let shaah_mga = calc.get_shaah_zmanis_mga().unwrap();
-    assert_duration_ms_close(shaah_mga, 4_040_608);
-
-    let mut calc = new_calc(0.0);
     let shaah_degrees = shaah_zmanis_by_degrees_and_offset(&mut calc, 6.0, 0);
     assert_duration_ms_close(shaah_degrees, 3_594_499);
 
@@ -433,84 +421,84 @@ fn test_default_shaah_zmanis() {
 fn test_use_elevation_zmanim_times() {
     let mut calc = new_calc(LAKEWOOD_ELEVATION_M);
 
-    assert_eq!(calc.calculate(crate::NeitzZman), calc.sunrise());
-    assert_eq!(calc.calculate(crate::ShkiaZman), calc.sunset());
+    assert_eq!(SUNRISE.calculate(&mut calc), calc.sunrise());
+    assert_eq!(SUNSET.calculate(&mut calc), calc.sunset());
 
     assert_zman_str(
         &mut new_calc(0.0),
-        TzaisZman::Degrees8Point5,
+        &TZAIS_DEGREES_8_POINT_5,
         "2017-10-17T18:54:29-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        TzaisZman::Degrees19Point8,
+        &TZAIS_19_POINT_8_DEGREES,
         "2017-10-17T19:53:34-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        TzaisZman::Minutes60,
+        &TZAIS_MINUTES_60,
         "2017-10-17T19:14:38-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        TzaisZman::Minutes90Zmanis,
+        &TZAIS_90_ZMANIS,
         "2017-10-17T19:37:49-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        TzaisZman::Minutes72,
+        &TZAIS_MINUTES_72,
         "2017-10-17T19:26:38-04:00",
     );
 
     assert_zman_str(
         &mut new_calc(0.0),
-        AlosZman::Degrees16Point1,
+        &ALOS_16_POINT_1_DEGREES,
         "2017-10-17T05:49:30-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        AlosZman::Degrees19Point8,
+        &ALOS_19_POINT_8_DEGREES,
         "2017-10-17T05:30:07-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        AlosZman::Minutes60,
+        &ALOS_60_MINUTES,
         "2017-10-17T06:09:11-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        AlosZman::Minutes90Zmanis,
+        &ALOS_90_ZMANIS,
         "2017-10-17T05:46:00-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        AlosZman::Minutes72,
+        &ALOS_72_MINUTES,
         "2017-10-17T05:57:11-04:00",
     );
 
     assert_zman_str(
         &mut new_calc(0.0),
-        ChatzosZman::Astronomical,
+        &CHATZOS_ASTRONOMICAL,
         "2017-10-17T12:41:55-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        MinchaGedolaZman::SunriseSunset,
+        &MINCHA_GEDOLA_SUNRISE_SUNSET,
         "2017-10-17T13:09:38-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        MinchaKetanaZman::SunriseSunset,
+        &MINCHA_KETANA_SUNRISE_SUNSET,
         "2017-10-17T15:56:00-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        PlagHaminchaZman::SunriseSunset,
+        &PLAG_HAMINCHA_SUNRISE_SUNSET,
         "2017-10-17T17:05:19-04:00",
     );
     assert_zman_str(
         &mut new_calc(0.0),
-        CandleLightingZman,
+        &CANDLE_LIGHTING,
         "2017-10-17T17:55:58-04:00",
     );
 }
@@ -527,12 +515,12 @@ fn test_use_elevation_zmanim_calculations() {
 
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        SofZmanShmaZman::GRA,
+        &SOF_ZMAN_SHMA_GRA,
         "2017-10-17T09:55:33-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        SofZmanShmaZman::MGA,
+        &SOF_ZMAN_SHMA_MGA,
         "2017-10-17T09:19:33-04:00",
     );
 
@@ -546,12 +534,12 @@ fn test_use_elevation_zmanim_calculations() {
 
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        SofZmanTfilaZman::GRA,
+        &SOF_ZMAN_TFILA_GRA,
         "2017-10-17T10:51:00-04:00",
     );
     assert_zman_str(
         &mut new_calc(LAKEWOOD_ELEVATION_M),
-        SofZmanTfilaZman::MGA,
+        &SOF_ZMAN_TFILA_MGA,
         "2017-10-17T10:27:00-04:00",
     );
 }
@@ -569,10 +557,6 @@ fn test_use_elevation_shaah_zmanis() {
     let mut calc = new_calc(LAKEWOOD_ELEVATION_M);
     let shaah_gra = calc.get_shaah_zmanis_gra().unwrap();
     assert_duration_ms_close(shaah_gra, 3_327_251);
-
-    let mut calc = new_calc(LAKEWOOD_ELEVATION_M);
-    let shaah_mga = calc.get_shaah_zmanis_mga().unwrap();
-    assert_duration_ms_close(shaah_mga, 4_047_251);
 
     let mut calc = new_calc(0.0);
     let shaah_degrees = shaah_zmanis_by_degrees_and_offset(&mut calc, 6.0, 0);
