@@ -17,23 +17,9 @@ pub enum Event<'a> {
     Sunset,
     /// Sunset at sea level (no elevation adjustment).
     SeaLevelSunset,
-    /// Time before sunrise when the sun is `degrees` below the geometric horizon.
-    ///
-    /// This is a *degrees-below-horizon* calculation (twilight-style), not a fixed number of
-    /// minutes before the crate’s [`SUNRISE`] value. In particular:
-    ///
-    /// - It uses the **geometric horizon**, so it is independent of the observer’s elevation.
-    /// - It is computed from the sun’s **astronomical position**, not by offsetting an
-    ///   elevation-adjusted sunrise time.
+    /// Time before sunrise when the sun is `degrees` below the geometric horizon (no elevation adjustment).
     SunriseOffsetByDegrees(f64),
-    /// Time after sunset when the sun is `degrees` below the geometric horizon.
-    ///
-    /// This is a *degrees-below-horizon* calculation (twilight-style), not a fixed number of
-    /// minutes after the crate’s [`SUNSET`] value. In particular:
-    ///
-    /// - It uses the **geometric horizon**, so it is independent of the observer’s elevation.
-    /// - It is computed from the sun’s **astronomical position**, not by offsetting an
-    ///   elevation-adjusted sunset time.
+    /// Time after sunset when the sun is `degrees` below the geometric horizon (no elevation adjustment).
     SunsetOffsetByDegrees(f64),
     /// Local mean time at the given hour (0.0–24.0).
     LocalMeanTime(f64),
@@ -250,7 +236,7 @@ impl<'a, Tz: TimeZone> Zman<Tz> for ZmanEvent<'a> {
     }
 }
 
-/// Bain hashmashos (Rabbeinu Tam, 2-stars variant).
+/// Bain hashmashos (Rabbeinu Tam, 2-stars): `sunset + (sunrise - alos19.8°) * 5/18`.
 pub struct BainHashmashosRt2Stars {
     #[cfg(test)]
     name: &'static str,
@@ -275,7 +261,7 @@ impl<Tz: TimeZone> Zman<Tz> for BainHashmashosRt2Stars {
     }
 }
 
-/// Mincha gedola computed as the later of 30 minutes after chatzos or chatzos + 1/2 shaah zmanis.
+/// Mincha gedola computed as the later of `chatzos + 30m` or `chatzos + 1/2 shaah` (shaah = alos16.1° → tzais3.7°).
 pub struct MinchaGedolaAhavatShalom {
     #[cfg(test)]
     name: &'static str,
@@ -496,7 +482,7 @@ pub const ALOS_BAAL_HATANYA: ZmanEvent<'static> =
 // BAIN HASHMASHOS
 // ============================================================================
 
-/// Sunset when the sun is `7.083°` below the geometric horizon (after sunset).
+/// Time after sunset when the sun is `7.083°` below the geometric horizon.
 pub(crate) const SUNSET_7_POINT_083_DEGREES: Event<'static> =
     Event::SunsetOffsetByDegrees(7.0 + (5.0 / 60.0));
 
@@ -522,7 +508,7 @@ pub const BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES: Zman
         ),
         "getBainHashmashosRT13Point5MinutesBefore7Point083Degrees",
     );
-/// Bain hashmashos (Rabbeinu Tam, 2-stars variant).
+/// Bain hashmashos (Rabbeinu Tam, 2-stars): `sunset + (sunrise - alos19.8°) * 5/18`.
 pub const BAIN_HASHMASHOS_RT_2_STARS: BainHashmashosRt2Stars = BainHashmashosRt2Stars {
     #[cfg(test)]
     name: "getBainHashmashosRT2Stars",
@@ -578,12 +564,12 @@ pub const CHATZOS_FIXED_LOCAL: ZmanEvent<'static> =
 // MINCHA GEDOLA
 // ============================================================================
 
-/// Mincha gedola: `6.5` shaos zmaniyos after sunrise (day = sunrise → sunset).
+/// Mincha gedola: `6.5` shaos after sunrise (or `0.5` shaah after chatzos if configured).
 pub const MINCHA_GEDOLA_SUNRISE_SUNSET: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaGedola(&Event::Sunrise, &Event::Sunset, true),
     "getMinchaGedola",
 );
-/// Mincha gedola: `6.5` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais16.1°).
+/// Mincha gedola: `6.5` shaos after alos `16.1°` (or `0.5` shaah after chatzos if configured).
 pub const MINCHA_GEDOLA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaGedola(
         &CORE_ALOS_16_POINT_1_DEGREES,
@@ -592,17 +578,17 @@ pub const MINCHA_GEDOLA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     ),
     "getMinchaGedola16Point1Degrees",
 );
-/// Mincha gedola: `30` minutes after chatzos (solar transit).
+/// Mincha gedola: `30` minutes after solar transit.
 pub const MINCHA_GEDOLA_MINUTES_30: ZmanEvent<'static> = ZmanEvent::new(
     Event::Offset(&Event::Transit, Duration::minutes(30)),
     "getMinchaGedola30Minutes",
 );
-/// Mincha gedola: `6.5` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
+/// Mincha gedola: `6.5` shaos after alos `72` minutes (or `0.5` shaah after chatzos if configured).
 pub const MINCHA_GEDOLA_MINUTES_72: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaGedola(&CORE_ALOS_72_MINUTES, &CORE_TZAIS_MINUTES_72, true),
     "getMinchaGedola72Minutes",
 );
-/// Mincha gedola (Ahavat Shalom): later of `chatzos + 30m` and `chatzos + 1/2 shaah zmanis`.
+/// Mincha gedola (Ahavat Shalom): later of `chatzos + 30m` and `chatzos + 1/2 shaah`.
 pub const MINCHA_GEDOLA_AHAVAT_SHALOM: MinchaGedolaAhavatShalom = MinchaGedolaAhavatShalom {
     #[cfg(test)]
     name: "getMinchaGedolaAhavatShalom",
@@ -612,12 +598,12 @@ pub const MINCHA_GEDOLA_ATERET_TORAH: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaGedola(&CORE_ALOS_72_ZMANIS, &CORE_TZAIS_ATERET_TORAH, false),
     "getMinchaGedolaAteretTorah",
 );
-/// Mincha gedola: `6.5` shaos zmaniyos after Baal HaTanya day start (day = Baal HaTanya sunrise → sunset).
+/// Mincha gedola: `6.5` shaos after Baal HaTanya day start (or `0.5` shaah after chatzos if configured).
 pub const MINCHA_GEDOLA_BAAL_HATANYA: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaGedola(&CORE_BAAL_HATANYA_SUNRISE, &CORE_BAAL_HATANYA_SUNSET, true),
     "getMinchaGedolaBaalHatanya",
 );
-/// Mincha gedola: later of Baal HaTanya mincha gedola and `chatzos + 30m`.
+/// Mincha gedola: later of Baal HaTanya mincha gedola and `30` minutes after solar transit.
 pub const MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30: MinchaGedolaBaalHatanyaGreaterThan30 =
     MinchaGedolaBaalHatanyaGreaterThan30 {
         #[cfg(test)]
@@ -638,12 +624,12 @@ pub const MINCHA_GEDOLA_GREATER_THAN_30: MinchaGedolaGreaterThan30 = MinchaGedol
 // MINCHA KETANA
 // ============================================================================
 
-/// Mincha ketana: `9.5` shaos zmaniyos after sunrise (day = sunrise → sunset).
+/// Mincha ketana: `9.5` shaos after sunrise (or `3.5` shaos after chatzos if configured).
 pub const MINCHA_KETANA_SUNRISE_SUNSET: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaKetana(&Event::Sunrise, &Event::Sunset, true),
     "getMinchaKetana",
 );
-/// Mincha ketana: `9.5` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais16.1°).
+/// Mincha ketana: `9.5` shaos after alos `16.1°` (or `3.5` shaos after chatzos if configured).
 pub const MINCHA_KETANA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaKetana(
         &CORE_ALOS_16_POINT_1_DEGREES,
@@ -652,7 +638,7 @@ pub const MINCHA_KETANA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     ),
     "getMinchaKetana16Point1Degrees",
 );
-/// Mincha ketana: `9.5` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
+/// Mincha ketana: `9.5` shaos after alos `72` minutes (or `3.5` shaos after chatzos if configured).
 pub const MINCHA_KETANA_MINUTES_72: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaKetana(&CORE_ALOS_72_MINUTES, &CORE_TZAIS_MINUTES_72, true),
     "getMinchaKetana72Minutes",
@@ -667,7 +653,7 @@ pub const MINCHA_KETANA_ATERET_TORAH: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaKetana(&CORE_ALOS_72_ZMANIS, &CORE_TZAIS_ATERET_TORAH, false),
     "getMinchaKetanaAteretTorah",
 );
-/// Mincha ketana: `9.5` shaos zmaniyos after Baal HaTanya day start (day = Baal HaTanya sunrise → sunset).
+/// Mincha ketana: `9.5` shaos after Baal HaTanya day start (or `3.5` shaos after chatzos if configured).
 pub const MINCHA_KETANA_BAAL_HATANYA: ZmanEvent<'static> = ZmanEvent::new(
     Event::MinchaKetana(&CORE_BAAL_HATANYA_SUNRISE, &CORE_BAAL_HATANYA_SUNSET, true),
     "getMinchaKetanaBaalHatanya",
@@ -712,7 +698,7 @@ pub const MISHEYAKIR_9_POINT_5_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
 // PLAG HAMINCHA
 // ============================================================================
 
-/// Plag hamincha: `10.75` shaos zmaniyos after sunrise (day = sunrise → sunset).
+/// Plag hamincha: `10.75` shaos after sunrise (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_SUNRISE_SUNSET: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&Event::Sunrise, &Event::Sunset, true),
     "getPlagHamincha",
@@ -736,52 +722,52 @@ pub const PLAG_HAMINCHA_ALOS_TO_SUNSET: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_16_POINT_1_DEGREES, &Event::Sunset, false),
     "getPlagAlosToSunset",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `60` minutes (day = alos60 → tzais60).
+/// Plag hamincha: `10.75` shaos after alos `60` minutes (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_60_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_60_MINUTES, &CORE_TZAIS_MINUTES_60, true),
     "getPlagHamincha60Minutes",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
+/// Plag hamincha: `10.75` shaos after alos `72` minutes (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_72_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_72_MINUTES, &CORE_TZAIS_MINUTES_72, true),
     "getPlagHamincha72Minutes",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `72 zmaniyos` (day = alos72Z → tzais72Z).
+/// Plag hamincha: `10.75` shaos after alos `72 zmaniyos` (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_72_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_72_ZMANIS, &CORE_TZAIS_72_ZMANIS, true),
     "getPlagHamincha72MinutesZmanis",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `90` minutes (day = alos90 → tzais90).
+/// Plag hamincha: `10.75` shaos after alos `90` minutes (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_90_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_90_MINUTES, &CORE_TZAIS_MINUTES_90, true),
     "getPlagHamincha90Minutes",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `90 zmaniyos` (day = alos90Z → tzais90Z).
+/// Plag hamincha: `10.75` shaos after alos `90 zmaniyos` (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_90_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_90_ZMANIS, &CORE_TZAIS_90_ZMANIS, true),
     "getPlagHamincha90MinutesZmanis",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `96` minutes (day = alos96 → tzais96).
+/// Plag hamincha: `10.75` shaos after alos `96` minutes (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_96_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_96_MINUTES, &CORE_TZAIS_MINUTES_96, true),
     "getPlagHamincha96Minutes",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `96 zmaniyos` (day = alos96Z → tzais96Z).
+/// Plag hamincha: `10.75` shaos after alos `96 zmaniyos` (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_96_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_96_ZMANIS, &CORE_TZAIS_96_ZMANIS, true),
     "getPlagHamincha96MinutesZmanis",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `120` minutes (day = alos120 → tzais120).
+/// Plag hamincha: `10.75` shaos after alos `120` minutes (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_120_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_120_MINUTES, &CORE_TZAIS_MINUTES_120, true),
     "getPlagHamincha120Minutes",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `120 zmaniyos` (day = alos120Z → tzais120Z).
+/// Plag hamincha: `10.75` shaos after alos `120 zmaniyos` (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_120_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_120_ZMANIS, &CORE_TZAIS_120_ZMANIS, true),
     "getPlagHamincha120MinutesZmanis",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais16.1°).
+/// Plag hamincha: `10.75` shaos after alos `16.1°` (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(
         &CORE_ALOS_16_POINT_1_DEGREES,
@@ -790,12 +776,12 @@ pub const PLAG_HAMINCHA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     ),
     "getPlagHamincha16Point1Degrees",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `18°` (day = alos18° → tzais18°).
+/// Plag hamincha: `10.75` shaos after alos `18°` (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_18_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_18_DEGREES, &CORE_TZAIS_18_DEGREES, true),
     "getPlagHamincha18Degrees",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `19.8°` (day = alos19.8° → tzais19.8°).
+/// Plag hamincha: `10.75` shaos after alos `19.8°` (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_19_POINT_8_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(
         &CORE_ALOS_19_POINT_8_DEGREES,
@@ -804,7 +790,7 @@ pub const PLAG_HAMINCHA_19_POINT_8_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     ),
     "getPlagHamincha19Point8Degrees",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after alos `26°` (day = alos26° → tzais26°).
+/// Plag hamincha: `10.75` shaos after alos `26°` (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_26_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_26_DEGREES, &CORE_TZAIS_26_DEGREES, true),
     "getPlagHamincha26Degrees",
@@ -814,7 +800,7 @@ pub const PLAG_HAMINCHA_ATERET_TORAH: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_ALOS_72_ZMANIS, &CORE_TZAIS_ATERET_TORAH, false),
     "getPlagHaminchaAteretTorah",
 );
-/// Plag hamincha: `10.75` shaos zmaniyos after Baal HaTanya day start (day = Baal HaTanya sunrise → sunset).
+/// Plag hamincha: `10.75` shaos after Baal HaTanya day start (or `4.75` shaos after chatzos if configured).
 pub const PLAG_HAMINCHA_BAAL_HATANYA: ZmanEvent<'static> = ZmanEvent::new(
     Event::PlagHamincha(&CORE_BAAL_HATANYA_SUNRISE, &CORE_BAAL_HATANYA_SUNSET, true),
     "getPlagHaminchaBaalHatanya",
@@ -829,12 +815,12 @@ pub const PLAG_HAMINCHA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET: ZmanEvent<'static> = 
 // SAMUCH LE MINCHA KETANA
 // ============================================================================
 
-/// Samuch le-mincha ketana: `9` shaos zmaniyos after sunrise (day = sunrise → sunset).
+/// Samuch le-mincha ketana: `9` shaos after sunrise (or `3` shaos after chatzos if configured).
 pub const SAMUCH_LE_MINCHA_KETANA_GRA: ZmanEvent<'static> = ZmanEvent::new(
     Event::SamuchLeMinchaKetana(&Event::Sunrise, &Event::Sunset, true),
     "getSamuchLeMinchaKetanaGRA",
 );
-/// Samuch le-mincha ketana: `9` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais16.1°).
+/// Samuch le-mincha ketana: `9` shaos after alos `16.1°` (or `3` shaos after chatzos if configured).
 pub const SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::SamuchLeMinchaKetana(
         &CORE_ALOS_16_POINT_1_DEGREES,
@@ -843,7 +829,7 @@ pub const SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanE
     ),
     "getSamuchLeMinchaKetana16Point1Degrees",
 );
-/// Samuch le-mincha ketana: `9` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
+/// Samuch le-mincha ketana: `9` shaos after alos `72` minutes (or `3` shaos after chatzos if configured).
 pub const SAMUCH_LE_MINCHA_KETANA_72_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::SamuchLeMinchaKetana(&CORE_ALOS_72_MINUTES, &CORE_TZAIS_MINUTES_72, true),
     "getSamuchLeMinchaKetana72Minutes",
@@ -853,17 +839,17 @@ pub const SAMUCH_LE_MINCHA_KETANA_72_MINUTES: ZmanEvent<'static> = ZmanEvent::ne
 // SOF ZMAN ACHILAS CHAMETZ
 // ============================================================================
 
-/// Sof zman achilas chametz: `4` shaos zmaniyos after sunrise (day = sunrise → sunset).
+/// Sof zman achilas chametz: `4` shaos after sunrise (or half-day based if configured).
 pub const SOF_ZMAN_ACHILAS_CHAMETZ_GRA: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&Event::Sunrise, &Event::Sunset, true),
     "getSofZmanAchilasChametzGRA",
 );
-/// Sof zman achilas chametz: `4` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
+/// Sof zman achilas chametz: `4` shaos after alos `72` minutes (or half-day based if configured).
 pub const SOF_ZMAN_ACHILAS_CHAMETZ_MGA_72_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_72_MINUTES, &CORE_TZAIS_MINUTES_72, true),
     "getSofZmanAchilasChametzMGA72Minutes",
 );
-/// Sof zman achilas chametz: `4` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais16.1°).
+/// Sof zman achilas chametz: `4` shaos after alos `16.1°` (or half-day based if configured).
 pub const SOF_ZMAN_ACHILAS_CHAMETZ_MGA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(
         &CORE_ALOS_16_POINT_1_DEGREES,
@@ -872,7 +858,7 @@ pub const SOF_ZMAN_ACHILAS_CHAMETZ_MGA_16_POINT_1_DEGREES: ZmanEvent<'static> = 
     ),
     "getSofZmanAchilasChametzMGA16Point1Degrees",
 );
-/// Sof zman achilas chametz: `4` shaos zmaniyos after Baal HaTanya day start (day = Baal HaTanya sunrise → sunset).
+/// Sof zman achilas chametz: `4` shaos after Baal HaTanya day start (or half-day based if configured).
 pub const SOF_ZMAN_ACHILAS_CHAMETZ_BAAL_HATANYA: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_BAAL_HATANYA_SUNRISE, &CORE_BAAL_HATANYA_SUNSET, true),
     "getSofZmanAchilasChametzBaalHatanya",
@@ -911,17 +897,17 @@ pub const SOF_ZMAN_BIUR_CHAMETZ_BAAL_HATANYA: ZmanEvent<'static> = ZmanEvent::ne
 // SOF ZMAN SHMA
 // ============================================================================
 
-/// Sof zman shma: `3` shaos zmaniyos after sunrise (day = sunrise → sunset).
+/// Sof zman shma: `3` shaos after sunrise (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_GRA: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&Event::Sunrise, &Event::Sunset, true),
     "getSofZmanShmaGRA",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
+/// Sof zman shma: `3` shaos after alos `72` minutes (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_ALOS_72_MINUTES, &CORE_TZAIS_MINUTES_72, true),
     "getSofZmanShmaMGA",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `19.8°` (day = alos19.8° → tzais19.8°).
+/// Sof zman shma: `3` shaos after alos `19.8°` (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA_19_POINT_8_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(
         &CORE_ALOS_19_POINT_8_DEGREES,
@@ -930,7 +916,7 @@ pub const SOF_ZMAN_SHMA_MGA_19_POINT_8_DEGREES: ZmanEvent<'static> = ZmanEvent::
     ),
     "getSofZmanShmaMGA19Point8Degrees",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais16.1°).
+/// Sof zman shma: `3` shaos after alos `16.1°` (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(
         &CORE_ALOS_16_POINT_1_DEGREES,
@@ -939,42 +925,42 @@ pub const SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::
     ),
     "getSofZmanShmaMGA16Point1Degrees",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `18°` (day = alos18° → tzais18°).
+/// Sof zman shma: `3` shaos after alos `18°` (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA_18_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_ALOS_18_DEGREES, &CORE_TZAIS_18_DEGREES, true),
     "getSofZmanShmaMGA18Degrees",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
+/// Sof zman shma: `3` shaos after alos `72` minutes (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA_72_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_ALOS_72_MINUTES, &CORE_TZAIS_MINUTES_72, true),
     "getSofZmanShmaMGA72Minutes",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `72 zmaniyos` (day = alos72Z → tzais72Z).
+/// Sof zman shma: `3` shaos after alos `72 zmaniyos` (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA_72_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_ALOS_72_ZMANIS, &CORE_TZAIS_72_ZMANIS, true),
     "getSofZmanShmaMGA72MinutesZmanis",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `90` minutes (day = alos90 → tzais90).
+/// Sof zman shma: `3` shaos after alos `90` minutes (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA_90_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_ALOS_90_MINUTES, &CORE_TZAIS_MINUTES_90, true),
     "getSofZmanShmaMGA90Minutes",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `90 zmaniyos` (day = alos90Z → tzais90Z).
+/// Sof zman shma: `3` shaos after alos `90 zmaniyos` (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA_90_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_ALOS_90_ZMANIS, &CORE_TZAIS_90_ZMANIS, true),
     "getSofZmanShmaMGA90MinutesZmanis",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `96` minutes (day = alos96 → tzais96).
+/// Sof zman shma: `3` shaos after alos `96` minutes (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA_96_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_ALOS_96_MINUTES, &CORE_TZAIS_MINUTES_96, true),
     "getSofZmanShmaMGA96Minutes",
 );
-/// Sof zman shma: `3` shaos zmaniyos after alos `96 zmaniyos` (day = alos96Z → tzais96Z).
+/// Sof zman shma: `3` shaos after alos `96 zmaniyos` (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_MGA_96_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_ALOS_96_ZMANIS, &CORE_TZAIS_96_ZMANIS, true),
     "getSofZmanShmaMGA96MinutesZmanis",
 );
-/// Sof zman shma: `3` hours before chatzos (solar transit).
+/// Sof zman shma: `3` hours before solar transit.
 pub const SOF_ZMAN_SHMA_HOURS_3_BEFORE_CHATZOS: ZmanEvent<'static> = ZmanEvent::new(
     Event::Offset(&Event::Transit, Duration::minutes(-180)),
     "getSofZmanShma3HoursBeforeChatzos",
@@ -1009,7 +995,7 @@ pub const SOF_ZMAN_SHMA_ATERET_TORAH: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_ALOS_72_ZMANIS, &CORE_TZAIS_ATERET_TORAH, false),
     "getSofZmanShmaAteretTorah",
 );
-/// Sof zman shma: `3` shaos zmaniyos after Baal HaTanya day start (day = Baal HaTanya sunrise → sunset).
+/// Sof zman shma: `3` shaos after Baal HaTanya day start (or half-day based if configured).
 pub const SOF_ZMAN_SHMA_BAAL_HATANYA: ZmanEvent<'static> = ZmanEvent::new(
     Event::Shema(&CORE_BAAL_HATANYA_SUNRISE, &CORE_BAAL_HATANYA_SUNSET, true),
     "getSofZmanShmaBaalHatanya",
@@ -1054,17 +1040,17 @@ pub const SOF_ZMAN_SHMA_MGA_72_MINUTES_TO_FIXED_LOCAL_CHATZOS: ZmanEvent<'static
 // SOF ZMAN TFILA
 // ============================================================================
 
-/// Sof zman tfila: `4` shaos zmaniyos after sunrise (day = sunrise → sunset).
+/// Sof zman tfila: `4` shaos after sunrise (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_GRA: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&Event::Sunrise, &Event::Sunset, true),
     "getSofZmanTfilaGRA",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
+/// Sof zman tfila: `4` shaos after alos `72` minutes (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_72_MINUTES, &CORE_TZAIS_MINUTES_72, true),
     "getSofZmanTfilaMGA",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `19.8°` (day = alos19.8° → tzais19.8°).
+/// Sof zman tfila: `4` shaos after alos `19.8°` (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA_19_POINT_8_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(
         &CORE_ALOS_19_POINT_8_DEGREES,
@@ -1073,7 +1059,7 @@ pub const SOF_ZMAN_TFILA_MGA_19_POINT_8_DEGREES: ZmanEvent<'static> = ZmanEvent:
     ),
     "getSofZmanTfilaMGA19Point8Degrees",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais16.1°).
+/// Sof zman tfila: `4` shaos after alos `16.1°` (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(
         &CORE_ALOS_16_POINT_1_DEGREES,
@@ -1082,42 +1068,42 @@ pub const SOF_ZMAN_TFILA_MGA_16_POINT_1_DEGREES: ZmanEvent<'static> = ZmanEvent:
     ),
     "getSofZmanTfilaMGA16Point1Degrees",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `18°` (day = alos18° → tzais18°).
+/// Sof zman tfila: `4` shaos after alos `18°` (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA_18_DEGREES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_18_DEGREES, &CORE_TZAIS_18_DEGREES, true),
     "getSofZmanTfilaMGA18Degrees",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
+/// Sof zman tfila: `4` shaos after alos `72` minutes (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA_72_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_72_MINUTES, &CORE_TZAIS_MINUTES_72, true),
     "getSofZmanTfilaMGA72Minutes",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `72 zmaniyos` (day = alos72Z → tzais72Z).
+/// Sof zman tfila: `4` shaos after alos `72 zmaniyos` (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA_72_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_72_ZMANIS, &CORE_TZAIS_72_ZMANIS, true),
     "getSofZmanTfilaMGA72MinutesZmanis",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `90` minutes (day = alos90 → tzais90).
+/// Sof zman tfila: `4` shaos after alos `90` minutes (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA_90_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_90_MINUTES, &CORE_TZAIS_MINUTES_90, true),
     "getSofZmanTfilaMGA90Minutes",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `90 zmaniyos` (day = alos90Z → tzais90Z).
+/// Sof zman tfila: `4` shaos after alos `90 zmaniyos` (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA_90_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_90_ZMANIS, &CORE_TZAIS_90_ZMANIS, true),
     "getSofZmanTfilaMGA90MinutesZmanis",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `96` minutes (day = alos96 → tzais96).
+/// Sof zman tfila: `4` shaos after alos `96` minutes (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA_96_MINUTES: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_96_MINUTES, &CORE_TZAIS_MINUTES_96, true),
     "getSofZmanTfilaMGA96Minutes",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after alos `96 zmaniyos` (day = alos96Z → tzais96Z).
+/// Sof zman tfila: `4` shaos after alos `96 zmaniyos` (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_MGA_96_ZMANIS: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_96_ZMANIS, &CORE_TZAIS_96_ZMANIS, true),
     "getSofZmanTfilaMGA96MinutesZmanis",
 );
-/// Sof zman tfila: `2` hours before chatzos (solar transit).
+/// Sof zman tfila: `2` hours before solar transit.
 pub const SOF_ZMAN_TFILA_HOURS_2_BEFORE_CHATZOS: ZmanEvent<'static> = ZmanEvent::new(
     Event::Offset(&Event::Transit, Duration::minutes(-120)),
     "getSofZmanTfila2HoursBeforeChatzos",
@@ -1132,7 +1118,7 @@ pub const SOF_ZMAN_TFILA_ATERET_TORAH: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_ALOS_72_ZMANIS, &CORE_TZAIS_ATERET_TORAH, false),
     "getSofZmanTfilaAteretTorah",
 );
-/// Sof zman tfila: `4` shaos zmaniyos after Baal HaTanya day start (day = Baal HaTanya sunrise → sunset).
+/// Sof zman tfila: `4` shaos after Baal HaTanya day start (or half-day based if configured).
 pub const SOF_ZMAN_TFILA_BAAL_HATANYA: ZmanEvent<'static> = ZmanEvent::new(
     Event::Tefila(&CORE_BAAL_HATANYA_SUNRISE, &CORE_BAAL_HATANYA_SUNSET, true),
     "getSofZmanTfilaBaalHatanya",
@@ -1250,7 +1236,7 @@ pub const TZAIS_19_POINT_8_DEGREES: ZmanEvent<'static> =
 /// Tzais when the sun is `26°` below the geometric horizon (after sunset).
 pub const TZAIS_26_DEGREES: ZmanEvent<'static> =
     ZmanEvent::new(CORE_TZAIS_26_DEGREES, "getTzais26Degrees");
-/// Tzais (Ateret Torah): sunset plus [`crate::CalculatorConfig::ateret_torah_sunset_offset`].
+/// Tzais (Ateret Torah): (elevation-adjusted) sunset plus [`crate::CalculatorConfig::ateret_torah_sunset_offset`].
 pub const TZAIS_ATERET_TORAH: ZmanEvent<'static> =
     ZmanEvent::new(CORE_TZAIS_ATERET_TORAH, "getTzaisAteretTorah");
 /// Tzais (Baal HaTanya): when the sun is `6°` below the geometric horizon (after sunset).
