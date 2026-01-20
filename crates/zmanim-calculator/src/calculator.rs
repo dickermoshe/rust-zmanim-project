@@ -8,7 +8,7 @@ use crate::{
     math::multiply_duration,
     types::{config::CalculatorConfig, location::Location},
     zman::Zman,
-    CHATZOS_HALF_DAY,
+    zman::CHATZOS_HALF_DAY,
 };
 
 /// Calculates zmanim for a given [`Location`] and date using a configurable astronomical backend.

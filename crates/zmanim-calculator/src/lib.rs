@@ -6,7 +6,7 @@
 //! - [`Location`]: where to calculate for.
 //! - [`CalculatorConfig`]: configuration knobs (candle lighting offset, chatzos behavior, etc.).
 //! - [`ZmanimCalculator`]: the engine for computing times for a given date + location.
-//! - A large set of predefined [`Zman`] constants in [`zman`] (re-exported at the crate root).
+//! - A large set of predefined [`Zman`] constants in [`zman`].
 //!
 //! `ZmanimCalculator::calculate()` returns `Option<DateTime<Utc>>` since some locations/dates (e.g. polar regions)
 //! have no sunrise/sunset or twilight for a given definition.
@@ -22,10 +22,10 @@ mod types {
 }
 mod calculator;
 mod math;
-mod zman;
 mod zmanim_impl;
 
+/// Zmanim constants and definitions.
+pub mod zman;
 pub use calculator::ZmanimCalculator;
 pub use types::config::CalculatorConfig;
 pub use types::location::Location;
-pub use zman::*;

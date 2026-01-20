@@ -17,7 +17,7 @@ zmanim-calculator = "0.1.0"
 ```rust
 use chrono::{NaiveDate, Utc};
 use zmanim_calculator::{
-    CalculatorConfig, Location, ZmanimCalculator, SUNRISE, TZAIS_MINUTES_72,
+    CalculatorConfig, Location, ZmanimCalculator, zman::SUNRISE, zman::TZAIS_MINUTES_72,
 };
 
 let location = Location::new(40.7128, -74.0060, 10.0, Some(Utc))
