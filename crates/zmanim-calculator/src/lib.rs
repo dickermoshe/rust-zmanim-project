@@ -1,4 +1,4 @@
-#![cfg_attr(not(feature = "std"), no_std)]
+// #![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs)]
 //! Calculate zmanim (Jewish halachic times) using the KosherJava Zmanim API’s concepts and naming.
 //!

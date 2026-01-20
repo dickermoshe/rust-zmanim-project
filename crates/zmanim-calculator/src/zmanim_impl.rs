@@ -14,14 +14,14 @@ mod tests {
 
     #[test]
     fn test_bain_hashmashos_uses_elevation() {
-        assert!(!Zman::<chrono_tz::Tz>::uses_elevation(
+        assert!(!ZmanLike::<chrono_tz::Tz>::uses_elevation(
             &BAIN_HASHMASHOS_RT_13_POINT_24_DEGREES
         ));
     }
 
     #[test]
     fn test_polar_day_zmanim_return_none() {
-        let alos_variants: [&dyn Zman<Tz>; 9] = [
+        let alos_variants: [&dyn ZmanLike<Tz>; 9] = [
             &ALOS_60_MINUTES,
             &ALOS_72_MINUTES,
             &ALOS_72_ZMANIS,
@@ -37,7 +37,7 @@ mod tests {
             assert!(zman.calculate(&mut calc).is_none());
         }
 
-        let bain_variants: [&dyn Zman<Tz>; 6] = [
+        let bain_variants: [&dyn ZmanLike<Tz>; 6] = [
             &BAIN_HASHMASHOS_RT_58_POINT_5_MINUTES,
             &BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES,
             &BAIN_HASHMASHOS_RT_2_STARS,
@@ -56,7 +56,7 @@ mod tests {
         let mut calc = polar_day_calc();
         assert!(CHATZOS_HALF_DAY.calculate(&mut calc).is_none());
 
-        let mincha_variants: [&dyn Zman<Tz>; 7] = [
+        let mincha_variants: [&dyn ZmanLike<Tz>; 7] = [
             &MINCHA_GEDOLA_16_POINT_1_DEGREES,
             &MINCHA_GEDOLA_MINUTES_72,
             &MINCHA_GEDOLA_AHAVAT_SHALOM,

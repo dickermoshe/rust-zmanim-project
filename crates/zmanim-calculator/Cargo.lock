@@ -463,6 +463,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
 
 [[package]]
+name = "hebrew_holiday_calendar"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "29e2865f88d2870a5c8ca127d34837661973ce09435cc917f9d6deb01bc350fb"
+dependencies = [
+ "chrono",
+ "icu_calendar",
+ "num_enum",
+]
+
+[[package]]
 name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1392,6 +1403,7 @@ dependencies = [
  "chrono-tz",
  "core_maths",
  "defmt",
+ "hebrew_holiday_calendar",
  "icu_calendar",
  "j4rs",
  "lazy_static",

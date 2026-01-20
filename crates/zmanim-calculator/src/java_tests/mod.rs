@@ -105,10 +105,11 @@ mod tests {
     /// * `seed` - Random seed for reproducibility
     /// * `max_diff_override` - Optional override for max difference (if None, uses MAX_DIFF_SECONDS)
     fn test_zman_vs_java(
-        zman: &'static dyn Zman<chrono_tz::Tz>,
+        zman: &'static dyn ZmanLike<chrono_tz::Tz>,
         seed: u64,
         max_diff_override: Option<i64>,
         max_lat: Option<f64>,
+        always_with_tz: bool,
     ) {
         std::println!(
             "Testing {:?} with seed: {} (set TEST_SEED={} to reproduce)",
@@ -128,6 +129,7 @@ mod tests {
             };
             if !Location::<chrono_tz::Tz>::near_anti_meridian(rust_calculator.location.longitude)
                 && rng.gen_bool(0.5)
+                && !always_with_tz
             {
                 rust_calculator.location.timezone = None;
             }
@@ -176,7 +178,7 @@ mod tests {
     }
 
     fn test_zman_iteration(
-        zman: &'static dyn Zman<chrono_tz::Tz>,
+        zman: &'static dyn ZmanLike<chrono_tz::Tz>,
         seed: u64,
         iteration: i64,
         max_diff_override: Option<i64>,
@@ -246,13 +248,19 @@ mod tests {
         ($name:ident, $zman:expr) => {
             #[test]
             fn $name() {
-                test_zman_vs_java(&$zman, get_test_seed(), None, None);
+                test_zman_vs_java(&$zman, get_test_seed(), None, None, false);
             }
         };
         ($name:ident, $zman:expr, $max_lat:expr) => {
             #[test]
             fn $name() {
-                test_zman_vs_java(&$zman, get_test_seed(), None, $max_lat);
+                test_zman_vs_java(&$zman, get_test_seed(), None, $max_lat, false);
+            }
+        };
+        ($name:ident, $zman:expr, $max_lat:expr, $always_with_tz:expr) => {
+            #[test]
+            fn $name() {
+                test_zman_vs_java(&$zman, get_test_seed(), None, $max_lat, $always_with_tz);
             }
         };
     }
@@ -703,6 +711,18 @@ mod tests {
     zman_test!(
         test_tzais_geonim_degrees_9_point_75,
         TZAIS_GEONIM_DEGREES_9_POINT_75
+    );
+    zman_test!(
+        test_kiddush_levana_start_7_days,
+        KIDDUSH_LEVANA_START_7_DAYS,
+        None,
+        true
+    );
+    zman_test!(
+        test_kiddush_levana_start_3_days,
+        KIDDUSH_LEVANA_START_3_DAYS,
+        None,
+        true
     );
 
     #[test]

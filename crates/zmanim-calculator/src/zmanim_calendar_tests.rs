@@ -48,13 +48,13 @@ fn fmt_local(dt: DateTime<Utc>) -> String {
         .to_string()
 }
 
-fn assert_zman_str(calc: &mut ZmanimCalculator<Tz>, zman: &dyn Zman<Tz>, expected: &str) {
+fn assert_zman_str(calc: &mut ZmanimCalculator<Tz>, zman: &dyn ZmanLike<Tz>, expected: &str) {
     let dt = zman.calculate(calc).unwrap();
     assert_time_str(dt, expected, None);
 }
 fn assert_zman_str_with_max_time_diff(
     calc: &mut ZmanimCalculator<Tz>,
-    zman: &dyn Zman<Tz>,
+    zman: &dyn ZmanLike<Tz>,
     expected: &str,
     max_time_diff_seconds: Option<i64>,
 ) {

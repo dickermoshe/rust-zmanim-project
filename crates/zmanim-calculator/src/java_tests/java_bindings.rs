@@ -4,7 +4,7 @@
 use chrono::{DateTime, Duration, TimeZone};
 use j4rs::{Instance, InvocationArg, Jvm, Null};
 
-use crate::{zman::Zman, *};
+use crate::{zman::ZmanLike, *};
 
 pub struct JavaTimeAndPlace {
     pub geolocation: Instance,
@@ -835,7 +835,7 @@ impl<'a> JavaZmanimCalendar<'a> {
         self.java_date_to_rust_datetime(&java_result)
     }
 
-    pub fn get_zman(&self, zman: &dyn Zman<chrono_tz::Tz>) -> Option<DateTime<chrono_tz::Tz>> {
+    pub fn get_zman(&self, zman: &dyn ZmanLike<chrono_tz::Tz>) -> Option<DateTime<chrono_tz::Tz>> {
         let java_result = self
             .jvm
             .invoke(&self.instance, zman.name(), InvocationArg::empty())

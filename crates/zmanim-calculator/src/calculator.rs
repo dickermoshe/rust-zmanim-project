@@ -3,11 +3,12 @@ use astronomical_calculator::{AstronomicalCalculator, Refraction};
 use core_maths::*;
 
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc};
+use icu_calendar::{cal::Hebrew, Date};
 
 use crate::{
     math::multiply_duration,
     types::{config::CalculatorConfig, location::Location},
-    zman::Zman,
+    zman::ZmanLike,
     zman::CHATZOS_HALF_DAY,
 };
 
@@ -86,9 +87,27 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
     ///
     /// Returns `None` if the zman cannot be computed for this date/location (for example in polar
     /// regions where an event never occurs).
-    pub fn calculate(&mut self, zman: impl Zman<Tz>) -> Option<DateTime<Utc>> {
+    pub fn calculate(&mut self, zman: impl ZmanLike<Tz>) -> Option<DateTime<Utc>> {
         zman.calculate(self)
     }
+    pub(crate) fn hebrew_date(&self) -> Option<Date<Hebrew>> {
+        let gregorian_date = Date::try_new_gregorian(
+            self.date.year(),
+            self.date.month() as u8,
+            self.date.day() as u8,
+        )
+        .ok()?;
+        Some(gregorian_date.to_calendar(Hebrew))
+    }
+    pub(crate) fn is_today(&self, datetime: DateTime<Utc>) -> Option<bool> {
+        self.location.timezone.as_ref().map(|timezone| {
+            timezone
+                .from_utc_datetime(&datetime.naive_utc())
+                .date_naive()
+                == self.date
+        })
+    }
+
     pub(crate) fn transit(&mut self) -> Option<DateTime<Utc>> {
         Utc.timestamp_opt(self.a_calc.get_solar_transit().ok()?, 0)
             .single()
@@ -168,8 +187,8 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
     #[allow(unused)]
     pub(crate) fn get_shaah_zmanis_from_zmanim(
         &mut self,
-        alos: impl Zman<Tz>,
-        tzais: impl Zman<Tz>,
+        alos: impl ZmanLike<Tz>,
+        tzais: impl ZmanLike<Tz>,
     ) -> Option<Duration> {
         let alos_time = alos.calculate(self)?;
         let tzais_time = tzais.calculate(self)?;
