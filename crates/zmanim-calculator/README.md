@@ -17,7 +17,7 @@ zmanim-calculator = "0.1.0"
 ```rust
 use chrono::{NaiveDate, Utc};
 use zmanim_calculator::{
-    CalculatorConfig, Location, NeitzZman, TzaisZman, ZmanimCalculator,
+    CalculatorConfig, Location, ZmanimCalculator, SUNRISE, TZAIS_MINUTES_72,
 };
 
 let location = Location::new(40.7128, -74.0060, 10.0, Some(Utc))
@@ -26,16 +26,15 @@ let date = NaiveDate::from_ymd_opt(2025, 1, 1).expect("valid date");
 let config = CalculatorConfig::default();
 let mut calc = ZmanimCalculator::new(location, date, config).expect("calculator");
 
-let sunrise = calc.calculate(NeitzZman).expect("sunrise");
-let tzais = calc
-    .calculate(TzaisZman::Minutes72)
-    .expect("tzais");
+let sunrise = calc.calculate(SUNRISE).expect("sunrise");
+let tzais = calc.calculate(TZAIS_MINUTES_72).expect("tzais");
 
 println!("Sunrise (UTC): {sunrise}");
 println!("Tzais (UTC): {tzais}");
 ```
 
 Notes:
+
 - `calculate` returns `DateTime<Utc>`; convert to local time as needed.
 - If you omit a timezone, locations near the anti-meridian require one.
 
