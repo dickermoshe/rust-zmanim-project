@@ -376,6 +376,10 @@ impl<'a> JavaJewishCalendar<'a> {
     pub fn is_behab(&self) -> bool {
         self.invoke_bool("isBeHaB")
     }
+
+    pub fn get_molad_as_date(&self) -> Option<DateTime<Utc>> {
+        self.invoke_date("getMoladAsDate")
+    }
 }
 
 /// Maps Java's getYomTovIndex() integer values to Rust Holiday enum values.
@@ -1092,6 +1096,61 @@ mod holiday_tests {
                 "Behab mismatch: Rust={}, Java={}, Rust holidays={:?}, {}",
                 rust_result, java_result, rust_holidays, message
             );
+        }
+    }
+
+    #[test]
+    fn test_molad() {
+        let jvm = init_jvm();
+        let mut rng = rand::thread_rng();
+        let iterations = get_test_iterations();
+
+        for _ in 0..iterations {
+            let result = create_jewish_calendars(&jvm, &mut rng);
+            if result.is_none() {
+                continue;
+            }
+
+            let (
+                rust_date,
+                java_calendar,
+                _in_israel,
+                _is_mukaf_choma,
+                _use_modern_holidays,
+                message,
+            ) = result.unwrap();
+
+            let java_molad = java_calendar.get_molad_as_date();
+            let rust_molad = rust_date.molad();
+
+            // Both should be Some or both None
+            if java_molad.is_none() && rust_molad.is_none() {
+                continue;
+            }
+
+            assert_eq!(
+                java_molad.is_some(),
+                rust_molad.is_some(),
+                "Molad existence mismatch: Rust={:?}, Java={:?}, {}",
+                rust_molad.is_some(),
+                java_molad.is_some(),
+                message
+            );
+
+            if let (Some(java), Some(rust)) = (java_molad, rust_molad) {
+                // Calculate the difference in milliseconds
+                let diff_millis = (java.timestamp_millis() - rust.timestamp_millis()).abs();
+
+                // Allow a tolerance of 1 second (1000 ms) due to potential rounding differences
+                assert!(
+                    diff_millis <= 1000,
+                    "Molad time mismatch: Rust={}, Java={}, diff={}ms, {}",
+                    rust,
+                    java,
+                    diff_millis,
+                    message
+                );
+            }
         }
     }
 }
