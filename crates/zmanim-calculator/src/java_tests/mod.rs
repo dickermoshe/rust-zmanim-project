@@ -1,5 +1,6 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 #![allow(clippy::panic)]
+#![allow(missing_docs)]
 
 use chrono::DateTime;
 use j4rs::{ClasspathEntry, Jvm, JvmBuilder};

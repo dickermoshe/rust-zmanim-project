@@ -1,5 +1,6 @@
 use chrono::{TimeZone, Utc};
 
+/// A geographic location (latitude/longitude/elevation) and an optional timezone.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Location<T: TimeZone = Utc> {
     /// Latitude in degrees (positive North, negative South)
@@ -15,9 +16,23 @@ pub struct Location<T: TimeZone = Utc> {
 impl<T: TimeZone> Location<T> {
     /// Creates a new Location.
     ///
-    /// Returns `None` if the location is near the anti-meridian (±150° longitude)
-    /// and no timezone is provided, since calculating local noon from UTC using
-    /// longitude offset alone becomes unreliable near date boundaries.
+    /// # Allowed values
+    ///
+    /// - `latitude` must be a finite number in `[-90.0, 90.0]` (degrees; positive = North).
+    /// - `longitude` must be a finite number in `[-180.0, 180.0]` (degrees; positive = East).
+    /// - `elevation` must be a finite number `>= 0.0` (meters above mean sea level).
+    /// - `timezone` is optional, but strongly recommended when calculating around date
+    ///   boundaries (see below).
+    ///
+    /// If any of the values are invalid, this returns `None`.
+    ///
+    /// # Anti-meridian behavior
+    ///
+    /// If `timezone` is `None` and `longitude` is near the anti-meridian (currently `abs(longitude) > 150°`),
+    /// this returns `None`.
+    ///
+    /// This mirrors the real-world situation where longitude alone does not uniquely determine the civil day
+    /// near the International Date Line; providing a timezone disambiguates the intended date.
     pub fn new(latitude: f64, longitude: f64, elevation: f64, timezone: Option<T>) -> Option<Self> {
         if timezone.is_none() && Self::near_anti_meridian(longitude) {
             return None;
@@ -40,7 +55,8 @@ impl<T: TimeZone> Location<T> {
             timezone,
         })
     }
-    pub fn near_anti_meridian(longitude: f64) -> bool {
+
+    pub(crate) fn near_anti_meridian(longitude: f64) -> bool {
         const ANTI_MERIDIAN_THRESHOLD: f64 = 150.0;
         longitude.abs() > ANTI_MERIDIAN_THRESHOLD
     }
