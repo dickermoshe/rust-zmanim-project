@@ -24,7 +24,7 @@ time = { version = "0.3.44", default-features = false }
 defmt = { version = "1.0.1", optional = true }
 chrono-tz = { version = "0.10.4", default-features = false, optional = true }
 core_maths = "0.1.1"
-hebrew_holiday_calendar = "0.2.1"
+hebrew_holiday_calendar = "0.2.2"
 
 [dev-dependencies]
 chrono = { version = "0.4.41", default-features = false, features = ["std"] }

@@ -712,15 +712,29 @@ mod tests {
         test_tzais_geonim_degrees_9_point_75,
         TZAIS_GEONIM_DEGREES_9_POINT_75
     );
+
+    zman_test!(test_molad, MOLAD, None, true);
     zman_test!(
-        test_kiddush_levana_start_7_days,
-        KIDDUSH_LEVANA_START_7_DAYS,
+        test_tchilas_zman_kidush_levana_3_days,
+        TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS,
         None,
         true
     );
     zman_test!(
-        test_kiddush_levana_start_3_days,
-        KIDDUSH_LEVANA_START_3_DAYS,
+        test_tchilas_zman_kidush_levana_7_days,
+        TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS,
+        None,
+        true
+    );
+    zman_test!(
+        test_sof_zman_kidush_levana_between_moldos,
+        SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS,
+        None,
+        true
+    );
+    zman_test!(
+        test_sof_zman_kidush_levana_15_days,
+        SOF_ZMAN_KIDUSH_LEVANA_15_DAYS,
         None,
         true
     );

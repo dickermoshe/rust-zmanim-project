@@ -1,11 +1,6 @@
 use chrono::{DateTime, Datelike, Duration, TimeZone, Utc};
-use hebrew_holiday_calendar::HebrewHolidayCalendar;
-use icu_calendar::{
-    cal::Hebrew,
-    options::{DateAddOptions, Overflow},
-    types::DateDuration,
-    Date,
-};
+use hebrew_holiday_calendar::MoladCalendar;
+use icu_calendar::Date;
 
 use crate::ZmanimCalculator;
 
@@ -1334,75 +1329,166 @@ pub const TZAIS_GEONIM_DEGREES_9_POINT_75: ZmanEvent<'static> = ZmanEvent::new(
     CORE_TZAIS_GEONIM_DEGREES_9_POINT_75,
     "getTzaisGeonim9Point75Degrees",
 );
-
-pub struct KiddushLevanaStart7Days;
-
-impl<Tz: TimeZone> ZmanLike<Tz> for KiddushLevanaStart7Days {
+#[allow(missing_docs)]
+#[derive(Default)]
+pub struct SofZmanKidushLevana15Days;
+impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevana15Days {
     fn calculate(&self, calculator: &mut ZmanimCalculator<Tz>) -> Option<DateTime<Utc>> {
-        let gregorian_date = Date::try_new_gregorian(
+        let tz = &calculator.location.timezone;
+        let date = Date::try_new_gregorian(
             calculator.date.year(),
             calculator.date.month() as u8,
             calculator.date.day() as u8,
         )
         .ok()?;
-        let hebrew = gregorian_date.to_calendar(Hebrew);
-        if hebrew.day_of_month().0 < 4 || hebrew.day_of_month().0 > 9 {
-            return None;
-        }
-        let molad = hebrew.molad()? + chrono::Duration::hours(168);
-        let is_today = calculator.is_today(molad)?;
-        if !is_today {
-            return None;
-        }
-
-        Some(molad)
+        date.sof_zman_kidush_levana_15_days(tz.as_ref()?)
+            .map(|i| i.0.to_utc())
     }
     #[cfg(test)]
     fn uses_elevation(&self) -> bool {
-        true
+        false
     }
+
+    #[cfg(test)]
+    fn name(&self) -> &str {
+        "getSofZmanKidushLevana15Days"
+    }
+}
+
+/// Returns the latest time of _Kiddush Levana_ calculated as 15 days after the molad.
+///
+/// Will return None if the zman will not occur on this day. If the location does not contain
+/// a timezone, this will always return None.
+pub const SOF_ZMAN_KIDUSH_LEVANA_15_DAYS: SofZmanKidushLevana15Days = SofZmanKidushLevana15Days {};
+
+#[allow(missing_docs)]
+#[derive(Default)]
+pub struct SofZmanKidushLevanaBetweenMoldos;
+impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevanaBetweenMoldos {
+    fn calculate(&self, calculator: &mut ZmanimCalculator<Tz>) -> Option<DateTime<Utc>> {
+        let tz = &calculator.location.timezone;
+        let date = Date::try_new_gregorian(
+            calculator.date.year(),
+            calculator.date.month() as u8,
+            calculator.date.day() as u8,
+        )
+        .ok()?;
+        date.sof_zman_kidush_levana_between_moldos(tz.as_ref()?)
+            .map(|i| i.0.to_utc())
+    }
+    #[cfg(test)]
+    fn uses_elevation(&self) -> bool {
+        false
+    }
+
+    #[cfg(test)]
+    fn name(&self) -> &str {
+        "getSofZmanKidushLevanaBetweenMoldos"
+    }
+}
+
+/// The latest time of _Kiddush Levana_ according to the
+/// [Maharil](https://en.wikipedia.org/wiki/Yaakov_ben_Moshe_Levi_Moelin)'s opinion that it
+/// is calculated as halfway between molad and molad.
+///
+/// Will return None if the zman will not occur on this day. If the location does not contain
+/// a timezone, this will always return None.
+pub const SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS: SofZmanKidushLevanaBetweenMoldos =
+    SofZmanKidushLevanaBetweenMoldos {};
+
+#[allow(missing_docs)]
+#[derive(Default)]
+pub struct TchilasZmanKidushLevana3Days;
+impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana3Days {
+    fn calculate(&self, calculator: &mut ZmanimCalculator<Tz>) -> Option<DateTime<Utc>> {
+        let tz = &calculator.location.timezone;
+        let date = Date::try_new_gregorian(
+            calculator.date.year(),
+            calculator.date.month() as u8,
+            calculator.date.day() as u8,
+        )
+        .ok()?;
+        date.tchilas_zman_kidush_levana_3_days(tz.as_ref()?)
+            .map(|i| i.0.to_utc())
+    }
+    #[cfg(test)]
+    fn uses_elevation(&self) -> bool {
+        false
+    }
+
+    #[cfg(test)]
+    fn name(&self) -> &str {
+        "getTchilasZmanKidushLevana3Days"
+    }
+}
+/// The earliest time of _Kiddush Levana_ according to [Rabbeinu Yonah](https://en.wikipedia.org/wiki/Yonah_Gerondi)'s opinion that it can be said 3 days after the molad.
+///
+/// Will return None if the zman will not occur on this day. If the location does not contain
+/// a timezone, this will always return None.
+pub const TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS: TchilasZmanKidushLevana3Days =
+    TchilasZmanKidushLevana3Days {};
+
+#[allow(missing_docs)]
+#[derive(Default)]
+pub struct TchilasZmanKidushLevana7Days;
+impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana7Days {
+    fn calculate(&self, calculator: &mut ZmanimCalculator<Tz>) -> Option<DateTime<Utc>> {
+        let tz = &calculator.location.timezone;
+        let date = Date::try_new_gregorian(
+            calculator.date.year(),
+            calculator.date.month() as u8,
+            calculator.date.day() as u8,
+        )
+        .ok()?;
+        date.tchilas_zman_kidush_levana_7_days(tz.as_ref()?)
+            .map(|i| i.0.to_utc())
+    }
+    #[cfg(test)]
+    fn uses_elevation(&self) -> bool {
+        false
+    }
+
     #[cfg(test)]
     fn name(&self) -> &str {
         "getTchilasZmanKidushLevana7Days"
     }
 }
 
-pub const KIDDUSH_LEVANA_START_7_DAYS: KiddushLevanaStart7Days = KiddushLevanaStart7Days {};
+/// The earliest time of _Kiddush Levana_ according to the opinions that it should
+/// not be said until 7 days after the molad.
+///
+/// Will return None if the zman will not occur on this day. If the location does not contain
+/// a timezone, this will always return None.
+pub const TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS: TchilasZmanKidushLevana7Days =
+    TchilasZmanKidushLevana7Days {};
 
-pub struct KiddushLevanaStart3Days;
+#[derive(Default)]
+#[allow(missing_docs)]
+pub struct Molad;
 
-impl<Tz: TimeZone> ZmanLike<Tz> for KiddushLevanaStart3Days {
+impl<Tz: TimeZone> ZmanLike<Tz> for Molad {
     fn calculate(&self, calculator: &mut ZmanimCalculator<Tz>) -> Option<DateTime<Utc>> {
-        let mut hebrew = calculator.hebrew_date()?;
-        if hebrew.day_of_month().0 > 5 || hebrew.day_of_month().0 < 30 {
-            return None;
-        }
-        let mut molad = hebrew.molad()? + chrono::Duration::hours(72);
-
-        let is_today = calculator.is_today(molad)?;
-
-        if !is_today && hebrew.day_of_month().0 == 30 {
-            let mut add_option = DateAddOptions::default();
-            add_option.overflow = Some(Overflow::Constrain);
-
-            hebrew
-                .try_add_with_options(DateDuration::for_months(1), add_option)
-                .ok()?;
-            molad = hebrew.molad()? + chrono::Duration::hours(72);
-            if !calculator.is_today(molad)? {
-                return None;
-            }
-        }
-        Some(molad)
+        let tz = &calculator.location.timezone;
+        let date = Date::try_new_gregorian(
+            calculator.date.year(),
+            calculator.date.month() as u8,
+            calculator.date.day() as u8,
+        )
+        .ok()?;
+        date.molad(tz.as_ref()?).map(|i| i.0.to_utc())
     }
     #[cfg(test)]
     fn uses_elevation(&self) -> bool {
-        true
+        false
     }
+
     #[cfg(test)]
     fn name(&self) -> &str {
-        "getTchilasZmanKidushLevana3Days"
+        "getZmanMolad"
     }
 }
-
-pub const KIDDUSH_LEVANA_START_3_DAYS: KiddushLevanaStart3Days = KiddushLevanaStart3Days {};
+/// The time of the molad (new moon) for the current date's Hebrew month.
+///
+/// Will return None if the zman will not occur on this day. If the location does not contain
+/// a timezone, this will always return None.
+pub const MOLAD: Molad = Molad {};

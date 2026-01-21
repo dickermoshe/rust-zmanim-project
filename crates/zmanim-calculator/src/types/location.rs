@@ -21,8 +21,7 @@ impl<T: TimeZone> Location<T> {
     /// - `latitude` must be a finite number in `[-90.0, 90.0]` (degrees; positive = North).
     /// - `longitude` must be a finite number in `[-180.0, 180.0]` (degrees; positive = East).
     /// - `elevation` must be a finite number `>= 0.0` (meters above mean sea level).
-    /// - `timezone` is required for locations near the anti-meridian.
-    ///   Calculations for Kiddush Levana times require a timezone. Ommitting a timezone will result in None being returned.
+    /// - `timezone` is required for locations near the anti-meridian and for calculating kiddush levena times.
     ///
     /// If any of the values are invalid, this returns `None`.
     ///
