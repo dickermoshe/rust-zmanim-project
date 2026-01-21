@@ -55,46 +55,11 @@ if let Some(parsha) = date.todays_parsha(false) {
 }
 ```
 
-## Holiday Types
-
-### Major Holidays
-
-- Rosh Hashana, Yom Kippur
-- Succos, Shemini Atzeres, Simchas Torah
-- Chanukah, Purim
-- Pesach, Shavuos
-
-### Fast Days
-
-- Fast of Gedalyah, Tenth of Teves, Fast of Esther
-- Seventeenth of Tammuz, Tisha B'Av
-
-### Modern Israeli Holidays
-
-- Yom HaShoah, Yom Hazikaron, Yom Ha'atzmaut, Yom Yerushalayim
-
-### Special Days
-
-- Rosh Chodesh, Lag BaOmer, Tu B'Shvat, Tu B'Av
-- Isru Chag, Yom Kippur Katan, BaHaB
-
-## Torah Readings
-
-- **Weekly Parshiyot**: All 54 Torah portions
-- **Combined Readings**: For non-leap years (e.g., Vayakhel-Pekudei)
-- **Special Shabbatot**: Shekalim, Zachor, Parah, Hachodesh
-- **Holiday-Adjacent**: Shabbat Hagadol, Shuva, Chazon, Nachamu
-- **Israel vs. Diaspora**: Different reading schedules when holidays differ
+See the [docs](https://docs.rs/hebrew_holiday_calendar/) for more info.  
 
 ## Testing
 
 This library is extensively tested against [KosherJava](https://github.com/KosherJava/zmanim), the widely-used Java library for Jewish calendar calculations. Our test suite includes:
-
-- **16 comprehensive integration tests** comparing Rust implementations against KosherJava
-- **Randomized testing** across a wide range of dates (1870-2070)
-- **All 41 holiday types** validated for correctness
-- **Parsha calculations** verified for both Israel and Diaspora
-- **Special observances** including day of Chanukah, day of Omer, fast days, and more
 
 The extensive testing ensures compatibility and accuracy with established Jewish calendar standards.
 
@@ -111,19 +76,6 @@ hebrew_holiday_calendar = { version = "0.1.0", default-features = false }
 
 - `defmt`: Enables formatting support for embedded logging
 
-## Implementation
-
-The library uses the ICU calendar system (`icu_calendar`) for accurate Hebrew date calculations and conversions. All Hebrew calendar rules are implemented according to traditional Jewish law:
-
-- Molad calculations
-- Dechiyot (postponement rules)
-- Leap year cycles (19-year Metonic cycle)
-- Variable month lengths (Cheshvan and Kislev)
-
-### Molad and Kiddush Levana APIs
-
-Molad and Kiddush Levana calculations are exposed on `Date<Gregorian>` via the `MoladCalendar` trait. These methods only return `Some` when the molad-based time falls on that Gregorian date in the provided timezone.
-
 ## License
 
 The library is released under the LGPL 2.1 license.
@@ -132,3 +84,4 @@ The library is released under the LGPL 2.1 license.
 
 - [icu_calendar](https://github.com/unicode-org/icu4x) for core calendar operations
 - [KosherJava](https://github.com/KosherJava/zmanim) for validation and reference implementation
+
