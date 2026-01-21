@@ -1121,7 +1121,7 @@ mod holiday_tests {
             ) = result.unwrap();
 
             let java_molad = java_calendar.get_molad_as_date();
-            let rust_molad = rust_date.molad();
+            let rust_molad = months_molad(&rust_date);
 
             // Both should be Some or both None
             if java_molad.is_none() && rust_molad.is_none() {
