@@ -1,7 +1,9 @@
 use chrono::{DateTime, Datelike, TimeZone, Utc};
+use chrono_tz::Tz;
 use j4rs::{ClasspathEntry, Instance, InvocationArg, Jvm, JvmBuilder, Null};
 use rand::Rng;
 use std::env;
+use std::str::FromStr;
 use std::sync::Once;
 
 use super::*;
@@ -45,12 +47,28 @@ static DEFAULT_TEST_YEARS: i64 = 100;
 /// Default number of milliseconds in the given number of years.
 static DEFAULT_TEST_YEARS_IN_MILLISECONDS: i64 = 1000 * 3600 * 24 * 365 * DEFAULT_TEST_YEARS;
 
+const TZ_CHOICES: [&str; 8] = [
+    "UTC",
+    "Etc/UTC",
+    "Etc/GMT",
+    "Etc/GMT+1",
+    "Etc/GMT-1",
+    "Etc/GMT+2",
+    "Etc/GMT-2",
+    "Etc/GMT-14",
+];
+
 /// Generates a random DateTime in the range 1870-2070 with the given timezone.
 fn random_date_time(rng: &mut impl Rng) -> DateTime<Utc> {
     let milliseconds_since_epoch: i64 = rng.gen_range(
         -DEFAULT_TEST_YEARS_IN_MILLISECONDS..=DEFAULT_TEST_YEARS_IN_MILLISECONDS, // 1870 to 2070
     );
     Utc.timestamp_millis_opt(milliseconds_since_epoch).unwrap()
+}
+
+fn random_tz(rng: &mut impl Rng) -> Tz {
+    let idx = rng.gen_range(0..TZ_CHOICES.len());
+    Tz::from_str(TZ_CHOICES[idx]).unwrap()
 }
 /// Generates a random Hebrew date in the range 1870-2070.
 fn random_hebrew_date(rng: &mut impl Rng) -> (i32, HebrewMonth, u8) {
@@ -382,6 +400,116 @@ impl<'a> JavaJewishCalendar<'a> {
     }
 }
 
+pub struct JavaComplexZmanimCalendar<'a> {
+    pub jvm: &'a Jvm,
+    pub instance: Instance,
+}
+
+impl<'a> JavaComplexZmanimCalendar<'a> {
+    pub fn from_gregorian_date(
+        jvm: &'a Jvm,
+        year: i32,
+        month: i32,
+        day: i32,
+        tz: &Tz,
+    ) -> Option<Self> {
+        let instance = jvm
+            .create_instance(
+                "com.kosherjava.zmanim.ComplexZmanimCalendar",
+                InvocationArg::empty(),
+            )
+            .ok()?;
+
+        let tz_arg = InvocationArg::try_from(tz.name()).unwrap();
+        let java_tz = jvm
+            .invoke_static("com.ibm.icu.util.TimeZone", "getTimeZone", &[tz_arg])
+            .ok()?;
+        let calendar = jvm
+            .invoke(&instance, "getCalendar", InvocationArg::empty())
+            .ok()?;
+        jvm.invoke(&calendar, "setTimeZone", &[InvocationArg::from(java_tz)])
+            .ok()?;
+        let year_arg = InvocationArg::try_from(year)
+            .unwrap()
+            .into_primitive()
+            .unwrap();
+        let month_arg = InvocationArg::try_from(month)
+            .unwrap()
+            .into_primitive()
+            .unwrap();
+        let day_arg = InvocationArg::try_from(day)
+            .unwrap()
+            .into_primitive()
+            .unwrap();
+        let local_date = jvm
+            .invoke_static("java.time.LocalDate", "of", &[year_arg, month_arg, day_arg])
+            .ok()?;
+        let sql_date = jvm
+            .invoke_static(
+                "java.sql.Date",
+                "valueOf",
+                &[InvocationArg::from(local_date)],
+            )
+            .ok()?;
+        jvm.invoke(&calendar, "setTime", &[InvocationArg::from(sql_date)])
+            .ok()?;
+
+        Some(Self { jvm, instance })
+    }
+
+    fn java_date_to_rust_datetime(&self, java_date: &Instance) -> Option<DateTime<Utc>> {
+        let is_null = self
+            .jvm
+            .check_equals(
+                java_date,
+                InvocationArg::try_from(Null::Of("java.util.Date")).unwrap(),
+            )
+            .unwrap();
+        if is_null {
+            return None;
+        }
+
+        let millis = self
+            .jvm
+            .to_rust::<i64>(
+                self.jvm
+                    .invoke(java_date, "getTime", InvocationArg::empty())
+                    .unwrap(),
+            )
+            .unwrap();
+
+        DateTime::<Utc>::from_timestamp_millis(millis)
+    }
+
+    fn invoke_date(&self, method: &str) -> Option<DateTime<Utc>> {
+        let java_result = self
+            .jvm
+            .invoke(&self.instance, method, InvocationArg::empty())
+            .ok()?;
+        self.java_date_to_rust_datetime(&java_result)
+    }
+
+    pub fn get_sof_zman_kidush_levana_between_moldos(&self) -> Option<DateTime<Utc>> {
+        self.invoke_date("getSofZmanKidushLevanaBetweenMoldos")
+    }
+
+    pub fn get_sof_zman_kidush_levana_15_days(&self) -> Option<DateTime<Utc>> {
+        self.invoke_date("getSofZmanKidushLevana15Days")
+    }
+
+    pub fn get_tchilas_zman_kidush_levana_3_days(&self) -> Option<DateTime<Utc>> {
+        self.invoke_date("getTchilasZmanKidushLevana3Days")
+    }
+
+    pub fn get_tchilas_zman_kidush_levana_7_days(&self) -> Option<DateTime<Utc>> {
+        self.invoke_date("getTchilasZmanKidushLevana7Days")
+    }
+
+    pub fn get_zman_molad(&self) -> Option<DateTime<Utc>> {
+        self.invoke_date("getZmanMolad")
+    }
+}
+
 /// Maps Java's getYomTovIndex() integer values to Rust Holiday enum values.
 /// Based on the KosherJava JewishCalendar class constants.
 fn java_holiday_index_to_rust(index: i32) -> Option<Holiday> {
@@ -546,6 +674,31 @@ mod holiday_tests {
     // - YomKippurKatan: test_yom_kippur_katan() uses isYomKippurKatan()
     // - Behab: test_behab() uses isBeHaB()
     // - CountOfTheOmer: covered by test_day_of_the_omer() via getDayOfOmer()
+
+    fn random_zmanim_calendar<'a>(
+        jvm: &'a Jvm,
+        gregorian: &Date<Gregorian>,
+        rng: &mut impl Rng,
+    ) -> (Tz, JavaComplexZmanimCalendar<'a>) {
+        for _ in 0..TZ_CHOICES.len() {
+            let tz = random_tz(rng);
+            if let Some(calendar) = JavaComplexZmanimCalendar::from_gregorian_date(
+                jvm,
+                gregorian.extended_year(),
+                gregorian.month().month_number() as i32,
+                gregorian.day_of_month().0 as i32,
+                &tz,
+            ) {
+                return (tz, calendar);
+            }
+        }
+        panic!(
+            "Failed to create JavaComplexZmanimCalendar for {}-{}-{}",
+            gregorian.extended_year(),
+            gregorian.month().month_number(),
+            gregorian.day_of_month().0
+        );
+    }
 
     #[test]
     fn test_is_assur_bemelacha() {
@@ -1151,6 +1304,231 @@ mod holiday_tests {
                     message
                 );
             }
+        }
+    }
+
+    fn assert_java_rust_zman<Tz: TimeZone>(
+        java_date: Option<DateTime<Utc>>,
+        rust_date: Option<(DateTime<Tz>, HebrewMonth)>,
+        label: &str,
+        message: &str,
+    ) {
+        if java_date.is_none() && rust_date.is_none() {
+            return;
+        }
+
+        assert_eq!(
+            java_date.is_some(),
+            rust_date.is_some(),
+            "{} existence mismatch: Rust={:?}, Java={:?}, JavaDate={:?}, RustDate={:?}, {}",
+            label,
+            rust_date.is_some(),
+            java_date.is_some(),
+            java_date,
+            rust_date,
+            message
+        );
+
+        let (java, (rust, rust_month)) = match (java_date, rust_date) {
+            (Some(java), Some(rust)) => (java, rust),
+            _ => return,
+        };
+
+        let rust_utc = rust.with_timezone(&Utc);
+        let diff_millis = (java.timestamp_millis() - rust_utc.timestamp_millis()).abs();
+        assert!(
+            diff_millis <= 1000,
+            "{} time mismatch: Rust={}, Java={}, diff={}ms, {}",
+            label,
+            rust_utc,
+            java,
+            diff_millis,
+            message
+        );
+
+        let _ = rust_month;
+        let _ = java;
+    }
+
+    #[test]
+    fn test_sof_zman_kidush_levana_between_moldos() {
+        let jvm = init_jvm();
+        let mut rng = rand::thread_rng();
+        let iterations = get_test_iterations();
+
+        for _ in 0..iterations {
+            let result = create_jewish_calendars(&jvm, &mut rng);
+            if result.is_none() {
+                continue;
+            }
+
+            let (
+                rust_date,
+                _java_calendar,
+                _in_israel,
+                _is_mukaf_choma,
+                _use_modern_holidays,
+                message,
+            ) = result.unwrap();
+            let rust_date = rust_date.to_calendar(Gregorian);
+
+            let gregorian = rust_date;
+
+            let (tz, zmanim_calendar) = random_zmanim_calendar(&jvm, &gregorian, &mut rng);
+
+            let java_date = zmanim_calendar.get_sof_zman_kidush_levana_between_moldos();
+            let rust_date = rust_date.sof_zman_kidush_levana_between_moldos(&tz);
+
+            assert_java_rust_zman(
+                java_date,
+                rust_date,
+                "sof_zman_kidush_levana_between_moldos",
+                &message,
+            );
+        }
+    }
+
+    #[test]
+    fn test_sof_zman_kidush_levana_15_days() {
+        let jvm = init_jvm();
+        let mut rng = rand::thread_rng();
+        let iterations = get_test_iterations();
+
+        for _ in 0..iterations {
+            let result = create_jewish_calendars(&jvm, &mut rng);
+            if result.is_none() {
+                continue;
+            }
+
+            let (
+                rust_date,
+                _java_calendar,
+                _in_israel,
+                _is_mukaf_choma,
+                _use_modern_holidays,
+                message,
+            ) = result.unwrap();
+            let rust_date = rust_date.to_calendar(Gregorian);
+
+            let gregorian = rust_date;
+
+            let (tz, zmanim_calendar) = random_zmanim_calendar(&jvm, &gregorian, &mut rng);
+
+            let java_date = zmanim_calendar.get_sof_zman_kidush_levana_15_days();
+            let rust_date = rust_date.sof_zman_kidush_levana_15_days(&tz);
+
+            assert_java_rust_zman(
+                java_date,
+                rust_date,
+                "sof_zman_kidush_levana_15_days",
+                &message,
+            );
+        }
+    }
+
+    #[test]
+    fn test_tchilas_zman_kidush_levana_3_days() {
+        let jvm = init_jvm();
+        let mut rng = rand::thread_rng();
+        let iterations = get_test_iterations();
+
+        for _ in 0..iterations {
+            let result = create_jewish_calendars(&jvm, &mut rng);
+            if result.is_none() {
+                continue;
+            }
+
+            let (
+                rust_date,
+                _java_calendar,
+                _in_israel,
+                _is_mukaf_choma,
+                _use_modern_holidays,
+                message,
+            ) = result.unwrap();
+            let rust_date = rust_date.to_calendar(Gregorian);
+
+            let gregorian = rust_date;
+            let (tz, zmanim_calendar) = random_zmanim_calendar(&jvm, &gregorian, &mut rng);
+
+            let java_date = zmanim_calendar.get_tchilas_zman_kidush_levana_3_days();
+            let rust_date = rust_date.tchilas_zman_kidush_levana_3_days(&tz);
+
+            assert_java_rust_zman(
+                java_date,
+                rust_date,
+                "tchilas_zman_kidush_levana_3_days",
+                &message,
+            );
+        }
+    }
+
+    #[test]
+    fn test_tchilas_zman_kidush_levana_7_days() {
+        let jvm = init_jvm();
+        let mut rng = rand::thread_rng();
+        let iterations = get_test_iterations();
+
+        for _ in 0..iterations {
+            let result = create_jewish_calendars(&jvm, &mut rng);
+            if result.is_none() {
+                continue;
+            }
+
+            let (
+                rust_date,
+                _java_calendar,
+                _in_israel,
+                _is_mukaf_choma,
+                _use_modern_holidays,
+                message,
+            ) = result.unwrap();
+            let rust_date = rust_date.to_calendar(Gregorian);
+
+            let gregorian = rust_date;
+            let (tz, zmanim_calendar) = random_zmanim_calendar(&jvm, &gregorian, &mut rng);
+
+            let java_date = zmanim_calendar.get_tchilas_zman_kidush_levana_7_days();
+            let rust_date = rust_date.tchilas_zman_kidush_levana_7_days(&tz);
+
+            assert_java_rust_zman(
+                java_date,
+                rust_date,
+                "tchilas_zman_kidush_levana_7_days",
+                &message,
+            );
+        }
+    }
+
+    #[test]
+    fn test_zman_molad() {
+        let jvm = init_jvm();
+        let mut rng = rand::thread_rng();
+        let iterations = get_test_iterations();
+
+        for _ in 0..iterations {
+            let result = create_jewish_calendars(&jvm, &mut rng);
+            if result.is_none() {
+                continue;
+            }
+
+            let (
+                rust_hdate,
+                _java_calendar,
+                _in_israel,
+                _is_mukaf_choma,
+                _use_modern_holidays,
+                message,
+            ) = result.unwrap();
+            let rust_date = rust_hdate.to_calendar(Gregorian);
+
+            let gregorian = rust_date;
+            let (tz, zmanim_calendar) = random_zmanim_calendar(&jvm, &gregorian, &mut rng);
+
+            let java_date = zmanim_calendar.get_zman_molad();
+            let rust_date = rust_date.molad(&tz);
+
+            assert_java_rust_zman(java_date, rust_date, "zman_molad", &message);
         }
     }
 }

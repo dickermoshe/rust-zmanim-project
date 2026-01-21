@@ -1,6 +1,6 @@
 [package]
 name = "hebrew_holiday_calendar"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 description = "A comprehensive Rust library for working with the Hebrew calendar, including holidays, Torah readings (parshiyot), and calendar calculations with no_std support"
 license = "LGPL-2.1"
@@ -31,6 +31,7 @@ features = ["unstable"]
 default-features = false
 
 [dev-dependencies]
+chrono-tz = "0.10.4"
 lazy_static = "1.5.0"
 rand = "0.8.5"
 tinystr = "0.8.2"

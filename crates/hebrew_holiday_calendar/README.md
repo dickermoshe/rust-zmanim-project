@@ -7,6 +7,7 @@ A comprehensive Rust library for working with the Hebrew calendar, including hol
 - 📅 **Hebrew Calendar Operations**: Convert between Gregorian and Hebrew dates
 - 🎉 **Holiday Tracking**: Determine Jewish holidays with customizable rules
 - 📖 **Torah Readings**: Find weekly parshiyot for any date
+- 🌙 **Molad Calculations**: Calculate molad and Kiddush Levana times
 - ⭐ **Special Shabbatot**: Identify Shekalim, Zachor, Parah, Hachodesh, and more
 - 🌍 **Israel & Diaspora Support**: Respects location-specific customs
 - 🕯️ **Candle Lighting**: Determine days requiring candle lighting
@@ -118,6 +119,10 @@ The library uses the ICU calendar system (`icu_calendar`) for accurate Hebrew da
 - Dechiyot (postponement rules)
 - Leap year cycles (19-year Metonic cycle)
 - Variable month lengths (Cheshvan and Kislev)
+
+### Molad and Kiddush Levana APIs
+
+Molad and Kiddush Levana calculations are exposed on `Date<Gregorian>` via the `MoladCalendar` trait. These methods only return `Some` when the molad-based time falls on that Gregorian date in the provided timezone.
 
 ## License
 
