@@ -433,7 +433,7 @@ impl<'a> JavaComplexZmanimCalendar<'a> {
             .unwrap()
             .into_primitive()
             .unwrap();
-        let month_arg = InvocationArg::try_from(month)
+        let month_arg = InvocationArg::try_from(month - 1)
             .unwrap()
             .into_primitive()
             .unwrap();
@@ -441,17 +441,9 @@ impl<'a> JavaComplexZmanimCalendar<'a> {
             .unwrap()
             .into_primitive()
             .unwrap();
-        let local_date = jvm
-            .invoke_static("java.time.LocalDate", "of", &[year_arg, month_arg, day_arg])
+        jvm.invoke(&calendar, "clear", InvocationArg::empty())
             .ok()?;
-        let sql_date = jvm
-            .invoke_static(
-                "java.sql.Date",
-                "valueOf",
-                &[InvocationArg::from(local_date)],
-            )
-            .ok()?;
-        jvm.invoke(&calendar, "setTime", &[InvocationArg::from(sql_date)])
+        jvm.invoke(&calendar, "set", &[year_arg, month_arg, day_arg])
             .ok()?;
 
         Some(Self { jvm, instance })
