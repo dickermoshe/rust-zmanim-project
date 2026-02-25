@@ -5,12 +5,10 @@
 use byteorder::{ByteOrder, BE};
 use chrono::{FixedOffset, LocalResult, NaiveDate, NaiveDateTime, TimeZone};
 use std::cmp::Ordering;
-#[cfg(unix)]
-use std::env;
+
 use std::error;
 use std::fmt;
-#[cfg(unix)]
-use std::fs::read;
+
 use std::hash::Hash;
 use std::io;
 use std::mem::size_of;
@@ -49,24 +47,6 @@ impl Oz {
 ///     but is not thread-safe.
 /// * [`ArcTz`] — uses atomic reference counting ([`Arc`]) to support shallow
 ///     cloning, slightly more expensive than [`RcTz`] but is thread-safe.
-///
-/// # Examples
-///
-/// Read the time zone information from the system, and use `&Tz` as `TimeZone`.
-///
-/// ```
-/// # #[cfg(unix)] {
-/// use chrono::{Utc, TimeZone};
-/// use tzfile::Tz;
-///
-/// let tz = Tz::named("America/New_York")?;
-/// let dt1 = Utc.ymd(2019, 3, 10).and_hms(6, 45, 0);
-/// assert_eq!(dt1.with_timezone(&&tz).to_string(), "2019-03-10 01:45:00 EST");
-/// let dt2 = Utc.ymd(2019, 3, 10).and_hms(7, 15, 0);
-/// assert_eq!(dt2.with_timezone(&&tz).to_string(), "2019-03-10 03:15:00 EDT");
-///
-/// # } Ok::<_, std::io::Error>(())
-/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Tz {
     /// Null-terminated time zone abbreviations concatenated as a single string.
@@ -91,6 +71,7 @@ impl Tz {
     ///
     /// Returns `None` if the date is invalid.
     fn oz_from_local_date(&self, local_date: NaiveDate) -> Option<Oz> {
+        #[allow(deprecated)]
         let min_ts = local_date.and_hms(0, 0, 0).timestamp();
         self.oz_from_local_timestamp(min_ts)
             .earliest()
@@ -155,17 +136,6 @@ impl RcTz {
     pub fn new(tz: Tz) -> Self {
         Self(Rc::new(tz))
     }
-
-    /// Reads and parses a system time zone.
-    ///
-    /// Equivalent to calling [`Tz::named()`] and wraps the result in this
-    /// reference-counted container.
-    ///
-    /// This function is currently only supported on Unix.
-    #[cfg(unix)]
-    pub fn named(name: &str) -> std::io::Result<Self> {
-        Tz::named(name).map(Self::new)
-    }
 }
 
 impl Deref for RcTz {
@@ -194,17 +164,6 @@ impl ArcTz {
     pub fn new(tz: Tz) -> Self {
         Self(Arc::new(tz))
     }
-
-    /// Reads and parses a system time zone.
-    ///
-    /// Equivalent to calling [`Tz::named()`] and wraps the result in this
-    /// atomic reference-counted container.
-    ///
-    /// This function is currently only supported on Unix.
-    #[cfg(unix)]
-    pub fn named(name: &str) -> std::io::Result<Self> {
-        Tz::named(name).map(Self::new)
-    }
 }
 
 impl Deref for ArcTz {
@@ -229,6 +188,7 @@ macro_rules! implements_time_zone {
         }
 
         fn offset_from_utc_datetime(&self, utc: &NaiveDateTime) -> Self::Offset {
+            #[allow(deprecated)]
             Offset {
                 oz: self.oz_from_utc_timestamp(utc.timestamp()),
                 tz: self.clone(),
@@ -236,6 +196,7 @@ macro_rules! implements_time_zone {
         }
 
         fn offset_from_utc_date(&self, utc: &NaiveDate) -> Self::Offset {
+            #[allow(deprecated)]
             self.offset_from_utc_datetime(&utc.and_hms(12, 0, 0))
         }
 
@@ -251,6 +212,7 @@ macro_rules! implements_time_zone {
         }
 
         fn offset_from_local_datetime(&self, local: &NaiveDateTime) -> LocalResult<Self::Offset> {
+            #[allow(deprecated)]
             let timestamp = local.timestamp();
             self.oz_from_local_timestamp(timestamp).map(|oz| Offset {
                 oz,
@@ -465,20 +427,6 @@ impl Tz {
     /// `chrono`, leap second information is ignored. The embedded POSIX TZ
     /// string, which describes non-hard-coded transition rules in the far
     /// future, is also not handled.
-    ///
-    /// # Examples
-    ///
-    /// Read a file into bytes and then parse it.
-    ///
-    /// ```rust
-    /// # #[cfg(unix)] {
-    /// use tzfile::Tz;
-    ///
-    /// let content = std::fs::read("/usr/share/zoneinfo/Etc/UTC")?;
-    /// let tz = Tz::parse("Etc/UTC", &content)?;
-    ///
-    /// # } Ok::<_, Box<dyn std::error::Error>>(())
-    /// ```
     pub fn parse(_name: &str, source: &[u8]) -> Result<Self, Error> {
         let header = Header::parse(source)?;
         let first_ver_len = Header::HEADER_LEN + header.data_len::<i32>();
@@ -490,42 +438,11 @@ impl Tz {
         }
         header.parse_content(&source[Header::HEADER_LEN..])
     }
-
-    /// Reads and parses a system time zone.
-    ///
-    /// This function is equivalent to reading `/usr/share/zoneinfo/{name}` and
-    /// the constructs a time zone via [`parse()`](Tz::parse).
-    ///
-    /// This function is currently only supported on Unix.
-    #[cfg(unix)]
-    pub fn named(name: &str) -> std::io::Result<Self> {
-        if name.contains('.') {
-            return Err(Error::InvalidTimeZoneFileName.into());
-        }
-        let content = read(format!("/usr/share/zoneinfo/{}", name))?;
-        Ok(Self::parse(name, &content)?)
-    }
-
-    /// Reads the parses the current local time zone.
-    ///
-    /// This function calls [`Tz::named`]`($TZ)` if the environment variable
-    /// `$TZ` is set, otherwise reads and parses `/etc/localtime`.
-    ///
-    /// This function is currently only supported on Unix.
-    #[cfg(unix)]
-    pub fn local() -> std::io::Result<Self> {
-        if let Ok(tz) = env::var("TZ") {
-            if !tz.is_empty() {
-                return Self::named(&tz);
-            }
-        }
-        let content = read("/etc/localtime")?;
-        Ok(Self::parse("Local", &content)?)
-    }
 }
 
 impl From<chrono::Utc> for Tz {
     fn from(_: chrono::Utc) -> Self {
+        #[allow(deprecated)]
         let oz = Oz {
             offset: FixedOffset::east(0),
             name: 0,
@@ -552,32 +469,10 @@ impl From<FixedOffset> for Tz {
 }
 
 #[cfg(test)]
+#[allow(deprecated)]
 mod tests {
     use super::*;
     use chrono::TimeZone;
-    #[cfg(unix)]
-    use std::path::Path;
-
-    #[cfg(unix)]
-    fn parse_built_zoneinfo(name: &str) -> Tz {
-        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("zoneinfo")
-            .join(name);
-        let content = std::fs::read(&path).unwrap_or_else(|e| {
-            panic!(
-                "failed to read built zoneinfo at {}: {}; run scripts/build-tzdb.sh",
-                path.display(),
-                e
-            )
-        });
-        Tz::parse(name, &content).unwrap_or_else(|e| {
-            panic!(
-                "failed to parse built zoneinfo at {}: {}",
-                path.display(),
-                e
-            )
-        })
-    }
 
     #[test]
     fn tz_from_fixed_offset() {
@@ -717,43 +612,9 @@ mod tests {
             );
         }
     }
-
-    #[test]
-    #[cfg(unix)]
-    fn invalid_timezone_filename() {
-        let err = Tz::named("../../../../../../../../etc/passwd").unwrap_err();
-        assert_eq!(err.kind(), std::io::ErrorKind::Other);
-        assert_eq!(
-            err.into_inner().unwrap().downcast::<Error>().unwrap(),
-            Box::new(Error::InvalidTimeZoneFileName)
-        );
-    }
-
-    #[test]
-    #[cfg(unix)]
-    fn rctz_arctz() {
-        let tz = parse_built_zoneinfo("Europe/London");
-        let rctz = RcTz::new(tz.clone());
-        let arctz = ArcTz::new(tz.clone());
-        let rctz2 = RcTz::new(tz.clone());
-        let arctz2 = ArcTz::new(tz.clone());
-        assert_eq!(tz, *rctz);
-        assert_eq!(tz, *arctz);
-        assert_eq!(rctz, rctz2);
-        assert_eq!(arctz, arctz2);
-    }
-
-    #[test]
-    #[cfg(unix)]
-    fn local() {
-        let tz = Tz::local().unwrap();
-        let dt = (&tz).ymd(2019, 2, 13).and_hms(14, 5, 18);
-        let cdt = chrono::Local.ymd(2019, 2, 13).and_hms(14, 5, 18);
-        assert_eq!(dt.naive_utc(), cdt.naive_utc());
-    }
 }
-
-#[cfg(all(test, unix))]
+#[cfg(test)]
+#[allow(deprecated)]
 mod chrono_tz_tests {
     use super::Tz;
     use chrono::{Duration, TimeZone};
