@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - master
+      - use_bundled
   pull_request:
     branches:
       - master
+      - use_bundled
 
 jobs:
   lint:
