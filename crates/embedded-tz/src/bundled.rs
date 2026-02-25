@@ -111,7 +111,7 @@ mod tests {
         ) {
             init();
             let our_tz = parse(tz_name).map_err(|e| {
-                TestCaseError::fail(std::format!("tzfile parse failed for {tz_name}: {e:?}"))
+                TestCaseError::fail(std::format!("embedded-tz parse failed for {tz_name}: {e:?}"))
             })?;
             let utc = Utc.timestamp_opt(ts, 0).single().ok_or_else(|| {
                 TestCaseError::fail(std::format!("timestamp out of range for chrono: {ts}"))

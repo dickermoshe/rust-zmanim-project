@@ -1,4 +1,4 @@
-//! `tzfile` provides a [`chrono::TimeZone`] implementation backed by tzfile
+//! `embedded-tz` provides a [`chrono::TimeZone`] implementation backed by tzfile
 //! (`TZif`) data.
 //!
 //! It can parse compiled time zone files from a system tz database (for
@@ -202,7 +202,7 @@ pub enum Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("tzfile error: ")?;
+        f.write_str("embedded-tz error: ")?;
         f.write_str(match self {
             Error::HeaderTooShort => "header too short",
             Error::InvalidMagic => "invalid magic",
@@ -329,11 +329,15 @@ impl Header {
         let mut prev_oz = ozs[0];
 
         let mut utc_to_local: TzUtcToLocalList = heapless::Vec::new();
-        utc_to_local.push((i64::min_value(), prev_oz)).unwrap();
+        utc_to_local
+            .push((i64::min_value(), prev_oz))
+            .map_err(|_| Error::HeaplessOverflow)?;
         for (te, &ltt) in trans_encoded.chunks_exact(8).zip(local_time_types) {
             let oz = *ozs.get(usize::from(ltt)).ok_or(Error::InvalidType)?;
             let timestamp = BE::read_i64(te);
-            utc_to_local.push((timestamp, oz)).unwrap();
+            utc_to_local
+                .push((timestamp, oz))
+                .map_err(|_| Error::HeaplessOverflow)?;
         }
 
         let mut local_to_utc: TzLocalToUtcList = heapless::Vec::new();
@@ -415,23 +419,24 @@ impl Tz {
 
         let mut name = TzNames::new();
         if seconds == 0 {
-            write!(&mut name, "{sign}{hours:02}:{minutes:02}").expect("fixed offset name overflow");
+            write!(&mut name, "{sign}{hours:02}:{minutes:02}")
+                .map_err(|_| Error::AllocationFailed)?;
         } else {
             write!(&mut name, "{sign}{hours:02}:{minutes:02}:{seconds:02}")
-                .expect("fixed offset name overflow");
+                .map_err(|_| Error::AllocationFailed)?;
         }
-        name.push('\0').expect("fixed offset name overflow");
+        name.push('\0').map_err(|_| Error::AllocationFailed)?;
         let oz = Oz { offset, name: 0 };
 
         let mut utc_to_local: TzUtcToLocalList = heapless::Vec::new();
         utc_to_local
             .push((i64::min_value(), oz))
-            .expect("utc_to_local overflow");
+            .map_err(|_| Error::AllocationFailed)?;
 
         let mut local_to_utc: TzLocalToUtcList = heapless::Vec::new();
         local_to_utc
             .push((i64::min_value(), LocalResult::Single(oz)))
-            .expect("local_to_utc overflow");
+            .map_err(|_| Error::AllocationFailed)?;
 
         let tz_data = TzData {
             name,
@@ -445,7 +450,7 @@ impl Tz {
 
     /// Returns a UTC time zone (`+00:00`) as a [`Tz`].
     pub fn utc() -> Result<Self, Error> {
-        let offset = FixedOffset::east_opt(0).expect("0 offset must be valid");
+        let offset = FixedOffset::east_opt(0).ok_or(Error::AllocationFailed)?;
         Self::from_offset(offset)
     }
 }
