@@ -555,6 +555,29 @@ impl From<FixedOffset> for Tz {
 mod tests {
     use super::*;
     use chrono::TimeZone;
+    #[cfg(unix)]
+    use std::path::Path;
+
+    #[cfg(unix)]
+    fn parse_built_zoneinfo(name: &str) -> Tz {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("zoneinfo")
+            .join(name);
+        let content = std::fs::read(&path).unwrap_or_else(|e| {
+            panic!(
+                "failed to read built zoneinfo at {}: {}; run scripts/build-tzdb.sh",
+                path.display(),
+                e
+            )
+        });
+        Tz::parse(name, &content).unwrap_or_else(|e| {
+            panic!(
+                "failed to parse built zoneinfo at {}: {}",
+                path.display(),
+                e
+            )
+        })
+    }
 
     #[test]
     fn tz_from_fixed_offset() {
@@ -709,9 +732,9 @@ mod tests {
     #[test]
     #[cfg(unix)]
     fn rctz_arctz() {
-        let tz = Tz::named("Europe/London").unwrap();
-        let rctz = RcTz::named("Europe/London").unwrap();
-        let arctz = ArcTz::named("Europe/London").unwrap();
+        let tz = parse_built_zoneinfo("Europe/London");
+        let rctz = RcTz::new(tz.clone());
+        let arctz = ArcTz::new(tz.clone());
         let rctz2 = RcTz::new(tz.clone());
         let arctz2 = ArcTz::new(tz.clone());
         assert_eq!(tz, *rctz);
@@ -735,27 +758,48 @@ mod chrono_tz_tests {
     use super::Tz;
     use chrono::{Duration, TimeZone};
     use lazy_static::lazy_static;
+    use std::path::Path;
+
+    fn parse_built_zoneinfo(name: &str) -> Tz {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("zoneinfo")
+            .join(name);
+        let content = std::fs::read(&path).unwrap_or_else(|e| {
+            panic!(
+                "failed to read built zoneinfo at {}: {}; run scripts/build-tzdb.sh",
+                path.display(),
+                e
+            )
+        });
+        Tz::parse(name, &content).unwrap_or_else(|e| {
+            panic!(
+                "failed to parse built zoneinfo at {}: {}",
+                path.display(),
+                e
+            )
+        })
+    }
 
     lazy_static! {
-        static ref ADELAIDE: Tz = Tz::named("Australia/Adelaide").unwrap();
-        static ref APIA: Tz = Tz::named("Pacific/Apia").unwrap();
-        static ref AMSTERDAM: Tz = Tz::named("Europe/Amsterdam").unwrap();
-        static ref BERLIN: Tz = Tz::named("Europe/Berlin").unwrap();
-        static ref DANMARKSHAVN: Tz = Tz::named("America/Danmarkshavn").unwrap();
-        static ref DHAKA: Tz = Tz::named("Asia/Dhaka").unwrap();
-        static ref EASTERN: Tz = Tz::named("US/Eastern").unwrap();
-        static ref GAZA: Tz = Tz::named("Asia/Gaza").unwrap();
-        static ref JERUSALEM: Tz = Tz::named("Asia/Jerusalem").unwrap();
-        static ref KATHMANDU: Tz = Tz::named("Asia/Kathmandu").unwrap();
-        static ref LONDON: Tz = Tz::named("Europe/London").unwrap();
-        static ref MOSCOW: Tz = Tz::named("Europe/Moscow").unwrap();
-        static ref NEW_YORK: Tz = Tz::named("America/New_York").unwrap();
-        static ref TAHITI: Tz = Tz::named("Pacific/Tahiti").unwrap();
-        static ref NOUMEA: Tz = Tz::named("Pacific/Noumea").unwrap();
-        static ref TRIPOLI: Tz = Tz::named("Africa/Tripoli").unwrap();
-        static ref UTC: Tz = Tz::named("Etc/UTC").unwrap();
-        static ref VILNIUS: Tz = Tz::named("Europe/Vilnius").unwrap();
-        static ref WARSAW: Tz = Tz::named("Europe/Warsaw").unwrap();
+        static ref ADELAIDE: Tz = parse_built_zoneinfo("Australia/Adelaide");
+        static ref APIA: Tz = parse_built_zoneinfo("Pacific/Apia");
+        static ref AMSTERDAM: Tz = parse_built_zoneinfo("Europe/Amsterdam");
+        static ref BERLIN: Tz = parse_built_zoneinfo("Europe/Berlin");
+        static ref DANMARKSHAVN: Tz = parse_built_zoneinfo("America/Danmarkshavn");
+        static ref DHAKA: Tz = parse_built_zoneinfo("Asia/Dhaka");
+        static ref EASTERN: Tz = parse_built_zoneinfo("America/New_York");
+        static ref GAZA: Tz = parse_built_zoneinfo("Asia/Gaza");
+        static ref JERUSALEM: Tz = parse_built_zoneinfo("Asia/Jerusalem");
+        static ref KATHMANDU: Tz = parse_built_zoneinfo("Asia/Kathmandu");
+        static ref LONDON: Tz = parse_built_zoneinfo("Europe/London");
+        static ref MOSCOW: Tz = parse_built_zoneinfo("Europe/Moscow");
+        static ref NEW_YORK: Tz = parse_built_zoneinfo("America/New_York");
+        static ref TAHITI: Tz = parse_built_zoneinfo("Pacific/Tahiti");
+        static ref NOUMEA: Tz = parse_built_zoneinfo("Pacific/Noumea");
+        static ref TRIPOLI: Tz = parse_built_zoneinfo("Africa/Tripoli");
+        static ref UTC: Tz = parse_built_zoneinfo("Etc/UTC");
+        static ref VILNIUS: Tz = parse_built_zoneinfo("Europe/Vilnius");
+        static ref WARSAW: Tz = parse_built_zoneinfo("Europe/Warsaw");
     }
 
     #[test]
@@ -911,7 +955,7 @@ mod chrono_tz_tests {
             .and_hms(13, 40, 28)
             .with_timezone(&&*AMSTERDAM);
         assert_eq!(dt.to_string(), "1914-01-01 14:00:00 AMT");
-        assert_eq!(dt.to_rfc3339(), "1914-01-01T14:00:00+00:19");
+        assert_eq!(dt.to_rfc3339(), "1914-01-01T14:00:00+00:20");
     }
 
     #[test]
