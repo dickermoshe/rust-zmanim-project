@@ -9,11 +9,9 @@ on:
       - master
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    strategy:
-      fail-fast: true
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -27,5 +25,26 @@ jobs:
         run: cargo clippy
       - name: Format
         run: cargo fmt -- --check
-      - name: Test
-        run: cargo test
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: true
+      matrix:
+        pool_feature:
+          - pool-128
+          - pool-256
+          - pool-512
+          - pool-1000
+          - pool-2048
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        name: Install Rust
+        with:
+          toolchain: stable
+          profile: minimal
+          default: true
+      - name: Test (${{ matrix.pool_feature }} + std)
+        run: cargo test --no-default-features --features "std,${{ matrix.pool_feature }}"
