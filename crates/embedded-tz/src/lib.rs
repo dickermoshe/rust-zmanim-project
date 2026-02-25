@@ -11,37 +11,14 @@ use core::fmt::Write;
 use core::ops::Deref;
 use core::str::from_utf8;
 use heapless::arc_pool;
-use heapless::box_pool;
 use heapless::pool::arc::Arc;
-use heapless::pool::arc::ArcBlock;
-use heapless::pool::boxed::BoxBlock;
-use paste::paste;
 
 #[cfg(feature = "bundled-tzdb")]
-pub mod bundled {
-    use super::{Error, Tz};
+pub mod bundled;
 
-    include!(concat!(env!("OUT_DIR"), "/bundled_tzdb.rs"));
-
-    pub fn all() -> &'static [(&'static str, &'static [u8])] {
-        BUNDLED_TZDB
-    }
-
-    pub fn bytes(name: &str) -> Option<&'static [u8]> {
-        BUNDLED_TZDB
-            .iter()
-            .find(|(tz_name, _)| *tz_name == name)
-            .map(|(_, bytes)| *bytes)
-    }
-
-    pub fn parse(name: &str) -> Result<Tz, Error> {
-        let bytes = bytes(name).ok_or(Error::InvalidTimeZoneFileName)?;
-        Tz::parse(name, bytes)
-    }
-}
-// TODO enable this when we have a way to test the bundled tzdb
-// #[cfg(all(feature = "bundled-tzdb", test))]
-// mod bundled_tz_proptest;
+type TzNames = heapless::String<256>;
+type TzUtcToLocalList = heapless::Vec<(i64, Oz), 1024>;
+type TzLocalToUtcList = heapless::Vec<(i64, LocalResult<Oz>), 1024>;
 
 /// `Oz` ("offset zone") represents a continuous period of time where the offset
 /// from UTC is constant and has the same abbreviation.
@@ -60,70 +37,25 @@ impl Oz {
     }
 }
 
-macro_rules! define_box_pool_with_init {
-    ($value_ty:ident) => {
-        paste! {
-            box_pool!([<$value_ty BoxPool>]: $value_ty);
-            impl [<$value_ty BoxPool>] {
-                pub fn manage_blocks(blocks: &'static mut [BoxBlock<$value_ty>]) {
-                    for block in blocks {
-                        Self.manage(block);
-                    }
-                }
-            }
-        }
-    };
-}
-
-macro_rules! define_arc_pool_with_init {
-    ($value_ty:ident) => {
-        paste! {
-            arc_pool!([<$value_ty ArcPool>]: $value_ty);
-            impl [<$value_ty ArcPool>] {
-                pub fn manage_blocks(blocks: &'static mut [ArcBlock<$value_ty>]) {
-                    for block in blocks {
-                        Self.manage(block);
-                    }
-                }
-            }
-        }
-    };
-}
-
-type TzNames = heapless::String<256>;
-define_box_pool_with_init!(TzNames);
-
-type TzUtcToLocalList = heapless::Vec<(i64, Oz), 1024>;
-type TzUtcToLocal = TzUtcToLocalList;
-define_box_pool_with_init!(TzUtcToLocal);
-
-type TzLocalToUtcList = heapless::Vec<(i64, LocalResult<Oz>), 1024>;
-type TzLocalToUtc = TzLocalToUtcList;
-define_box_pool_with_init!(TzLocalToUtc);
-
-/// Time zone parsed from a tz database file.
-///
-/// When a time zone has complex transition rules, a `Tz` object can be very
-/// large and expensive to clone. As every [`DateTime`](chrono::DateTime)
-/// instant would store a copy of the time zone object, it would be very slow to
-/// support `DateTime<Tz>` directly. Therefore, `Tz` itself does not implement
-/// [`TimeZone`]. Rather, you may use one of the following instead:
-///
-/// * [`ArcTz`] — uses atomic reference counting ([`Arc`]) to support shallow
-///     cloning, slightly more expensive than [`RcTz`] but is thread-safe.
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct Tz {
+pub struct TzData {
     /// Null-terminated time zone abbreviations concatenated as a single string.
-    names: heapless::pool::boxed::Box<TzNamesBoxPool>,
+    name: TzNames,
     /// Sorted array of UTC-to-local conversion results. The first item of the
     /// tuple is the starting UTC timestamp, and second item is the
     /// corresponding local offset.
-    utc_to_local: heapless::pool::boxed::Box<TzUtcToLocalBoxPool>,
+    utc_to_local: TzUtcToLocalList,
     /// Sorted array of local-to-UTC conversion results. The first item of the
     /// tuple is the starting local timestamp, and second item is the
     /// corresponding local offset (with ambiguity/invalid time handling).
-    local_to_utc: heapless::pool::boxed::Box<TzLocalToUtcBoxPool>,
+    local_to_utc: TzLocalToUtcList,
 }
+
+arc_pool!(TzDataArcPool: TzData);
+
+/// Time zone parsed from a tz database file.
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct Tz(pub Arc<TzDataArcPool>);
 
 /// Extracts the lower bound index from the result of standard `binary_search`.
 fn to_lower_bound(bsr: Result<usize, usize>) -> usize {
@@ -145,19 +77,21 @@ impl Tz {
     /// Obtains the [`Oz`] at the local timestamp.
     fn oz_from_local_timestamp(&self, local_ts: i64) -> LocalResult<Oz> {
         let index = to_lower_bound(
-            self.local_to_utc
+            self.0
+                .local_to_utc
                 .binary_search_by(|&(local, _)| local.cmp(&local_ts)),
         );
-        self.local_to_utc[index].1
+        self.0.local_to_utc[index].1
     }
 
     /// Obtains the [`Oz`] at the UTC timestamp.
     fn oz_from_utc_timestamp(&self, timestamp: i64) -> Oz {
         let index = to_lower_bound(
-            self.utc_to_local
+            self.0
+                .utc_to_local
                 .binary_search_by(|&(utc, _)| utc.cmp(&timestamp)),
         );
-        self.utc_to_local[index].1
+        self.0.utc_to_local[index].1
     }
 }
 
@@ -176,7 +110,7 @@ impl<T: Clone + Deref<Target = Tz>> chrono::Offset for Offset<T> {
 
 impl<T: Deref<Target = Tz>> fmt::Display for Offset<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let suffix = &self.tz.names[usize::from(self.oz.name)..];
+        let suffix = &self.tz.0.name[usize::from(self.oz.name)..];
         let len = suffix.find('\0').unwrap_or_else(|| suffix.len());
         f.write_str(&suffix[..len])
     }
@@ -188,80 +122,40 @@ impl<T: Deref<Target = Tz>> fmt::Debug for Offset<T> {
     }
 }
 
-define_arc_pool_with_init!(Tz);
-
-/// Atomic reference-counted time zone.
-///
-/// This type is equivalent to [`Arc`]`<`[`Tz`]`>`, but needed to workaround
-/// Rust's coherence rule to implement [`TimeZone`].
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
-pub struct ArcTz(pub Arc<TzArcPool>);
-
-impl ArcTz {
-    /// Wraps an existing [`Tz`] object in this atomic reference-counted
-    /// container.
-    pub fn new(tz: Tz) -> Result<Self, Error> {
-        let tz = TzArcPool.alloc(tz).map_err(|_| Error::AllocationFailed)?;
-        Ok(Self(tz))
-    }
-}
-
-impl Deref for ArcTz {
-    type Target = Tz;
-    fn deref(&self) -> &Tz {
-        &self.0
-    }
-}
-
-macro_rules! implements_time_zone {
-    () => {
-        type Offset = Offset<Self>;
-
-        fn from_offset(offset: &Self::Offset) -> Self {
-            Self::clone(&offset.tz)
-        }
-
-        fn offset_from_utc_datetime(&self, utc: &NaiveDateTime) -> Self::Offset {
-            #[allow(deprecated)]
-            Offset {
-                oz: self.oz_from_utc_timestamp(utc.timestamp()),
-                tz: self.clone(),
-            }
-        }
-
-        fn offset_from_utc_date(&self, utc: &NaiveDate) -> Self::Offset {
-            #[allow(deprecated)]
-            self.offset_from_utc_datetime(&utc.and_hms(12, 0, 0))
-        }
-
-        fn offset_from_local_date(&self, local: &NaiveDate) -> LocalResult<Self::Offset> {
-            if let Some(oz) = self.oz_from_local_date(*local) {
-                LocalResult::Single(Offset {
-                    oz,
-                    tz: self.clone(),
-                })
-            } else {
-                LocalResult::None
-            }
-        }
-
-        fn offset_from_local_datetime(&self, local: &NaiveDateTime) -> LocalResult<Self::Offset> {
-            #[allow(deprecated)]
-            let timestamp = local.timestamp();
-            self.oz_from_local_timestamp(timestamp).map(|oz| Offset {
-                oz,
-                tz: self.clone(),
-            })
-        }
-    };
-}
-
 impl<'a> TimeZone for &'a Tz {
-    implements_time_zone!();
-}
+    type Offset = Offset<Self>;
 
-impl TimeZone for ArcTz {
-    implements_time_zone!();
+    fn from_offset(offset: &Self::Offset) -> Self {
+        Self::clone(&offset.tz)
+    }
+
+    fn offset_from_utc_datetime(&self, utc: &NaiveDateTime) -> Self::Offset {
+        #[allow(deprecated)]
+        Offset {
+            oz: self.oz_from_utc_timestamp(utc.timestamp()),
+            tz: self,
+        }
+    }
+
+    fn offset_from_utc_date(&self, utc: &NaiveDate) -> Self::Offset {
+        #[allow(deprecated)]
+        self.offset_from_utc_datetime(&utc.and_hms(12, 0, 0))
+    }
+
+    fn offset_from_local_date(&self, local: &NaiveDate) -> LocalResult<Self::Offset> {
+        if let Some(oz) = self.oz_from_local_date(*local) {
+            LocalResult::Single(Offset { oz, tz: self })
+        } else {
+            LocalResult::None
+        }
+    }
+
+    fn offset_from_local_datetime(&self, local: &NaiveDateTime) -> LocalResult<Self::Offset> {
+        #[allow(deprecated)]
+        let timestamp = local.timestamp();
+        self.oz_from_local_timestamp(timestamp)
+            .map(|oz| Offset { oz, tz: *self })
+    }
 }
 
 /// Parse errors from [`Tz::parse()`].
@@ -464,20 +358,14 @@ impl Header {
             };
             prev_oz = cur_oz;
         }
-        let utc_to_local = TzUtcToLocalBoxPool
-            .alloc(utc_to_local)
-            .map_err(|_| Error::AllocationFailed)?;
-        let local_to_utc = TzLocalToUtcBoxPool
-            .alloc(local_to_utc)
-            .map_err(|_| Error::AllocationFailed)?;
-        let names_heapless = TzNamesBoxPool
-            .alloc(names_heapless)
-            .map_err(|_| Error::AllocationFailed)?;
-        Ok(Tz {
-            names: names_heapless,
+        let tz_data = TzData {
+            name: names_heapless,
             utc_to_local: utc_to_local,
             local_to_utc: local_to_utc,
-        })
+        };
+        Ok(Tz(TzDataArcPool
+            .alloc(tz_data)
+            .map_err(|_| Error::AllocationFailed)?))
     }
 }
 
@@ -499,16 +387,7 @@ impl Tz {
         }
         header.parse_content(&source[Header::HEADER_LEN..])
     }
-}
-impl From<chrono::Utc> for Tz {
-    fn from(_: chrono::Utc) -> Self {
-        let offset = FixedOffset::east_opt(0).expect("0 offset must be valid");
-        Self::from(offset)
-    }
-}
-
-impl From<FixedOffset> for Tz {
-    fn from(offset: FixedOffset) -> Self {
+    pub fn from_offset(offset: FixedOffset) -> Result<Self, Error> {
         let total = offset.local_minus_utc();
         let sign = if total >= 0 { '+' } else { '-' };
         let abs = total.abs();
@@ -518,8 +397,7 @@ impl From<FixedOffset> for Tz {
 
         let mut name = TzNames::new();
         if seconds == 0 {
-            write!(&mut name, "{sign}{hours:02}:{minutes:02}")
-                .expect("fixed offset name overflow");
+            write!(&mut name, "{sign}{hours:02}:{minutes:02}").expect("fixed offset name overflow");
         } else {
             write!(&mut name, "{sign}{hours:02}:{minutes:02}:{seconds:02}")
                 .expect("fixed offset name overflow");
@@ -537,78 +415,66 @@ impl From<FixedOffset> for Tz {
             .push((i64::min_value(), LocalResult::Single(oz)))
             .expect("local_to_utc overflow");
 
-        let names = TzNamesBoxPool
-            .alloc(name)
-            .expect("failed to allocate tz names");
-        let utc_to_local = TzUtcToLocalBoxPool
-            .alloc(utc_to_local)
-            .expect("failed to allocate utc_to_local");
-        let local_to_utc = TzLocalToUtcBoxPool
-            .alloc(local_to_utc)
-            .expect("failed to allocate local_to_utc");
-
-        Self {
-            names,
+        let tz_data = TzData {
+            name,
             utc_to_local,
             local_to_utc,
-        }
+        };
+        Ok(Tz(TzDataArcPool
+            .alloc(tz_data)
+            .map_err(|_| Error::AllocationFailed)?))
+    }
+    pub fn utc() -> Result<Self, Error> {
+        let offset = FixedOffset::east_opt(0).expect("0 offset must be valid");
+        Self::from_offset(offset)
+    }
+}
+
+#[cfg(test)]
+pub(crate) mod test_utils {
+    extern crate std;
+    use core::ptr::addr_of_mut;
+    use std::sync::Once;
+
+    use heapless::pool::arc::ArcBlock;
+
+    use crate::{TzData, TzDataArcPool};
+    static INIT: Once = Once::new();
+    pub fn init() {
+        INIT.call_once(|| {
+            const TEST_POOL_CAPACITY: usize = 1000;
+            const TZ_DATA_BLOCK: ArcBlock<TzData> = ArcBlock::new();
+            static mut TZ_DATA_BLOCKS: [ArcBlock<TzData>; TEST_POOL_CAPACITY] =
+                [TZ_DATA_BLOCK; TEST_POOL_CAPACITY];
+            let blocks = unsafe { addr_of_mut!(TZ_DATA_BLOCKS).as_mut().unwrap() };
+            for block in blocks {
+                TzDataArcPool.manage(block);
+            }
+        });
     }
 }
 
 #[cfg(test)]
 #[allow(deprecated)]
 mod tests {
+    use crate::test_utils::init;
+
     use super::*;
     extern crate std;
-    use crate::{TzLocalToUtcBoxPool, TzNamesBoxPool, TzUtcToLocalBoxPool};
-    use core::ptr::addr_of_mut;
-    use std::sync::Once;
 
     use super::Tz;
     use chrono::{Duration, TimeZone};
-    use heapless::pool::boxed::BoxBlock;
     use lazy_static::lazy_static;
     use std::path::Path;
     use std::string::ToString;
 
-    static INIT: Once = Once::new();
-
-    fn init() {
-        INIT.call_once(|| {
-            const TEST_POOL_CAPACITY: usize = 1000;
-            #[allow(clippy::declare_interior_mutable_const)]
-            const NAMES_BLOCK: BoxBlock<TzNames> = BoxBlock::new();
-            static mut NAMES_BLOCKS: [BoxBlock<TzNames>; TEST_POOL_CAPACITY] =
-                [NAMES_BLOCK; TEST_POOL_CAPACITY];
-
-            #[allow(clippy::declare_interior_mutable_const)]
-            const UTC_TO_LOCAL_BLOCK: BoxBlock<TzUtcToLocal> = BoxBlock::new();
-            static mut UTC_TO_LOCAL_BLOCKS: [BoxBlock<TzUtcToLocal>; TEST_POOL_CAPACITY] =
-                [UTC_TO_LOCAL_BLOCK; TEST_POOL_CAPACITY];
-
-            #[allow(clippy::declare_interior_mutable_const)]
-            const LOCAL_TO_UTC_BLOCK: BoxBlock<TzLocalToUtc> = BoxBlock::new();
-            static mut LOCAL_TO_UTC_BLOCKS: [BoxBlock<TzLocalToUtc>; TEST_POOL_CAPACITY] =
-                [LOCAL_TO_UTC_BLOCK; TEST_POOL_CAPACITY];
-
-            unsafe {
-                TzNamesBoxPool::manage_blocks(addr_of_mut!(NAMES_BLOCKS).as_mut().unwrap());
-                TzUtcToLocalBoxPool::manage_blocks(
-                    addr_of_mut!(UTC_TO_LOCAL_BLOCKS).as_mut().unwrap(),
-                );
-                TzLocalToUtcBoxPool::manage_blocks(
-                    addr_of_mut!(LOCAL_TO_UTC_BLOCKS).as_mut().unwrap(),
-                );
-            }
-        });
-    }
-
     #[test]
     fn tz_from_fixed_offset() {
         init();
-        let utc_tz = Tz::from(chrono::Utc);
+        let utc_tz = Tz::utc().expect("UTC must be valid");
         let fixed_1_tz =
-            Tz::from(chrono::FixedOffset::east_opt(3600).expect("+01:00 must be valid"));
+            Tz::from_offset(FixedOffset::east_opt(3600).expect("+01:00 must be valid"))
+                .expect("+01:00 must be valid");
 
         let dt_0 = (&utc_tz).ymd(1000, 1, 1).and_hms(15, 0, 0);
         let dt_1_converted = dt_0.with_timezone(&&fixed_1_tz);
@@ -619,7 +485,7 @@ mod tests {
     #[test]
     fn tz_from_utc() {
         init();
-        let utc_tz = Tz::from(chrono::Utc);
+        let utc_tz = Tz::utc().expect("UTC must be valid");
         let dt = (&utc_tz).ymd(2024, 1, 1).and_hms(12, 34, 56);
         assert_eq!(dt.to_rfc3339(), "2024-01-01T12:34:56+00:00");
         assert_eq!(dt.format("%Z").to_string(), "+00:00");

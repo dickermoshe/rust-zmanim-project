@@ -4,4 +4,4 @@
 #
 # It is recommended to check this file in to source control so that
 # everyone who runs the test benefits from these saved cases.
-cc 1553ffdf73beaa0bc13e6b25e78aa9cd731659ccdbab89579a7f0f69d9866a57 # shrinks to tz_name = "America/Halifax", ts = 2341461600
+cc e55b76bd2ac8ea2fc5af2ed776425929ca87b7aa5157a453460c32b3a588b763 # shrinks to tz_name = "Asia/Kashgar", ts = 0
