@@ -1,26 +1,35 @@
 //! `tzfile` is a [`chrono::TimeZone`] implementation using the system tz
 //! database. It can parse compiled (binary) time zone files inside
 //! `/usr/share/zoneinfo` into time zone objects for `chrono`.
-
+#![no_std]
 use byteorder::{ByteOrder, BE};
 use chrono::{FixedOffset, LocalResult, NaiveDate, NaiveDateTime, TimeZone};
-use std::cmp::Ordering;
+use heapless::arc_pool;
+use heapless::box_pool;
+use heapless::pool::arc::Arc;
+use heapless::pool::arc::ArcBlock;
+use heapless::pool::boxed::BoxBlock;
+// use std::cmp::Ordering;
 
-use std::error;
-use std::fmt;
+// use std::error;
+// use std::fmt;
 
-use std::hash::Hash;
-use std::io;
-use std::mem::size_of;
-use std::ops::Deref;
-use std::rc::Rc;
-use std::str::from_utf8;
-use std::sync::Arc;
+use core::cmp::Ordering;
+use core::error;
+use core::fmt;
+use core::ops::Deref;
+use core::ptr::addr_of_mut;
+use core::str::from_utf8;
+// use std::hash::Hash;
+// use std::io;
+// use std::mem::size_of;
+// use std::ops::Deref;
+// use std::str::from_utf8;
 
 /// `Oz` ("offset zone") represents a continuous period of time where the offset
 /// from UTC is constant and has the same abbreviation.
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Debug)]
-struct Oz {
+pub struct Oz {
     /// The time zone offset from UTC.
     offset: FixedOffset,
     /// The byte index to the time zone abbreviation.
@@ -31,6 +40,56 @@ impl Oz {
     /// Converts a UTC timestamp to a local timestamp.
     fn to_local(self, utc_ts: i64) -> i64 {
         utc_ts + i64::from(self.offset.local_minus_utc())
+    }
+}
+
+const POOL_CAPACITY: usize = 1000;
+
+type TzNames = heapless::String<256>;
+box_pool!(TzNamesBoxPool: TzNames);
+impl TzNamesBoxPool {
+    pub fn init() {
+        let blocks: &'static mut [BoxBlock<TzNames>] = {
+            #[allow(clippy::declare_interior_mutable_const)]
+            const BLOCK: BoxBlock<TzNames> = BoxBlock::new(); // <=
+            static mut BLOCKS: [BoxBlock<TzNames>; POOL_CAPACITY] = [BLOCK; POOL_CAPACITY];
+            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
+        };
+        for block in blocks {
+            Self.manage(block);
+        }
+    }
+}
+
+type TzUtcToLocalList = heapless::Vec<(i64, Oz), 1024>;
+box_pool!(TzUtcToLocalBoxPool: TzUtcToLocalList);
+impl TzUtcToLocalBoxPool {
+    pub fn init() {
+        let blocks: &'static mut [BoxBlock<TzUtcToLocalList>] = {
+            #[allow(clippy::declare_interior_mutable_const)]
+            const BLOCK: BoxBlock<TzUtcToLocalList> = BoxBlock::new(); // <=
+            static mut BLOCKS: [BoxBlock<TzUtcToLocalList>; POOL_CAPACITY] = [BLOCK; POOL_CAPACITY];
+            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
+        };
+        for block in blocks {
+            Self.manage(block);
+        }
+    }
+}
+
+type TzLocalToUtcList = heapless::Vec<(i64, LocalResult<Oz>), 1024>;
+box_pool!(TzLocalToUtcBoxPool: TzLocalToUtcList);
+impl TzLocalToUtcBoxPool {
+    pub fn init() {
+        let blocks: &'static mut [BoxBlock<TzLocalToUtcList>] = {
+            #[allow(clippy::declare_interior_mutable_const)]
+            const BLOCK: BoxBlock<TzLocalToUtcList> = BoxBlock::new(); // <=
+            static mut BLOCKS: [BoxBlock<TzLocalToUtcList>; POOL_CAPACITY] = [BLOCK; POOL_CAPACITY];
+            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
+        };
+        for block in blocks {
+            Self.manage(block);
+        }
     }
 }
 
@@ -47,18 +106,18 @@ impl Oz {
 ///     but is not thread-safe.
 /// * [`ArcTz`] — uses atomic reference counting ([`Arc`]) to support shallow
 ///     cloning, slightly more expensive than [`RcTz`] but is thread-safe.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Tz {
     /// Null-terminated time zone abbreviations concatenated as a single string.
-    names: Box<str>,
+    names: heapless::pool::boxed::Box<TzNamesBoxPool>,
     /// Sorted array of UTC-to-local conversion results. The first item of the
     /// tuple is the starting UTC timestamp, and second item is the
     /// corresponding local offset.
-    utc_to_local: Box<[(i64, Oz)]>,
+    utc_to_local: heapless::pool::boxed::Box<TzUtcToLocalBoxPool>,
     /// Sorted array of local-to-UTC conversion results. The first item of the
     /// tuple is the starting local timestamp, and second item is the
     /// corresponding local offset (with ambiguity/invalid time handling).
-    local_to_utc: Box<[(i64, LocalResult<Oz>)]>,
+    local_to_utc: heapless::pool::boxed::Box<TzLocalToUtcBoxPool>,
 }
 
 /// Extracts the lower bound index from the result of standard `binary_search`.
@@ -124,30 +183,18 @@ impl<T: Deref<Target = Tz>> fmt::Debug for Offset<T> {
     }
 }
 
-/// Reference-counted time zone.
-///
-/// This type is equivalent to [`Rc`]`<`[`Tz`]`>`, but needed to workaround
-/// Rust's coherence rule to implement [`TimeZone`].
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
-pub struct RcTz(pub Rc<Tz>);
-
-impl RcTz {
-    /// Wraps an existing [`Tz`] object in this reference-counted container.
-    pub fn new(tz: Tz) -> Self {
-        Self(Rc::new(tz))
-    }
-}
-
-impl Deref for RcTz {
-    type Target = Tz;
-    fn deref(&self) -> &Tz {
-        &self.0
-    }
-}
-
-impl From<Tz> for RcTz {
-    fn from(tz: Tz) -> Self {
-        Self::new(tz)
+arc_pool!(TzArcPool: Tz);
+impl TzArcPool {
+    pub fn init() {
+        let blocks: &'static mut [ArcBlock<Tz>] = {
+            #[allow(clippy::declare_interior_mutable_const)]
+            const BLOCK: ArcBlock<Tz> = ArcBlock::new(); // <=
+            static mut BLOCKS: [ArcBlock<Tz>; POOL_CAPACITY] = [BLOCK; POOL_CAPACITY];
+            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
+        };
+        for block in blocks {
+            Self.manage(block);
+        }
     }
 }
 
@@ -156,13 +203,14 @@ impl From<Tz> for RcTz {
 /// This type is equivalent to [`Arc`]`<`[`Tz`]`>`, but needed to workaround
 /// Rust's coherence rule to implement [`TimeZone`].
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
-pub struct ArcTz(pub Arc<Tz>);
+pub struct ArcTz(pub Arc<TzArcPool>);
 
 impl ArcTz {
     /// Wraps an existing [`Tz`] object in this atomic reference-counted
     /// container.
-    pub fn new(tz: Tz) -> Self {
-        Self(Arc::new(tz))
+    pub fn new(tz: Tz) -> Result<Self, Error> {
+        let tz = TzArcPool.alloc(tz).map_err(|_| Error::AllocationFailed)?;
+        Ok(Self(tz))
     }
 }
 
@@ -170,12 +218,6 @@ impl Deref for ArcTz {
     type Target = Tz;
     fn deref(&self) -> &Tz {
         &self.0
-    }
-}
-
-impl From<Tz> for ArcTz {
-    fn from(tz: Tz) -> Self {
-        Self::new(tz)
     }
 }
 
@@ -226,10 +268,6 @@ impl<'a> TimeZone for &'a Tz {
     implements_time_zone!();
 }
 
-impl TimeZone for RcTz {
-    implements_time_zone!();
-}
-
 impl TimeZone for ArcTz {
     implements_time_zone!();
 }
@@ -260,6 +298,10 @@ pub enum Error {
     InvalidType,
     /// Name offset is out of bounds.
     NameOffsetOutOfBounds,
+    /// Failed to push objects to heapless container.
+    HeaplessOverflow,
+    /// Failed to allocate memory.
+    AllocationFailed,
 }
 
 impl fmt::Display for Error {
@@ -277,17 +319,13 @@ impl fmt::Display for Error {
             Error::InvalidTimeZoneFileName => "invalid time zone file name",
             Error::InvalidType => "invalid time zone transition type",
             Error::NameOffsetOutOfBounds => "name offset out of bounds",
+            Error::HeaplessOverflow => "overflowed capacity of heapless container",
+            Error::AllocationFailed => "allocation failed",
         })
     }
 }
 
 impl error::Error for Error {}
-
-impl From<Error> for io::Error {
-    fn from(e: Error) -> io::Error {
-        io::Error::new(io::ErrorKind::Other, e)
-    }
-}
 
 static MAGIC: [u8; 4] = *b"TZif";
 
@@ -362,6 +400,10 @@ impl Header {
 
         // Collect the timezone abbreviations.
         let names = from_utf8(&content[infos_end..abbr_end]).map_err(|_| Error::NonUtf8Abbr)?;
+        let mut names_heapless = TzNames::new();
+        names_heapless
+            .push_str(names)
+            .map_err(|_| Error::HeaplessOverflow)?;
 
         // Collect the timezone infos.
         let ozs = content[local_time_types_end..infos_end]
@@ -374,8 +416,15 @@ impl Header {
                     return Err(Error::NameOffsetOutOfBounds);
                 }
                 Ok(Oz { offset, name })
-            })
-            .collect::<Result<Vec<_>, Error>>()?;
+            });
+        let mut ozs_heapless: heapless::Vec<Oz, 1024> = heapless::Vec::new();
+        for oz in ozs {
+            match oz {
+                Ok(oz) => ozs_heapless.push(oz).map_err(|_| Error::HeaplessOverflow)?,
+                Err(e) => return Err(e),
+            };
+        }
+        let ozs = ozs_heapless;
 
         // Collect the transition times.
         let trans_encoded = &content[..trans_encoded_end];
@@ -383,39 +432,59 @@ impl Header {
 
         let mut prev_oz = ozs[0];
 
-        let mut utc_to_local = Vec::with_capacity(self.tzh_timecnt + 1);
-        utc_to_local.push((i64::min_value(), prev_oz));
+        let mut utc_to_local: TzUtcToLocalList = heapless::Vec::new();
+        utc_to_local.push((i64::min_value(), prev_oz)).unwrap();
         for (te, &ltt) in trans_encoded.chunks_exact(8).zip(local_time_types) {
             let oz = *ozs.get(usize::from(ltt)).ok_or(Error::InvalidType)?;
             let timestamp = BE::read_i64(te);
-            utc_to_local.push((timestamp, oz));
+            utc_to_local.push((timestamp, oz)).unwrap();
         }
 
-        let mut local_to_utc = Vec::with_capacity(self.tzh_timecnt * 2 + 1);
-        local_to_utc.push((i64::min_value(), LocalResult::Single(prev_oz)));
+        let mut local_to_utc: TzLocalToUtcList = heapless::Vec::new();
+        local_to_utc
+            .push((i64::min_value(), LocalResult::Single(prev_oz)))
+            .map_err(|_| Error::HeaplessOverflow)?;
         for &(utc_ts, cur_oz) in &utc_to_local[1..] {
             let prev_local_ts = prev_oz.to_local(utc_ts);
             let cur_local_ts = cur_oz.to_local(utc_ts);
             match prev_local_ts.cmp(&cur_local_ts) {
                 Ordering::Less => {
-                    local_to_utc.push((prev_local_ts, LocalResult::None));
-                    local_to_utc.push((cur_local_ts, LocalResult::Single(cur_oz)));
+                    local_to_utc
+                        .push((prev_local_ts, LocalResult::None))
+                        .map_err(|_| Error::HeaplessOverflow)?;
+                    local_to_utc
+                        .push((cur_local_ts, LocalResult::Single(cur_oz)))
+                        .map_err(|_| Error::HeaplessOverflow)?;
                 }
                 Ordering::Equal => {
-                    local_to_utc.push((cur_local_ts, LocalResult::Single(cur_oz)));
+                    local_to_utc
+                        .push((cur_local_ts, LocalResult::Single(cur_oz)))
+                        .map_err(|_| Error::HeaplessOverflow)?;
                 }
                 Ordering::Greater => {
-                    local_to_utc.push((cur_local_ts, LocalResult::Ambiguous(prev_oz, cur_oz)));
-                    local_to_utc.push((prev_local_ts, LocalResult::Single(cur_oz)));
+                    local_to_utc
+                        .push((cur_local_ts, LocalResult::Ambiguous(prev_oz, cur_oz)))
+                        .map_err(|_| Error::HeaplessOverflow)?;
+                    local_to_utc
+                        .push((prev_local_ts, LocalResult::Single(cur_oz)))
+                        .map_err(|_| Error::HeaplessOverflow)?;
                 }
             };
             prev_oz = cur_oz;
         }
-
+        let utc_to_local = TzUtcToLocalBoxPool
+            .alloc(utc_to_local)
+            .map_err(|_| Error::AllocationFailed)?;
+        let local_to_utc = TzLocalToUtcBoxPool
+            .alloc(local_to_utc)
+            .map_err(|_| Error::AllocationFailed)?;
+        let names_heapless = TzNamesBoxPool
+            .alloc(names_heapless)
+            .map_err(|_| Error::AllocationFailed)?;
         Ok(Tz {
-            names: names.into(),
-            utc_to_local: utc_to_local.into_boxed_slice(),
-            local_to_utc: local_to_utc.into_boxed_slice(),
+            names: names_heapless,
+            utc_to_local: utc_to_local,
+            local_to_utc: local_to_utc,
         })
     }
 }
@@ -439,55 +508,61 @@ impl Tz {
         header.parse_content(&source[Header::HEADER_LEN..])
     }
 }
+//TODO: ADD
+// impl From<chrono::Utc> for Tz {
+//     fn from(_: chrono::Utc) -> Self {
+//         #[allow(deprecated)]
+//         let oz = Oz {
+//             offset: FixedOffset::east(0),
+//             name: 0,
+//         };
+//         let mut names_heapless = TzNames::new();
+//         names_heapless.push_str("UTC\0").unwrap();
+//         Self {
+//             names: names_heapless,
+//             utc_to_local: vec![(i64::min_value(), oz)].into_boxed_slice(),
+//             local_to_utc: vec![(i64::min_value(), LocalResult::Single(oz))].into_boxed_slice(),
+//         }
+//     }
+// }
 
-impl From<chrono::Utc> for Tz {
-    fn from(_: chrono::Utc) -> Self {
-        #[allow(deprecated)]
-        let oz = Oz {
-            offset: FixedOffset::east(0),
-            name: 0,
-        };
-        Self {
-            names: "UTC\0".into(),
-            utc_to_local: vec![(i64::min_value(), oz)].into_boxed_slice(),
-            local_to_utc: vec![(i64::min_value(), LocalResult::Single(oz))].into_boxed_slice(),
-        }
-    }
-}
-
-impl From<FixedOffset> for Tz {
-    fn from(offset: FixedOffset) -> Self {
-        let mut name = offset.to_string();
-        name.push('\0');
-        let oz = Oz { offset, name: 0 };
-        Self {
-            names: name.into_boxed_str(),
-            utc_to_local: vec![(i64::min_value(), oz)].into_boxed_slice(),
-            local_to_utc: vec![(i64::min_value(), LocalResult::Single(oz))].into_boxed_slice(),
-        }
-    }
-}
+//TODO: ADD
+// impl From<FixedOffset> for Tz {
+//     fn from(offset: FixedOffset) -> Self {
+//         let mut name = offset.to_string();
+//         name.push('\0');
+//         let oz = Oz { offset, name: 0 };
+//         let mut names_heapless = TzNames::new();
+//         names_heapless.push_str(name.as_str()).unwrap();
+//         Self {
+//             names: names_heapless,
+//             utc_to_local: vec![(i64::min_value(), oz)].into_boxed_slice(),
+//             local_to_utc: vec![(i64::min_value(), LocalResult::Single(oz))].into_boxed_slice(),
+//         }
+//     }
+// }
 
 #[cfg(test)]
 #[allow(deprecated)]
 mod tests {
     use super::*;
-    use chrono::TimeZone;
+    extern crate std;
 
-    #[test]
-    fn tz_from_fixed_offset() {
-        let utc_tz = Tz::from(chrono::Utc);
-        let fixed_1_tz = Tz::from(chrono::FixedOffset::east(3600));
+    //TODO: ADD
+    // #[test]
+    // fn tz_from_fixed_offset() {
+    //     let utc_tz = Tz::from(chrono::Utc);
+    //     let fixed_1_tz = Tz::from(chrono::FixedOffset::east(3600));
 
-        let dt_0 = (&utc_tz).ymd(1000, 1, 1).and_hms(15, 0, 0);
-        let dt_1_converted = dt_0.with_timezone(&&fixed_1_tz);
-        let dt_1_expected = (&fixed_1_tz).ymd(1000, 1, 1).and_hms(16, 0, 0);
-        assert_eq!(dt_1_converted, dt_1_expected);
-    }
+    //     let dt_0 = (&utc_tz).ymd(1000, 1, 1).and_hms(15, 0, 0);
+    //     let dt_1_converted = dt_0.with_timezone(&&fixed_1_tz);
+    //     let dt_1_expected = (&fixed_1_tz).ymd(1000, 1, 1).and_hms(16, 0, 0);
+    //     assert_eq!(dt_1_converted, dt_1_expected);
+    // }
 
     #[test]
     fn parse_valid_contents() {
-        let contents: Vec<&[u8]> = vec![
+        let contents: std::vec::Vec<&[u8]> = std::vec![
             // #0
             b"TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x01\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x04\0\0\0\0\0\0UTC\0\0\0\
               TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x01\0\0\0\0\0\0\0\x01\0\0\0\x01\0\0\0\x04\xF8\0\0\0\0\0\0\0\0\0\0\0\0\0\0UTC\0\0\0\nUTC0\n",
@@ -509,7 +584,7 @@ mod tests {
 
     #[test]
     fn parse_invalid_contents() {
-        let contents: Vec<(&[u8], Error)> = vec![
+        let contents: std::vec::Vec<(&[u8], Error)> = std::vec![
             (
                 // #0
                 b"",
@@ -616,10 +691,19 @@ mod tests {
 #[cfg(test)]
 #[allow(deprecated)]
 mod chrono_tz_tests {
+    use crate::{TzLocalToUtcBoxPool, TzNamesBoxPool, TzUtcToLocalBoxPool};
+
     use super::Tz;
     use chrono::{Duration, TimeZone};
     use lazy_static::lazy_static;
+    extern crate std;
     use std::path::Path;
+    use std::string::ToString;
+    fn init() {
+        TzLocalToUtcBoxPool::init();
+        TzUtcToLocalBoxPool::init();
+        TzNamesBoxPool::init();
+    }
 
     fn parse_built_zoneinfo(name: &str) -> Tz {
         let path = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -665,6 +749,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn london_to_berlin() {
+        init();
         let dt = (&*LONDON).ymd(2016, 10, 8).and_hms(17, 0, 0);
         let converted = dt.with_timezone(&&*BERLIN);
         let expected = (&*BERLIN).ymd(2016, 10, 8).and_hms(18, 0, 0);
@@ -673,6 +758,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn us_eastern_dst_commutativity() {
+        init();
         let dt = (&*UTC).ymd(2002, 4, 7).and_hms(7, 0, 0);
         for days in -420..720 {
             let dt1 = (dt.clone() + Duration::days(days)).with_timezone(&&*EASTERN);
@@ -683,6 +769,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn warsaw_tz_name() {
+        init();
         let dt = (&*UTC).ymd(1915, 8, 4).and_hms(22, 35, 59);
         assert_eq!(dt.with_timezone(&&*WARSAW).format("%Z").to_string(), "WMT");
         let dt = dt + Duration::seconds(1);
@@ -691,6 +778,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn vilnius_utc_offset() {
+        init();
         let dt = (&*UTC)
             .ymd(1916, 12, 31)
             .and_hms(22, 35, 59)
@@ -702,6 +790,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn victorian_times() {
+        init();
         let dt = (&*UTC)
             .ymd(1847, 12, 1)
             .and_hms(0, 1, 14)
@@ -713,6 +802,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn london_dst() {
+        init();
         let dt = (&*LONDON).ymd(2016, 3, 10).and_hms(5, 0, 0);
         let later = dt + Duration::days(180);
         let expected = (&*LONDON).ymd(2016, 9, 6).and_hms(6, 0, 0);
@@ -721,6 +811,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn international_date_line_change() {
+        init();
         let dt = (&*UTC)
             .ymd(2011, 12, 30)
             .and_hms(9, 59, 59)
@@ -732,6 +823,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn negative_offset_with_minutes_and_seconds() {
+        init();
         let dt = (&*UTC)
             .ymd(1900, 1, 1)
             .and_hms(12, 0, 0)
@@ -741,6 +833,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn monotonicity() {
+        init();
         let mut dt = (&*NOUMEA).ymd(1800, 1, 1).and_hms(12, 0, 0);
         for _ in 0..24 * 356 * 400 {
             let new = dt.clone() + Duration::hours(1);
@@ -751,6 +844,7 @@ mod chrono_tz_tests {
     }
 
     fn test_inverse<T: TimeZone>(tz: T, begin: i32, end: i32) {
+        init();
         for y in begin..end {
             for d in 1..366 {
                 for h in 0..24 {
@@ -767,38 +861,44 @@ mod chrono_tz_tests {
 
     #[test]
     fn inverse_london() {
+        init();
         test_inverse(&*LONDON, 1989, 1994);
     }
 
     #[test]
     fn inverse_dhaka() {
+        init();
         test_inverse(&*DHAKA, 1995, 2000);
     }
 
     #[test]
     fn inverse_apia() {
+        init();
         test_inverse(&*APIA, 2011, 2012);
     }
 
     #[test]
     fn inverse_tahiti() {
+        init();
         test_inverse(&*TAHITI, 1911, 1914);
     }
 
     #[test]
     fn string_representation() {
+        init();
         let dt = (&*UTC)
             .ymd(2000, 9, 1)
             .and_hms(12, 30, 15)
             .with_timezone(&&*ADELAIDE);
         assert_eq!(dt.to_string(), "2000-09-01 22:00:15 ACST");
-        assert_eq!(format!("{:?}", dt), "2000-09-01T22:00:15ACST");
+        assert_eq!(std::format!("{:?}", dt), "2000-09-01T22:00:15ACST");
         assert_eq!(dt.to_rfc3339(), "2000-09-01T22:00:15+09:30");
-        assert_eq!(format!("{}", dt), "2000-09-01 22:00:15 ACST");
+        assert_eq!(std::format!("{}", dt), "2000-09-01 22:00:15 ACST");
     }
 
     #[test]
     fn tahiti() {
+        init();
         let dt = (&*UTC)
             .ymd(1912, 10, 1)
             .and_hms(9, 58, 16)
@@ -811,6 +911,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn second_offsets() {
+        init();
         let dt = (&*UTC)
             .ymd(1914, 1, 1)
             .and_hms(13, 40, 28)
@@ -822,58 +923,67 @@ mod chrono_tz_tests {
     #[test]
     #[should_panic]
     fn nonexistent_time() {
+        init();
         let _ = (&*LONDON).ymd(2016, 3, 27).and_hms(1, 30, 0);
     }
 
     #[test]
     #[should_panic]
     fn nonexistent_time_2() {
+        init();
         let _ = (&*LONDON).ymd(2016, 3, 27).and_hms(1, 0, 0);
     }
 
     #[test]
     fn time_exists() {
+        init();
         let _ = (&*LONDON).ymd(2016, 3, 27).and_hms(2, 0, 0);
     }
 
     #[test]
     #[should_panic]
     fn ambiguous_time() {
+        init();
         let _ = (&*LONDON).ymd(2016, 10, 30).and_hms(1, 0, 0);
     }
 
     #[test]
     #[should_panic]
     fn ambiguous_time_2() {
+        init();
         let _ = (&*LONDON).ymd(2016, 10, 30).and_hms(1, 30, 0);
     }
 
     #[test]
     #[should_panic]
     fn ambiguous_time_3() {
+        init();
         let _ = (&*MOSCOW).ymd(2014, 10, 26).and_hms(1, 30, 0);
     }
 
     #[test]
     #[should_panic]
     fn ambiguous_time_4() {
+        init();
         let _ = (&*MOSCOW).ymd(2014, 10, 26).and_hms(1, 0, 0);
     }
 
     #[test]
     fn unambiguous_time() {
+        init();
         let _ = (&*LONDON).ymd(2016, 10, 30).and_hms(2, 0, 0);
     }
 
     #[test]
     fn unambiguous_time_2() {
+        init();
         let _ = (&*MOSCOW).ymd(2014, 10, 26).and_hms(2, 0, 0);
     }
 
     // the numberphile tests
-
     #[test]
     fn test_london_5_days_ago_to_new_york() {
+        init();
         let from = (&*LONDON).ymd(2013, 12, 25).and_hms(14, 0, 0);
         let to = (&*NEW_YORK).ymd(2013, 12, 30).and_hms(14, 0, 0);
         assert_eq!(
@@ -884,18 +994,23 @@ mod chrono_tz_tests {
 
     #[test]
     fn london_to_australia() {
+        init();
         // at the time Tom was speaking, Adelaide was 10 1/2 hours ahead
         // many other parts of Australia use different time zones
-        let from = (&*LONDON).ymd(2013, 12, 25).and_hms(14, 0, 0);
-        let to = (&*ADELAIDE).ymd(2013, 12, 30).and_hms(14, 0, 0);
-        assert_eq!(
-            to.signed_duration_since(from),
-            Duration::days(5) - Duration::minutes(630)
-        );
+        for _ in 0..5 {
+            // Run in a loop to expose global mutations
+            let from = (&*LONDON).ymd(2013, 12, 25).and_hms(14, 0, 0);
+            let to = (&*ADELAIDE).ymd(2013, 12, 30).and_hms(14, 0, 0);
+            assert_eq!(
+                to.signed_duration_since(from),
+                Duration::days(5) - Duration::minutes(630)
+            );
+        }
     }
 
     #[test]
     fn london_to_nepal() {
+        init();
         // note Tom gets this wrong, it's 5 3/4 hours as he is speaking
         let from = (&*LONDON).ymd(2013, 12, 25).and_hms(14, 0, 0);
         let to = (&*KATHMANDU).ymd(2013, 12, 30).and_hms(14, 0, 0);
@@ -907,6 +1022,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn autumn() {
+        init();
         let from = (&*LONDON).ymd(2013, 10, 25).and_hms(12, 0, 0);
         let to = (&*LONDON).ymd(2013, 11, 1).and_hms(12, 0, 0);
         assert_eq!(
@@ -917,6 +1033,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn earlier_daylight_savings_in_new_york() {
+        init();
         let from = (&*NEW_YORK).ymd(2013, 10, 25).and_hms(12, 0, 0);
         let to = (&*NEW_YORK).ymd(2013, 11, 1).and_hms(12, 0, 0);
         assert_eq!(to.signed_duration_since(from), Duration::days(7));
@@ -924,6 +1041,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn southern_hemisphere_clocks_forward() {
+        init();
         let from = (&*ADELAIDE).ymd(2013, 10, 1).and_hms(12, 0, 0);
         let to = (&*ADELAIDE).ymd(2013, 11, 1).and_hms(12, 0, 0);
         assert_eq!(
@@ -934,6 +1052,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn samoa_skips_a_day() {
+        init();
         let from = (&*APIA).ymd(2011, 12, 29).and_hms(12, 0, 0);
         let to = (&*APIA).ymd(2011, 12, 31).and_hms(12, 0, 0);
         assert_eq!(to.signed_duration_since(from), Duration::days(1));
@@ -941,6 +1060,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn double_bst() {
+        init();
         let from = (&*LONDON).ymd(1942, 6, 1).and_hms(12, 0, 0);
         let to = (&*UTC).ymd(1942, 6, 1).and_hms(12, 0, 0);
         assert_eq!(to.signed_duration_since(from), Duration::hours(2));
@@ -948,6 +1068,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn libya_2013() {
+        init();
         // Libya actually put their clocks *forward* in 2013, but not in any other year
         let from = (&*TRIPOLI).ymd(2012, 3, 1).and_hms(12, 0, 0);
         let to = (&*TRIPOLI).ymd(2012, 4, 1).and_hms(12, 0, 0);
@@ -967,6 +1088,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn israel_palestine() {
+        init();
         let from = (&*JERUSALEM).ymd(2016, 10, 29).and_hms(12, 0, 0);
         let to = (&*GAZA).ymd(2016, 10, 29).and_hms(12, 0, 0);
         assert_eq!(to.signed_duration_since(from), Duration::hours(1));
@@ -974,6 +1096,7 @@ mod chrono_tz_tests {
 
     #[test]
     fn leapsecond() {
+        init();
         let from = (&*UTC).ymd(2016, 6, 30).and_hms(23, 59, 59);
         let to = (&*UTC).ymd(2016, 6, 30).and_hms_milli(23, 59, 59, 1000);
         assert_eq!(to.signed_duration_since(from), Duration::seconds(1));
