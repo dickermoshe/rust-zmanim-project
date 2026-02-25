@@ -31,15 +31,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    strategy:
-      fail-fast: true
-      matrix:
-        pool_feature:
-          - pool-128
-          - pool-256
-          - pool-512
-          - pool-1000
-          - pool-2048
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -48,5 +39,5 @@ jobs:
           toolchain: stable
           profile: minimal
           default: true
-      - name: Test (${{ matrix.pool_feature }} + std)
-        run: cargo test --no-default-features --features "std,${{ matrix.pool_feature }}"
+      - name: Test
+        run: cargo test
