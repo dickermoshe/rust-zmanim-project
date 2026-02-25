@@ -4,27 +4,18 @@
 #![no_std]
 use byteorder::{ByteOrder, BE};
 use chrono::{FixedOffset, LocalResult, NaiveDate, NaiveDateTime, TimeZone};
-use heapless::arc_pool;
-use heapless::box_pool;
-use heapless::pool::arc::Arc;
-use heapless::pool::arc::ArcBlock;
-use heapless::pool::boxed::BoxBlock;
-// use std::cmp::Ordering;
-
-// use std::error;
-// use std::fmt;
-
 use core::cmp::Ordering;
 use core::error;
 use core::fmt;
 use core::ops::Deref;
 use core::ptr::addr_of_mut;
 use core::str::from_utf8;
-// use std::hash::Hash;
-// use std::io;
-// use std::mem::size_of;
-// use std::ops::Deref;
-// use std::str::from_utf8;
+use heapless::arc_pool;
+use heapless::box_pool;
+use heapless::pool::arc::Arc;
+use paste::paste;
+mod once_cell;
+use crate::once_cell::OnceLock;
 
 /// `Oz` ("offset zone") represents a continuous period of time where the offset
 /// from UTC is constant and has the same abbreviation.
@@ -45,53 +36,70 @@ impl Oz {
 
 const POOL_CAPACITY: usize = 1000;
 
-type TzNames = heapless::String<256>;
-box_pool!(TzNamesBoxPool: TzNames);
-impl TzNamesBoxPool {
-    pub fn init() {
-        let blocks: &'static mut [BoxBlock<TzNames>] = {
-            #[allow(clippy::declare_interior_mutable_const)]
-            const BLOCK: BoxBlock<TzNames> = BoxBlock::new(); // <=
-            static mut BLOCKS: [BoxBlock<TzNames>; POOL_CAPACITY] = [BLOCK; POOL_CAPACITY];
-            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
-        };
-        for block in blocks {
-            Self.manage(block);
+macro_rules! define_box_pool_with_init {
+    ($init_lock:ident, $value_ty:ident) => {
+        static $init_lock: OnceLock<()> = OnceLock::new();
+        paste! {
+            box_pool!([<$value_ty BoxPool>]: $value_ty);
+            impl [<$value_ty BoxPool>] {
+                pub fn init(capacity: usize) {
+                    let capacity = capacity.min(POOL_CAPACITY);
+                    $init_lock.get_or_init(|| {
+                        let blocks: &'static mut [heapless::pool::boxed::BoxBlock<$value_ty>] = {
+                            #[allow(clippy::declare_interior_mutable_const)]
+                            const BLOCK: heapless::pool::boxed::BoxBlock<$value_ty> =
+                                heapless::pool::boxed::BoxBlock::new();
+                            static mut BLOCKS: [heapless::pool::boxed::BoxBlock<$value_ty>; POOL_CAPACITY] =
+                                [BLOCK; POOL_CAPACITY];
+                            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
+                        };
+                        for block in blocks.iter_mut().take(capacity) {
+                            Self.manage(block);
+                        }
+                    });
+                }
+            }
         }
-    }
+    };
 }
+
+macro_rules! define_arc_pool_with_init {
+    ($init_lock:ident, $value_ty:ident) => {
+        static $init_lock: OnceLock<()> = OnceLock::new();
+        paste! {
+            arc_pool!([<$value_ty ArcPool>]: $value_ty);
+            impl [<$value_ty ArcPool>] {
+                pub fn init(capacity: usize) {
+                    let capacity = capacity.min(POOL_CAPACITY);
+                    $init_lock.get_or_init(|| {
+                        let blocks: &'static mut [heapless::pool::arc::ArcBlock<$value_ty>] = {
+                            #[allow(clippy::declare_interior_mutable_const)]
+                            const BLOCK: heapless::pool::arc::ArcBlock<$value_ty> =
+                                heapless::pool::arc::ArcBlock::new();
+                            static mut BLOCKS: [heapless::pool::arc::ArcBlock<$value_ty>; POOL_CAPACITY] =
+                                [BLOCK; POOL_CAPACITY];
+                            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
+                        };
+                        for block in blocks.iter_mut().take(capacity) {
+                            Self.manage(block);
+                        }
+                    });
+                }
+            }
+        }
+    };
+}
+
+type TzNames = heapless::String<256>;
+define_box_pool_with_init!(TZ_NAMES_BOXPOOL_INIT, TzNames);
 
 type TzUtcToLocalList = heapless::Vec<(i64, Oz), 1024>;
-box_pool!(TzUtcToLocalBoxPool: TzUtcToLocalList);
-impl TzUtcToLocalBoxPool {
-    pub fn init() {
-        let blocks: &'static mut [BoxBlock<TzUtcToLocalList>] = {
-            #[allow(clippy::declare_interior_mutable_const)]
-            const BLOCK: BoxBlock<TzUtcToLocalList> = BoxBlock::new(); // <=
-            static mut BLOCKS: [BoxBlock<TzUtcToLocalList>; POOL_CAPACITY] = [BLOCK; POOL_CAPACITY];
-            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
-        };
-        for block in blocks {
-            Self.manage(block);
-        }
-    }
-}
+type TzUtcToLocal = TzUtcToLocalList;
+define_box_pool_with_init!(TZ_UTC_TO_LOCAL_BOXPOOL_INIT, TzUtcToLocal);
 
 type TzLocalToUtcList = heapless::Vec<(i64, LocalResult<Oz>), 1024>;
-box_pool!(TzLocalToUtcBoxPool: TzLocalToUtcList);
-impl TzLocalToUtcBoxPool {
-    pub fn init() {
-        let blocks: &'static mut [BoxBlock<TzLocalToUtcList>] = {
-            #[allow(clippy::declare_interior_mutable_const)]
-            const BLOCK: BoxBlock<TzLocalToUtcList> = BoxBlock::new(); // <=
-            static mut BLOCKS: [BoxBlock<TzLocalToUtcList>; POOL_CAPACITY] = [BLOCK; POOL_CAPACITY];
-            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
-        };
-        for block in blocks {
-            Self.manage(block);
-        }
-    }
-}
+type TzLocalToUtc = TzLocalToUtcList;
+define_box_pool_with_init!(TZ_LOCAL_TO_UTC_BOXPOOL_INIT, TzLocalToUtc);
 
 /// Time zone parsed from a tz database file.
 ///
@@ -101,9 +109,6 @@ impl TzLocalToUtcBoxPool {
 /// support `DateTime<Tz>` directly. Therefore, `Tz` itself does not implement
 /// [`TimeZone`]. Rather, you may use one of the following instead:
 ///
-/// * `&'a Tz` — zero cost to clone, but only valid within the lifetime `'a`.
-/// * [`RcTz`] — uses reference counting ([`Rc`]) to support shallow cloning,
-///     but is not thread-safe.
 /// * [`ArcTz`] — uses atomic reference counting ([`Arc`]) to support shallow
 ///     cloning, slightly more expensive than [`RcTz`] but is thread-safe.
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -183,19 +188,18 @@ impl<T: Deref<Target = Tz>> fmt::Debug for Offset<T> {
     }
 }
 
-arc_pool!(TzArcPool: Tz);
-impl TzArcPool {
-    pub fn init() {
-        let blocks: &'static mut [ArcBlock<Tz>] = {
-            #[allow(clippy::declare_interior_mutable_const)]
-            const BLOCK: ArcBlock<Tz> = ArcBlock::new(); // <=
-            static mut BLOCKS: [ArcBlock<Tz>; POOL_CAPACITY] = [BLOCK; POOL_CAPACITY];
-            unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
-        };
-        for block in blocks {
-            Self.manage(block);
-        }
-    }
+define_arc_pool_with_init!(TZ_ARC_POOL_INIT, Tz);
+
+/// Initializes global memory pools with up to `capacity` blocks each.
+///
+/// If `capacity` exceeds the compile-time pool backing size, it is clamped.
+/// Initialization is one-time and thread-safe; subsequent calls are no-ops.
+pub fn init(capacity: usize) {
+    let capacity = capacity.min(POOL_CAPACITY);
+    TzLocalToUtcBoxPool::init(capacity);
+    TzUtcToLocalBoxPool::init(capacity);
+    TzNamesBoxPool::init(capacity);
+    TzArcPool::init(capacity);
 }
 
 /// Atomic reference-counted time zone.
@@ -209,6 +213,7 @@ impl ArcTz {
     /// Wraps an existing [`Tz`] object in this atomic reference-counted
     /// container.
     pub fn new(tz: Tz) -> Result<Self, Error> {
+        init(POOL_CAPACITY);
         let tz = TzArcPool.alloc(tz).map_err(|_| Error::AllocationFailed)?;
         Ok(Self(tz))
     }
@@ -497,6 +502,7 @@ impl Tz {
     /// string, which describes non-hard-coded transition rules in the far
     /// future, is also not handled.
     pub fn parse(_name: &str, source: &[u8]) -> Result<Self, Error> {
+        init(POOL_CAPACITY);
         let header = Header::parse(source)?;
         let first_ver_len = Header::HEADER_LEN + header.data_len::<i32>();
         let source = source.get(first_ver_len..).ok_or(Error::DataTooShort)?;
@@ -693,16 +699,16 @@ mod tests {
 mod chrono_tz_tests {
     use crate::{TzLocalToUtcBoxPool, TzNamesBoxPool, TzUtcToLocalBoxPool};
 
-    use super::Tz;
+    use super::{Tz, POOL_CAPACITY};
     use chrono::{Duration, TimeZone};
     use lazy_static::lazy_static;
     extern crate std;
     use std::path::Path;
     use std::string::ToString;
     fn init() {
-        TzLocalToUtcBoxPool::init();
-        TzUtcToLocalBoxPool::init();
-        TzNamesBoxPool::init();
+        TzLocalToUtcBoxPool::init(POOL_CAPACITY);
+        TzUtcToLocalBoxPool::init(POOL_CAPACITY);
+        TzNamesBoxPool::init(POOL_CAPACITY);
     }
 
     fn parse_built_zoneinfo(name: &str) -> Tz {
@@ -1042,6 +1048,7 @@ mod chrono_tz_tests {
     #[test]
     fn southern_hemisphere_clocks_forward() {
         init();
+
         let from = (&*ADELAIDE).ymd(2013, 10, 1).and_hms(12, 0, 0);
         let to = (&*ADELAIDE).ymd(2013, 11, 1).and_hms(12, 0, 0);
         assert_eq!(
