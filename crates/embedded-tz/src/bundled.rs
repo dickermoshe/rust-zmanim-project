@@ -17,7 +17,7 @@ pub fn parse(name: &str) -> Result<Tz, Error> {
 #[cfg(test)]
 mod tests {
     extern crate std;
-    use chrono::{Offset, TimeZone, Utc};
+    use chrono::{NaiveDate, Offset, TimeZone, Utc};
 
     use proptest::prelude::*;
     use std::vec::Vec;
@@ -51,6 +51,33 @@ mod tests {
         for o in all() {
             let _ = parse(o.0).unwrap();
         }
+    }
+
+    #[test]
+    fn bundled_matches_chrono_tz_second_offsets_amsterdam() {
+        init();
+        let our_tz = parse("Europe/Amsterdam").expect("bundled Europe/Amsterdam should parse");
+        let chrono_tz = "Europe/Amsterdam"
+            .parse::<chrono_tz::Tz>()
+            .expect("chrono-tz Europe/Amsterdam should parse");
+        let utc_naive = NaiveDate::from_ymd_opt(1914, 1, 1)
+            .expect("valid date")
+            .and_hms_opt(13, 40, 28)
+            .expect("valid time");
+        let utc = Utc.from_utc_datetime(&utc_naive);
+
+        let ours = utc.with_timezone(&&our_tz);
+        let theirs = utc.with_timezone(&chrono_tz);
+
+        assert_eq!(ours.naive_local(), theirs.naive_local());
+        assert_eq!(
+            ours.offset().fix().local_minus_utc(),
+            theirs.offset().fix().local_minus_utc()
+        );
+        assert_eq!(
+            std::format!("{}", ours.format("%Z")),
+            std::format!("{}", theirs.format("%Z"))
+        );
     }
 
     proptest! {

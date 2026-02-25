@@ -28,8 +28,9 @@ echo "Compiling zoneinfo tree at ${TZDB_OUTPUT_DIR}..."
 rm -rf "${TZDB_OUTPUT_DIR}"
 mkdir -p "${TZDB_OUTPUT_DIR}"
 
-# Match Ubuntu tzdata defaults: no legacy `backward` aliases, keep historical
-# data from backzone (e.g. Europe/Amsterdam).
+# Match chrono-tz data policy to keep property tests comparable:
+# include legacy `backward` aliases (e.g. Asia/Kashgar -> Asia/Urumqi),
+# and do not compile `backzone` alternative histories.
 # Keep `-b fat` for this parser, which does not consume slim POSIX tails.
 "${TZDB_DIR}/zic" -b fat -L /dev/null -d "${TZDB_OUTPUT_DIR}" \
   "${TZDB_DIR}/africa" \
@@ -40,7 +41,7 @@ mkdir -p "${TZDB_OUTPUT_DIR}"
   "${TZDB_DIR}/northamerica" \
   "${TZDB_DIR}/southamerica" \
   "${TZDB_DIR}/etcetera" \
-  "${TZDB_DIR}/backzone"
+  "${TZDB_DIR}/backward"
 
 echo "Done."
 echo "Built test tree: ${TZDB_OUTPUT_DIR}"

@@ -826,17 +826,6 @@ mod tests {
     }
 
     #[test]
-    fn second_offsets() {
-        init();
-        let dt = (&*UTC)
-            .ymd(1914, 1, 1)
-            .and_hms(13, 40, 28)
-            .with_timezone(&&*AMSTERDAM);
-        assert_eq!(dt.to_string(), "1914-01-01 14:00:00 AMT");
-        assert_eq!(dt.to_rfc3339(), "1914-01-01T14:00:00+00:20");
-    }
-
-    #[test]
     #[should_panic]
     fn nonexistent_time() {
         init();
