@@ -8,8 +8,13 @@ license = "MIT"
 repository = "https://github.com/kennytm/tzfile"
 
 [features]
-default = ["std"]
+default = ["std", "pool-1000"]
 std = ["critical-section/std"]
+pool-128 = []
+pool-256 = []
+pool-512 = []
+pool-1000 = []
+pool-2048 = []
 
 [dependencies]
 byteorder = "1.3"

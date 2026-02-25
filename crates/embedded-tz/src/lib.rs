@@ -34,7 +34,45 @@ impl Oz {
     }
 }
 
+#[cfg(all(feature = "pool-128", feature = "pool-256"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(all(feature = "pool-128", feature = "pool-512"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(all(feature = "pool-128", feature = "pool-1000"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(all(feature = "pool-128", feature = "pool-2048"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(all(feature = "pool-256", feature = "pool-512"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(all(feature = "pool-256", feature = "pool-1000"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(all(feature = "pool-256", feature = "pool-2048"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(all(feature = "pool-512", feature = "pool-1000"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(all(feature = "pool-512", feature = "pool-2048"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(all(feature = "pool-1000", feature = "pool-2048"))]
+compile_error!("Select only one pool-* feature");
+#[cfg(not(any(
+    feature = "pool-128",
+    feature = "pool-256",
+    feature = "pool-512",
+    feature = "pool-1000",
+    feature = "pool-2048"
+)))]
+compile_error!("Enable one pool-* feature");
+
+#[cfg(feature = "pool-128")]
+const POOL_CAPACITY: usize = 128;
+#[cfg(feature = "pool-256")]
+const POOL_CAPACITY: usize = 256;
+#[cfg(feature = "pool-512")]
+const POOL_CAPACITY: usize = 512;
+#[cfg(feature = "pool-1000")]
 const POOL_CAPACITY: usize = 1000;
+#[cfg(feature = "pool-2048")]
+const POOL_CAPACITY: usize = 2048;
 
 macro_rules! define_box_pool_with_init {
     ($init_lock:ident, $value_ty:ident) => {
@@ -42,8 +80,7 @@ macro_rules! define_box_pool_with_init {
         paste! {
             box_pool!([<$value_ty BoxPool>]: $value_ty);
             impl [<$value_ty BoxPool>] {
-                pub fn init(capacity: usize) {
-                    let capacity = capacity.min(POOL_CAPACITY);
+                pub fn init() {
                     $init_lock.get_or_init(|| {
                         let blocks: &'static mut [heapless::pool::boxed::BoxBlock<$value_ty>] = {
                             #[allow(clippy::declare_interior_mutable_const)]
@@ -53,7 +90,7 @@ macro_rules! define_box_pool_with_init {
                                 [BLOCK; POOL_CAPACITY];
                             unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
                         };
-                        for block in blocks.iter_mut().take(capacity) {
+                        for block in blocks.iter_mut().take(POOL_CAPACITY) {
                             Self.manage(block);
                         }
                     });
@@ -69,8 +106,7 @@ macro_rules! define_arc_pool_with_init {
         paste! {
             arc_pool!([<$value_ty ArcPool>]: $value_ty);
             impl [<$value_ty ArcPool>] {
-                pub fn init(capacity: usize) {
-                    let capacity = capacity.min(POOL_CAPACITY);
+                pub fn init() {
                     $init_lock.get_or_init(|| {
                         let blocks: &'static mut [heapless::pool::arc::ArcBlock<$value_ty>] = {
                             #[allow(clippy::declare_interior_mutable_const)]
@@ -80,7 +116,7 @@ macro_rules! define_arc_pool_with_init {
                                 [BLOCK; POOL_CAPACITY];
                             unsafe { addr_of_mut!(BLOCKS).as_mut().unwrap() }
                         };
-                        for block in blocks.iter_mut().take(capacity) {
+                        for block in blocks.iter_mut().take(POOL_CAPACITY) {
                             Self.manage(block);
                         }
                     });
@@ -190,16 +226,15 @@ impl<T: Deref<Target = Tz>> fmt::Debug for Offset<T> {
 
 define_arc_pool_with_init!(TZ_ARC_POOL_INIT, Tz);
 
-/// Initializes global memory pools with up to `capacity` blocks each.
+/// Initializes global memory pools.
 ///
-/// If `capacity` exceeds the compile-time pool backing size, it is clamped.
+/// Pool size is selected at compile-time via `pool-*` feature flags.
 /// Initialization is one-time and thread-safe; subsequent calls are no-ops.
-pub fn init(capacity: usize) {
-    let capacity = capacity.min(POOL_CAPACITY);
-    TzLocalToUtcBoxPool::init(capacity);
-    TzUtcToLocalBoxPool::init(capacity);
-    TzNamesBoxPool::init(capacity);
-    TzArcPool::init(capacity);
+pub fn init() {
+    TzLocalToUtcBoxPool::init();
+    TzUtcToLocalBoxPool::init();
+    TzNamesBoxPool::init();
+    TzArcPool::init();
 }
 
 /// Atomic reference-counted time zone.
@@ -213,7 +248,7 @@ impl ArcTz {
     /// Wraps an existing [`Tz`] object in this atomic reference-counted
     /// container.
     pub fn new(tz: Tz) -> Result<Self, Error> {
-        init(POOL_CAPACITY);
+        init();
         let tz = TzArcPool.alloc(tz).map_err(|_| Error::AllocationFailed)?;
         Ok(Self(tz))
     }
@@ -502,7 +537,7 @@ impl Tz {
     /// string, which describes non-hard-coded transition rules in the far
     /// future, is also not handled.
     pub fn parse(_name: &str, source: &[u8]) -> Result<Self, Error> {
-        init(POOL_CAPACITY);
+        init();
         let header = Header::parse(source)?;
         let first_ver_len = Header::HEADER_LEN + header.data_len::<i32>();
         let source = source.get(first_ver_len..).ok_or(Error::DataTooShort)?;
@@ -699,16 +734,16 @@ mod tests {
 mod chrono_tz_tests {
     use crate::{TzLocalToUtcBoxPool, TzNamesBoxPool, TzUtcToLocalBoxPool};
 
-    use super::{Tz, POOL_CAPACITY};
+    use super::Tz;
     use chrono::{Duration, TimeZone};
     use lazy_static::lazy_static;
     extern crate std;
     use std::path::Path;
     use std::string::ToString;
     fn init() {
-        TzLocalToUtcBoxPool::init(POOL_CAPACITY);
-        TzUtcToLocalBoxPool::init(POOL_CAPACITY);
-        TzNamesBoxPool::init(POOL_CAPACITY);
+        TzLocalToUtcBoxPool::init();
+        TzUtcToLocalBoxPool::init();
+        TzNamesBoxPool::init();
     }
 
     fn parse_built_zoneinfo(name: &str) -> Tz {
