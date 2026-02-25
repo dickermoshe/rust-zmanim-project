@@ -7,6 +7,7 @@ use chrono::{FixedOffset, LocalResult, NaiveDate, NaiveDateTime, TimeZone};
 use core::cmp::Ordering;
 use core::error;
 use core::fmt;
+use core::fmt::Write;
 use core::ops::Deref;
 use core::str::from_utf8;
 use heapless::arc_pool;
@@ -499,39 +500,60 @@ impl Tz {
         header.parse_content(&source[Header::HEADER_LEN..])
     }
 }
-//TODO: ADD
-// impl From<chrono::Utc> for Tz {
-//     fn from(_: chrono::Utc) -> Self {
-//         #[allow(deprecated)]
-//         let oz = Oz {
-//             offset: FixedOffset::east(0),
-//             name: 0,
-//         };
-//         let mut names_heapless = TzNames::new();
-//         names_heapless.push_str("UTC\0").unwrap();
-//         Self {
-//             names: names_heapless,
-//             utc_to_local: vec![(i64::min_value(), oz)].into_boxed_slice(),
-//             local_to_utc: vec![(i64::min_value(), LocalResult::Single(oz))].into_boxed_slice(),
-//         }
-//     }
-// }
+impl From<chrono::Utc> for Tz {
+    fn from(_: chrono::Utc) -> Self {
+        let offset = FixedOffset::east_opt(0).expect("0 offset must be valid");
+        Self::from(offset)
+    }
+}
 
-//TODO: ADD
-// impl From<FixedOffset> for Tz {
-//     fn from(offset: FixedOffset) -> Self {
-//         let mut name = offset.to_string();
-//         name.push('\0');
-//         let oz = Oz { offset, name: 0 };
-//         let mut names_heapless = TzNames::new();
-//         names_heapless.push_str(name.as_str()).unwrap();
-//         Self {
-//             names: names_heapless,
-//             utc_to_local: vec![(i64::min_value(), oz)].into_boxed_slice(),
-//             local_to_utc: vec![(i64::min_value(), LocalResult::Single(oz))].into_boxed_slice(),
-//         }
-//     }
-// }
+impl From<FixedOffset> for Tz {
+    fn from(offset: FixedOffset) -> Self {
+        let total = offset.local_minus_utc();
+        let sign = if total >= 0 { '+' } else { '-' };
+        let abs = total.abs();
+        let hours = abs / 3600;
+        let minutes = (abs % 3600) / 60;
+        let seconds = abs % 60;
+
+        let mut name = TzNames::new();
+        if seconds == 0 {
+            write!(&mut name, "{sign}{hours:02}:{minutes:02}")
+                .expect("fixed offset name overflow");
+        } else {
+            write!(&mut name, "{sign}{hours:02}:{minutes:02}:{seconds:02}")
+                .expect("fixed offset name overflow");
+        }
+        name.push('\0').expect("fixed offset name overflow");
+        let oz = Oz { offset, name: 0 };
+
+        let mut utc_to_local: TzUtcToLocalList = heapless::Vec::new();
+        utc_to_local
+            .push((i64::min_value(), oz))
+            .expect("utc_to_local overflow");
+
+        let mut local_to_utc: TzLocalToUtcList = heapless::Vec::new();
+        local_to_utc
+            .push((i64::min_value(), LocalResult::Single(oz)))
+            .expect("local_to_utc overflow");
+
+        let names = TzNamesBoxPool
+            .alloc(name)
+            .expect("failed to allocate tz names");
+        let utc_to_local = TzUtcToLocalBoxPool
+            .alloc(utc_to_local)
+            .expect("failed to allocate utc_to_local");
+        let local_to_utc = TzLocalToUtcBoxPool
+            .alloc(local_to_utc)
+            .expect("failed to allocate local_to_utc");
+
+        Self {
+            names,
+            utc_to_local,
+            local_to_utc,
+        }
+    }
+}
 
 #[cfg(test)]
 #[allow(deprecated)]
@@ -581,17 +603,27 @@ mod tests {
         });
     }
 
-    //TODO: ADD
-    // #[test]
-    // fn tz_from_fixed_offset() {
-    //     let utc_tz = Tz::from(chrono::Utc);
-    //     let fixed_1_tz = Tz::from(chrono::FixedOffset::east(3600));
+    #[test]
+    fn tz_from_fixed_offset() {
+        init();
+        let utc_tz = Tz::from(chrono::Utc);
+        let fixed_1_tz =
+            Tz::from(chrono::FixedOffset::east_opt(3600).expect("+01:00 must be valid"));
 
-    //     let dt_0 = (&utc_tz).ymd(1000, 1, 1).and_hms(15, 0, 0);
-    //     let dt_1_converted = dt_0.with_timezone(&&fixed_1_tz);
-    //     let dt_1_expected = (&fixed_1_tz).ymd(1000, 1, 1).and_hms(16, 0, 0);
-    //     assert_eq!(dt_1_converted, dt_1_expected);
-    // }
+        let dt_0 = (&utc_tz).ymd(1000, 1, 1).and_hms(15, 0, 0);
+        let dt_1_converted = dt_0.with_timezone(&&fixed_1_tz);
+        let dt_1_expected = (&fixed_1_tz).ymd(1000, 1, 1).and_hms(16, 0, 0);
+        assert_eq!(dt_1_converted, dt_1_expected);
+    }
+
+    #[test]
+    fn tz_from_utc() {
+        init();
+        let utc_tz = Tz::from(chrono::Utc);
+        let dt = (&utc_tz).ymd(2024, 1, 1).and_hms(12, 34, 56);
+        assert_eq!(dt.to_rfc3339(), "2024-01-01T12:34:56+00:00");
+        assert_eq!(dt.format("%Z").to_string(), "+00:00");
+    }
 
     #[test]
     fn parse_valid_contents() {
