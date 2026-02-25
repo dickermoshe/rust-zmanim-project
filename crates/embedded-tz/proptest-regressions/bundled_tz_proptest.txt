@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 1553ffdf73beaa0bc13e6b25e78aa9cd731659ccdbab89579a7f0f69d9866a57 # shrinks to tz_name = "America/Halifax", ts = 2341461600

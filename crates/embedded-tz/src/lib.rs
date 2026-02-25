@@ -16,6 +16,32 @@ use heapless::pool::arc::ArcBlock;
 use heapless::pool::boxed::BoxBlock;
 use paste::paste;
 
+#[cfg(feature = "bundled-tzdb")]
+pub mod bundled {
+    use super::{Error, Tz};
+
+    include!(concat!(env!("OUT_DIR"), "/bundled_tzdb.rs"));
+
+    pub fn all() -> &'static [(&'static str, &'static [u8])] {
+        BUNDLED_TZDB
+    }
+
+    pub fn bytes(name: &str) -> Option<&'static [u8]> {
+        BUNDLED_TZDB
+            .iter()
+            .find(|(tz_name, _)| *tz_name == name)
+            .map(|(_, bytes)| *bytes)
+    }
+
+    pub fn parse(name: &str) -> Result<Tz, Error> {
+        let bytes = bytes(name).ok_or(Error::InvalidTimeZoneFileName)?;
+        Tz::parse(name, bytes)
+    }
+}
+// TODO enable this when we have a way to test the bundled tzdb
+// #[cfg(all(feature = "bundled-tzdb", test))]
+// mod bundled_tz_proptest;
+
 /// `Oz` ("offset zone") represents a continuous period of time where the offset
 /// from UTC is constant and has the same abbreviation.
 #[derive(Copy, Clone, Hash, PartialEq, Eq, Debug)]
