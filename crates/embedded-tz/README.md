@@ -26,70 +26,108 @@ If you can do normal application or firmware updates, it is usually simpler to:
 - ship the update via your standard deployment path (including vendor OTA
   systems such as those commonly available in Espressif/Nordic ecosystems).
 
-## Current model
+## Getting started
 
-- No runtime dependency on system zoneinfo files.
-- Optional bundled database via the `bundled-tzdb` feature.
-- Parse zones from bundled entries with `embedded_tz::bundled::parse`.
+Add the dependency (git or path) and enable `bundled-tzdb` if you want a
+compile-time copy of the IANA tz database included in your binary:
 
-## Guardrails
+```toml
+[dependencies]
+embedded-tz = { git = "https://github.com/dickermoshe/embedded-tz", features = ["bundled-tzdb"] }
+```
 
-- Far-future transitions are intentionally conservative:
-  `embedded-tz` does not apply the POSIX tail generic-rule expansion used by
-  `chrono-tz` for very far-future timestamps.
-- Capacity is fixed by your arc-pool allocation:
-  you can only parse/hold as many `Tz` values as your preallocated pool supports.
-- Before sending tzdb payloads over the wire, validate them with the same
-  crate version and the same tzdb version (`bundled::version()`) you expect on
-  device.
+## Usage
 
-## Arc pool init and parsing example
+Every parsed time zone is reference-counted via a `heapless` arc pool.
+You must set up that pool **once** at startup, before calling any parsing
+function. The pool size determines how many `Tz` values you can hold
+simultaneously.
 
-You must initialize the `heapless` arc pool once at startup before parsing and
-holding `Tz` values.
+### 1. Initialize the pool
 
 ```rust
-use chrono::{TimeZone, Utc};
 use core::ptr::addr_of_mut;
 use heapless::pool::arc::ArcBlock;
-use embedded_tz::{bundled, Tz, TzData, TzDataArcPool};
+use embedded_tz::{TzData, TzDataArcPool};
 
-const TZ_POOL_CAPACITY: usize = 16;
+const TZ_POOL_SIZE: usize = 16;
 const TZ_DATA_BLOCK: ArcBlock<TzData> = ArcBlock::new();
-static mut TZ_DATA_BLOCKS: [ArcBlock<TzData>; TZ_POOL_CAPACITY] =
-    [TZ_DATA_BLOCK; TZ_POOL_CAPACITY];
+static mut TZ_DATA_BLOCKS: [ArcBlock<TzData>; TZ_POOL_SIZE] =
+    [TZ_DATA_BLOCK; TZ_POOL_SIZE];
 
-fn init_tz_pool_once() {
-    // Call exactly once during boot/init.
+fn init_tz_pool() {
     let blocks = unsafe { addr_of_mut!(TZ_DATA_BLOCKS).as_mut().unwrap() };
     for block in blocks {
         TzDataArcPool.manage(block);
     }
 }
-
-fn parse_zone(name: &str) -> Result<Tz, embedded_tz::Error> {
-    bundled::parse(name)
-}
-
-fn demo() -> Result<(), embedded_tz::Error> {
-    init_tz_pool_once();
-    let tzdb_version = bundled::version();
-    let tz = parse_zone("America/New_York")?;
-    let dt = Utc.with_ymd_and_hms(2026, 2, 25, 12, 0, 0).unwrap();
-    let _local = dt.with_timezone(&&tz);
-    let _ = tzdb_version;
-    Ok(())
-}
 ```
 
-## Suggested wire-update workflow
+### 2. Parse a time zone
 
-1. Build/choose a tzdb version on the server side.
-2. Validate each payload parses with the same crate + tzdb version you expect on
-   device.
-3. Transmit only validated TZif bytes and identifiers.
-4. On device, initialize the pool once, then parse/store only up to your
-   allocated capacity.
+From the bundled database (requires `bundled-tzdb` feature):
+
+```rust
+use embedded_tz::bundled;
+
+let tz = bundled::parse("America/New_York")?;
+```
+
+From raw TZif bytes received over the wire:
+
+```rust
+use embedded_tz::Tz;
+
+let tz = Tz::parse("America/New_York", &raw_tzif_bytes)?;
+```
+
+Or create a fixed-offset zone directly:
+
+```rust
+use chrono::FixedOffset;
+use embedded_tz::Tz;
+
+let tz = Tz::from_offset(FixedOffset::east_opt(2 * 3600).unwrap())?;
+```
+
+### 3. Convert times
+
+`Tz` implements `chrono::TimeZone`, so it works with the standard chrono API:
+
+```rust
+use chrono::{TimeZone, Utc};
+
+let utc = Utc.with_ymd_and_hms(2026, 3, 8, 12, 0, 0).unwrap();
+let local = utc.with_timezone(&&tz);
+```
+
+## Updating time zones over the wire
+
+The main reason to use this crate instead of `chrono-tz` is to push tz database
+updates to a device without a full firmware update. A typical flow:
+
+1. **Server side** -- Build or download a tzdb release. For each zone you need,
+   extract the compiled TZif file (the binary blobs in `/usr/share/zoneinfo`).
+2. **Validate** -- Parse every payload with the same `embedded-tz` version
+   running on the device.
+3. **Transmit** -- Send the validated TZif bytes and their IANA identifiers
+   (e.g. `"America/New_York"`) to the device.
+4. **Device side** -- Call `Tz::parse(name, &bytes)` to load each zone into the
+   arc pool.
+
+Use `bundled::version()` to check which tzdb version is compiled into the
+binary. This is useful for deciding whether a wire update is needed.
+
+## Limitations
+
+- **Fixed pool capacity.** You can only hold as many `Tz` values as the arc pool
+  you allocated at startup. Once the pool is exhausted, parsing returns
+  `Error::AllocationFailed`.
+- **No far-future POSIX tail rules.** Unlike `chrono-tz`, this crate does not
+  expand the POSIX TZ string appended to TZif files. Offsets past the last
+  explicit transition in the file repeat the final transition's offset
+  indefinitely. For most practical use (within ~10 years of the tzdb release)
+  this is equivalent.
 
 ## Testing methodology
 
