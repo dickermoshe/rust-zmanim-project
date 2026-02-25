@@ -1,11 +1,23 @@
+//! Access to the bundled time zone database.
+//!
+//! This module is available when the `bundled-tzdb` feature is enabled.
 use super::{Error, Tz};
 
 include!(concat!(env!("OUT_DIR"), "/bundled_tzdb.rs"));
 
+/// Returns the IANA tzdb version used to build this bundled database.
+pub fn version() -> &'static str {
+    TZ_DB_VERSION
+}
+
+/// Returns all bundled tzdb entries as `(name, raw_tzif_bytes)` pairs.
 pub fn all() -> &'static [(&'static str, &'static [u8])] {
     BUNDLED_TZDB
 }
-
+/// Parses a named time zone from the bundled tz database.
+///
+/// Returns [`Error::InvalidTimeZoneFileName`] when `name` is not found in the
+/// bundled database.
 pub fn parse(name: &str) -> Result<Tz, Error> {
     let bytes = BUNDLED_TZDB
         .iter()
@@ -17,7 +29,7 @@ pub fn parse(name: &str) -> Result<Tz, Error> {
 #[cfg(test)]
 mod tests {
     extern crate std;
-    use chrono::{NaiveDate, Offset, TimeZone, Utc};
+    use chrono::{Datelike, Duration, NaiveDate, Offset, TimeZone, Utc};
 
     use proptest::prelude::*;
     use std::vec::Vec;
@@ -43,6 +55,13 @@ mod tests {
             "no bundled entries are parseable by chrono-tz"
         );
         proptest::sample::select(entries)
+    }
+
+    fn max_test_timestamp() -> i64 {
+        let now = Utc::now();
+        now.with_year(now.year() + 10)
+            .unwrap_or_else(|| now + Duration::days(3653))
+            .timestamp()
     }
 
     #[test]
@@ -87,7 +106,8 @@ mod tests {
             // Keep this sanity check in the Unix-era window where chrono-tz and
             // bundled zoneinfo sources align best across historical backzone
             // differences and far-future POSIX tail handling differences.
-            ts in 0_i64..2_147_483_648_i64
+            // Limit the upper bound to 10 years from test execution time.
+            ts in chrono::DateTime::<Utc>::MIN_UTC.timestamp()..max_test_timestamp()
         ) {
             init();
             let our_tz = parse(tz_name).map_err(|e| {

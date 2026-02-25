@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 
 fn main() {
     println!("cargo:rerun-if-changed=zoneinfo");
+    println!("cargo:rerun-if-changed=tzdb/version");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_BUNDLED_TZDB");
 
     if env::var_os("CARGO_FEATURE_BUNDLED_TZDB").is_none() {
@@ -36,6 +37,9 @@ fn generate_bundled_tzdb() -> io::Result<()> {
 
     let out_file = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bundled_tzdb.rs");
     let mut out = fs::File::create(out_file)?;
+    let tzdb_version = read_tzdb_version(&manifest_dir)?;
+
+    writeln!(out, "pub const TZ_DB_VERSION: &str = {tzdb_version:?};")?;
 
     writeln!(out, "pub static BUNDLED_TZDB: &[(&str, &[u8])] = &[")?;
 
@@ -55,6 +59,19 @@ fn generate_bundled_tzdb() -> io::Result<()> {
 
     writeln!(out, "];")?;
     Ok(())
+}
+
+fn read_tzdb_version(manifest_dir: &Path) -> io::Result<String> {
+    let raw = fs::read_to_string(manifest_dir.join("tzdb").join("version"))?;
+    let version = raw.trim();
+    let cleaned = version.strip_suffix("-dirty").unwrap_or(version);
+    if cleaned.is_empty() {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "tzdb/version is empty",
+        ));
+    }
+    Ok(cleaned.to_string())
 }
 
 fn collect_regular_files(root: &Path, files: &mut Vec<PathBuf>) -> io::Result<()> {

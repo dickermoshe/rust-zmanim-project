@@ -22,7 +22,3 @@ criterion = "0.3"
 chrono-tz = "0.10.4"
 chrono = "0.4"
 proptest = "1.10.0"
-
-[[bench]]
-name = "bench_convert_vs_chrono_tz"
-harness = false

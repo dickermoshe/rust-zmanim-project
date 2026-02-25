@@ -1,6 +1,11 @@
-//! `tzfile` is a [`chrono::TimeZone`] implementation using the system tz
-//! database. It can parse compiled (binary) time zone files inside
-//! `/usr/share/zoneinfo` into time zone objects for `chrono`.
+//! `tzfile` provides a [`chrono::TimeZone`] implementation backed by tzfile
+//! (`TZif`) data.
+//!
+//! It can parse compiled time zone files from a system tz database (for
+//! example, `/usr/share/zoneinfo`) into values usable with `chrono`.
+//!
+//! With the `bundled-tzdb` feature enabled, this crate also exposes a bundled
+//! copy of the time zone database via [`bundled`].
 #![no_std]
 use byteorder::{ByteOrder, BE};
 use chrono::{FixedOffset, LocalResult, NaiveDate, NaiveDateTime, TimeZone};
@@ -14,6 +19,7 @@ use heapless::arc_pool;
 use heapless::pool::arc::Arc;
 
 #[cfg(feature = "bundled-tzdb")]
+/// Helpers for reading and parsing the bundled tz database.
 pub mod bundled;
 
 type TzNames = heapless::String<256>;
@@ -37,6 +43,10 @@ impl Oz {
     }
 }
 
+/// Backing storage for parsed time zone transition tables.
+///
+/// This is public to support low-level integrations, but most users should
+/// interact with [`Tz`] instead.
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct TzData {
     /// Null-terminated time zone abbreviations concatenated as a single string.
@@ -376,6 +386,9 @@ impl Tz {
     /// `chrono`, leap second information is ignored. The embedded POSIX TZ
     /// string, which describes non-hard-coded transition rules in the far
     /// future, is also not handled.
+    ///
+    /// The `name` parameter is currently informational and is not used while
+    /// parsing.
     pub fn parse(_name: &str, source: &[u8]) -> Result<Self, Error> {
         let header = Header::parse(source)?;
         let first_ver_len = Header::HEADER_LEN + header.data_len::<i32>();
@@ -387,6 +400,11 @@ impl Tz {
         }
         header.parse_content(&source[Header::HEADER_LEN..])
     }
+
+    /// Builds a fixed-offset time zone from a [`FixedOffset`].
+    ///
+    /// This produces a `Tz` with no transitions, whose abbreviation is
+    /// formatted as `+HH:MM` or `+HH:MM:SS`.
     pub fn from_offset(offset: FixedOffset) -> Result<Self, Error> {
         let total = offset.local_minus_utc();
         let sign = if total >= 0 { '+' } else { '-' };
@@ -424,6 +442,8 @@ impl Tz {
             .alloc(tz_data)
             .map_err(|_| Error::AllocationFailed)?))
     }
+
+    /// Returns a UTC time zone (`+00:00`) as a [`Tz`].
     pub fn utc() -> Result<Self, Error> {
         let offset = FixedOffset::east_opt(0).expect("0 offset must be valid");
         Self::from_offset(offset)

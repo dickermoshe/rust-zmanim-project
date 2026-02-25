@@ -35,6 +35,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      PROPTEST_CASES: "10000"
     steps:
       - uses: actions/checkout@v2
       - name: Install build deps
@@ -48,4 +50,4 @@ jobs:
           profile: minimal
           default: true
       - name: Test
-        run: cargo test
+        run: cargo test --features bundled-tzdb
