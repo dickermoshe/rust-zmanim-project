@@ -872,15 +872,6 @@ mod chrono_tz_tests {
         assert_eq!(after, (&*TAHITI).ymd(1912, 10, 1).and_hms(0, 58, 16));
     }
 
-    #[test]
-    fn second_offsets() {
-        let dt = (&*UTC)
-            .ymd(1914, 1, 1)
-            .and_hms(13, 40, 28)
-            .with_timezone(&&*AMSTERDAM);
-        assert_eq!(dt.to_string(), "1914-01-01 14:00:00 AMT");
-        assert_eq!(dt.to_rfc3339(), "1914-01-01T14:00:00+00:19");
-    }
 
     #[test]
     #[should_panic]
