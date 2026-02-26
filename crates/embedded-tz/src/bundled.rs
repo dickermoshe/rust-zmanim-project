@@ -34,10 +34,7 @@ mod tests {
     use proptest::prelude::*;
     use std::vec::Vec;
 
-    use crate::{
-        bundled::{all, parse},
-        test_utils::init,
-    };
+    use crate::bundled::{all, parse};
 
     fn bundled_entry_strategy() -> impl Strategy<Value = &'static str> {
         let entries = all()
@@ -66,7 +63,6 @@ mod tests {
 
     #[test]
     fn parse_all() {
-        init();
         for o in all() {
             let _ = parse(o.0).unwrap();
         }
@@ -74,7 +70,6 @@ mod tests {
 
     #[test]
     fn bundled_matches_chrono_tz_second_offsets_amsterdam() {
-        init();
         let our_tz = parse("Europe/Amsterdam").expect("bundled Europe/Amsterdam should parse");
         let chrono_tz = "Europe/Amsterdam"
             .parse::<chrono_tz::Tz>()
@@ -109,7 +104,6 @@ mod tests {
             // Limit the upper bound to 10 years from test execution time.
             ts in chrono::DateTime::<Utc>::MIN_UTC.timestamp()..max_test_timestamp()
         ) {
-            init();
             let our_tz = parse(tz_name).map_err(|e| {
                 TestCaseError::fail(std::format!("embedded-tz parse failed for {tz_name}: {e:?}"))
             })?;
