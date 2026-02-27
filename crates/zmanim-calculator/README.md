@@ -1,3 +1,9 @@
+This has been tested extensively. However, the API is still relatively unstable. 
+If you would like to use this project, I would recommend pinning to a specific commit. 
+This will not be published until the API has stabilized. 
+
+---
+
 # Zmanim Calculator
 
 [![CI](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml)
