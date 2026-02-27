@@ -36,7 +36,7 @@ println!("Tzais (UTC): {tzais}");
 Notes:
 
 - `calculate` returns `DateTime<Utc>`; convert to local time as needed.
-- If you omit a timezone, locations near the anti-meridian require one.
+- If you omit a timezone, no zmanim will be returned for locations near the anti-meridian.
 
 ## Zmanim Calculator
 
