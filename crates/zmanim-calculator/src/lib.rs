@@ -13,7 +13,7 @@
 #[cfg(test)]
 mod java_tests;
 #[cfg(test)]
-mod zmanim_calendar_tests;
+mod tests;
 mod types {
     /// Configuration types for zmanim calculations.
     pub mod config;
@@ -22,7 +22,6 @@ mod types {
 }
 mod calculator;
 mod math;
-mod zmanim_impl;
 
 /// Zmanim constants and definitions.
 pub mod zman;
