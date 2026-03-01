@@ -79,12 +79,14 @@ jobs:
           submodules: true
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Generate header
-        run: cargo run --features c --bin build_c_headers
-
-      - name: Verify header was generated
-        run: ls -la bindings/c/zmanim_calculator.h
+        run: |
+          cargo build --features c --bin build_c_headers
+          ./target/debug/build_c_headers
+          ls -la bindings/c/zmanim_calculator.h
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
