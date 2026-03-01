@@ -1,68 +1,79 @@
-This has been tested extensively. However, the API is still relatively unstable.
-If you would like to use this project, I would recommend pinning to a specific commit.
-This will not be published until the API has stabilized.
-
----
-
 # Zmanim Calculator
 
 [![CI](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml)
 [![Codecov](https://codecov.io/gh/dickermoshe/zmanim-calculator/branch/main/graph/badge.svg)](https://codecov.io/gh/dickermoshe/zmanim-calculator)
 
+This project has been tested extensively, but the public API is still evolving.
+If you are building against it today, pin to a specific commit.
+
 ## Install
 
-Add the crate to your `Cargo.toml`:
+Recommended while the API is still changing:
 
 ```toml
 [dependencies]
-zmanim-calculator = "0.1.0"
+zmanim-calculator = { git = "https://github.com/dickermoshe/zmanim-calculator", rev = "<commit-sha>" }
 ```
 
-## Usage
+## Rust Usage
 
 ```rust
 use chrono::{NaiveDate, Utc};
 use zmanim_calculator::{
-    CalculatorConfig, Location, ZmanimCalculator, zman::SUNRISE, zman::TZAIS_MINUTES_72,
+    prelude::{CalculatorConfig, Location, ZmanimCalculator},
+    presets::{SUNRISE, TZAIS_MINUTES_72},
 };
 
-let location = Location::new(40.7128, -74.0060, 10.0, Some(Utc))
-    .expect("valid location");
-let date = NaiveDate::from_ymd_opt(2025, 1, 1).expect("valid date");
-let config = CalculatorConfig::default();
-let mut calc = ZmanimCalculator::new(location, date, config).expect("calculator");
+fn main() {
+    let location = Location::new(40.7128, -74.0060, 10.0, Some(Utc)).expect("valid location");
+    let date = NaiveDate::from_ymd_opt(2026, 3, 1).expect("valid date");
+    let mut calc =
+        ZmanimCalculator::new(location, date, CalculatorConfig::default()).expect("calculator");
 
-let sunrise = calc.calculate(SUNRISE).expect("sunrise");
-let tzais = calc.calculate(TZAIS_MINUTES_72).expect("tzais");
+    let sunrise = calc.calculate(SUNRISE).expect("sunrise");
+    let tzais = calc.calculate(TZAIS_MINUTES_72).expect("tzais");
 
-println!("Sunrise (UTC): {sunrise}");
-println!("Tzais (UTC): {tzais}");
+    println!("Sunrise (UTC): {sunrise}");
+    println!("Tzais 72 (UTC): {tzais}");
+}
 ```
 
 Notes:
 
-- `calculate` returns `DateTime<Utc>`; convert to local time as needed.
-- If you omit a timezone, no zmanim will be returned for locations near the anti-meridian.
+- `calculate` returns `DateTime<Utc>`.
+- If you omit a timezone, calculations near the anti-meridian (`|longitude| > 150`) will fail.
 
-## Zmanim Calculator
+## C API (`c` feature)
 
-We strive to follow KosherJava's APIs as closely as possible to maintain compatibility and familiarity for developers who have used the Java library. However, our documentation is not as comprehensive as KosherJava's. For detailed API documentation and usage examples, please refer to the [KosherJava documentation](https://kosherjava.com/zmanim-project/how-to-use-the-zmanim-api/).
+The crate can generate and ship a C header and C-callable functions via the `c` feature.
 
-## Technical Details
+Generate the header:
 
-The library is designed with modularity and flexibility in mind. It supports both `std` and `no_std` environments, making it suitable for embedded systems, web assembly, and traditional applications. The core implementation is written in Rust, providing memory safety, performance, and cross-platform compatibility.
+```bash
+cargo run --features c --bin build_c_headers
+```
 
-- `std` (optional): Enables standard library support.
-- `defmt` (optional): Enables `defmt` logging for embedded targets.
+Build the C-callable library:
 
-- **KosherJava**: The original Java implementation by Eliyahu Hershfeld and contributors, which provides the core algorithms and calculations that this library is based upon. KosherJava has been a trusted resource in the Jewish programming community for many years, and we are grateful for their excellent work and the open-source license that makes projects like this possible.
+```bash
+cargo build --release --features c
+```
+
+This writes the header to `bindings/c/zmanim_calendar.h`.
+See `example-c-project/` for a complete usage example (`main.c` and `build_and_run.sh`).
+
+## Feature Flags
+
+- `std`: Enables standard library support.
+- `defmt`: Enables `defmt` formatting/logging support for embedded targets.
+- `c`: Enables the C FFI surface and header generation tooling (`std` is enabled automatically).
+
+## Compatibility and References
+
+The API aims to follow KosherJava naming and behavior where possible.
+For background and broader algorithm documentation, see the [KosherJava documentation](https://kosherjava.com/zmanim-project/how-to-use-the-zmanim-api/).
 
 ## License
 
-This project is based on KosherJava, which is released under the GNU Lesser General Public License version 2.1 (LGPL 2.1). This license allows the library to be used in both free and proprietary software while ensuring that modifications to the library itself remain open source.
-
-For the full license text, please refer to the LICENSE file in the kosher-java subdirectory.
-
-# TODO:
-
-Separate the events from this zmainm.
+This project is based on KosherJava, released under LGPL 2.1.
+For details, see [LICENSE](./LICENSE).
