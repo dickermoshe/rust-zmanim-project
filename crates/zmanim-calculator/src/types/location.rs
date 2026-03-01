@@ -86,7 +86,7 @@ mod tests {
     }
 }
 
-#[cfg(all(feature = "defmt"))]
+#[cfg(feature = "defmt")]
 impl<T: TimeZone> defmt::Format for Location<T> {
     fn format(&self, fmt: defmt::Formatter) {
         defmt::write!(

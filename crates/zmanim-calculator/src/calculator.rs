@@ -56,7 +56,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             None,
             Refraction::ApSolposBennet,
         )
-        .map_err(|e| ZmanimError::AstronomicalCalculatorError(e))?;
+        .map_err(ZmanimError::AstronomicalCalculatorError)?;
         let sea_level_calculator = AstronomicalCalculator::new(
             localnoon,
             None,
@@ -69,7 +69,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             None,
             Refraction::ApSolposBennet,
         )
-        .map_err(|e| ZmanimError::AstronomicalCalculatorError(e))?;
+        .map_err(ZmanimError::AstronomicalCalculatorError)?;
         Ok(Self {
             location,
             date,
@@ -194,7 +194,7 @@ pub trait ZmanLike<Tz: TimeZone> {
     ) -> Result<DateTime<Utc>, ZmanimError>;
 }
 
-#[cfg(all(feature = "defmt"))]
+#[cfg(feature = "defmt")]
 impl<T: TimeZone> defmt::Format for ZmanimCalculator<T> {
     fn format(&self, fmt: defmt::Formatter) {
         use chrono::Datelike;
