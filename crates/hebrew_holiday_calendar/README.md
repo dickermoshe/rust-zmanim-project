@@ -4,15 +4,13 @@ A comprehensive Rust library for working with the Hebrew calendar, including hol
 
 ## Features
 
-- 📅 **Hebrew Calendar Operations**: Convert between Gregorian and Hebrew dates
-- 🎉 **Holiday Tracking**: Determine Jewish holidays with customizable rules
-- 📖 **Torah Readings**: Find weekly parshiyot for any date
-- 🌙 **Molad Calculations**: Calculate molad and Kiddush Levana times
-- ⭐ **Special Shabbatot**: Identify Shekalim, Zachor, Parah, Hachodesh, and more
-- 🌍 **Israel & Diaspora Support**: Respects location-specific customs
-- 🕯️ **Candle Lighting**: Determine days requiring candle lighting
-- ⚡ **Fast & Efficient**: Optimized calendar calculations
-- 🔧 **No Std Compatible**: Works in embedded environments
+-  **Holiday Tracking**: Determine Jewish holidays with customizable rules
+- **Torah Readings**: Find weekly parshiyot for any date
+- **Molad Calculations**: Calculate molad and Kiddush Levana times
+- **Special Shabbatot**: Identify Shekalim, Zachor, Parah, Hachodesh, and more
+- **Israel & Diaspora Support**: Respects location-specific customs
+- **Candle Lighting**: Determine days requiring candle lighting
+- **No Std Compatible**: Works in embedded environments
 
 ## Installation
 
@@ -84,4 +82,5 @@ The library is released under the LGPL 2.1 license.
 
 - [icu_calendar](https://github.com/unicode-org/icu4x) for core calendar operations
 - [KosherJava](https://github.com/KosherJava/zmanim) for validation and reference implementation
+
 
