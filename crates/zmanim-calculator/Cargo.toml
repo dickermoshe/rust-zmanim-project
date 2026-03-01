@@ -15,23 +15,24 @@ defmt = ["dep:defmt"]
 tz = ["dep:chrono-tz"]
 
 [dependencies]
-astronomical-calculator = "0.4.0"
+astronomical-calculator = "0.4.1"
 icu_calendar = { version = "2.0.3", features = [
     "unstable",
 ], default-features = false }
-chrono = { version = "0.4.41", default-features = false }
-time = { version = "0.3.44", default-features = false }
+chrono = { version = "0.4.44", default-features = false }
+time = { version = "0.3.47", default-features = false }
 defmt = { version = "1.0.1", optional = true }
 chrono-tz = { version = "0.10.4", default-features = false, optional = true }
 core_maths = "0.1.1"
 hebrew_holiday_calendar = "0.2.2"
+thiserror = { version = "2.0.18", default-features = false }
 
 [dev-dependencies]
 chrono = { version = "0.4.41", default-features = false, features = ["std"] }
 lazy_static = "1.5.0"
 j4rs = "0.24.0"
 num_enum = "0.7.5"
-proptest = "1.9.0"
+proptest = "1.10.0"
 rand = "0.8.5"
 tinystr = "0.8.2"
 tzf-rs = "1.1.3"

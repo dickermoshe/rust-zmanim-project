@@ -4,53 +4,6 @@ use icu_calendar::Date;
 
 use crate::ZmanimCalculator;
 
-/// A low-level building block describing how to compute an astronomical or halachic event.
-///
-/// Most callers should use the predefined [`ZmanEvent`] constants (such as [`SUNRISE`]) or implement
-/// [`Zman`] directly, but exposing [`Event`] allows composing new definitions using offsets.
-pub enum Event<'a> {
-    /// Sunrise at the configured location/date.
-    Sunrise,
-    /// Sunrise at sea level (no elevation adjustment).
-    SeaLevelSunrise,
-    /// Solar transit (local apparent noon / chatzos astronomically).
-    Transit,
-    /// Sunset at the configured location/date.
-    Sunset,
-    /// Sunset at sea level (no elevation adjustment).
-    SeaLevelSunset,
-    /// Time before sunrise when the sun is `degrees` below the geometric horizon (no elevation adjustment).
-    SunriseOffsetByDegrees(f64),
-    /// Time after sunset when the sun is `degrees` below the geometric horizon (no elevation adjustment).
-    SunsetOffsetByDegrees(f64),
-    /// Local mean time at the given hour (0.0–24.0).
-    LocalMeanTime(f64),
-    /// Shabbos/Yom Tov candle lighting time based on configuration.
-    CandleLighting,
-    /// Ateret Torah sunset based on configuration.
-    AteretTorahSunset,
-    /// A fixed time offset from another [`Event`].
-    Offset(&'a Event<'a>, Duration),
-    /// An offset in "shaos zmaniyos" (GRA temporal hours) from another [`Event`].
-    ZmanisOffset(&'a Event<'a>, f64),
-    /// An offset expressed as a fraction of the day between two [`Event`]s.
-    ShaahZmanisBasedOffset(&'a Event<'a>, &'a Event<'a>, f64),
-    /// An offset expressed as a fraction of the half-day between two [`Event`]s.
-    HalfDayBasedOffset(&'a Event<'a>, &'a Event<'a>, f64),
-    /// Sof zman shma derived from two bounding [`Event`]s.
-    Shema(&'a Event<'a>, &'a Event<'a>, bool),
-    /// Mincha gedola derived from two bounding [`Event`]s.
-    MinchaGedola(&'a Event<'a>, &'a Event<'a>, bool),
-    /// Samuch le-mincha ketana derived from two bounding [`Event`]s.
-    SamuchLeMinchaKetana(&'a Event<'a>, &'a Event<'a>, bool),
-    /// Mincha ketana derived from two bounding [`Event`]s.
-    MinchaKetana(&'a Event<'a>, &'a Event<'a>, bool),
-    /// Sof zman tefila derived from two bounding [`Event`]s.
-    Tefila(&'a Event<'a>, &'a Event<'a>, bool),
-    /// Plag hamincha derived from two bounding [`Event`]s.
-    PlagHamincha(&'a Event<'a>, &'a Event<'a>, bool),
-}
-
 impl<'a> Event<'a> {
     fn calculate<T: TimeZone>(
         &self,
@@ -402,26 +355,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for PlagAhavatShalom {
 }
 
 // ============================================================================
-// SUNRISE
-// ============================================================================
-
-/// Sunrise (elevation-adjusted).
-pub const SUNRISE: ZmanEvent<'static> = ZmanEvent::new(Event::Sunrise, "getSunrise");
-/// Sunrise at sea level (elevation `0m`).
-pub const SEA_LEVEL_SUNRISE: ZmanEvent<'static> =
-    ZmanEvent::new(Event::SeaLevelSunrise, "getSeaLevelSunrise");
-
-// ============================================================================
-// SUNSET
-// ============================================================================
-
-/// Sunset (elevation-adjusted).
-pub const SUNSET: ZmanEvent<'static> = ZmanEvent::new(Event::Sunset, "getSunset");
-/// Sunset at sea level (elevation `0m`).
-pub const SEA_LEVEL_SUNSET: ZmanEvent<'static> =
-    ZmanEvent::new(Event::SeaLevelSunset, "getSeaLevelSunset");
-
-// ============================================================================
 // ALOS
 // ============================================================================
 
@@ -494,8 +427,7 @@ pub const ALOS_BAAL_HATANYA: ZmanEvent<'static> =
 // BAIN HASHMASHOS
 // ============================================================================
 
-/// Time after sunset when the sun is `7.083°` below the geometric horizon.
-pub(crate) const SUNSET_7_POINT_083_DEGREES: Event<'static> =
+pub(crate) const CORE_SUNSET_7_POINT_083_DEGREES: Event<'static> =
     Event::SunsetOffsetByDegrees(7.0 + (5.0 / 60.0));
 
 /// Bain hashmashos (Rabbeinu Tam): when the sun is `13.24°` below the geometric horizon (after sunset).
@@ -511,11 +443,11 @@ pub const BAIN_HASHMASHOS_RT_58_POINT_5_MINUTES: ZmanEvent<'static> = ZmanEvent:
     ),
     "getBainHashmashosRT58Point5Minutes",
 );
-/// Bain hashmashos (Rabbeinu Tam): `13.5` minutes before [`SUNSET_7_POINT_083_DEGREES`].
+/// Bain hashmashos (Rabbeinu Tam): `13.5` minutes before when the sun will be `7.083°` below the geometric horizon.
 pub const BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES: ZmanEvent<'static> =
     ZmanEvent::new(
         Event::Offset(
-            &SUNSET_7_POINT_083_DEGREES,
+            &CORE_SUNSET_7_POINT_083_DEGREES,
             Duration::milliseconds((-13.5 * 60.0 * 1000.0) as i64),
         ),
         "getBainHashmashosRT13Point5MinutesBefore7Point083Degrees",

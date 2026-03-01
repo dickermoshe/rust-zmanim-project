@@ -1,6 +1,6 @@
-This has been tested extensively. However, the API is still relatively unstable. 
-If you would like to use this project, I would recommend pinning to a specific commit. 
-This will not be published until the API has stabilized. 
+This has been tested extensively. However, the API is still relatively unstable.
+If you would like to use this project, I would recommend pinning to a specific commit.
+This will not be published until the API has stabilized.
 
 ---
 
@@ -62,3 +62,7 @@ The library is designed with modularity and flexibility in mind. It supports bot
 This project is based on KosherJava, which is released under the GNU Lesser General Public License version 2.1 (LGPL 2.1). This license allows the library to be used in both free and proprietary software while ensuring that modifications to the library itself remain open source.
 
 For the full license text, please refer to the LICENSE file in the kosher-java subdirectory.
+
+# TODO:
+
+Separate the events from this zmainm.

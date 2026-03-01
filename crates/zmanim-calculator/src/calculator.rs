@@ -1,31 +1,25 @@
+use crate::{
+    types::{config::CalculatorConfig, error::ZmanimError, location::Location},
+    // zman::{ZmanLike, CHATZOS_HALF_DAY},
+};
 use astronomical_calculator::{AstronomicalCalculator, Refraction};
+use chrono::{
+    offset::LocalResult, DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc,
+};
 #[allow(unused_imports)]
 use core_maths::*;
 
-use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc};
-
-use crate::{
-    math::multiply_duration,
-    types::{config::CalculatorConfig, location::Location},
-    zman::ZmanLike,
-    zman::CHATZOS_HALF_DAY,
-};
-
-/// Calculates zmanim for a given [`Location`] and date using a configurable astronomical backend.
-///
-/// Most callers will create a calculator with [`ZmanimCalculator::new`], then compute individual
-/// zmanim via [`ZmanimCalculator::calculate`] and one of the predefined [`Zman`] constants (such as
-/// [`crate::SUNRISE`]).
+/// Calculates zmanim for a given [`Location`] and [`NaiveDate`].
 #[derive(Clone, Debug)]
 pub struct ZmanimCalculator<Tz: TimeZone> {
-    /// The location (coordinates, elevation, and optional timezone) to calculate for.
+    /// The location to calculate for.
     pub location: Location<Tz>,
-    /// The civil date used for calculations.
+
     pub date: NaiveDate,
     /// Calculation configuration options.
     pub config: CalculatorConfig,
-    pub(crate) a_calc: AstronomicalCalculator,
-    pub(crate) sl_calc: AstronomicalCalculator,
+    pub(crate) elevation_adjusted_calculator: AstronomicalCalculator,
+    pub(crate) sea_level_calculator: AstronomicalCalculator,
 }
 
 impl<Tz: TimeZone> ZmanimCalculator<Tz> {
@@ -33,9 +27,13 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
     ///
     /// Returns `None` if the underlying astronomical calculators cannot be constructed for the
     /// provided inputs (for example due to invalid/unsupported values).
-    pub fn new(location: Location<Tz>, date: NaiveDate, config: CalculatorConfig) -> Option<Self> {
+    pub fn new(
+        location: Location<Tz>,
+        date: NaiveDate,
+        config: CalculatorConfig,
+    ) -> Result<Self, ZmanimError> {
         let localnoon = Self::local_noon(date, &location)?;
-        let elevation_calc = AstronomicalCalculator::new(
+        let elevation_adjusted_calculator = AstronomicalCalculator::new(
             localnoon,
             None,
             0.0,
@@ -47,8 +45,8 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             None,
             Refraction::ApSolposBennet,
         )
-        .ok()?;
-        let sea_level_calc = AstronomicalCalculator::new(
+        .map_err(|e| ZmanimError::AstronomicalCalculatorError(e))?;
+        let sea_level_calculator = AstronomicalCalculator::new(
             localnoon,
             None,
             0.0,
@@ -60,121 +58,48 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             None,
             Refraction::ApSolposBennet,
         )
-        .ok()?;
-        Some(Self {
+        .map_err(|e| ZmanimError::AstronomicalCalculatorError(e))?;
+        Ok(Self {
             location,
             date,
             config,
-            a_calc: elevation_calc,
-            sl_calc: sea_level_calc,
+            elevation_adjusted_calculator,
+            sea_level_calculator,
         })
     }
-    fn local_noon<T: TimeZone>(date: NaiveDate, location: &Location<T>) -> Option<DateTime<Utc>> {
-        if let Some(timezone) = &location.timezone {
-            timezone
-                .with_ymd_and_hms(date.year(), date.month(), date.day(), 12, 0, 0)
-                .single()
-                .map(|dt| dt.to_utc())
-        } else {
-            Utc.with_ymd_and_hms(date.year(), date.month(), date.day(), 12, 0, 0)
-                .single()?
-                .checked_sub_signed(TimeDelta::seconds((location.longitude * 4.0 * 60.0) as i64))
+
+    fn local_noon<T: TimeZone>(
+        date: NaiveDate,
+        location: &Location<T>,
+    ) -> Result<DateTime<Utc>, ZmanimError> {
+        // Preferred: convert 12:00:00 in the location's timezone to UTC.
+        if let Some(tz) = location.timezone.as_ref() {
+            let result = tz.with_ymd_and_hms(date.year(), date.month(), date.day(), 12, 0, 0);
+            match result {
+                LocalResult::Single(dt) => return Ok(dt.to_utc()),
+                // During a DST overlap, noon exists twice; either value is close enough.
+                LocalResult::Ambiguous(dt, _) => return Ok(dt.to_utc()),
+                // Noon falls inside a DST gap on this date; fall through to the longitude estimate.
+                LocalResult::None => {}
+            }
         }
+
+        // Fallback: estimate UTC noon from longitude (4 min per degree).
+        // Not valid near the anti-meridian where the date itself is ambiguous.
+        if !Location::<T>::near_anti_meridian(location.longitude) {
+            if let Some(utc_noon) = date.and_hms_micro_opt(12, 0, 0, 0) {
+                let offset = TimeDelta::seconds((location.longitude * 4.0 * 60.0) as i64);
+                if let Some(dt) = utc_noon.and_utc().checked_sub_signed(offset) {
+                    return Ok(dt);
+                }
+            }
+        }
+
+        Err(ZmanimError::LocalNoonError)
     }
 
-    /// Calculates a single `zman` (event/time) using this calculator.
-    ///
-    /// Returns `None` if the zman cannot be computed for this date/location (for example in polar
-    /// regions where an event never occurs).
-    pub fn calculate(&mut self, zman: impl ZmanLike<Tz>) -> Option<DateTime<Utc>> {
+    pub fn calculate(&mut self, zman: impl ZmanLike<Tz>) -> Result<DateTime<Utc>, ZmanimError> {
         zman.calculate(self)
-    }
-
-    pub(crate) fn transit(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(self.a_calc.get_solar_transit().ok()?, 0)
-            .single()
-    }
-
-    pub(crate) fn sunrise(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(self.a_calc.get_sunrise().ok()?.timestamp()?, 0)
-            .single()
-    }
-    pub(crate) fn sunset(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(self.a_calc.get_sunset().ok()?.timestamp()?, 0)
-            .single()
-    }
-    pub(crate) fn sea_level_sunrise(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(self.sl_calc.get_sea_level_sunrise().ok()?.timestamp()?, 0)
-            .single()
-    }
-    pub(crate) fn sea_level_sunset(&mut self) -> Option<DateTime<Utc>> {
-        Utc.timestamp_opt(self.sl_calc.get_sea_level_sunset().ok()?.timestamp()?, 0)
-            .single()
-    }
-    pub(crate) fn sunrise_offset_by_degrees(
-        &mut self,
-        offset_zenith: f64,
-    ) -> Option<DateTime<Utc>> {
-        // If we are calculating a position above the horizon, we need to use the astronomical calculator
-        // to offset from the real sunrise.
-        Utc.timestamp_opt(
-            self.a_calc
-                .get_sunrise_offset_by_degrees(offset_zenith, offset_zenith > 0.0)
-                .ok()?
-                .timestamp()?,
-            0,
-        )
-        .single()
-    }
-    pub(crate) fn sunset_offset_by_degrees(&mut self, offset_zenith: f64) -> Option<DateTime<Utc>> {
-        // If we are calculating a position above the horizon, we need to use the astronomical calculator
-        // to offset from the real sunset.
-        Utc.timestamp_opt(
-            self.a_calc
-                .get_sunset_offset_by_degrees(offset_zenith, offset_zenith > 0.0)
-                .ok()?
-                .timestamp()?,
-            0,
-        )
-        .single()
-    }
-    #[allow(unused)]
-    pub(crate) fn temporal_hour(&mut self) -> Option<Duration> {
-        let sea_level_sunrise = self.sea_level_sunrise()?;
-        let sea_level_sunset = self.sea_level_sunset()?;
-        self.get_temporal_hour_from_times(&sea_level_sunrise, &sea_level_sunset)
-    }
-    pub(crate) fn get_temporal_hour_from_times(
-        &mut self,
-        start_of_day: &DateTime<Utc>,
-        end_of_day: &DateTime<Utc>,
-    ) -> Option<Duration> {
-        Some((*end_of_day - start_of_day) / 12)
-    }
-
-    pub(crate) fn get_shaah_zmanis_gra(&mut self) -> Option<Duration> {
-        let sunrise = self.sunrise()?;
-        let sunset = self.sunset()?;
-        self.get_temporal_hour_from_times(&sunrise, &sunset)
-    }
-
-    pub(crate) fn offset_by_shaah_zmanis_gra(
-        &mut self,
-        base: DateTime<Utc>,
-        hours: f64,
-    ) -> Option<DateTime<Utc>> {
-        let shaah_zmanis = self.get_shaah_zmanis_gra()?;
-        Some(base + multiply_duration(shaah_zmanis, hours)?)
-    }
-    #[allow(unused)]
-    pub(crate) fn get_shaah_zmanis_from_zmanim(
-        &mut self,
-        alos: impl ZmanLike<Tz>,
-        tzais: impl ZmanLike<Tz>,
-    ) -> Option<Duration> {
-        let alos_time = alos.calculate(self)?;
-        let tzais_time = tzais.calculate(self)?;
-        self.get_temporal_hour_from_times(&alos_time, &tzais_time)
     }
 
     pub(crate) fn local_mean_time(
@@ -182,14 +107,16 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         date: NaiveDate,
         location: &Location<Tz>,
         hours: f64,
-    ) -> Option<DateTime<Utc>> {
+    ) -> Result<DateTime<Utc>, ZmanimError> {
         if !(0.0..24.0).contains(&hours) {
-            return None;
+            return Err(ZmanimError::InvalidHours);
         }
 
         if let Some(timezone) = &location.timezone {
             #[allow(clippy::unwrap_used)]
-            let midnight = date.and_hms_opt(0, 0, 0).unwrap();
+            let midnight = date
+                .and_hms_opt(0, 0, 0)
+                .ok_or(ZmanimError::TimeConversionError)?;
 
             let lmt_nanos = (hours * 3600.0 * 1_000_000_000.0).round() as i64;
             let lmt_dt = midnight + Duration::nanoseconds(lmt_nanos);
@@ -207,144 +134,27 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
                 utc -= Duration::days(diff_days);
             }
 
-            Some(utc)
+            Ok(utc)
         } else {
             let lmt_seconds = (hours * 3600.0).round() as i64;
             #[allow(clippy::unwrap_used)]
-            let lmt_dt = date.and_hms_opt(0, 0, 0).unwrap() + Duration::seconds(lmt_seconds);
+            let lmt_dt = date
+                .and_hms_opt(0, 0, 0)
+                .ok_or(ZmanimError::TimeConversionError)?
+                + Duration::seconds(lmt_seconds);
             let offset_seconds = (location.longitude * 240.0).round() as i64;
-            Some((lmt_dt - Duration::seconds(offset_seconds)).and_utc())
+            Ok((lmt_dt - Duration::seconds(offset_seconds)).and_utc())
         }
     }
-    pub(crate) fn get_half_day_based_zman_from_times(
-        &mut self,
-        start_of_half_day: &DateTime<Utc>,
-        end_of_half_day: &DateTime<Utc>,
-        hours: f64,
-    ) -> Option<DateTime<Utc>> {
-        let shaah_zmanis =
-            self.get_half_day_based_shaah_zmanis_from_times(start_of_half_day, end_of_half_day)?;
-        if hours >= 0.0 {
-            Some(*start_of_half_day + multiply_duration(shaah_zmanis, hours)?)
-        } else {
-            Some(*end_of_half_day + multiply_duration(shaah_zmanis, hours)?)
-        }
-    }
+}
 
-    pub(crate) fn get_half_day_based_shaah_zmanis_from_times(
-        &mut self,
-        start_of_half_day: &DateTime<Utc>,
-        end_of_half_day: &DateTime<Utc>,
-    ) -> Option<Duration> {
-        Some((*end_of_half_day - start_of_half_day) / 6)
-    }
-
-    pub(crate) fn get_shaah_zmanis_based_zman_from_times(
-        &mut self,
-        start_of_day: &DateTime<Utc>,
-        end_of_day: &DateTime<Utc>,
-        hours: f64,
-    ) -> Option<DateTime<Utc>> {
-        let shaah_zmanis = self.get_temporal_hour_from_times(start_of_day, end_of_day)?;
-
-        Some(*start_of_day + multiply_duration(shaah_zmanis, hours)?)
-    }
-
-    pub(crate) fn get_sof_zman_shma_from_times(
-        &mut self,
-        start_of_day: &DateTime<Utc>,
-        end_of_day: Option<&DateTime<Utc>>,
-        synchronous: bool,
-    ) -> Option<DateTime<Utc>> {
-        if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = self.get_chatzos()?;
-
-            self.get_half_day_based_zman_from_times(start_of_day, &chatzos, 3.0)
-        } else {
-            self.get_shaah_zmanis_based_zman_from_times(start_of_day, end_of_day?, 3.0)
-        }
-    }
-
-    pub(crate) fn get_mincha_gedola_from_times(
-        &mut self,
-        start_of_day: Option<&DateTime<Utc>>,
-        end_of_day: &DateTime<Utc>,
-        synchronous: bool,
-    ) -> Option<DateTime<Utc>> {
-        if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = self.get_chatzos()?;
-
-            self.get_half_day_based_zman_from_times(&chatzos, end_of_day, 0.5)
-        } else {
-            self.get_shaah_zmanis_based_zman_from_times(start_of_day?, end_of_day, 6.5)
-        }
-    }
-
-    pub(crate) fn get_samuch_le_mincha_ketana_from_times(
-        &mut self,
-
-        start_of_day: Option<&DateTime<Utc>>,
-        end_of_day: &DateTime<Utc>,
-        synchronous: bool,
-    ) -> Option<DateTime<Utc>> {
-        if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = self.get_chatzos()?;
-
-            self.get_half_day_based_zman_from_times(&chatzos, end_of_day, 3.0)
-        } else {
-            self.get_shaah_zmanis_based_zman_from_times(start_of_day?, end_of_day, 9.0)
-        }
-    }
-    pub(crate) fn get_mincha_ketana_from_times(
-        &mut self,
-
-        start_of_day: Option<&DateTime<Utc>>,
-        end_of_day: &DateTime<Utc>,
-        synchronous: bool,
-    ) -> Option<DateTime<Utc>> {
-        if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = self.get_chatzos()?;
-
-            self.get_half_day_based_zman_from_times(&chatzos, end_of_day, 3.5)
-        } else {
-            self.get_shaah_zmanis_based_zman_from_times(start_of_day?, end_of_day, 9.5)
-        }
-    }
-    pub(crate) fn get_sof_zman_tfila_from_times(
-        &mut self,
-        start_of_day: &DateTime<Utc>,
-        end_of_day: Option<&DateTime<Utc>>,
-        synchronous: bool,
-    ) -> Option<DateTime<Utc>> {
-        if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = self.get_chatzos()?;
-
-            self.get_half_day_based_zman_from_times(start_of_day, &chatzos, 4.0)
-        } else {
-            self.get_shaah_zmanis_based_zman_from_times(start_of_day, end_of_day?, 4.0)
-        }
-    }
-
-    pub(crate) fn get_plag_hamincha_from_times(
-        &mut self,
-        start_of_day: Option<&DateTime<Utc>>,
-        end_of_day: &DateTime<Utc>,
-        synchronous: bool,
-    ) -> Option<DateTime<Utc>> {
-        if self.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-            let chatzos = self.get_chatzos()?;
-            self.get_half_day_based_zman_from_times(&chatzos, end_of_day, 4.75)
-        } else {
-            self.get_shaah_zmanis_based_zman_from_times(start_of_day?, end_of_day, 10.75)
-        }
-    }
-    fn get_chatzos(&mut self) -> Option<DateTime<Utc>> {
-        if self.config.use_astronomical_chatzos {
-            self.transit()
-        } else {
-            CHATZOS_HALF_DAY.calculate(self).or_else(|| self.transit())
-        }
-    }
+/// A value that can be calculated by a [`ZmanimCalculator`].
+pub trait ZmanLike<Tz: TimeZone> {
+    /// Compute the zman for the current calculator state.
+    fn calculate(
+        &self,
+        calculator: &mut ZmanimCalculator<Tz>,
+    ) -> Result<DateTime<Utc>, ZmanimError>;
 }
 
 #[cfg(feature = "defmt")]

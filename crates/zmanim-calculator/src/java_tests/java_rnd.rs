@@ -55,7 +55,7 @@ pub fn random_time_and_place<Rng: rand::Rng>(
     let timezone_id = FINDER.get_tz_name(longitude, latitude);
     let timezone = chrono_tz::Tz::from_str(timezone_id).ok()?;
     let date_time = random_date_time(rng, &timezone);
-    let rust_time_and_place = Location::new(latitude, longitude, elevation, Some(timezone))?;
+    let rust_time_and_place = Location::new(latitude, longitude, elevation, Some(timezone)).ok()?;
     let java_time_and_place = JavaTimeAndPlace::new(jvm, &rust_time_and_place, &date_time)?;
     Some((rust_time_and_place, date_time, java_time_and_place))
 }
@@ -71,14 +71,13 @@ pub fn random_zmanim_calendars<'a>(
     let use_astronomical_chatzos = rng.gen_bool(0.5);
     let use_astronomical_chatzos_for_other_zmanim = rng.gen_bool(0.5);
     let ateret_torah_sunset_offset = Duration::minutes(rng.gen_range(0..=60));
-    let config = CalculatorConfig::new(
-        use_astronomical_chatzos,
+    let config = CalculatorConfig {
         candle_lighting_offset,
         use_astronomical_chatzos_for_other_zmanim,
         ateret_torah_sunset_offset,
-    );
+    };
     let rust_calculator =
-        ZmanimCalculator::new(rust_time_and_place, date_time.naive_local().date(), config)?;
+        ZmanimCalculator::new(rust_time_and_place, date_time.naive_local().date(), config).ok()?;
 
     let java_calendar = JavaZmanimCalendar::new(
         jvm,

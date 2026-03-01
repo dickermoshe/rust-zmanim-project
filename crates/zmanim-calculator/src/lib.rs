@@ -17,14 +17,17 @@ mod tests;
 mod types {
     /// Configuration types for zmanim calculations.
     pub mod config;
+    /// Error types for zmanim calculations.
+    pub mod error;
     /// Location types for zmanim calculations.
     pub mod location;
 }
 mod calculator;
-mod math;
+mod duration_helper;
 
 /// Zmanim constants and definitions.
-pub mod zman;
+pub mod presets;
+pub mod primitive_zman;
 pub use calculator::ZmanimCalculator;
 pub use types::config::CalculatorConfig;
 pub use types::location::Location;
