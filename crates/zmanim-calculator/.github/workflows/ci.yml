@@ -94,3 +94,16 @@ jobs:
           components: clippy
       - name: Clippy check
         run: cargo clippy ${{ matrix.args }} -- -D warnings
+
+  example-c-project:
+    name: Example C project
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: mlugg/setup-zig@v2
+      - run: cargo install cargo-zigbuild
+      - name: Build and run
+        run: bash example-c-project/build_and_run.sh
