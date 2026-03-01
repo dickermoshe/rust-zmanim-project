@@ -3,12 +3,13 @@
 [![CI](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml)
 [![Codecov](https://codecov.io/gh/dickermoshe/zmanim-calculator/branch/main/graph/badge.svg)](https://codecov.io/gh/dickermoshe/zmanim-calculator)
 
-This project has been tested extensively, but the public API is still evolving.
-If you are building against it today, pin to a specific commit.
+> [!NOTE]
+> This crate focuses exclusively on zmanim calculations. For related functionality, see:
+>
+> - [hebrew_holiday_calendar](https://github.com/dickermoshe/hebrew_holiday_calendar) -- Hebrew holidays and learning schedules
+> - [astronomical-calculator](https://github.com/dickermoshe/astronomical-calculator) -- General astronomical events
 
 ## Install
-
-Recommended while the API is still changing:
 
 ```toml
 [dependencies]
@@ -44,6 +45,12 @@ Notes:
 - If you omit a timezone, calculations near the anti-meridian (`|longitude| > 150`) will fail.
 - Kiddush Levana and Molad calculations require a timezone and will fail without one.
 
+## Feature Flags
+
+- `std`: Enables standard library support.
+- `defmt`: Enables `defmt` formatting/logging support for embedded targets.
+- `c`: Enables the C FFI surface and header generation tooling (`std` is enabled automatically).
+
 ## C API (`c` feature)
 
 The crate can generate and ship a C header and C-callable functions via the `c` feature.
@@ -62,12 +69,6 @@ cargo build --release --features c
 
 This writes the header to `bindings/c/zmanim_calendar.h`.
 See `example-c-project/` for a complete usage example (`main.c` and `build_and_run.sh`).
-
-## Feature Flags
-
-- `std`: Enables standard library support.
-- `defmt`: Enables `defmt` formatting/logging support for embedded targets.
-- `c`: Enables the C FFI surface and header generation tooling (`std` is enabled automatically).
 
 ## Compatibility and References
 
