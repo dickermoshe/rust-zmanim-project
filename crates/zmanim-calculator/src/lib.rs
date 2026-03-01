@@ -26,7 +26,8 @@ mod types {
     /// Location types for zmanim calculations.
     pub mod location;
 }
-mod calculator;
+// Calculation logic for zmanim.
+pub mod calculator;
 mod duration_helper;
 /// Predefined zmanim calculations built from reusable primitives.
 pub mod presets;

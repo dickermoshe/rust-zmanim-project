@@ -1,7 +1,10 @@
-use crate::{
-    types::{config::CalculatorConfig, error::ZmanimError, location::Location},
-    // zman::{ZmanLike, CHATZOS_HALF_DAY},
-};
+//! Calculation logic for zmanim.
+//!
+//! [`ZmanimCalculator`] is the main entry point: construct one with [`ZmanimCalculator::new`],
+//! then pass any [`ZmanLike`] implementor (typically a value from [`crate::presets`]) to
+//! [`ZmanimCalculator::calculate`] to obtain a `DateTime<Utc>`.
+
+use crate::types::{config::CalculatorConfig, error::ZmanimError, location::Location};
 use astronomical_calculator::{AstronomicalCalculator, Refraction};
 use chrono::{
     offset::LocalResult, DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc,

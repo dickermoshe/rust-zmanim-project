@@ -42,6 +42,7 @@ Notes:
 
 - `calculate` returns `DateTime<Utc>`.
 - If you omit a timezone, calculations near the anti-meridian (`|longitude| > 150`) will fail.
+- Kiddush Levana and Molad calculations require a timezone and will fail without one.
 
 ## C API (`c` feature)
 
