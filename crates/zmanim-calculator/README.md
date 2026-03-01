@@ -6,7 +6,8 @@
 > [!NOTE]
 > This crate focuses exclusively on zmanim calculations. For related functionality, see:
 >
-> - [hebrew_holiday_calendar](https://github.com/dickermoshe/hebrew_holiday_calendar) -- Hebrew holidays and learning schedules
+> - [hebrew_holiday_calendar](https://github.com/dickermoshe/hebrew_holiday_calendar) -- Hebrew holidays
+> - [limudim-calendar](https://github.com/dickermoshe/limudim-calendar) -- Learning schedules (Daf Yomi, etc.)
 > - [astronomical-calculator](https://github.com/dickermoshe/astronomical-calculator) -- General astronomical events
 
 ## Install
