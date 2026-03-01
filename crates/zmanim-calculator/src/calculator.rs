@@ -20,7 +20,6 @@ use core_maths::*;
 pub struct ZmanimCalculator<Tz: TimeZone> {
     /// The location to calculate for.
     pub location: Location<Tz>,
-
     /// The civil date at `location` for which zmanim are calculated.
     pub date: NaiveDate,
     /// Calculation configuration options.

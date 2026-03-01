@@ -1,0 +1,30 @@
+name: Example C project
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  windows:
+    name: Example C project (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: mlugg/setup-zig@v2
+      - run: cargo install cargo-zigbuild
+      - name: Build and run
+        run: ./example-c-project/build_and_run.ps1
+
+  ubuntu:
+    name: Example C project (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: mlugg/setup-zig@v2
+      - run: cargo install cargo-zigbuild
+      - name: Build and run
+        run: bash example-c-project/build_and_run.sh

@@ -9,9 +9,18 @@ homepage = "https://github.com/dickermoshe/zmanim-calculator"
 documentation = "https://docs.rs/zmanim-calculator"
 
 [features]
+# By default, only the core functionality is enabled.
 default = []
+# Enable this feature to use the standard library.
 std = []
+# Enable this feature to use the defmt crate for logging.
 defmt = ["dep:defmt"]
+# Enable this feature to use the C API.
+c = ["std", "dep:interoptopus", "dep:interoptopus_backend_c"]
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
 
 [dependencies]
 astronomical-calculator = "0.4.1"
@@ -24,6 +33,8 @@ defmt = { version = "1.0.1", optional = true }
 core_maths = "0.1.1"
 hebrew_holiday_calendar = "0.2.2"
 thiserror = { version = "2.0.18", default-features = false }
+interoptopus = { version = "0.14.27", optional = true }
+interoptopus_backend_c = { version = "0.14.25", optional = true }
 
 [dev-dependencies]
 chrono = { version = "0.4.41", default-features = false, features = ["std"] }

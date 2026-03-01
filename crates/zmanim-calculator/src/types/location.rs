@@ -1,10 +1,10 @@
-use chrono::{TimeZone, Utc};
+use chrono::TimeZone;
 
 use crate::types::error::ZmanimError;
 
 /// A geographic location (latitude/longitude/elevation) and an optional timezone.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Location<T: TimeZone = Utc> {
+pub struct Location<T: TimeZone> {
     /// Latitude in degrees. Valid range: `[-90.0, 90.0]` (positive = North).
     pub latitude: f64,
     /// Longitude in degrees. Valid range: `[-180.0, 180.0]` (positive = East).

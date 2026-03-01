@@ -33,6 +33,9 @@ pub mod presets;
 /// Low-level zman formulas used to build higher-level presets.
 pub mod primitive_zman;
 
+#[cfg(feature = "c")]
+/// C API for zmanim calculations.
+pub mod c_api;
 /// Re-export the most commonly used types and traits.
 pub mod prelude {
     pub use crate::calculator::ZmanimCalculator;
