@@ -1610,7 +1610,7 @@ pub struct JulianDate {
 /// - `TemperatureOutOfRange`: Temperature must be > -273.15°C (absolute zero)
 /// - `GeometricDipOutOfRange`: Geometric dip must be in range [-5.0, 5.0] degrees
 /// - `TimeConversionError`: Invalid datetime or timestamp conversion
-#[derive(Error, Debug, Clone, Copy)]
+#[derive(Error, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum CalculationError {
     /// ΔUT1 parameter out of valid range [-1.0, 1.0] seconds
     #[error("ΔUT1 out of range")]
