@@ -79,8 +79,6 @@ jobs:
           submodules: true
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache: false
 
       - name: Generate header
         run: cargo run --features c --bin build_c_headers
