@@ -13,7 +13,7 @@
 
 ```toml
 [dependencies]
-zmanim-calculator = { git = "https://github.com/dickermoshe/zmanim-calculator", rev = "<commit-sha>" }
+zmanim-calculator = "0.1.0"
 ```
 
 ## Rust Usage
