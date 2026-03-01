@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            archive: tar.gz
+          - target: x86_64-pc-windows-msvc
+            runner: windows-latest
+            archive: zip
+          - target: x86_64-apple-darwin
+            runner: macos-latest
+            archive: tar.gz
+          - target: aarch64-apple-darwin
+            runner: macos-latest
+            archive: tar.gz
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Add target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --features c --target ${{ matrix.target }}
+
+      - name: Package (unix)
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: |
+          staging="zmanim-calculator-${{ github.event.release.tag_name }}-${{ matrix.target }}"
+          mkdir "$staging"
+          cp target/${{ matrix.target }}/release/libzmanim_calculator.{a,so,dylib} "$staging/" 2>/dev/null || true
+          tar czf "$staging.tar.gz" "$staging"
+
+      - name: Package (windows)
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          $staging = "zmanim-calculator-${{ github.event.release.tag_name }}-${{ matrix.target }}"
+          New-Item -ItemType Directory -Path $staging
+          Copy-Item "target/${{ matrix.target }}/release/zmanim_calculator.dll" -Destination $staging/ -ErrorAction SilentlyContinue
+          Copy-Item "target/${{ matrix.target }}/release/zmanim_calculator.dll.lib" -Destination $staging/ -ErrorAction SilentlyContinue
+          Copy-Item "target/${{ matrix.target }}/release/zmanim_calculator.lib" -Destination $staging/ -ErrorAction SilentlyContinue
+          Compress-Archive -Path $staging -DestinationPath "$staging.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zmanim-calculator-${{ matrix.target }}
+          path: zmanim-calculator-${{ github.event.release.tag_name }}-${{ matrix.target }}.${{ matrix.archive }}
+
+  header:
+    name: Generate C header
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Generate header
+        run: cargo run --features c --bin build_c_headers
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zmanim_calculator-header
+          path: bindings/c/zmanim_calculator.h
+
+  release:
+    name: Upload release assets
+    needs: [build, header]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Upload assets to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
