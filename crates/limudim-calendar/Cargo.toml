@@ -1,8 +1,11 @@
 [package]
 name = "limudim-calendar"
-version = "0.1.0"
+version = "0.1.1"
 description = "A comprehensive Rust library for calculating Jewish learning schedules with the Hebrew calendar with no_std support"
 edition = "2021"
+repository = "https://github.com/dickermoshe/limudim-calendar"
+documentation = "https://docs.rs/limudim-calendar"
+homepage = "https://github.com/dickermoshe/limudim-calendar"
 license = "LGPL-2.1"
 readme = "README.md"
 exclude = ["limudim-wasm"]
@@ -13,7 +16,7 @@ defmt = ["dep:defmt", "hebrew_holiday_calendar/defmt"]
 
 [dependencies]
 defmt = { version = "1.0.1", optional = true }
-hebrew_holiday_calendar = { version = "0.2.0", default-features = false }
+hebrew_holiday_calendar = { version = "0.2.2", default-features = false }
 
 [dependencies.icu_calendar]
 version = "2.0.3"
