@@ -12,7 +12,6 @@ documentation = "https://docs.rs/zmanim-calculator"
 default = []
 std = []
 defmt = ["dep:defmt"]
-tz = ["dep:chrono-tz"]
 
 [dependencies]
 astronomical-calculator = "0.4.1"
@@ -22,7 +21,6 @@ icu_calendar = { version = "2.0.3", features = [
 chrono = { version = "0.4.44", default-features = false }
 time = { version = "0.3.47", default-features = false }
 defmt = { version = "1.0.1", optional = true }
-chrono-tz = { version = "0.10.4", default-features = false, optional = true }
 core_maths = "0.1.1"
 hebrew_holiday_calendar = "0.2.2"
 thiserror = { version = "2.0.18", default-features = false }

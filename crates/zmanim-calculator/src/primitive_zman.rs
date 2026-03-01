@@ -1,10 +1,21 @@
+//! Low-level zman formulas used to build higher-level presets.
+//!
+//! [`ZmanPrimitive`] is the internal expression language for zman calculations.
+//! Variants represent either:
+//! - base astronomical events (for example sunrise/sunset),
+//! - transformed events (fixed offsets or degree-based offsets), or
+//! - derived halachic times computed from two boundary events.
+//!
+//! Most users should prefer the ready-made constants in [`crate::presets`].
+//! Use this module when you need to compose a custom zman definition that is
+//! not already provided by a preset.
+
 use chrono::{DateTime, Duration, TimeZone, Utc};
 
-#[cfg(test)]
-use crate::ZmanimCalculator;
 use crate::{
     calculator::ZmanLike,
     duration_helper::multiply_duration,
+    prelude::ZmanimCalculator,
     types::error::{IntoDateTimeResult, ZmanimError},
 };
 
@@ -55,7 +66,7 @@ pub enum ZmanPrimitive<'a> {
 impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
     fn calculate(
         &self,
-        calculator: &mut crate::ZmanimCalculator<Tz>,
+        calculator: &mut ZmanimCalculator<Tz>,
     ) -> Result<DateTime<Utc>, ZmanimError> {
         match *self {
             ZmanPrimitive::Sunrise => calculator

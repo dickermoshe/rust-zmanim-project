@@ -10,11 +10,18 @@ use chrono::{
 use core_maths::*;
 
 /// Calculates zmanim for a given [`Location`] and [`NaiveDate`].
+///
+/// Construct once for a location/date pair, then call [`ZmanimCalculator::calculate`]
+/// with one or more values implementing [`ZmanLike`].
+///
+/// Most users should pass one of the ready-made definitions from [`crate::presets`]
+/// (for example `presets::SUNRISE`) instead of implementing custom zman logic.
 #[derive(Clone, Debug)]
 pub struct ZmanimCalculator<Tz: TimeZone> {
     /// The location to calculate for.
     pub location: Location<Tz>,
 
+    /// The civil date at `location` for which zmanim are calculated.
     pub date: NaiveDate,
     /// Calculation configuration options.
     pub config: CalculatorConfig,
@@ -25,8 +32,12 @@ pub struct ZmanimCalculator<Tz: TimeZone> {
 impl<Tz: TimeZone> ZmanimCalculator<Tz> {
     /// Creates a new calculator for the given `location`, `date`, and `config`.
     ///
-    /// Returns `None` if the underlying astronomical calculators cannot be constructed for the
-    /// provided inputs (for example due to invalid/unsupported values).
+    /// Use this as your main entry point before calculating any zmanim.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the calculator cannot be initialized from the provided
+    /// location/date/config values.
     pub fn new(
         location: Location<Tz>,
         date: NaiveDate,
@@ -68,6 +79,19 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         })
     }
 
+    /// Calculates a single zman using the current calculator state.
+    ///
+    /// Pass any value implementing [`ZmanLike`] and receive the resulting instant in UTC.
+    ///
+    /// This method takes `&mut self` so repeated calls can reuse internal intermediate
+    /// computation state for better performance.
+    ///
+    /// If borrow rules make your call sites awkward, clone the calculator and use each
+    /// clone independently (for example, one clone for sunrise and another for sunset).
+    pub fn calculate(&mut self, zman: impl ZmanLike<Tz>) -> Result<DateTime<Utc>, ZmanimError> {
+        zman.calculate(self)
+    }
+
     fn local_noon<T: TimeZone>(
         date: NaiveDate,
         location: &Location<T>,
@@ -98,10 +122,17 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         Err(ZmanimError::LocalNoonError)
     }
 
-    pub fn calculate(&mut self, zman: impl ZmanLike<Tz>) -> Result<DateTime<Utc>, ZmanimError> {
-        zman.calculate(self)
-    }
-
+    /// Converts local mean time (LMT) hours for a date/location into UTC.
+    ///
+    /// `hours` is interpreted in the half-open range `[0.0, 24.0)`, where:
+    /// - `0.0` is local mean midnight
+    /// - `12.0` is local mean noon
+    ///
+    /// # Errors
+    ///
+    /// Returns:
+    /// - [`ZmanimError::InvalidHours`] when `hours` is outside `[0.0, 24.0)`,
+    /// - [`ZmanimError::TimeConversionError`] if midnight construction fails.
     pub(crate) fn local_mean_time(
         &mut self,
         date: NaiveDate,
@@ -149,34 +180,22 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
 }
 
 /// A value that can be calculated by a [`ZmanimCalculator`].
+///
+/// Most consumers should use predefined values from [`crate::presets`]. Implement this trait
+/// when you need a custom zman definition not already provided there.
 pub trait ZmanLike<Tz: TimeZone> {
-    /// Compute the zman for the current calculator state.
+    /// Computes this zman for the current calculator state.
+    ///
+    /// Implement this trait for custom zman definitions that can run through
+    /// [`ZmanimCalculator::calculate`].
     fn calculate(
         &self,
         calculator: &mut ZmanimCalculator<Tz>,
     ) -> Result<DateTime<Utc>, ZmanimError>;
 }
 
-#[cfg(feature = "defmt")]
-impl defmt::Format for ZmanimCalculator<Utc> {
-    fn format(&self, fmt: defmt::Formatter) {
-        use chrono::Datelike;
-        let y = self.date.year();
-        let m = self.date.month();
-        let d = self.date.day();
-        defmt::write!(
-            fmt,
-            "ZmanimCalculator {{ location: {}, date: {=i32}-{=u32}-{=u32}, config: {} }}",
-            self.location,
-            y,
-            m,
-            d,
-            self.config
-        )
-    }
-}
-#[cfg(all(feature = "tz", feature = "defmt"))]
-impl defmt::Format for ZmanimCalculator<chrono_tz::Tz> {
+#[cfg(all(feature = "defmt"))]
+impl<T: TimeZone> defmt::Format for ZmanimCalculator<T> {
     fn format(&self, fmt: defmt::Formatter) {
         use chrono::Datelike;
         let y = self.date.year();

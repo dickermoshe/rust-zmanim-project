@@ -4,7 +4,7 @@
 use chrono::{DateTime, Duration, TimeZone};
 use j4rs::{Instance, InvocationArg, Jvm, Null};
 
-use crate::{calculator::ZmanLike, presets::ZmanPresetLike, Location};
+use crate::{prelude::*, presets::ZmanPresetLike};
 
 pub struct JavaTimeAndPlace {
     pub geolocation: Instance,

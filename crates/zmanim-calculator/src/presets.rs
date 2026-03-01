@@ -1,9 +1,15 @@
+//! Predefined zmanim calculations built from reusable primitives.
+//!
+//! Prefer these presets for standard zmanim usage. Reach for `primitive_zman` only when
+//! you need to compose a custom calculation that is not already provided here.
+
 use chrono::{Datelike, TimeZone};
 use hebrew_holiday_calendar::MoladCalendar;
 use icu_calendar::Date;
 
+use crate::prelude::ZmanimCalculator;
 use crate::types::error::ZmanimError;
-use crate::ZmanimCalculator;
+
 use crate::{calculator::ZmanLike, primitive_zman::ZmanPrimitive};
 use chrono::Duration;
 use chrono::{DateTime, Utc};
@@ -149,9 +155,10 @@ pub const BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES: Zman
         ),
         "getBainHashmashosRT13Point5MinutesBefore7Point083Degrees",
     );
-/// Bain hashmashos (Rabbeinu Tam, 2-stars): `sunset + (sunrise - alos19.8°) * 5/18`.
-#[derive(Default)]
-pub struct BainHashmashosRt2Stars;
+#[allow(missing_docs)]
+pub struct BainHashmashosRt2Stars {
+    _private: (),
+}
 
 impl<Tz: TimeZone> ZmanLike<Tz> for BainHashmashosRt2Stars {
     fn calculate(
@@ -178,7 +185,8 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for BainHashmashosRt2Stars {
 }
 
 /// Bain hashmashos (Rabbeinu Tam, 2-stars): `sunset + (sunrise - alos19.8°) * 5/18`.
-pub const BAIN_HASHMASHOS_RT_2_STARS: BainHashmashosRt2Stars = BainHashmashosRt2Stars;
+pub const BAIN_HASHMASHOS_RT_2_STARS: BainHashmashosRt2Stars =
+    BainHashmashosRt2Stars { _private: () };
 /// Bain hashmashos (Yereim): `18` minutes before sunset.
 pub const BAIN_HASHMASHOS_YEREIM_18_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Offset(&ZmanPrimitive::Sunset, Duration::minutes(-18)),
@@ -250,9 +258,10 @@ pub const MINCHA_GEDOLA_MINUTES_72: ZmanPreset<'static> = ZmanPreset::new(
     "getMinchaGedola72Minutes",
 );
 
-#[derive(Default)]
-/// Mincha gedola computed as the later of `chatzos + 30m` or `chatzos + 1/2 shaah` (shaah = alos16.1° → tzais3.7°).
-pub struct MinchaGedolaAhavatShalom;
+#[allow(missing_docs)]
+pub struct MinchaGedolaAhavatShalom {
+    _private: (),
+}
 
 impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaAhavatShalom {
     fn calculate(
@@ -264,7 +273,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaAhavatShalom {
 
         let alos = ALOS_16_POINT_1_DEGREES.calculate(calculator)?;
         let tzais = TZAIS_GEONIM_DEGREES_3_POINT_7.calculate(calculator)?;
-        let shaah_zmanis = (alos - tzais) / 12;
+        let shaah_zmanis = (tzais - alos) / 12;
         let mincha_alternative = chatzos + (shaah_zmanis / 2);
         if mincha_gedola_30 > mincha_alternative {
             Ok(mincha_gedola_30)
@@ -284,7 +293,8 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaAhavatShalom {
     }
 }
 /// Mincha gedola (Ahavat Shalom): later of `chatzos + 30m` and `chatzos + 1/2 shaah`.
-pub const MINCHA_GEDOLA_AHAVAT_SHALOM: MinchaGedolaAhavatShalom = MinchaGedolaAhavatShalom;
+pub const MINCHA_GEDOLA_AHAVAT_SHALOM: MinchaGedolaAhavatShalom =
+    MinchaGedolaAhavatShalom { _private: () };
 /// Mincha gedola: `6.5` shaos zmaniyos after alos `72 zmaniyos` (day end = Ateret Torah tzais).
 pub const MINCHA_GEDOLA_ATERET_TORAH: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::MinchaGedola(
@@ -304,9 +314,10 @@ pub const MINCHA_GEDOLA_BAAL_HATANYA: ZmanPreset<'static> = ZmanPreset::new(
     "getMinchaGedolaBaalHatanya",
 );
 
-/// Mincha gedola computed as the later of 30 minutes after chatzos or the Baal HaTanya definition.
-#[derive(Default)]
-pub struct MinchaGedolaBaalHatanyaGreaterThan30;
+#[allow(missing_docs)]
+pub struct MinchaGedolaBaalHatanyaGreaterThan30 {
+    _private: (),
+}
 
 impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaBaalHatanyaGreaterThan30 {
     fn calculate(
@@ -335,16 +346,16 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaBaalHatanyaGreaterThan30 {
 
 /// Mincha gedola: later of Baal HaTanya mincha gedola and `30` minutes after solar transit.
 pub const MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30: MinchaGedolaBaalHatanyaGreaterThan30 =
-    MinchaGedolaBaalHatanyaGreaterThan30;
+    MinchaGedolaBaalHatanyaGreaterThan30 { _private: () };
 /// Mincha gedola: `30` minutes after fixed local chatzos (12:00 local mean time).
 pub const MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Offset(&ZmanPrimitive::LocalMeanTime(12.0), Duration::minutes(30)),
     "getMinchaGedolaGRAFixedLocalChatzos30Minutes",
 );
-
-/// Mincha gedola computed as the later of standard mincha gedola or a fixed 30-minute offset.
-#[derive(Default)]
-pub struct MinchaGedolaGreaterThan30;
+#[allow(missing_docs)]
+pub struct MinchaGedolaGreaterThan30 {
+    _private: (),
+}
 
 impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaGreaterThan30 {
     fn calculate(
@@ -372,7 +383,8 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaGreaterThan30 {
 }
 
 /// Mincha gedola: later of [`MINCHA_GEDOLA_SUNRISE_SUNSET`] and [`MINCHA_GEDOLA_MINUTES_30`].
-pub const MINCHA_GEDOLA_GREATER_THAN_30: MinchaGedolaGreaterThan30 = MinchaGedolaGreaterThan30;
+pub const MINCHA_GEDOLA_GREATER_THAN_30: MinchaGedolaGreaterThan30 =
+    MinchaGedolaGreaterThan30 { _private: () };
 
 /// Mincha ketana: `9.5` shaos after sunrise (or `3.5` shaos after chatzos if configured).
 pub const MINCHA_KETANA_SUNRISE_SUNSET: ZmanPreset<'static> = ZmanPreset::new(
@@ -397,9 +409,10 @@ pub const MINCHA_KETANA_MINUTES_72: ZmanPreset<'static> = ZmanPreset::new(
     ),
     "getMinchaKetana72Minutes",
 );
-/// Mincha ketana computed from the Ahavat Shalom definition (using Geonim tzais and alos 16.1°).
-#[derive(Default)]
-pub struct MinchaKetanaAhavatShalom;
+#[allow(missing_docs)]
+pub struct MinchaKetanaAhavatShalom {
+    _private: (),
+}
 
 impl<Tz: TimeZone> ZmanLike<Tz> for MinchaKetanaAhavatShalom {
     fn calculate(
@@ -408,7 +421,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaKetanaAhavatShalom {
     ) -> Result<DateTime<Utc>, ZmanimError> {
         let tzais = TZAIS_GEONIM_DEGREES_3_POINT_8.calculate(calculator)?;
         let alos = ALOS_16_POINT_1_DEGREES.calculate(calculator)?;
-        let shaah_zmanis = (alos - tzais) / 12;
+        let shaah_zmanis = (tzais - alos) / 12;
         Ok(tzais - (shaah_zmanis * 5 / 2))
     }
 }
@@ -424,7 +437,8 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaKetanaAhavatShalom {
 }
 
 /// Mincha ketana (Ahavat Shalom): `2.5` shaos zmaniyos before tzais `3.8°` (day = alos16.1° → tzais3.8°).
-pub const MINCHA_KETANA_AHAVAT_SHALOM: MinchaKetanaAhavatShalom = MinchaKetanaAhavatShalom;
+pub const MINCHA_KETANA_AHAVAT_SHALOM: MinchaKetanaAhavatShalom =
+    MinchaKetanaAhavatShalom { _private: () };
 /// Mincha ketana: `9.5` shaos zmaniyos after alos `72 zmaniyos` (day end = Ateret Torah tzais).
 pub const MINCHA_KETANA_ATERET_TORAH: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::MinchaKetana(
@@ -485,9 +499,10 @@ pub const PLAG_HAMINCHA_SUNRISE_SUNSET: ZmanPreset<'static> = ZmanPreset::new(
     "getPlagHamincha",
 );
 
-#[derive(Default)]
-/// Plag hamincha (Ahavat Shalom): `1.25` shaos zmaniyos before tzais `3.8°` (day = alos16.1° → tzais3.8°).
-pub struct PlagAhavatShalom;
+#[allow(missing_docs)]
+pub struct PlagAhavatShalom {
+    _private: (),
+}
 
 impl<Tz: TimeZone> ZmanLike<Tz> for PlagAhavatShalom {
     fn calculate(
@@ -496,7 +511,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for PlagAhavatShalom {
     ) -> Result<DateTime<Utc>, ZmanimError> {
         let tzais = ZmanPrimitive::SunsetOffsetByDegrees(3.8).calculate(calculator)?;
         let alos = ZmanPrimitive::SunriseOffsetByDegrees(16.1).calculate(calculator)?;
-        let shaah_zmanis = (alos - tzais) / 12;
+        let shaah_zmanis = (tzais - alos) / 12;
         Ok(tzais - (shaah_zmanis * 5 / 4))
     }
 }
@@ -514,7 +529,7 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for PlagAhavatShalom {
 }
 
 /// Plag hamincha (Ahavat Shalom): `1.25` shaos zmaniyos before tzais `3.8°` (day = alos16.1° → tzais3.8°).
-pub const PLAG_HAMINCHA_AHAVAT_SHALOM: PlagAhavatShalom = PlagAhavatShalom;
+pub const PLAG_HAMINCHA_AHAVAT_SHALOM: PlagAhavatShalom = PlagAhavatShalom { _private: () };
 /// Plag hamincha: `10.75` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais7.083°).
 pub const PLAG_HAMINCHA_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083: ZmanPreset<'static> =
     ZmanPreset::new(
@@ -1281,8 +1296,9 @@ pub const TZAIS_GEONIM_DEGREES_9_POINT_75: ZmanPreset<'static> = ZmanPreset::new
 );
 
 #[allow(missing_docs)]
-#[derive(Default)]
-pub struct SofZmanKidushLevana15Days;
+pub struct SofZmanKidushLevana15Days {
+    _private: (),
+}
 impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevana15Days {
     fn calculate(
         &self,
@@ -1318,11 +1334,13 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for SofZmanKidushLevana15Days {
 ///
 /// Will return None if the zman will not occur on this day. If the location does not contain
 /// a timezone, this will always return None.
-pub const SOF_ZMAN_KIDUSH_LEVANA_15_DAYS: SofZmanKidushLevana15Days = SofZmanKidushLevana15Days {};
+pub const SOF_ZMAN_KIDUSH_LEVANA_15_DAYS: SofZmanKidushLevana15Days =
+    SofZmanKidushLevana15Days { _private: () };
 
 #[allow(missing_docs)]
-#[derive(Default)]
-pub struct SofZmanKidushLevanaBetweenMoldos;
+pub struct SofZmanKidushLevanaBetweenMoldos {
+    _private: (),
+}
 impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevanaBetweenMoldos {
     fn calculate(
         &self,
@@ -1361,11 +1379,12 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for SofZmanKidushLevanaBetweenMoldos {
 /// Will return None if the zman will not occur on this day. If the location does not contain
 /// a timezone, this will always return None.
 pub const SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS: SofZmanKidushLevanaBetweenMoldos =
-    SofZmanKidushLevanaBetweenMoldos {};
+    SofZmanKidushLevanaBetweenMoldos { _private: () };
 
 #[allow(missing_docs)]
-#[derive(Default)]
-pub struct TchilasZmanKidushLevana3Days;
+pub struct TchilasZmanKidushLevana3Days {
+    _private: (),
+}
 impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana3Days {
     fn calculate(
         &self,
@@ -1401,11 +1420,12 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for TchilasZmanKidushLevana3Days {
 /// Will return None if the zman will not occur on this day. If the location does not contain
 /// a timezone, this will always return None.
 pub const TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS: TchilasZmanKidushLevana3Days =
-    TchilasZmanKidushLevana3Days {};
+    TchilasZmanKidushLevana3Days { _private: () };
 
 #[allow(missing_docs)]
-#[derive(Default)]
-pub struct TchilasZmanKidushLevana7Days;
+pub struct TchilasZmanKidushLevana7Days {
+    _private: (),
+}
 impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana7Days {
     fn calculate(
         &self,
@@ -1443,9 +1463,8 @@ impl<Tz: TimeZone> ZmanPresetLike<Tz> for TchilasZmanKidushLevana7Days {
 /// Will return None if the zman will not occur on this day. If the location does not contain
 /// a timezone, this will always return None.
 pub const TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS: TchilasZmanKidushLevana7Days =
-    TchilasZmanKidushLevana7Days {};
+    TchilasZmanKidushLevana7Days { _private: () };
 
-#[derive(Default)]
 #[allow(missing_docs)]
 pub struct Molad;
 

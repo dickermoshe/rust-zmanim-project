@@ -69,8 +69,22 @@ jobs:
         uses: actions-rust-lang/rustfmt@v1
 
   clippy:
-    name: Clippy
+    name: Clippy (${{ matrix.name }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: default-features
+            args: ""
+          - name: no-default-features
+            args: "--no-default-features"
+          - name: std
+            args: "--no-default-features --features std"
+          - name: defmt
+            args: "--no-default-features --features defmt"
+          - name: std+defmt
+            args: "--no-default-features --features std,defmt"
     permissions:
       contents: read
     steps:
@@ -79,4 +93,4 @@ jobs:
         with:
           components: clippy
       - name: Clippy check
-        run: cargo clippy -- -D warnings
+        run: cargo clippy ${{ matrix.args }} -- -D warnings

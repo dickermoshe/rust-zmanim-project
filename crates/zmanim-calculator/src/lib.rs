@@ -1,15 +1,19 @@
-// #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs)]
-//! Calculate zmanim (Jewish halachic times) using the KosherJava Zmanim API’s concepts and naming.
+//! Calculate zmanim (Jewish halachic times) using KosherJava-style concepts and naming.
 //!
-//! This crate exposes:
-//! - [`Location`]: where to calculate for.
-//! - [`CalculatorConfig`]: configuration knobs (candle lighting offset, chatzos behavior, etc.).
-//! - [`ZmanimCalculator`]: the engine for computing times for a given date + location.
-//! - A large set of predefined [`Zman`] constants in [`zman`].
+//! Typical usage:
+//! - Build a [`Location`].
+//! - Create a [`ZmanimCalculator`] with a date and [`CalculatorConfig`].
+//! - Compute times using ready-made definitions from [`presets`]
+//!   (for example, `presets::SUNRISE` and `presets::SUNSET`).
 //!
-//! `ZmanimCalculator::calculate()` returns `Option<DateTime<Utc>>` since some locations/dates (e.g. polar regions)
-//! have no sunrise/sunset or twilight for a given definition.
+//! [`ZmanimCalculator::calculate`] returns `Result<DateTime<Utc>, ZmanimError>`.
+//! In edge cases (for example high latitudes on specific dates), calculations may return an error.
+//!
+//! `calculate` takes `&mut self` so repeated calculations can reuse intermediate state.
+//! If Rust borrow rules are awkward for your call pattern, clone the calculator and use each
+//! clone independently.
 #[cfg(test)]
 mod java_tests;
 #[cfg(test)]
@@ -24,10 +28,17 @@ mod types {
 }
 mod calculator;
 mod duration_helper;
-
-/// Zmanim constants and definitions.
+/// Predefined zmanim calculations built from reusable primitives.
 pub mod presets;
+/// Low-level zman formulas used to build higher-level presets.
 pub mod primitive_zman;
-pub use calculator::ZmanimCalculator;
-pub use types::config::CalculatorConfig;
-pub use types::location::Location;
+
+/// Re-export the most commonly used types and traits.
+pub mod prelude {
+    pub use crate::calculator::ZmanimCalculator;
+    pub use crate::presets::ZmanPreset;
+    pub use crate::primitive_zman::ZmanPrimitive;
+    pub use crate::types::config::CalculatorConfig;
+    pub use crate::types::error::ZmanimError;
+    pub use crate::types::location::Location;
+}

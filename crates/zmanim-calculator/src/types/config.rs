@@ -27,6 +27,6 @@ impl Default for CalculatorConfig {
 #[cfg(feature = "defmt")]
 impl defmt::Format for CalculatorConfig {
     fn format(&self, fmt: defmt::Formatter) {
-        defmt::write!(fmt, "CalculatorConfig {{ use_astronomical_chatzos: {}, candle_lighting_offset: {}, use_astronomical_chatzos_for_other_zmanim: {}, ateret_torah_sunset_offset: {} }}", self.use_astronomical_chatzos, self.candle_lighting_offset.as_seconds_f64(), self.use_astronomical_chatzos_for_other_zmanim, self.ateret_torah_sunset_offset.as_seconds_f64())
+        defmt::write!(fmt, "CalculatorConfig {{ candle_lighting_offset: {}, use_astronomical_chatzos_for_other_zmanim: {}, ateret_torah_sunset_offset: {} }}", self.candle_lighting_offset.as_seconds_f64(), self.use_astronomical_chatzos_for_other_zmanim, self.ateret_torah_sunset_offset.as_seconds_f64())
     }
 }

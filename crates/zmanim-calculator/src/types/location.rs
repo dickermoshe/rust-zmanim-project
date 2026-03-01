@@ -86,28 +86,16 @@ mod tests {
     }
 }
 
-#[cfg(feature = "defmt")]
-impl defmt::Format for Location<Utc> {
+#[cfg(all(feature = "defmt"))]
+impl<T: TimeZone> defmt::Format for Location<T> {
     fn format(&self, fmt: defmt::Formatter) {
         defmt::write!(
             fmt,
-            "Location {{ latitude: {}, longitude: {}, elevation: {}, timezone: UTC }}",
+            "Location {{ latitude: {}, longitude: {}, elevation: {}, has_timezone: {} }}",
             self.latitude,
             self.longitude,
             self.elevation,
-        )
-    }
-}
-#[cfg(all(feature = "tz", feature = "defmt"))]
-impl defmt::Format for Location<chrono_tz::Tz> {
-    fn format(&self, fmt: defmt::Formatter) {
-        defmt::write!(
-            fmt,
-            "Location {{ latitude: {}, longitude: {}, elevation: {}, timezone: {:?} }}",
-            self.latitude,
-            self.longitude,
-            self.elevation,
-            self.timezone.map(|l| l.name())
+            self.timezone.is_some(),
         )
     }
 }

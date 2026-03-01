@@ -11,7 +11,7 @@ extern crate std;
 use std::env;
 use std::sync::Once;
 
-use crate::*;
+use crate::prelude::*;
 
 /// Default number of iterations for randomized tests.
 pub fn get_test_iterations() -> i64 {

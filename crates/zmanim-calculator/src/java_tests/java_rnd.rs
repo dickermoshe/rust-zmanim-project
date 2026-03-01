@@ -3,10 +3,8 @@
 extern crate std;
 use std::str::FromStr;
 
-use crate::{
-    java_tests::java_bindings::{JavaTimeAndPlace, JavaZmanimCalendar},
-    CalculatorConfig, Location, ZmanimCalculator,
-};
+use crate::java_tests::java_bindings::{JavaTimeAndPlace, JavaZmanimCalendar};
+use crate::prelude::*;
 
 use super::*;
 use chrono::{Duration, TimeZone};
