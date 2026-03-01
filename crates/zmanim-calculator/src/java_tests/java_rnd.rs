@@ -66,7 +66,6 @@ pub fn random_zmanim_calendars<'a>(
     let (rust_time_and_place, date_time, java_time_and_place) =
         random_time_and_place(max_lat, jvm, rng)?;
     let candle_lighting_offset = Duration::minutes(rng.gen_range(0..=60));
-    let use_astronomical_chatzos = rng.gen_bool(0.5);
     let use_astronomical_chatzos_for_other_zmanim = rng.gen_bool(0.5);
     let ateret_torah_sunset_offset = Duration::minutes(rng.gen_range(0..=60));
     let config = CalculatorConfig {
@@ -81,7 +80,6 @@ pub fn random_zmanim_calendars<'a>(
         jvm,
         java_time_and_place,
         candle_lighting_offset,
-        use_astronomical_chatzos,
         use_astronomical_chatzos_for_other_zmanim,
         ateret_torah_sunset_offset,
     )?;

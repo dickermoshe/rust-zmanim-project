@@ -132,7 +132,6 @@ impl<'a> JavaZmanimCalendar<'a> {
         jvm: &'a Jvm,
         java_time_and_place: JavaTimeAndPlace,
         candle_lighting_offset: Duration,
-        use_astronomical_chatzos: bool,
         use_astronomical_chatzos_for_other_zmanim: bool,
         ateret_torah_sunset_offset: Duration,
     ) -> Option<Self> {
@@ -158,10 +157,12 @@ impl<'a> JavaZmanimCalendar<'a> {
                 .unwrap()],
         )
         .ok()?;
+
+        // We test SolarTransit against GetChatzos. This configures the calendar to use solar transit/astronomical midday.
         jvm.invoke(
             &java_zmanim_calendar,
             "setUseAstronomicalChatzos",
-            &[InvocationArg::try_from(use_astronomical_chatzos)
+            &[InvocationArg::try_from(true)
                 .unwrap()
                 .into_primitive()
                 .unwrap()],

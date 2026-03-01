@@ -213,6 +213,7 @@ pub const BAIN_HASHMASHOS_YEREIM_13_POINT_5_MINUTES: ZmanPreset<'static> = ZmanP
 pub const CANDLE_LIGHTING: ZmanPreset<'static> =
     ZmanPreset::new(ZmanPrimitive::CandleLighting, "getCandleLighting");
 
+// We configure the Java calendar to use astronomical noon  for getChatzos() so that this java method is the equivalent of this rust preset.
 /// Chatzos (astronomical noon): solar transit.
 pub const CHATZOS_ASTRONOMICAL: ZmanPreset<'static> =
     ZmanPreset::new(ZmanPrimitive::SolarTransit, "getChatzos");
