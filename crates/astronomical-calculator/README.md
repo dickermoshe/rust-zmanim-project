@@ -134,3 +134,4 @@ Contributions are welcome! Please feel free to submit issues or pull requests on
 - 0.3.0 :`get_sunrise_offset_by_degrees` and `get_sunset_offset_by_degrees` do not use the provided geometric dip, instead they use the geometric horizon.
 - 0.3.1: Add `Debug` and `Clone` to `AstronomicalCalculator`
 - 0.4.0: Add `geometric` parameter to `get_sunrise_offset_by_degrees` and `get_sunset_offset_by_degrees`
+- 0.4.1: Add `PartialEq`, `Eq`, and `Hash` to `CalculationError`
