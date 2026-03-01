@@ -51,9 +51,19 @@ Notes:
 - `defmt`: Enables `defmt` formatting/logging support for embedded targets.
 - `c`: Enables the C FFI surface and header generation tooling (`std` is enabled automatically).
 
+## Compatibility and References
+
+The API aims to follow KosherJava naming and behavior where possible.
+For background and broader algorithm documentation, see the [KosherJava documentation](https://kosherjava.com/zmanim-project/how-to-use-the-zmanim-api/).
+
 ## C API (`c` feature)
 
-The crate can generate and ship a C header and C-callable functions via the `c` feature.
+Pre-built libraries and the C header are available on the
+[GitHub Releases](https://github.com/dickermoshe/zmanim-calculator/releases) page
+for Linux, macOS, and Windows.
+
+<details>
+<summary>Building from source</summary>
 
 Generate the header:
 
@@ -67,13 +77,11 @@ Build the C-callable library:
 cargo build --release --features c
 ```
 
-This writes the header to `bindings/c/zmanim_calendar.h`.
+The header is written to `bindings/c/zmanim_calendar.h`.
+
+</details>
+
 See `example-c-project/` for a complete usage example (`main.c` and `build_and_run.sh`).
-
-## Compatibility and References
-
-The API aims to follow KosherJava naming and behavior where possible.
-For background and broader algorithm documentation, see the [KosherJava documentation](https://kosherjava.com/zmanim-project/how-to-use-the-zmanim-api/).
 
 ## License
 
