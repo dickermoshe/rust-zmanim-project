@@ -21,8 +21,6 @@ pub fn get_test_iterations() -> i64 {
         .unwrap_or(100)
 }
 
-// /// Default Epsilon for floating point comparisons.
-// pub static DEFAULT_F64_TEST_EPSILON: f64 = 1e-4;
 static JVM_INIT: Once = Once::new();
 /// Initializes or attaches to the shared JVM instance for testing against KosherJava.
 ///
@@ -719,31 +717,31 @@ mod tests {
         TZAIS_GEONIM_DEGREES_9_POINT_75
     );
 
-    // zman_test!(test_molad, MOLAD, None, true);
-    // zman_test!(
-    //     test_tchilas_zman_kidush_levana_3_days,
-    //     TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS,
-    //     None,
-    //     true
-    // );
-    // zman_test!(
-    //     test_tchilas_zman_kidush_levana_7_days,
-    //     TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS,
-    //     None,
-    //     true
-    // );
-    // zman_test!(
-    //     test_sof_zman_kidush_levana_between_moldos,
-    //     SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS,
-    //     None,
-    //     true
-    // );
-    // zman_test!(
-    //     test_sof_zman_kidush_levana_15_days,
-    //     SOF_ZMAN_KIDUSH_LEVANA_15_DAYS,
-    //     None,
-    //     true
-    // );
+    zman_test!(test_molad, MOLAD, None, true);
+    zman_test!(
+        test_tchilas_zman_kidush_levana_3_days,
+        TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS,
+        None,
+        true
+    );
+    zman_test!(
+        test_tchilas_zman_kidush_levana_7_days,
+        TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS,
+        None,
+        true
+    );
+    zman_test!(
+        test_sof_zman_kidush_levana_between_moldos,
+        SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS,
+        None,
+        true
+    );
+    zman_test!(
+        test_sof_zman_kidush_levana_15_days,
+        SOF_ZMAN_KIDUSH_LEVANA_15_DAYS,
+        None,
+        true
+    );
 
     #[test]
     fn regression_mincha_gedola_gra_fixed_local_chatzos_30_minutes() {
