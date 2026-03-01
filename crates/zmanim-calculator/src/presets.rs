@@ -134,7 +134,6 @@ pub const ALOS_BAAL_HATANYA: ZmanPreset<'static> = ZmanPreset::new(
 );
 
 /// Bain hashmashos (Rabbeinu Tam): when the sun is `13.24°` below the geometric horizon (after sunset).
-
 pub const BAIN_HASHMASHOS_RT_13_POINT_24_DEGREES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::SunsetOffsetByDegrees(13.24),
     "getBainHashmashosRT13Point24Degrees",

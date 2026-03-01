@@ -1,18 +1,16 @@
-#!/usr/bin/env bash
-# Linux only.
+#!/bin/bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$repo_root"
+cd "$(dirname "$0")/.."
 
 cargo run --features c --bin build_c_headers
-cargo zigbuild --features c --release
+cargo build --release --features c
 
-source_file="$repo_root/example-c-project/main.c"
-header_dir="$repo_root/bindings/c"
-static_lib="$repo_root/target/release/libzmanim_calculator.a"
-output="$repo_root/example-c-project/example_c_project"
+zig cc \
+    example-c-project/main.c \
+    -Ltarget/release \
+    -lzmanim_calculator \
+    -lm -lpthread -ldl \
+    -o example-c-project/example
 
-zig cc -std=c11 -I "$header_dir" "$source_file" "$static_lib" -lpthread -o "$output"
-
-"$output"
+./example-c-project/example
