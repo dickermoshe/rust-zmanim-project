@@ -83,22 +83,13 @@ jobs:
           cache: false
 
       - name: Generate header
-        run: |
-          set -eux
-          pwd
-          cargo build --features c --bin build_c_headers --verbose
-          ./target/debug/build_c_headers
-          echo "--- checking for bindings directory ---"
-          ls -la bindings/ || echo "bindings/ does not exist"
-          ls -la bindings/c/ || echo "bindings/c/ does not exist"
-          find . -name "zmanim_calculator.h" || echo "header not found anywhere"
-          ls -la bindings/c/zmanim_calculator.h
+        run: cargo run --features c --bin build_c_headers
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zmanim_calculator-header
-          path: bindings/c/zmanim_calculator.h
+          name: zmanim_calendar-header
+          path: bindings/c/zmanim_calendar.h
           if-no-files-found: error
 
   release:
