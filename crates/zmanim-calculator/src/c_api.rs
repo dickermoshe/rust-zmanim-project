@@ -334,22 +334,37 @@ pub extern "C" fn alos_baal_hatanya(calculator: &ZmanimCalculator) -> FFIOption<
 #[doc = "Calculates preset `BAIN_HASHMASHOS_RT_13_POINT_24_DEGREES`."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn bain_hashmashos_rt_13_point_24_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::BAIN_HASHMASHOS_RT_13_POINT_24_DEGREES)
+pub extern "C" fn bain_hashmashos_rt_13_point_24_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::BAIN_HASHMASHOS_RT_13_POINT_24_DEGREES,
+    )
 }
 
 #[doc = "Bain hashmashos (Rabbeinu Tam): `58.5` minutes after sunset."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn bain_hashmashos_rt_58_point_5_minutes(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::BAIN_HASHMASHOS_RT_58_POINT_5_MINUTES)
+pub extern "C" fn bain_hashmashos_rt_58_point_5_minutes(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::BAIN_HASHMASHOS_RT_58_POINT_5_MINUTES,
+    )
 }
 
 #[doc = "Bain hashmashos (Rabbeinu Tam): `13.5` minutes before when the sun will be `7.083°` below the geometric horizon."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn bain_hashmashos_rt_13_point_5_minutes_before_7_point_083_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES)
+pub extern "C" fn bain_hashmashos_rt_13_point_5_minutes_before_7_point_083_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES,
+    )
 }
 
 #[doc = "Bain hashmashos (Rabbeinu Tam, 2-stars): `sunset + (sunrise - alos19.8°) * 5/18`."]
@@ -362,22 +377,37 @@ pub extern "C" fn bain_hashmashos_rt_2_stars(calculator: &ZmanimCalculator) -> F
 #[doc = "Bain hashmashos (Yereim): `18` minutes before sunset."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn bain_hashmashos_yereim_18_minutes(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::BAIN_HASHMASHOS_YEREIM_18_MINUTES)
+pub extern "C" fn bain_hashmashos_yereim_18_minutes(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::BAIN_HASHMASHOS_YEREIM_18_MINUTES,
+    )
 }
 
 #[doc = "Bain hashmashos (Yereim): `16.875` minutes before sunset."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn bain_hashmashos_yereim_16_point_875_minutes(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::BAIN_HASHMASHOS_YEREIM_16_POINT_875_MINUTES)
+pub extern "C" fn bain_hashmashos_yereim_16_point_875_minutes(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::BAIN_HASHMASHOS_YEREIM_16_POINT_875_MINUTES,
+    )
 }
 
 #[doc = "Bain hashmashos (Yereim): `13.5` minutes before sunset."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn bain_hashmashos_yereim_13_point_5_minutes(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::BAIN_HASHMASHOS_YEREIM_13_POINT_5_MINUTES)
+pub extern "C" fn bain_hashmashos_yereim_13_point_5_minutes(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::BAIN_HASHMASHOS_YEREIM_13_POINT_5_MINUTES,
+    )
 }
 
 #[doc = "Candle lighting: sea-level sunset minus [`crate::CalculatorConfig::candle_lighting_offset`]."]
@@ -418,7 +448,9 @@ pub extern "C" fn mincha_gedola_sunrise_sunset(calculator: &ZmanimCalculator) ->
 #[doc = "Mincha gedola: `6.5` shaos after alos `16.1°` (or `0.5` shaah after chatzos if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn mincha_gedola_16_point_1_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
+pub extern "C" fn mincha_gedola_16_point_1_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
     calculate_preset_timestamp(calculator, crate::presets::MINCHA_GEDOLA_16_POINT_1_DEGREES)
 }
 
@@ -460,15 +492,25 @@ pub extern "C" fn mincha_gedola_baal_hatanya(calculator: &ZmanimCalculator) -> F
 #[doc = "Mincha gedola: later of Baal HaTanya mincha gedola and `30` minutes after solar transit."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn mincha_gedola_baal_hatanya_greater_than_30(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30)
+pub extern "C" fn mincha_gedola_baal_hatanya_greater_than_30(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30,
+    )
 }
 
 #[doc = "Mincha gedola: `30` minutes after fixed local chatzos (12:00 local mean time)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn mincha_gedola_gra_fixed_local_chatzos_30_minutes(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES)
+pub extern "C" fn mincha_gedola_gra_fixed_local_chatzos_30_minutes(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES,
+    )
 }
 
 #[doc = "Mincha gedola: later of [`MINCHA_GEDOLA_SUNRISE_SUNSET`] and [`MINCHA_GEDOLA_MINUTES_30`]."]
@@ -488,7 +530,9 @@ pub extern "C" fn mincha_ketana_sunrise_sunset(calculator: &ZmanimCalculator) ->
 #[doc = "Mincha ketana: `9.5` shaos after alos `16.1°` (or `3.5` shaos after chatzos if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn mincha_ketana_16_point_1_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
+pub extern "C" fn mincha_ketana_16_point_1_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
     calculate_preset_timestamp(calculator, crate::presets::MINCHA_KETANA_16_POINT_1_DEGREES)
 }
 
@@ -523,8 +567,13 @@ pub extern "C" fn mincha_ketana_baal_hatanya(calculator: &ZmanimCalculator) -> F
 #[doc = "Mincha ketana: `3.5` shaos zmaniyos after fixed local chatzos, using fixed-local-chatzos → sunset half-day."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn mincha_ketana_gra_fixed_local_chatzos_to_sunset(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::MINCHA_KETANA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET)
+pub extern "C" fn mincha_ketana_gra_fixed_local_chatzos_to_sunset(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::MINCHA_KETANA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET,
+    )
 }
 
 #[doc = "Misheyakir when the sun is `10.2°` below the geometric horizon (degrees-below-horizon dawn)."]
@@ -579,8 +628,13 @@ pub extern "C" fn plag_hamincha_ahavat_shalom(calculator: &ZmanimCalculator) -> 
 #[doc = "Plag hamincha: `10.75` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais7.083°)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn plag_hamincha_16_point_1_to_tzais_geonim_7_point_083(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::PLAG_HAMINCHA_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083)
+pub extern "C" fn plag_hamincha_16_point_1_to_tzais_geonim_7_point_083(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::PLAG_HAMINCHA_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083,
+    )
 }
 
 #[doc = "Plag hamincha: `10.75` shaos zmaniyos after alos `16.1°` (day end = sunset)."]
@@ -656,7 +710,9 @@ pub extern "C" fn plag_hamincha_120_zmanis(calculator: &ZmanimCalculator) -> FFI
 #[doc = "Plag hamincha: `10.75` shaos after alos `16.1°` (or `4.75` shaos after chatzos if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn plag_hamincha_16_point_1_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
+pub extern "C" fn plag_hamincha_16_point_1_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
     calculate_preset_timestamp(calculator, crate::presets::PLAG_HAMINCHA_16_POINT_1_DEGREES)
 }
 
@@ -670,7 +726,9 @@ pub extern "C" fn plag_hamincha_18_degrees(calculator: &ZmanimCalculator) -> FFI
 #[doc = "Plag hamincha: `10.75` shaos after alos `19.8°` (or `4.75` shaos after chatzos if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn plag_hamincha_19_point_8_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
+pub extern "C" fn plag_hamincha_19_point_8_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
     calculate_preset_timestamp(calculator, crate::presets::PLAG_HAMINCHA_19_POINT_8_DEGREES)
 }
 
@@ -698,8 +756,13 @@ pub extern "C" fn plag_hamincha_baal_hatanya(calculator: &ZmanimCalculator) -> F
 #[doc = "Plag hamincha: `4.75` shaos zmaniyos after fixed local chatzos, using fixed-local-chatzos → sunset half-day."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn plag_hamincha_gra_fixed_local_chatzos_to_sunset(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::PLAG_HAMINCHA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET)
+pub extern "C" fn plag_hamincha_gra_fixed_local_chatzos_to_sunset(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::PLAG_HAMINCHA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET,
+    )
 }
 
 #[doc = "Samuch le-mincha ketana: `9` shaos after sunrise (or `3` shaos after chatzos if configured)."]
@@ -712,15 +775,25 @@ pub extern "C" fn samuch_le_mincha_ketana_gra(calculator: &ZmanimCalculator) -> 
 #[doc = "Samuch le-mincha ketana: `9` shaos after alos `16.1°` (or `3` shaos after chatzos if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn samuch_le_mincha_ketana_16_point_1_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES)
+pub extern "C" fn samuch_le_mincha_ketana_16_point_1_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES,
+    )
 }
 
 #[doc = "Samuch le-mincha ketana: `9` shaos after alos `72` minutes (or `3` shaos after chatzos if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn samuch_le_mincha_ketana_72_minutes(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SAMUCH_LE_MINCHA_KETANA_72_MINUTES)
+pub extern "C" fn samuch_le_mincha_ketana_72_minutes(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SAMUCH_LE_MINCHA_KETANA_72_MINUTES,
+    )
 }
 
 #[doc = "Sof zman achilas chametz: `4` shaos after sunrise (or half-day based if configured)."]
@@ -733,22 +806,37 @@ pub extern "C" fn sof_zman_achilas_chametz_gra(calculator: &ZmanimCalculator) ->
 #[doc = "Sof zman achilas chametz: `4` shaos after alos `72` minutes (or half-day based if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_achilas_chametz_mga_72_minutes(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_ACHILAS_CHAMETZ_MGA_72_MINUTES)
+pub extern "C" fn sof_zman_achilas_chametz_mga_72_minutes(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_ACHILAS_CHAMETZ_MGA_72_MINUTES,
+    )
 }
 
 #[doc = "Sof zman achilas chametz: `4` shaos after alos `16.1°` (or half-day based if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_achilas_chametz_mga_16_point_1_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_ACHILAS_CHAMETZ_MGA_16_POINT_1_DEGREES)
+pub extern "C" fn sof_zman_achilas_chametz_mga_16_point_1_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_ACHILAS_CHAMETZ_MGA_16_POINT_1_DEGREES,
+    )
 }
 
 #[doc = "Sof zman achilas chametz: `4` shaos after Baal HaTanya day start (or half-day based if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_achilas_chametz_baal_hatanya(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_ACHILAS_CHAMETZ_BAAL_HATANYA)
+pub extern "C" fn sof_zman_achilas_chametz_baal_hatanya(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_ACHILAS_CHAMETZ_BAAL_HATANYA,
+    )
 }
 
 #[doc = "Sof zman biur chametz: `5` shaos zmaniyos after sunrise (day = sunrise → sunset)."]
@@ -761,22 +849,37 @@ pub extern "C" fn sof_zman_biur_chametz_gra(calculator: &ZmanimCalculator) -> FF
 #[doc = "Sof zman biur chametz: `5` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_biur_chametz_mga_72_minutes(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_BIUR_CHAMETZ_MGA_72_MINUTES)
+pub extern "C" fn sof_zman_biur_chametz_mga_72_minutes(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_BIUR_CHAMETZ_MGA_72_MINUTES,
+    )
 }
 
 #[doc = "Sof zman biur chametz: `5` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais16.1°)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_biur_chametz_mga_16_point_1_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_BIUR_CHAMETZ_MGA_16_POINT_1_DEGREES)
+pub extern "C" fn sof_zman_biur_chametz_mga_16_point_1_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_BIUR_CHAMETZ_MGA_16_POINT_1_DEGREES,
+    )
 }
 
 #[doc = "Sof zman biur chametz: `5` shaos zmaniyos after Baal HaTanya day start (day = Baal HaTanya sunrise → sunset)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_biur_chametz_baal_hatanya(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_BIUR_CHAMETZ_BAAL_HATANYA)
+pub extern "C" fn sof_zman_biur_chametz_baal_hatanya(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_BIUR_CHAMETZ_BAAL_HATANYA,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos after sunrise (or half-day based if configured)."]
@@ -796,15 +899,25 @@ pub extern "C" fn sof_zman_shma_mga(calculator: &ZmanimCalculator) -> FFIOption<
 #[doc = "Sof zman shma: `3` shaos after alos `19.8°` (or half-day based if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_mga_19_point_8_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_MGA_19_POINT_8_DEGREES)
+pub extern "C" fn sof_zman_shma_mga_19_point_8_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_MGA_19_POINT_8_DEGREES,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos after alos `16.1°` (or half-day based if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_mga_16_point_1_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES)
+pub extern "C" fn sof_zman_shma_mga_16_point_1_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos after alos `18°` (or half-day based if configured)."]
@@ -859,8 +972,13 @@ pub extern "C" fn sof_zman_shma_mga_96_zmanis(calculator: &ZmanimCalculator) -> 
 #[doc = "Sof zman shma: `3` hours before solar transit."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_hours_3_before_chatzos(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_HOURS_3_BEFORE_CHATZOS)
+pub extern "C" fn sof_zman_shma_hours_3_before_chatzos(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_HOURS_3_BEFORE_CHATZOS,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos zmaniyos after alos `120` minutes (day = alos120 → tzais120)."]
@@ -873,15 +991,25 @@ pub extern "C" fn sof_zman_shma_mga_120_minutes(calculator: &ZmanimCalculator) -
 #[doc = "Sof zman shma: `3` shaos zmaniyos after alos `16.1°` (day end = sunset)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_alos_16_point_1_to_sunset(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_SUNSET)
+pub extern "C" fn sof_zman_shma_alos_16_point_1_to_sunset(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_SUNSET,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos zmaniyos after alos `16.1°` (day end = tzais7.083°)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_alos_16_point_1_to_tzais_geonim_7_point_083(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083)
+pub extern "C" fn sof_zman_shma_alos_16_point_1_to_tzais_geonim_7_point_083(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos zmaniyos after sunrise (day end = fixed local chatzos)."]
@@ -915,36 +1043,61 @@ pub extern "C" fn sof_zman_shma_fixed_local(calculator: &ZmanimCalculator) -> FF
 #[doc = "Sof zman shma: `3` shaos zmaniyos after sunrise (day end = fixed local chatzos)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_gra_sunrise_to_fixed_local_chatzos(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS)
+pub extern "C" fn sof_zman_shma_gra_sunrise_to_fixed_local_chatzos(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos zmaniyos after alos `18°` (day end = fixed local chatzos)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_mga_18_degrees_to_fixed_local_chatzos(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_MGA_18_DEGREES_TO_FIXED_LOCAL_CHATZOS)
+pub extern "C" fn sof_zman_shma_mga_18_degrees_to_fixed_local_chatzos(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_MGA_18_DEGREES_TO_FIXED_LOCAL_CHATZOS,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos zmaniyos after alos `16.1°` (day end = fixed local chatzos)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_mga_16_point_1_degrees_to_fixed_local_chatzos(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES_TO_FIXED_LOCAL_CHATZOS)
+pub extern "C" fn sof_zman_shma_mga_16_point_1_degrees_to_fixed_local_chatzos(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES_TO_FIXED_LOCAL_CHATZOS,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos zmaniyos after alos `90` minutes (day end = fixed local chatzos)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_mga_90_minutes_to_fixed_local_chatzos(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_MGA_90_MINUTES_TO_FIXED_LOCAL_CHATZOS)
+pub extern "C" fn sof_zman_shma_mga_90_minutes_to_fixed_local_chatzos(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_MGA_90_MINUTES_TO_FIXED_LOCAL_CHATZOS,
+    )
 }
 
 #[doc = "Sof zman shma: `3` shaos zmaniyos after alos `72` minutes (day end = fixed local chatzos)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_shma_mga_72_minutes_to_fixed_local_chatzos(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_SHMA_MGA_72_MINUTES_TO_FIXED_LOCAL_CHATZOS)
+pub extern "C" fn sof_zman_shma_mga_72_minutes_to_fixed_local_chatzos(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_SHMA_MGA_72_MINUTES_TO_FIXED_LOCAL_CHATZOS,
+    )
 }
 
 #[doc = "Sof zman tfila: `4` shaos after sunrise (or half-day based if configured)."]
@@ -964,15 +1117,25 @@ pub extern "C" fn sof_zman_tfila_mga(calculator: &ZmanimCalculator) -> FFIOption
 #[doc = "Sof zman tfila: `4` shaos after alos `19.8°` (or half-day based if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_tfila_mga_19_point_8_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_TFILA_MGA_19_POINT_8_DEGREES)
+pub extern "C" fn sof_zman_tfila_mga_19_point_8_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_TFILA_MGA_19_POINT_8_DEGREES,
+    )
 }
 
 #[doc = "Sof zman tfila: `4` shaos after alos `16.1°` (or half-day based if configured)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_tfila_mga_16_point_1_degrees(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_TFILA_MGA_16_POINT_1_DEGREES)
+pub extern "C" fn sof_zman_tfila_mga_16_point_1_degrees(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_TFILA_MGA_16_POINT_1_DEGREES,
+    )
 }
 
 #[doc = "Sof zman tfila: `4` shaos after alos `18°` (or half-day based if configured)."]
@@ -1027,8 +1190,13 @@ pub extern "C" fn sof_zman_tfila_mga_96_zmanis(calculator: &ZmanimCalculator) ->
 #[doc = "Sof zman tfila: `2` hours before solar transit."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_tfila_hours_2_before_chatzos(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_TFILA_HOURS_2_BEFORE_CHATZOS)
+pub extern "C" fn sof_zman_tfila_hours_2_before_chatzos(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_TFILA_HOURS_2_BEFORE_CHATZOS,
+    )
 }
 
 #[doc = "Sof zman tfila: `4` shaos zmaniyos after alos `120` minutes (day = alos120 → tzais120)."]
@@ -1062,8 +1230,13 @@ pub extern "C" fn sof_zman_tfila_fixed_local(calculator: &ZmanimCalculator) -> F
 #[doc = "Sof zman tfila: `4` shaos zmaniyos after sunrise (day end = fixed local chatzos)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_tfila_gra_sunrise_to_fixed_local_chatzos(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_TFILA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS)
+pub extern "C" fn sof_zman_tfila_gra_sunrise_to_fixed_local_chatzos(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_TFILA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS,
+    )
 }
 
 #[doc = "Tzais when the sun is `8.5°` below the geometric horizon (after sunset)."]
@@ -1258,7 +1431,9 @@ pub extern "C" fn tzais_geonim_degrees_6_point_45(calculator: &ZmanimCalculator)
 #[doc = "Tzais (Geonim): when the sun is `7.083°` below the geometric horizon (after sunset)."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn tzais_geonim_degrees_7_point_083(calculator: &ZmanimCalculator) -> FFIOption<i64> {
+pub extern "C" fn tzais_geonim_degrees_7_point_083(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
     calculate_preset_timestamp(calculator, crate::presets::TZAIS_GEONIM_DEGREES_7_POINT_083)
 }
 
@@ -1308,8 +1483,13 @@ pub extern "C" fn sof_zman_kidush_levana_15_days(calculator: &ZmanimCalculator) 
 #[doc = "a timezone, this will always return None."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn sof_zman_kidush_levana_between_moldos(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS)
+pub extern "C" fn sof_zman_kidush_levana_between_moldos(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS,
+    )
 }
 
 #[doc = "The earliest time of _Kiddush Levana_ according to [Rabbeinu Yonah](https://en.wikipedia.org/wiki/Yonah_Gerondi)'s opinion that it can be said 3 days after the molad."]
@@ -1318,8 +1498,13 @@ pub extern "C" fn sof_zman_kidush_levana_between_moldos(calculator: &ZmanimCalcu
 #[doc = "a timezone, this will always return None."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn tchilas_zman_kidush_levana_3_days(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS)
+pub extern "C" fn tchilas_zman_kidush_levana_3_days(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS,
+    )
 }
 
 #[doc = "The earliest time of _Kiddush Levana_ according to the opinions that it should"]
@@ -1329,8 +1514,13 @@ pub extern "C" fn tchilas_zman_kidush_levana_3_days(calculator: &ZmanimCalculato
 #[doc = "a timezone, this will always return None."]
 #[no_mangle]
 #[ffi_function]
-pub extern "C" fn tchilas_zman_kidush_levana_7_days(calculator: &ZmanimCalculator) -> FFIOption<i64> {
-    calculate_preset_timestamp(calculator, crate::presets::TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS)
+pub extern "C" fn tchilas_zman_kidush_levana_7_days(
+    calculator: &ZmanimCalculator,
+) -> FFIOption<i64> {
+    calculate_preset_timestamp(
+        calculator,
+        crate::presets::TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS,
+    )
 }
 
 #[doc = "The time of the molad (new moon) for the current date's Hebrew month."]
@@ -1366,7 +1556,9 @@ pub fn my_inventory() -> Inventory {
         .register(function!(alos_baal_hatanya))
         .register(function!(bain_hashmashos_rt_13_point_24_degrees))
         .register(function!(bain_hashmashos_rt_58_point_5_minutes))
-        .register(function!(bain_hashmashos_rt_13_point_5_minutes_before_7_point_083_degrees))
+        .register(function!(
+            bain_hashmashos_rt_13_point_5_minutes_before_7_point_083_degrees
+        ))
         .register(function!(bain_hashmashos_rt_2_stars))
         .register(function!(bain_hashmashos_yereim_18_minutes))
         .register(function!(bain_hashmashos_yereim_16_point_875_minutes))
@@ -1399,7 +1591,9 @@ pub fn my_inventory() -> Inventory {
         .register(function!(misheyakir_9_point_5_degrees))
         .register(function!(plag_hamincha_sunrise_sunset))
         .register(function!(plag_hamincha_ahavat_shalom))
-        .register(function!(plag_hamincha_16_point_1_to_tzais_geonim_7_point_083))
+        .register(function!(
+            plag_hamincha_16_point_1_to_tzais_geonim_7_point_083
+        ))
         .register(function!(plag_hamincha_alos_to_sunset))
         .register(function!(plag_hamincha_60_minutes))
         .register(function!(plag_hamincha_72_minutes))
@@ -1442,16 +1636,26 @@ pub fn my_inventory() -> Inventory {
         .register(function!(sof_zman_shma_hours_3_before_chatzos))
         .register(function!(sof_zman_shma_mga_120_minutes))
         .register(function!(sof_zman_shma_alos_16_point_1_to_sunset))
-        .register(function!(sof_zman_shma_alos_16_point_1_to_tzais_geonim_7_point_083))
+        .register(function!(
+            sof_zman_shma_alos_16_point_1_to_tzais_geonim_7_point_083
+        ))
         .register(function!(sof_zman_shma_kol_eliyahu))
         .register(function!(sof_zman_shma_ateret_torah))
         .register(function!(sof_zman_shma_baal_hatanya))
         .register(function!(sof_zman_shma_fixed_local))
         .register(function!(sof_zman_shma_gra_sunrise_to_fixed_local_chatzos))
-        .register(function!(sof_zman_shma_mga_18_degrees_to_fixed_local_chatzos))
-        .register(function!(sof_zman_shma_mga_16_point_1_degrees_to_fixed_local_chatzos))
-        .register(function!(sof_zman_shma_mga_90_minutes_to_fixed_local_chatzos))
-        .register(function!(sof_zman_shma_mga_72_minutes_to_fixed_local_chatzos))
+        .register(function!(
+            sof_zman_shma_mga_18_degrees_to_fixed_local_chatzos
+        ))
+        .register(function!(
+            sof_zman_shma_mga_16_point_1_degrees_to_fixed_local_chatzos
+        ))
+        .register(function!(
+            sof_zman_shma_mga_90_minutes_to_fixed_local_chatzos
+        ))
+        .register(function!(
+            sof_zman_shma_mga_72_minutes_to_fixed_local_chatzos
+        ))
         .register(function!(sof_zman_tfila_gra))
         .register(function!(sof_zman_tfila_mga))
         .register(function!(sof_zman_tfila_mga_19_point_8_degrees))
