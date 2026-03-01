@@ -83,11 +83,15 @@ jobs:
       - name: Generate header
         run: cargo run --features c --bin build_c_headers
 
+      - name: Verify header was generated
+        run: ls -la bindings/c/zmanim_calculator.h
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: zmanim_calculator-header
           path: bindings/c/zmanim_calculator.h
+          if-no-files-found: error
 
   release:
     name: Upload release assets
