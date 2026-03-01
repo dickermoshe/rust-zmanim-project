@@ -87,9 +87,9 @@ dependencies = [
 
 [[package]]
 name = "hebrew_holiday_calendar"
-version = "0.2.0"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74d323f4cc775fe84f9c7ea7ec36edee318c9493ebd1f541cc10b6b9a1906611"
+checksum = "30ccc9527e35097dda760b6d2731085fe4f3eb907b7bad64153b28c209978aa8"
 dependencies = [
  "chrono",
  "defmt",
@@ -144,7 +144,7 @@ checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
 
 [[package]]
 name = "limudim-calendar"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "defmt",
  "hebrew_holiday_calendar",

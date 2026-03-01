@@ -2,6 +2,13 @@
 
 A Rust library for calculating various Jewish learning schedules (limudim), including Daf Yomi, Mishna Yomis, Pirkei Avos, and more.
 
+> [!NOTE]
+> This crate focuses exclusively on Jewish learning schedules calculations. For related functionality, see:
+>
+> - [hebrew_holiday_calendar](https://github.com/dickermoshe/hebrew_holiday_calendar) -- Hebrew holidays
+> - [astronomical-calculator](https://github.com/dickermoshe/astronomical-calculator) -- General astronomical events
+> - [zmanim-calculator](https://github.com/dickermoshe/zmanim-calculator) -- Zmanim calculations
+
 ## Features
 
 This library provides calculators for the following learning schedules:
