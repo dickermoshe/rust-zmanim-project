@@ -209,7 +209,7 @@ pub const BAIN_HASHMASHOS_YEREIM_13_POINT_5_MINUTES: ZmanPreset<'static> = ZmanP
     "getBainHashmashosYereim13Point5Minutes",
 );
 
-/// Candle lighting: sea-level sunset minus [`crate::CalculatorConfig::candle_lighting_offset`].
+/// Candle lighting: sea-level sunset minus [`crate::types::config::CalculatorConfig::candle_lighting_offset`].
 pub const CANDLE_LIGHTING: ZmanPreset<'static> =
     ZmanPreset::new(ZmanPrimitive::CandleLighting, "getCandleLighting");
 
@@ -1212,7 +1212,7 @@ pub const TZAIS_26_DEGREES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::SunsetOffsetByDegrees(26.0),
     "getTzais26Degrees",
 );
-/// Tzais (Ateret Torah): (elevation-adjusted) sunset plus [`crate::CalculatorConfig::ateret_torah_sunset_offset`].
+/// Tzais (Ateret Torah): (elevation-adjusted) sunset plus [`crate::types::config::CalculatorConfig::ateret_torah_sunset_offset`].
 pub const TZAIS_ATERET_TORAH: ZmanPreset<'static> =
     ZmanPreset::new(ZmanPrimitive::TzaisAteretTorah, "getTzaisAteretTorah");
 /// Tzais (Baal HaTanya): when the sun is `6°` below the geometric horizon (after sunset).
