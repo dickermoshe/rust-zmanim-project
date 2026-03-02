@@ -410,7 +410,7 @@ pub extern "C" fn bain_hashmashos_yereim_13_point_5_minutes(
     )
 }
 
-#[doc = "Candle lighting: sea-level sunset minus [`crate::CalculatorConfig::candle_lighting_offset`]."]
+#[doc = "Candle lighting: sea-level sunset minus [`crate::types::config::CalculatorConfig::candle_lighting_offset`]."]
 #[no_mangle]
 #[ffi_function]
 pub extern "C" fn candle_lighting(calculator: &ZmanimCalculator) -> FFIOption<i64> {
@@ -1344,7 +1344,7 @@ pub extern "C" fn tzais_26_degrees(calculator: &ZmanimCalculator) -> FFIOption<i
     calculate_preset_timestamp(calculator, crate::presets::TZAIS_26_DEGREES)
 }
 
-#[doc = "Tzais (Ateret Torah): (elevation-adjusted) sunset plus [`crate::CalculatorConfig::ateret_torah_sunset_offset`]."]
+#[doc = "Tzais (Ateret Torah): (elevation-adjusted) sunset plus [`crate::types::config::CalculatorConfig::ateret_torah_sunset_offset`]."]
 #[no_mangle]
 #[ffi_function]
 pub extern "C" fn tzais_ateret_torah(calculator: &ZmanimCalculator) -> FFIOption<i64> {

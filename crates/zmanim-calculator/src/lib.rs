@@ -3,12 +3,14 @@
 //! Calculate zmanim (Jewish halachic times) using KosherJava-style concepts and naming.
 //!
 //! Typical usage:
-//! - Build a [`Location`].
-//! - Create a [`ZmanimCalculator`] with a date and [`CalculatorConfig`].
+//! - Build a [`Location`](crate::types::location::Location).
+//! - Create a [`ZmanimCalculator`](crate::calculator::ZmanimCalculator) with a date and
+//!   [`CalculatorConfig`](crate::types::config::CalculatorConfig).
 //! - Compute times using ready-made definitions from [`presets`]
 //!   (for example, `presets::SUNRISE` and `presets::SUNSET`).
 //!
-//! [`ZmanimCalculator::calculate`] returns `Result<DateTime<Utc>, ZmanimError>`.
+//! [`ZmanimCalculator::calculate`](crate::calculator::ZmanimCalculator::calculate) returns
+//! `Result<DateTime<Utc>, ZmanimError>`.
 //! In edge cases (for example high latitudes on specific dates), calculations may return an error.
 //!
 //! `calculate` takes `&mut self` so repeated calculations can reuse intermediate state.
