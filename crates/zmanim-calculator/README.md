@@ -1,23 +1,27 @@
+> This crate is part of the [Rust Zmanim Project](TODO).
+
 # Zmanim Calculator
 
+A Rust library for calculating halachic zmanim (times), following KosherJava naming and behavior. Supports `no_std` environments and includes an optional C FFI.
+
+[![Crates.io](https://img.shields.io/crates/v/zmanim-calculator.svg)](https://crates.io/crates/zmanim-calculator)
+[![Documentation](https://docs.rs/zmanim-calculator/badge.svg)](https://docs.rs/zmanim-calculator)
 [![CI](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml)
-[![Codecov](https://codecov.io/gh/dickermoshe/zmanim-calculator/branch/main/graph/badge.svg)](https://codecov.io/gh/dickermoshe/zmanim-calculator)
 
-> [!NOTE]
-> This crate focuses exclusively on zmanim calculations. For related functionality, see:
->
-> - [hebrew_holiday_calendar](https://github.com/dickermoshe/hebrew_holiday_calendar) -- Hebrew holidays
-> - [limudim-calendar](https://github.com/dickermoshe/limudim-calendar) -- Learning schedules (Daf Yomi, etc.)
-> - [astronomical-calculator](https://github.com/dickermoshe/astronomical-calculator) -- General astronomical events
+## Installation
 
-## Install
+```bash
+cargo add zmanim-calculator chrono
+```
+
+Or manually add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zmanim-calculator = "0.1.0"
+zmanim-calculator = "0.1"
 ```
 
-## Rust Usage
+## Usage
 
 ```rust
 use chrono::{NaiveDate, Utc};
@@ -40,24 +44,15 @@ fn main() {
 }
 ```
 
-Notes:
-
-- `calculate` returns `DateTime<Utc>`.
-- If you omit a timezone, calculations near the anti-meridian (`|longitude| > 150`) will fail.
-- Kiddush Levana and Molad calculations require a timezone and will fail without one.
+If you omit a timezone, calculations near the anti-meridian (`|longitude| > 150`) will fail. Kiddush Levana and Molad calculations require a timezone as well.
 
 ## Feature Flags
 
-- `std`: Enables standard library support.
-- `defmt`: Enables `defmt` formatting/logging support for embedded targets.
-- `c`: Enables the C FFI surface and header generation tooling (`std` is enabled automatically).
+- **`std`** — Enables standard library support
+- **`defmt`** — Enables `defmt` formatting/logging for embedded targets
+- **`c`** — Enables the C FFI surface and header generation tooling (`std` is enabled automatically)
 
-## Compatibility and References
-
-The API aims to follow KosherJava naming and behavior where possible.
-For background and broader algorithm documentation, see the [KosherJava documentation](https://kosherjava.com/zmanim-project/how-to-use-the-zmanim-api/).
-
-## C API (`c` feature)
+## C API
 
 Pre-built libraries and the C header are available on the
 [GitHub Releases](https://github.com/dickermoshe/zmanim-calculator/releases) page
@@ -82,9 +77,12 @@ The header is written to `bindings/c/zmanim_calendar.h`.
 
 </details>
 
-See `example-c-project/` for a complete usage example (`main.c` and `build_and_run.sh`).
+See `example-c-project/` for a complete usage example.
+
+## Compatibility
+
+The API aims to follow KosherJava naming and behavior where possible. For background and broader algorithm documentation, see the [KosherJava documentation](https://kosherjava.com/zmanim-project/how-to-use-the-zmanim-api/).
 
 ## License
 
-This project is based on KosherJava, released under LGPL 2.1.
-For details, see [LICENSE](./LICENSE).
+Licensed under LGPL-2.1. See [LICENSE](LICENSE) for details.

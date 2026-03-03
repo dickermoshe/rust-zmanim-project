@@ -1,0 +1,44 @@
+[workspace]
+members = [
+    "crates/astronomical-calculator",
+    "crates/embedded-tz",
+    "crates/hebrew_holiday_calendar",
+    "crates/limudim-calendar",
+    "crates/limudim-calendar/limudim-wasm",
+    "crates/zmanim-calculator",
+]
+resolver = "2"
+
+[workspace.lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+
+[workspace.dependencies]
+# Internal crates
+astronomical-calculator = { path = "crates/astronomical-calculator", version = "0.4.1" }
+hebrew_holiday_calendar = { path = "crates/hebrew_holiday_calendar", version = "0.2.2", default-features = false }
+limudim-calendar = { path = "crates/limudim-calendar", version = "0.1.1" }
+
+# Core
+chrono = { version = "0.4.44", default-features = false }
+icu_calendar = { version = "2.0.3", features = ["unstable"], default-features = false }
+core_maths = "0.1.1"
+thiserror = { version = "2.0.18", default-features = false }
+defmt = "1.0.1"
+num_enum = { version = "0.7.5", default-features = false }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Testing
+chrono-tz = "0.10.4"
+proptest = "1.10.0"
+rand = "0.8.5"
+lazy_static = "1.5.0"
+tinystr = "0.8.2"
+j4rs = "0.25.0"
+
+[profile.release.package.limudim-wasm]
+opt-level = "s"

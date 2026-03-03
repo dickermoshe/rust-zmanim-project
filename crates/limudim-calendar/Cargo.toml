@@ -15,15 +15,9 @@ default = []
 defmt = ["dep:defmt", "hebrew_holiday_calendar/defmt"]
 
 [dependencies]
-defmt = { version = "1.0.1", optional = true }
-hebrew_holiday_calendar = { version = "0.2.2", default-features = false }
+defmt = { workspace = true, optional = true }
+hebrew_holiday_calendar.workspace = true
+icu_calendar.workspace = true
 
-[dependencies.icu_calendar]
-version = "2.0.3"
-features = ["unstable"]
-default-features = false
-
-[lints.clippy]
-unwrap_used = "warn"
-expect_used = "warn"
-panic = "warn"
+[lints]
+workspace = true

@@ -15,36 +15,17 @@ default = []
 defmt = ["dep:defmt"]
 
 [dependencies]
-defmt = { version = "1.0.1", optional = true }
-
-[dependencies.chrono]
-version = "0.4.41"
-default-features = false
-
-[dependencies.num_enum]
-version = "0.7.5"
-default-features = false
-
-[dependencies.icu_calendar]
-version = "2.0.3"
-features = ["unstable"]
-default-features = false
+defmt = { workspace = true, optional = true }
+chrono.workspace = true
+num_enum.workspace = true
+icu_calendar.workspace = true
 
 [dev-dependencies]
-chrono-tz = "0.10.4"
-lazy_static = "1.5.0"
-rand = "0.8.5"
-tinystr = "0.8.2"
-
-[dev-dependencies.j4rs]
-git = "https://github.com/astonbitecode/j4rs"
-rev = "478273"
-
-[workspace.lints.clippy]
-unwrap_used = "warn"
-expect_used = "warn"
-panic = "warn"
-
+chrono-tz.workspace = true
+lazy_static.workspace = true
+rand.workspace = true
+tinystr.workspace = true
+j4rs.workspace = true
 
 [lints]
 workspace = true

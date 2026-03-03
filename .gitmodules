@@ -1,0 +1,13 @@
+[submodule "crates/embedded-tz/tzdb"]
+	path = crates/embedded-tz/tzdb
+	url = https://github.com/eggert/tz
+
+[submodule "crates/hebrew_holiday_calendar/kosher-java"]
+	path = crates/hebrew_holiday_calendar/kosher-java
+	url = https://github.com/dickermoshe/zmanim
+	branch = icu
+
+[submodule "crates/zmanim-calculator/kosher-java"]
+	path = crates/zmanim-calculator/kosher-java
+	url = https://github.com/dickermoshe/zmanim
+	branch = icu
