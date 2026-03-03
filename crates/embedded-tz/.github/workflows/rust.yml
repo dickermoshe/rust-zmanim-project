@@ -1,0 +1,53 @@
+name: Rust
+
+on:
+  push:
+    branches:
+      - master
+      - use_bundled
+  pull_request:
+    branches:
+      - master
+      - use_bundled
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install build deps
+        run: sudo apt-get update && sudo apt-get install -y make gcc
+      - name: Build zoneinfo
+        run: bash scripts/build-tzdb.sh
+      - uses: actions-rs/toolchain@v1
+        name: Install Rust
+        with:
+          toolchain: stable
+          profile: minimal
+          components: "clippy, rustfmt"
+          default: true
+      - name: Clippy
+        run: cargo clippy
+      - name: Format
+        run: cargo fmt -- --check
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PROPTEST_CASES: "10000"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install build deps
+        run: sudo apt-get update && sudo apt-get install -y make gcc
+      - name: Build zoneinfo
+        run: bash scripts/build-tzdb.sh
+      - uses: actions-rs/toolchain@v1
+        name: Install Rust
+        with:
+          toolchain: stable
+          profile: minimal
+          default: true
+      - name: Test
+        run: cargo test --features bundled-tzdb
