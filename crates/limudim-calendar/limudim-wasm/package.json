@@ -1,0 +1,24 @@
+{
+  "name": "limudim-wasm",
+  "version": "0.1.0",
+  "description": "WASM bindings for limudim - Jewish learning schedule calculator",
+  "main": "pkg/limudim_wasm.js",
+  "scripts": {
+    "build": "wasm-pack build --target nodejs",
+    "build:web": "wasm-pack build --target web",
+    "test": "bun test"
+  },
+  "keywords": [
+    "jewish",
+    "calendar",
+    "limud",
+    "daf-yomi",
+    "wasm"
+  ],
+  "license": "LGPL-2.1",
+  "dependencies": {
+    "@faker-js/faker": "^10.2.0",
+    "@hebcal/core": "^6.0.8",
+    "@hebcal/learning": "^6.6.0"
+  }
+}
