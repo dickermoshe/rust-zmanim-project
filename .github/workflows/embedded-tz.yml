@@ -29,6 +29,9 @@ jobs:
         with:
           submodules: true
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: llvm-tools-preview
+      - uses: taiki-e/install-action@cargo-llvm-cov
       - name: Install build deps
         run: sudo apt-get update && sudo apt-get install -y make gcc
       - name: Build zoneinfo from tzdb
@@ -45,4 +48,12 @@ jobs:
       - name: Run tests
         env:
           PROPTEST_CASES: 10000
-        run: cargo test -p embedded-tz --features bundled-tzdb
+        run: cargo llvm-cov -p embedded-tz --features bundled-tzdb --no-report --verbose
+      - name: Generate Codecov report
+        run: cargo llvm-cov --codecov --output-path codecov.json --no-run
+      - name: Upload Codecov report
+        uses: codecov/codecov-action@v5
+        with:
+          files: codecov.json
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true

@@ -29,7 +29,9 @@ jobs:
           submodules: true
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          components: llvm-tools-preview
           cache: false
+      - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -43,9 +45,17 @@ jobs:
         env:
           RUST_BACKTRACE: 1
           TEST_ITERATIONS: 10000
-        run: cargo test -p hebrew_holiday_calendar --verbose
+        run: cargo llvm-cov -p hebrew_holiday_calendar --no-report --verbose
       - name: Run tests (no default features)
         env:
           RUST_BACKTRACE: 1
           TEST_ITERATIONS: 100
         run: cargo test -p hebrew_holiday_calendar --verbose --no-default-features
+      - name: Generate Codecov report
+        run: cargo llvm-cov --codecov --output-path codecov.json --no-run
+      - name: Upload Codecov report
+        uses: codecov/codecov-action@v5
+        with:
+          files: codecov.json
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
