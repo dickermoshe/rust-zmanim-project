@@ -1,0 +1,48 @@
+name: Embedded TZ
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+      - run: cargo clippy -p embedded-tz -- -D warnings
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Install build deps
+        run: sudo apt-get update && sudo apt-get install -y make gcc
+      - name: Build zoneinfo from tzdb
+        working-directory: crates/embedded-tz
+        run: |
+          make -C tzdb clean
+          make -C tzdb zic
+          rm -rf zoneinfo
+          mkdir -p zoneinfo
+          tzdb/zic -b fat -L /dev/null -d zoneinfo \
+            tzdb/africa tzdb/antarctica tzdb/asia tzdb/australasia \
+            tzdb/europe tzdb/northamerica tzdb/southamerica \
+            tzdb/etcetera tzdb/backward
+      - name: Run tests
+        env:
+          PROPTEST_CASES: 10000
+        run: cargo test -p embedded-tz --features bundled-tzdb

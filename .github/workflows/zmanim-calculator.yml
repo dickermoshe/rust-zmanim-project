@@ -1,0 +1,96 @@
+name: Zmanim Calculator
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  clippy:
+    name: Clippy (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: default-features
+            args: ""
+          - name: no-default-features
+            args: "--no-default-features"
+          - name: std
+            args: "--no-default-features --features std"
+          - name: defmt
+            args: "--no-default-features --features defmt"
+          - name: std+defmt
+            args: "--no-default-features --features std,defmt"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+      - run: cargo clippy -p zmanim-calculator ${{ matrix.args }} -- -D warnings
+
+  test:
+    name: Test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: llvm-tools-preview
+          cache: false
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: Build Java submodule
+        shell: bash
+        working-directory: crates/zmanim-calculator/kosher-java
+        run: mvn -DskipTests -Dmaven.javadoc.skip=true -Dmaven.source.skip=true package
+      - name: Run tests
+        env:
+          RUST_BACKTRACE: 1
+          TEST_ITERATIONS: 1000
+        run: cargo llvm-cov -p zmanim-calculator --no-report --verbose
+      - name: Run tests (no default features)
+        env:
+          RUST_BACKTRACE: 1
+          TEST_ITERATIONS: 100
+        run: cargo test -p zmanim-calculator --verbose --no-default-features
+      - name: Generate Codecov report
+        run: cargo llvm-cov --codecov --output-path codecov.json --no-run
+      - name: Upload Codecov report
+        uses: codecov/codecov-action@v5
+        with:
+          files: codecov.json
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+
+  example-c-project:
+    name: Example C Project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: mlugg/setup-zig@v2
+      - name: Generate C headers
+        run: cargo run -p zmanim-calculator --features c --bin build_c_headers
+      - name: Build library
+        run: cargo build -p zmanim-calculator --release --features c
+      - name: Compile and run C example
+        run: |
+          zig cc \
+            crates/zmanim-calculator/example-c-project/main.c \
+            -Ltarget/release \
+            -lzmanim_calculator \
+            -lm -lpthread -ldl \
+            -o example
+          ./example
