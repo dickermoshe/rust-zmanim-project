@@ -1,8 +1,8 @@
 use icu_calendar::{cal::Hebrew, Date};
 use limudim_calendar::LimudCalendar;
 use limudim_calendar::{
-    Amud, AmudYomiBavliDirshu, Daf, DafHashavuaBavli, DafYomiBavli, DafYomiYerushalmiVilna, Mishna,
-    MishnaYomis, Mishnas, PirkeiAvos, PirkeiAvosUnit, Side, TehillimMonthly, TehillimUnit, Tractate,
+    Amud, AmudYomiBavliDirshu, Daf, DafHashavuaBavli, DafYomiBavli, DafYomiYerushalmiVilna, Mishna, MishnaYomis,
+    Mishnas, PirkeiAvos, PirkeiAvosUnit, Side, TehillimMonthly, TehillimUnit, Tractate,
 };
 use serde::Serialize;
 use wasm_bindgen::prelude::*;

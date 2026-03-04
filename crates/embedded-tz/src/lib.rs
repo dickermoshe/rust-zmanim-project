@@ -46,9 +46,9 @@ impl Oz {
 ///
 /// * `&'a Tz` — zero cost to clone, but only valid within the lifetime `'a`.
 /// * [`RcTz`] — uses reference counting ([`Rc`]) to support shallow cloning,
-///     but is not thread-safe.
+///   but is not thread-safe.
 /// * [`ArcTz`] — uses atomic reference counting ([`Arc`]) to support shallow
-///     cloning, slightly more expensive than [`RcTz`] but is thread-safe.
+///   cloning, slightly more expensive than [`RcTz`] but is thread-safe.
 ///
 /// # Examples
 ///
@@ -57,12 +57,12 @@ impl Oz {
 /// ```
 /// # #[cfg(unix)] {
 /// use chrono::{Utc, TimeZone};
-/// use tzfile::Tz;
+/// use embedded_tz::Tz;
 ///
 /// let tz = Tz::named("America/New_York")?;
-/// let dt1 = Utc.ymd(2019, 3, 10).and_hms(6, 45, 0);
+/// let dt1 = Utc.with_ymd_and_hms(2019, 3, 10, 6, 45, 0).unwrap();
 /// assert_eq!(dt1.with_timezone(&&tz).to_string(), "2019-03-10 01:45:00 EST");
-/// let dt2 = Utc.ymd(2019, 3, 10).and_hms(7, 15, 0);
+/// let dt2 = Utc.with_ymd_and_hms(2019, 3, 10, 7, 15, 0).unwrap();
 /// assert_eq!(dt2.with_timezone(&&tz).to_string(), "2019-03-10 03:15:00 EDT");
 ///
 /// # } Ok::<_, std::io::Error>(())
@@ -133,7 +133,7 @@ impl<T: Clone + Deref<Target = Tz>> chrono::Offset for Offset<T> {
 impl<T: Deref<Target = Tz>> fmt::Display for Offset<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let suffix = &self.tz.names[usize::from(self.oz.name)..];
-        let len = suffix.find('\0').unwrap_or_else(|| suffix.len());
+        let len = suffix.find('\0').unwrap_or(suffix.len());
         f.write_str(&suffix[..len])
     }
 }
@@ -264,7 +264,7 @@ macro_rules! implements_time_zone {
     };
 }
 
-impl<'a> TimeZone for &'a Tz {
+impl TimeZone for &Tz {
     implements_time_zone!();
 }
 
@@ -418,7 +418,7 @@ impl Header {
         let mut prev_oz = ozs[0];
 
         let mut utc_to_local = Vec::with_capacity(self.tzh_timecnt + 1);
-        utc_to_local.push((i64::min_value(), prev_oz));
+        utc_to_local.push((i64::MIN, prev_oz));
         for (te, &ltt) in trans_encoded.chunks_exact(8).zip(local_time_types) {
             let oz = *ozs.get(usize::from(ltt)).ok_or(Error::InvalidType)?;
             let timestamp = BE::read_i64(te);
@@ -426,7 +426,7 @@ impl Header {
         }
 
         let mut local_to_utc = Vec::with_capacity(self.tzh_timecnt * 2 + 1);
-        local_to_utc.push((i64::min_value(), LocalResult::Single(prev_oz)));
+        local_to_utc.push((i64::MIN, LocalResult::Single(prev_oz)));
         for &(utc_ts, cur_oz) in &utc_to_local[1..] {
             let prev_local_ts = prev_oz.to_local(utc_ts);
             let cur_local_ts = cur_oz.to_local(utc_ts);
@@ -468,7 +468,7 @@ impl Tz {
     ///
     /// ```rust
     /// # #[cfg(unix)] {
-    /// use tzfile::Tz;
+    /// use embedded_tz::Tz;
     ///
     /// let content = std::fs::read("/usr/share/zoneinfo/Etc/UTC")?;
     /// let tz = Tz::parse("Etc/UTC", &content)?;
@@ -508,8 +508,8 @@ impl From<chrono::Utc> for Tz {
         };
         Self {
             names: "UTC\0".into(),
-            utc_to_local: vec![(i64::min_value(), oz)].into_boxed_slice(),
-            local_to_utc: vec![(i64::min_value(), LocalResult::Single(oz))].into_boxed_slice(),
+            utc_to_local: vec![(i64::MIN, oz)].into_boxed_slice(),
+            local_to_utc: vec![(i64::MIN, LocalResult::Single(oz))].into_boxed_slice(),
         }
     }
 }
@@ -521,8 +521,8 @@ impl From<FixedOffset> for Tz {
         let oz = Oz { offset, name: 0 };
         Self {
             names: name.into_boxed_str(),
-            utc_to_local: vec![(i64::min_value(), oz)].into_boxed_slice(),
-            local_to_utc: vec![(i64::min_value(), LocalResult::Single(oz))].into_boxed_slice(),
+            utc_to_local: vec![(i64::MIN, oz)].into_boxed_slice(),
+            local_to_utc: vec![(i64::MIN, LocalResult::Single(oz))].into_boxed_slice(),
         }
     }
 }
