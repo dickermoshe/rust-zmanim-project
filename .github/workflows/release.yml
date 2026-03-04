@@ -59,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zmanim-calculator-header
-          path: ./crates/zmanim-calculator/bindings/c/zmanim_calculator.h
+          path: ./bindings/c/zmanim_calculator.h
           if-no-files-found: error
 
   release:

@@ -84,8 +84,6 @@ jobs:
       - uses: mlugg/setup-zig@v2
       - name: Generate C headers
         run: cargo run -p zmanim-calculator --features c --bin build_c_headers
-      - name: List generated files
-        run: find crates/zmanim-calculator -type f -name '*.h' && echo '---' && ls -laR crates/zmanim-calculator/bindings/ || echo 'No bindings/ directory found'
       - name: Build library
         run: cargo build -p zmanim-calculator --release --features c
       - name: Compile and run C example
