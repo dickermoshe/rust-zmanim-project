@@ -6,7 +6,7 @@ A Rust library for calculating halachic zmanim (times), following KosherJava nam
 
 [![Crates.io](https://img.shields.io/crates/v/zmanim-calculator.svg)](https://crates.io/crates/zmanim-calculator)
 [![Documentation](https://docs.rs/zmanim-calculator/badge.svg)](https://docs.rs/zmanim-calculator)
-[![CI](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/dickermoshe/zmanim-calculator/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/dickermoshe/rust-zmanim-project/graph/badge.svg?flag=zmanim-calculator)](https://codecov.io/gh/dickermoshe/rust-zmanim-project)
 
 ## Installation
 

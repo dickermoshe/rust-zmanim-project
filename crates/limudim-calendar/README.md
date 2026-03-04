@@ -6,6 +6,7 @@ A Rust library for calculating Jewish learning schedules (limudim), including Da
 
 [![Crates.io](https://img.shields.io/crates/v/limudim-calendar.svg)](https://crates.io/crates/limudim-calendar)
 [![Documentation](https://docs.rs/limudim-calendar/badge.svg)](https://docs.rs/limudim-calendar)
+[![codecov](https://codecov.io/gh/dickermoshe/rust-zmanim-project/graph/badge.svg?flag=limudim-calendar)](https://codecov.io/gh/dickermoshe/rust-zmanim-project)
 
 ## Supported Schedules
 

@@ -55,5 +55,6 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           files: codecov.json
+          flags: astronomical-calculator
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true

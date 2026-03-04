@@ -2,6 +2,8 @@
 
 # Embedded Tz
 
+[![codecov](https://codecov.io/gh/dickermoshe/rust-zmanim-project/graph/badge.svg?flag=embedded-tz)](https://codecov.io/gh/dickermoshe/rust-zmanim-project)
+
 A `no_std` `chrono::TimeZone` implementation for TZif data, aimed at embedded deployments. Forked from the `tzfile` crate with added support for embedded environments and over-the-wire timezone updates.
 
 ## When to Use This Crate

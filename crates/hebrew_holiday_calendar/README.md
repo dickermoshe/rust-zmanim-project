@@ -6,6 +6,7 @@ A Rust library for working with the Hebrew calendar, including holidays, Torah r
 
 [![Crates.io](https://img.shields.io/crates/v/hebrew_holiday_calendar.svg)](https://crates.io/crates/hebrew_holiday_calendar)
 [![Documentation](https://docs.rs/hebrew_holiday_calendar/badge.svg)](https://docs.rs/hebrew_holiday_calendar)
+[![codecov](https://codecov.io/gh/dickermoshe/rust-zmanim-project/graph/badge.svg?flag=hebrew_holiday_calendar)](https://codecov.io/gh/dickermoshe/rust-zmanim-project)
 
 ## Installation
 

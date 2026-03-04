@@ -6,6 +6,7 @@ A high-precision Rust library for calculating solar position, sunrise/sunset tim
 
 [![Crates.io](https://img.shields.io/crates/v/astronomical-calculator.svg)](https://crates.io/crates/astronomical-calculator)
 [![Documentation](https://docs.rs/astronomical-calculator/badge.svg)](https://docs.rs/astronomical-calculator)
+[![codecov](https://codecov.io/gh/dickermoshe/rust-zmanim-project/graph/badge.svg?flag=astronomical-calculator)](https://codecov.io/gh/dickermoshe/rust-zmanim-project)
 
 ## Installation
 
