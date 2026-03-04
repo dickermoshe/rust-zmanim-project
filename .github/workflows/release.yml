@@ -34,24 +34,13 @@ jobs:
         run: rustup target add ${{ matrix.target }}
       - name: Build
         run: cargo build -p zmanim-calculator --release --features c --target ${{ matrix.target }}
-      - name: Package (unix)
-        if: matrix.archive == 'tar.gz'
-        shell: bash
+      - name: Package 
         run: |
           staging="zmanim-calculator-${{ github.event.release.tag_name }}-${{ matrix.target }}"
           mkdir "$staging"
           cp target/${{ matrix.target }}/release/libzmanim_calculator.{a,so,dylib} "$staging/" 2>/dev/null || true
           tar czf "$staging.tar.gz" "$staging"
-      - name: Package (windows)
-        if: matrix.archive == 'zip'
-        shell: pwsh
-        run: |
-          $staging = "zmanim-calculator-${{ github.event.release.tag_name }}-${{ matrix.target }}"
-          New-Item -ItemType Directory -Path $staging
-          Copy-Item "target/${{ matrix.target }}/release/zmanim_calculator.dll" -Destination $staging/ -ErrorAction SilentlyContinue
-          Copy-Item "target/${{ matrix.target }}/release/zmanim_calculator.dll.lib" -Destination $staging/ -ErrorAction SilentlyContinue
-          Copy-Item "target/${{ matrix.target }}/release/zmanim_calculator.lib" -Destination $staging/ -ErrorAction SilentlyContinue
-          Compress-Archive -Path $staging -DestinationPath "$staging.zip"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -70,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zmanim-calculator-header
-          path: bindings/c/zmanim_calculator.h
+          path: ./crates/zmanim-calculator/bindings/c/zmanim_calculator.h
           if-no-files-found: error
 
   release:
