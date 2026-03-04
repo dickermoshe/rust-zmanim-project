@@ -16,13 +16,15 @@ panic = "warn"
 
 [workspace.dependencies]
 # Internal crates
-astronomical-calculator = { path = "crates/astronomical-calculator", version = "0.4.1" }
-hebrew_holiday_calendar = { path = "crates/hebrew_holiday_calendar", version = "0.2.2", default-features = false }
-limudim-calendar = { path = "crates/limudim-calendar", version = "0.1.1" }
+astronomical-calculator = { path = "crates/astronomical-calculator" }
+hebrew_holiday_calendar = { path = "crates/hebrew_holiday_calendar", default-features = false }
+limudim-calendar = { path = "crates/limudim-calendar" }
 
 # Core
 chrono = { version = "0.4.44", default-features = false }
-icu_calendar = { version = "2.0.3", features = ["unstable"], default-features = false }
+icu_calendar = { version = "2.0.3", features = [
+    "unstable",
+], default-features = false }
 core_maths = "0.1.1"
 thiserror = { version = "2.0.18", default-features = false }
 defmt = "1.0.1"
