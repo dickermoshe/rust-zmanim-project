@@ -872,7 +872,6 @@ mod chrono_tz_tests {
         assert_eq!(after, (&*TAHITI).ymd(1912, 10, 1).and_hms(0, 58, 16));
     }
 
-
     #[test]
     #[should_panic]
     fn nonexistent_time() {

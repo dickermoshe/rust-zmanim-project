@@ -1,6 +1,6 @@
 //! Low-level zman formulas used to build higher-level presets.
 //!
-//! [`ZmanPrimitive`] is the internal expression language for zman calculations.
+//! [`ZmanPrimitive`](crate::primitive_zman::ZmanPrimitive) is the internal expression language for zman calculations.
 //! Variants represent either:
 //! - base astronomical events (for example sunrise/sunset),
 //! - transformed events (fixed offsets or degree-based offsets), or
@@ -39,25 +39,25 @@ pub enum ZmanPrimitive<'a> {
     LocalMeanTime(f64),
     /// Shabbos/Yom Tov candle lighting time based on configuration.
     CandleLighting,
-    /// A fixed time offset from another [`ZmanEvent`].
+    /// A fixed time offset from another [`ZmanPrimitive`].
     Offset(&'a ZmanPrimitive<'a>, Duration),
-    /// An offset in "shaos zmaniyos" according to the GRA from another [`ZmanEvent`].
+    /// An offset in "shaos zmaniyos" according to the GRA from another [`ZmanPrimitive`].
     ZmanisOffset(&'a ZmanPrimitive<'a>, f64),
     /// This calculates a temporal hour from the time between the two events, then adds that many temporal hours to the first event.
     ShaahZmanisBasedOffset(&'a ZmanPrimitive<'a>, &'a ZmanPrimitive<'a>, f64),
-    /// An offset expressed as a fraction of the half-day between two [`ZmanEvent`]s.
+    /// An offset expressed as a fraction of the half-day between two [`ZmanPrimitive`]s.
     HalfDayBasedOffset(&'a ZmanPrimitive<'a>, &'a ZmanPrimitive<'a>, f64),
-    /// Sof zman shma derived from two bounding [`ZmanEvent`]s.
+    /// Sof zman shma derived from two bounding [`ZmanPrimitive`]s.
     Shema(&'a ZmanPrimitive<'a>, &'a ZmanPrimitive<'a>, bool),
-    /// Mincha gedola derived from two bounding [`ZmanEvent`]s.
+    /// Mincha gedola derived from two bounding [`ZmanPrimitive`]s.
     MinchaGedola(&'a ZmanPrimitive<'a>, &'a ZmanPrimitive<'a>, bool),
-    /// Samuch le-mincha ketana derived from two bounding [`ZmanEvent`]s.
+    /// Samuch le-mincha ketana derived from two bounding [`ZmanPrimitive`]s.
     SamuchLeMinchaKetana(&'a ZmanPrimitive<'a>, &'a ZmanPrimitive<'a>, bool),
-    /// Mincha ketana derived from two bounding [`ZmanEvent`]s.
+    /// Mincha ketana derived from two bounding [`ZmanPrimitive`]s.
     MinchaKetana(&'a ZmanPrimitive<'a>, &'a ZmanPrimitive<'a>, bool),
-    /// Sof zman tefila derived from two bounding [`ZmanEvent`]s.
+    /// Sof zman tefila derived from two bounding [`ZmanPrimitive`]s.
     Tefila(&'a ZmanPrimitive<'a>, &'a ZmanPrimitive<'a>, bool),
-    /// Plag hamincha derived from two bounding [`ZmanEvent`]s.
+    /// Plag hamincha derived from two bounding [`ZmanPrimitive`]s.
     PlagHamincha(&'a ZmanPrimitive<'a>, &'a ZmanPrimitive<'a>, bool),
     /// Tzais according to the shita of Yeshivas Ateret Torah
     TzaisAteretTorah,
