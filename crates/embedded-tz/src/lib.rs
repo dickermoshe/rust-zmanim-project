@@ -65,7 +65,7 @@ impl Oz {
 /// let dt2 = Utc.with_ymd_and_hms(2019, 3, 10, 7, 15, 0).unwrap();
 /// assert_eq!(dt2.with_timezone(&&tz).to_string(), "2019-03-10 03:15:00 EDT");
 ///
-/// # } Ok::<_, std::io::Error>(())
+/// # } Ok::<_, embedded_tz::Error>(())
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Tz {
@@ -470,10 +470,10 @@ impl Tz {
     /// # #[cfg(unix)] {
     /// use embedded_tz::Tz;
     ///
-    /// let content = std::fs::read("/usr/share/zoneinfo/Etc/UTC")?;
+    /// let content = std::fs::read("/usr/share/zoneinfo/Etc/UTC").unwrap();
     /// let tz = Tz::parse("Etc/UTC", &content)?;
     ///
-    /// # } Ok::<_, Box<dyn std::error::Error>>(())
+    /// # } Ok::<_, embedded_tz::Error>(())
     /// ```
     pub fn parse(_name: &str, source: &[u8]) -> Result<Self, Error> {
         let header = Header::parse(source)?;
