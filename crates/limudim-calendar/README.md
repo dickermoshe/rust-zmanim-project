@@ -1,4 +1,4 @@
-> This crate is part of the [Rust Zmanim Project](TODO).
+> This crate is part of the [Rust Zmanim Project](https://github.com/dickermoshe/rust-zmanim-project).
 
 # Limudim Calendar
 

@@ -1,4 +1,4 @@
-> This crate is part of the [Rust Zmanim Project](TODO).
+> This crate is part of the [Rust Zmanim Project](https://github.com/dickermoshe/rust-zmanim-project).
 
 # Zmanim Calculator
 
@@ -55,7 +55,7 @@ If you omit a timezone, calculations near the anti-meridian (`|longitude| > 150`
 ## C API
 
 Pre-built libraries and the C header are available on the
-[GitHub Releases](https://github.com/dickermoshe/zmanim-calculator/releases) page
+[GitHub Releases](https://github.com/dickermoshe/rust-zmanim-project/releases) page
 for Linux, macOS, and Windows.
 
 <details>

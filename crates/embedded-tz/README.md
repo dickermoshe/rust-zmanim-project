@@ -1,4 +1,4 @@
-> This crate is part of the [Rust Zmanim Project](TODO).
+> This crate is part of the [Rust Zmanim Project](https://github.com/dickermoshe/rust-zmanim-project).
 
 # Embedded Tz
 
@@ -22,7 +22,7 @@ Add the dependency and enable `bundled-tzdb` if you want a compile-time copy of 
 
 ```toml
 [dependencies]
-embedded-tz = { git = "https://github.com/dickermoshe/embedded-tz", features = ["bundled-tzdb"] }
+embedded-tz = { git = "https://github.com/dickermoshe/rust-zmanim-project", features = ["bundled-tzdb"] }
 ```
 
 ## Usage

@@ -8,7 +8,7 @@ authors = [
 edition = "2018"
 description = "embedded/no_std chrono::TimeZone implementation for TZif data"
 license = "MIT"
-repository = "https://github.com/dickermoshe/embedded-tz"
+repository = "https://github.com/dickermoshe/rust-zmanim-project"
 
 [features]
 bundled-tzdb = []

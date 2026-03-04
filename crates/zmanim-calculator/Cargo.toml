@@ -4,8 +4,8 @@ version = "0.1.0"
 description = "A comprehensive Rust library for calculating Zmanim with no_std support"
 edition = "2021"
 license = "LGPL-2.1"
-repository = "https://github.com/dickermoshe/zmanim-calculator"
-homepage = "https://github.com/dickermoshe/zmanim-calculator"
+repository = "https://github.com/dickermoshe/rust-zmanim-project"
+homepage = "https://github.com/dickermoshe/rust-zmanim-project"
 documentation = "https://docs.rs/zmanim-calculator"
 
 [features]
