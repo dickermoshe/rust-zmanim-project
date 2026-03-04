@@ -7,11 +7,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let out_dir = Path::new("bindings").join("c");
     fs::create_dir_all(&out_dir)?;
-    let out_file = out_dir.join("zmanim_calendar.h");
+    let out_file = out_dir.join("zmanim_calculator.h");
 
     Generator::new(
         Config {
-            ifndef: "zmanim_calendar_h".to_string(),
+            ifndef: "zmanim_calculator_h".to_string(),
             ..Config::default()
         },
         zmanim_calculator::c_api::my_inventory(),
