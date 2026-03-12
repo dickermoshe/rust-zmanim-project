@@ -2,7 +2,7 @@
 
 # Zmanim Calculator
 
-A Rust library for calculating halachic zmanim (times), following KosherJava naming and behavior. Supports `no_std` environments and includes an optional C FFI.
+A Rust library for calculating halachic zmanim (times), following KosherJava naming and behavior. Supports `no_std` environments.
 
 [![Crates.io](https://img.shields.io/crates/v/zmanim-calculator.svg)](https://crates.io/crates/zmanim-calculator)
 [![Documentation](https://docs.rs/zmanim-calculator/badge.svg)](https://docs.rs/zmanim-calculator)
@@ -50,34 +50,6 @@ If you omit a timezone, calculations near the anti-meridian (`|longitude| > 150`
 
 - **`std`** — Enables standard library support
 - **`defmt`** — Enables `defmt` formatting/logging for embedded targets
-- **`c`** — Enables the C FFI surface and header generation tooling (`std` is enabled automatically)
-
-## C API
-
-Pre-built libraries and the C header are available on the
-[GitHub Releases](https://github.com/dickermoshe/rust-zmanim-project/releases) page
-for Linux, macOS, and Windows.
-
-<details>
-<summary>Building from source</summary>
-
-Generate the header:
-
-```bash
-cargo run --features c --bin build_c_headers
-```
-
-Build the C-callable library:
-
-```bash
-cargo build --release --features c
-```
-
-The header is written to `bindings/c/zmanim_calendar.h`.
-
-</details>
-
-See `example-c-project/` for a complete usage example.
 
 ## Compatibility
 

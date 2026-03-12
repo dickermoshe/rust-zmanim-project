@@ -1,6 +1,6 @@
 [package]
 name = "zmanim-calculator"
-version = "0.5.1"
+version = "0.5.2"
 description = "A comprehensive Rust library for calculating Zmanim with no_std support"
 edition = "2021"
 license = "LGPL-2.1"
@@ -15,11 +15,7 @@ default = []
 std = []
 # Enable this feature to use the defmt crate for logging.
 defmt = ["dep:defmt"]
-# Enable this feature to use the C API.
-c = ["std", "dep:interoptopus", "dep:interoptopus_backend_c"]
 
-[lib]
-crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
 astronomical-calculator.workspace = true
@@ -30,8 +26,6 @@ defmt = { workspace = true, optional = true }
 core_maths.workspace = true
 hebrew_holiday_calendar.workspace = true
 thiserror.workspace = true
-interoptopus = { version = "0.14.27", optional = true }
-interoptopus_backend_c = { version = "0.14.25", optional = true }
 
 [dev-dependencies]
 chrono = { workspace = true, features = ["std"] }

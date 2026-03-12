@@ -16,9 +16,9 @@ panic = "warn"
 
 [workspace.dependencies]
 # Internal crates
-astronomical-calculator = { path = "crates/astronomical-calculator", version = "0.5.1" }
-hebrew_holiday_calendar = { path = "crates/hebrew_holiday_calendar", default-features = false, version = "0.5.1" }
-limudim-calendar = { path = "crates/limudim-calendar", version = "0.5.1" }
+astronomical-calculator = { path = "crates/astronomical-calculator", version = "0.5.2" }
+hebrew_holiday_calendar = { path = "crates/hebrew_holiday_calendar", default-features = false, version = "0.5.2" }
+limudim-calendar = { path = "crates/limudim-calendar", version = "0.5.2" }
 
 # Core
 chrono = { version = "0.4.44", default-features = false }
