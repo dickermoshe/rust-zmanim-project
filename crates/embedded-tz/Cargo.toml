@@ -14,7 +14,7 @@ repository = "https://github.com/dickermoshe/rust-zmanim-project"
 bundled-tzdb = []
 
 [dependencies]
-byteorder = "1.3"
+byteorder = { version = "1.3", default-features = false }
 chrono.workspace = true
 
 [dev-dependencies]
