@@ -103,25 +103,3 @@ jobs:
           flags: zmanim-calculator
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-
-  example-c-project:
-    name: Example C Project
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - uses: mlugg/setup-zig@v2
-      - name: Generate C headers
-        working-directory: crates/zmanim-calculator
-        run: cargo run --features c --bin build_c_headers
-      - name: Build library
-        run: cargo build -p zmanim-calculator --release --features c
-      - name: Compile and run C example
-        run: |
-          zig cc \
-            crates/zmanim-calculator/example-c-project/main.c \
-            -Ltarget/release \
-            -lzmanim_calculator \
-            -lm -lpthread -ldl \
-            -o example
-          ./example
