@@ -2,9 +2,13 @@ use chrono::{DateTime, Datelike, TimeZone, Utc};
 use chrono_tz::Tz;
 use j4rs::{ClasspathEntry, Instance, InvocationArg, Jvm, JvmBuilder, Null};
 use rand::Rng;
+extern crate std;
 use std::env;
+use std::format;
 use std::str::FromStr;
+use std::string::String;
 use std::sync::Once;
+use std::vec::Vec;
 
 use super::*;
 

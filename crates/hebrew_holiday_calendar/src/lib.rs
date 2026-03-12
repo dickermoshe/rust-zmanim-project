@@ -32,6 +32,7 @@
 //!     println!("Parsha: {}", parsha.he());
 //! }
 //! ```
+#![no_std]
 
 use core::ops::RangeInclusive;
 use core::slice::Iter;
