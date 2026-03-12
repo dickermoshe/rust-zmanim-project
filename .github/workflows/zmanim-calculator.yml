@@ -24,17 +24,10 @@ jobs:
     name: Clippy (${{ matrix.name }})
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         include:
-          - name: default-features
-            args: ""
-          - name: no-default-features
-            args: "--no-default-features"
           - name: std
             args: "--no-default-features --features std"
-          - name: defmt
-            args: "--no-default-features --features defmt"
           - name: std+defmt
             args: "--no-default-features --features std,defmt"
     steps:
@@ -59,17 +52,10 @@ jobs:
     name: Check (${{ matrix.name }})
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         include:
-          - name: default-features
-            args: ""
-          - name: no-default-features
-            args: "--no-default-features"
           - name: std
             args: "--no-default-features --features std"
-          - name: defmt
-            args: "--no-default-features --features defmt"
           - name: std+defmt
             args: "--no-default-features --features std,defmt"
     steps:
