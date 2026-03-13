@@ -3,6 +3,7 @@ use chrono::{DateTime, TimeZone, Utc};
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq, Eq, Clone, Copy, Hash)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 /// Error types for zmanim calculations.
 pub enum ZmanimError {
     /// The provided latitude is invalid. Must be between -90 and 90 degrees.

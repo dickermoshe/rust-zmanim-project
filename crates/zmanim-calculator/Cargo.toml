@@ -18,7 +18,7 @@ defmt = ["dep:defmt"]
 
 
 [dependencies]
-astronomical-calculator.workspace = true
+astronomical-calculator = { workspace = true, features = ["defmt"] }
 icu_calendar.workspace = true
 chrono.workspace = true
 time = { version = "0.3.47", default-features = false }

@@ -1611,6 +1611,7 @@ pub struct JulianDate {
 /// - `GeometricDipOutOfRange`: Geometric dip must be in range [-5.0, 5.0] degrees
 /// - `TimeConversionError`: Invalid datetime or timestamp conversion
 #[derive(Error, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum CalculationError {
     /// ΔUT1 parameter out of valid range [-1.0, 1.0] seconds
     #[error("ΔUT1 out of range")]

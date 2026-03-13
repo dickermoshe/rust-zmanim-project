@@ -94,6 +94,7 @@ dependencies = [
  "chrono-tz",
  "core_maths",
  "csv",
+ "defmt",
  "proptest",
  "proptest-arbitrary-interop",
  "rand 0.8.5",

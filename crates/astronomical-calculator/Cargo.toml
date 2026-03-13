@@ -14,11 +14,13 @@ exclude = ["test_data/"]
 
 [features]
 default = []
+defmt = ["dep:defmt"]
 
 [dependencies]
 core_maths.workspace = true
 chrono.workspace = true
 thiserror.workspace = true
+defmt = { workspace = true, optional = true }
 
 [[example]]
 name = "lakewood_nj"
