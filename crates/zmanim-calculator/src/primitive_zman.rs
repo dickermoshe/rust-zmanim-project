@@ -20,6 +20,8 @@ use crate::{
 };
 
 /// A low-level building block for calculating zmanim.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum ZmanPrimitive<'a> {
     /// Sunrise at the configured location/date.
     Sunrise,

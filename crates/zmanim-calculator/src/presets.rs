@@ -18,6 +18,8 @@ use chrono::{DateTime, Utc};
 ///
 /// Most users should consume these predefined presets directly rather than constructing
 /// [`ZmanPrimitive`] values by hand.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct ZmanPreset<'a> {
     /// The underlying low-level computation definition for this preset.
     event: ZmanPrimitive<'a>,
