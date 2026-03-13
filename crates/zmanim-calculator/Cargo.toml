@@ -14,11 +14,11 @@ default = []
 # Enable this feature to use the standard library.
 std = []
 # Enable this feature to use the defmt crate for logging.
-defmt = ["dep:defmt"]
+defmt = ["dep:defmt", "astronomical-calculator/defmt"]
 
 
 [dependencies]
-astronomical-calculator = { workspace = true, features = ["defmt"] }
+astronomical-calculator.workspace = true
 icu_calendar.workspace = true
 chrono.workspace = true
 time = { version = "0.3.47", default-features = false }
