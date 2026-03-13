@@ -90,7 +90,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
     ///
     /// If borrow rules make your call sites awkward, clone the calculator and use each
     /// clone independently (for example, one clone for sunrise and another for sunset).
-    pub fn calculate(&mut self, zman: impl ZmanLike<Tz>) -> Result<DateTime<Utc>, ZmanimError> {
+    pub fn calculate(&mut self, zman: &impl ZmanLike<Tz>) -> Result<DateTime<Utc>, ZmanimError> {
         zman.calculate(self)
     }
 

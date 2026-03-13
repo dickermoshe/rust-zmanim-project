@@ -104,7 +104,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                 calculator.local_mean_time(date, &location, hours)
             }
             ZmanPrimitive::CandleLighting => {
-                let sunset = calculator.calculate(ZmanPrimitive::SeaLevelSunset)?;
+                let sunset = calculator.calculate(&ZmanPrimitive::SeaLevelSunset)?;
                 Ok(sunset - calculator.config.candle_lighting_offset)
             }
             ZmanPrimitive::Offset(event, duration) => {
@@ -113,8 +113,8 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
             }
             ZmanPrimitive::ZmanisOffset(event, hours) => {
                 let event_time = event.calculate(calculator)?;
-                let sunrise = calculator.calculate(ZmanPrimitive::Sunrise)?;
-                let sunset = calculator.calculate(ZmanPrimitive::Sunset)?;
+                let sunrise = calculator.calculate(&ZmanPrimitive::Sunrise)?;
+                let sunset = calculator.calculate(&ZmanPrimitive::Sunset)?;
                 let shaah_zmanis = (sunset - sunrise) / 12;
                 let offset = multiply_duration(shaah_zmanis, hours)
                     .ok_or(ZmanimError::TimeConversionError)?;
@@ -144,7 +144,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                 let event1_time = event1.calculate(calculator)?;
                 let event2_time = event2.calculate(calculator);
                 if calculator.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-                    let chatzos = calculator.calculate(ZmanPrimitive::SolarTransit)?;
+                    let chatzos = calculator.calculate(&ZmanPrimitive::SolarTransit)?;
                     let shaah_zmanis = (chatzos - event1_time) / 6;
                     let offset = multiply_duration(shaah_zmanis, 3.0)
                         .ok_or(ZmanimError::TimeConversionError)?;
@@ -161,7 +161,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                 let event1_time = event1.calculate(calculator);
                 let event2_time = event2.calculate(calculator)?;
                 if calculator.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-                    let chatzos = calculator.calculate(ZmanPrimitive::SolarTransit)?;
+                    let chatzos = calculator.calculate(&ZmanPrimitive::SolarTransit)?;
                     let shaah_zmanis = (event2_time - chatzos) / 6;
                     let offset = multiply_duration(shaah_zmanis, 0.5)
                         .ok_or(ZmanimError::TimeConversionError)?;
@@ -178,7 +178,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                 let event1_time = event1.calculate(calculator);
                 let event2_time = event2.calculate(calculator)?;
                 if calculator.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-                    let chatzos = calculator.calculate(ZmanPrimitive::SolarTransit)?;
+                    let chatzos = calculator.calculate(&ZmanPrimitive::SolarTransit)?;
                     let shaah_zmanis = (event2_time - chatzos) / 6;
                     let offset = multiply_duration(shaah_zmanis, 3.0)
                         .ok_or(ZmanimError::TimeConversionError)?;
@@ -195,7 +195,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                 let event1_time = event1.calculate(calculator);
                 let event2_time = event2.calculate(calculator)?;
                 if calculator.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-                    let chatzos = calculator.calculate(ZmanPrimitive::SolarTransit)?;
+                    let chatzos = calculator.calculate(&ZmanPrimitive::SolarTransit)?;
                     let shaah_zmanis = (event2_time - chatzos) / 6;
                     let offset = multiply_duration(shaah_zmanis, 3.5)
                         .ok_or(ZmanimError::TimeConversionError)?;
@@ -212,7 +212,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                 let event1_time = event1.calculate(calculator)?;
                 let event2_time = event2.calculate(calculator);
                 if calculator.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-                    let chatzos = calculator.calculate(ZmanPrimitive::SolarTransit)?;
+                    let chatzos = calculator.calculate(&ZmanPrimitive::SolarTransit)?;
                     let shaah_zmanis = (chatzos - event1_time) / 6;
                     let offset = multiply_duration(shaah_zmanis, 4.0)
                         .ok_or(ZmanimError::TimeConversionError)?;
@@ -229,7 +229,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                 let event1_time = event1.calculate(calculator);
                 let event2_time = event2.calculate(calculator)?;
                 if calculator.config.use_astronomical_chatzos_for_other_zmanim && synchronous {
-                    let chatzos = calculator.calculate(ZmanPrimitive::SolarTransit)?;
+                    let chatzos = calculator.calculate(&ZmanPrimitive::SolarTransit)?;
                     let shaah_zmanis = (event2_time - chatzos) / 6;
                     let offset = multiply_duration(shaah_zmanis, 4.75)
                         .ok_or(ZmanimError::TimeConversionError)?;
