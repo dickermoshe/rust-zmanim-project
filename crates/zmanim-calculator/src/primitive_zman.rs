@@ -249,9 +249,10 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
         }
     }
 }
-#[cfg(test)]
+#[cfg(feature = "_java_testing")]
 impl<'a> ZmanPrimitive<'a> {
-    pub(crate) fn uses_elevation<Tz: TimeZone>(&self, calculator: &ZmanimCalculator<Tz>) -> bool {
+    /// Whether or not the elevation is used in the calculation.
+    pub fn uses_elevation<Tz: TimeZone>(&self, calculator: &ZmanimCalculator<Tz>) -> bool {
         match self {
             ZmanPrimitive::SeaLevelSunrise => false,
             ZmanPrimitive::SeaLevelSunset => false,

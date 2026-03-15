@@ -1,0 +1,30 @@
+name: frb_example_dart_minimal
+description: flutter rust bridge example
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+dependencies:
+  lints: ^5.1.1
+  flutter_rust_bridge:
+    git:
+      url: https://github.com/fzyzcjy/flutter_rust_bridge
+      ref: f19087cd0cac019b82d52cfa5153ce81b1b6e902 # This matches v2.11.1
+      path: frb_dart
+  flutter_rust_bridge_utils:
+    git:
+      url: https://github.com/fzyzcjy/flutter_rust_bridge
+      ref: f19087cd0cac019b82d52cfa5153ce81b1b6e902 # This matches v2.11.1
+      path: frb_utils
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+  jni: ^0.15.2
+dev_dependencies:
+  test: ^1.21.4
+  freezed: ^3.0.0
+  build_runner: ^2.4.4
+  json_serializable: ^6.9.0
+  jnigen: ^0.15.0
+  hooks: ^1.0.2
+
+  

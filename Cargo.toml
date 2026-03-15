@@ -6,6 +6,7 @@ members = [
     "crates/limudim-calendar",
     "crates/limudim-calendar/limudim-wasm",
     "crates/zmanim-calculator",
+    "test/rust",
 ]
 resolver = "2"
 
@@ -19,6 +20,7 @@ panic = "warn"
 astronomical-calculator = { path = "crates/astronomical-calculator", version = "0.5.2" }
 hebrew_holiday_calendar = { path = "crates/hebrew_holiday_calendar", default-features = false, version = "0.5.2" }
 limudim-calendar = { path = "crates/limudim-calendar", version = "0.5.2" }
+zmanim-calculator = { path = "crates/zmanim-calculator", version = "0.5.2" }
 
 # Core
 chrono = { version = "0.4.44", default-features = false }

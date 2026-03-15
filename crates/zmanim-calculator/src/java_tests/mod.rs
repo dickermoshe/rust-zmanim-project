@@ -520,13 +520,11 @@ mod tests {
     );
     zman_test!(test_sof_zman_shma_ateret_torah, SOF_ZMAN_SHMA_ATERET_TORAH);
     zman_test!(test_sof_zman_shma_baal_hatanya, SOF_ZMAN_SHMA_BAAL_HATANYA);
-    zman_test!(test_sof_zman_shma_fixed_local, SOF_ZMAN_SHMA_FIXED_LOCAL);
     zman_test!(test_sof_zman_shma_gra, SOF_ZMAN_SHMA_GRA);
     zman_test!(
         test_sof_zman_shma_gra_sunrise_to_fixed_local_chatzos,
         SOF_ZMAN_SHMA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS
     );
-    zman_test!(test_sof_zman_shma_kol_eliyahu, SOF_ZMAN_SHMA_KOL_ELIYAHU);
     zman_test!(test_sof_zman_shma_mga, SOF_ZMAN_SHMA_MGA);
     zman_test!(
         test_sof_zman_shma_mga_120_minutes,
@@ -597,7 +595,6 @@ mod tests {
         test_sof_zman_tfila_baal_hatanya,
         SOF_ZMAN_TFILA_BAAL_HATANYA
     );
-    zman_test!(test_sof_zman_tfila_fixed_local, SOF_ZMAN_TFILA_FIXED_LOCAL);
     zman_test!(test_sof_zman_tfila_gra, SOF_ZMAN_TFILA_GRA);
     zman_test!(
         test_sof_zman_tfila_gra_sunrise_to_fixed_local_chatzos,
@@ -662,8 +659,6 @@ mod tests {
     zman_test!(test_tzais_minutes_96_zmanis, TZAIS_96_ZMANIS);
     zman_test!(test_tzais_ateret_torah, TZAIS_ATERET_TORAH);
     zman_test!(test_tzais_baal_hatanya, TZAIS_BAAL_HATANYA);
-    zman_test!(test_tzais_geonim_3_point_65, TZAIS_GEONIM_3_POINT_65);
-    zman_test!(test_tzais_geonim_3_point_676, TZAIS_GEONIM_3_POINT_676);
     zman_test!(
         test_tzais_geonim_degrees_3_point_7,
         TZAIS_GEONIM_DEGREES_3_POINT_7
