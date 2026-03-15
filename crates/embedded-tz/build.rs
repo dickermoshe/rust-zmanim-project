@@ -7,9 +7,9 @@ use std::path::{Path, PathBuf};
 fn main() {
     println!("cargo:rerun-if-changed=zoneinfo");
     println!("cargo:rerun-if-changed=tzdb/version");
-    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_BUNDLED_TZDB");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_BUILD_TZDB");
 
-    if env::var_os("CARGO_FEATURE_BUNDLED_TZDB").is_none() {
+    if env::var_os("CARGO_FEATURE_BUILD_TZDB").is_none() {
         return;
     }
 
