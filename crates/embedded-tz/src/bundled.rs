@@ -6,24 +6,36 @@ use super::{Error, Tz};
 include!(concat!(env!("OUT_DIR"), "/bundled_tzdb.rs"));
 
 /// Returns the IANA tzdb version used to build this bundled database.
-pub fn version() -> &'static str {
+pub const fn version() -> &'static str {
     TZ_DB_VERSION
 }
 
 /// Returns all bundled tzdb entries as `(name, raw_tzif_bytes)` pairs.
-pub fn all() -> &'static [(&'static str, &'static [u8])] {
+pub const fn all() -> &'static [(&'static str, &'static [u8])] {
     BUNDLED_TZDB
 }
+/// Returns the raw tzif bytes for a given time zone name.
+///
+/// Returns [`Error::InvalidTimeZoneFileName`] when `name` is not found in the
+/// bundled database.
+pub const fn get_bytes(name: &str) -> Result<&'static [u8], Error> {
+    let length = BUNDLED_TZDB.len();
+    let mut index = 0;
+    while index < length {
+        if BUNDLED_TZDB[index].0.eq_ignore_ascii_case(name) {
+            return Ok(BUNDLED_TZDB[index].1);
+        }
+        index += 1;
+    }
+    Err(Error::InvalidTimeZoneFileName)
+}
+
 /// Parses a named time zone from the bundled tz database.
 ///
 /// Returns [`Error::InvalidTimeZoneFileName`] when `name` is not found in the
 /// bundled database.
 pub fn parse(name: &str) -> Result<Tz, Error> {
-    let bytes = BUNDLED_TZDB
-        .iter()
-        .find(|(tz_name, _)| *tz_name == name)
-        .map(|(_, bytes)| *bytes)
-        .ok_or(Error::InvalidTimeZoneFileName)?;
+    let bytes = get_bytes(name)?;
     Tz::parse(name, bytes)
 }
 #[cfg(test)]

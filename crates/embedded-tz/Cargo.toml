@@ -11,6 +11,7 @@ license = "MIT"
 repository = "https://github.com/dickermoshe/rust-zmanim-project"
 
 [features]
+default = ["bundled-tzdb"]
 # If you want to use the bundled tzdb, you can enable this feature.
 bundled-tzdb = []
 # If you want to build the tzdb yourself, you can enable this feature.
