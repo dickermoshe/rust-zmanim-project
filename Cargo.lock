@@ -475,6 +475,7 @@ dependencies = [
  "chrono",
  "chrono-tz",
  "criterion",
+ "defmt",
  "lazy_static",
  "proptest",
 ]

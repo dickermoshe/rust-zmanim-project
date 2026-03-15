@@ -81,6 +81,13 @@ pub struct Tz {
     local_to_utc: Box<[(i64, LocalResult<Oz>)]>,
 }
 
+#[cfg(feature = "defmt")]
+impl defmt::Format for Tz {
+    fn format(&self, f: defmt::Formatter) {
+        defmt::write!(f, "Tz {{ names: {} }}", self.names);
+    }
+}
+
 /// Extracts the lower bound index from the result of standard `binary_search`.
 fn to_lower_bound(bsr: Result<usize, usize>) -> usize {
     bsr.unwrap_or_else(|i| i - 1)
@@ -149,6 +156,7 @@ impl<T: Deref<Target = Tz>> fmt::Debug for Offset<T> {
 /// This type is equivalent to [`Rc`]`<`[`Tz`]`>`, but needed to workaround
 /// Rust's coherence rule to implement [`TimeZone`].
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct RcTz(pub Rc<Tz>);
 
 impl RcTz {
@@ -187,6 +195,7 @@ impl From<Tz> for RcTz {
 /// This type is equivalent to [`Arc`]`<`[`Tz`]`>`, but needed to workaround
 /// Rust's coherence rule to implement [`TimeZone`].
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct ArcTz(pub Arc<Tz>);
 
 impl ArcTz {
@@ -278,6 +287,7 @@ impl TimeZone for ArcTz {
 
 /// Parse errors from [`Tz::parse()`].
 #[derive(Debug, PartialEq, Eq, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Error {
     /// The source bytes is too short to parse the header.
     HeaderTooShort,

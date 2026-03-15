@@ -11,16 +11,20 @@ license = "MIT"
 repository = "https://github.com/dickermoshe/rust-zmanim-project"
 
 [features]
-default = ["bundled-tzdb"]
+default = []
+# If you want to use the defmt crate for logging, you can enable this feature.
+defmt = ["dep:defmt"]
 # If you want to use the bundled tzdb, you can enable this feature.
 bundled-tzdb = []
 # If you want to build the tzdb yourself, you can enable this feature.
 # This only works on Linux.
 build-tzdb = ["bundled-tzdb"]
 
+
 [dependencies]
 byteorder = { version = "1.3", default-features = false }
 chrono.workspace = true
+defmt = { workspace = true, optional = true, features = ["alloc"] }
 
 [dev-dependencies]
 lazy_static.workspace = true
