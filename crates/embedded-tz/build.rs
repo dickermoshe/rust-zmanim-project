@@ -35,13 +35,16 @@ fn generate_bundled_tzdb() -> io::Result<()> {
     collect_regular_files(&zoneinfo_root, &mut paths)?;
     paths.sort();
 
-    let out_file = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bundled_tzdb.rs");
-    let mut out = fs::File::create(out_file)?;
+    let out_file = manifest_dir.join("src").join("bundled_tzdb.rs");
+    let mut generated = Vec::new();
     let tzdb_version = read_tzdb_version(&manifest_dir)?;
 
-    writeln!(out, "pub const TZ_DB_VERSION: &str = {tzdb_version:?};")?;
+    writeln!(
+        generated,
+        "pub const TZ_DB_VERSION: &str = {tzdb_version:?};"
+    )?;
 
-    writeln!(out, "pub static BUNDLED_TZDB: &[(&str, &[u8])] = &[")?;
+    writeln!(generated, "pub static BUNDLED_TZDB: &[(&str, &[u8])] = &[")?;
 
     for path in paths {
         let bytes = fs::read(&path)?;
@@ -53,11 +56,16 @@ fn generate_bundled_tzdb() -> io::Result<()> {
             .strip_prefix(&zoneinfo_root)
             .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "strip_prefix failed"))?;
         let rel_norm = rel.to_string_lossy().replace('\\', "/");
-        let include_path = path.to_string_lossy().replace('\\', "/");
-        writeln!(out, "    ({rel_norm:?}, include_bytes!({include_path:?})),")?;
+        writeln!(
+            generated,
+            "    ({rel_norm:?}, include_bytes!(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/zoneinfo/{rel_norm}\"))),"
+        )?;
     }
 
-    writeln!(out, "];")?;
+    writeln!(generated, "];")?;
+    if fs::read(&out_file).ok().as_deref() != Some(generated.as_slice()) {
+        fs::write(out_file, generated)?;
+    }
     Ok(())
 }
 

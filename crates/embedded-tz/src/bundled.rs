@@ -3,7 +3,7 @@
 //! This module is available when the `bundled-tzdb` feature is enabled.
 use super::{Error, Tz};
 
-include!(concat!(env!("OUT_DIR"), "/bundled_tzdb.rs"));
+include!("bundled_tzdb.rs");
 
 /// Returns the IANA tzdb version used to build this bundled database.
 pub const fn version() -> &'static str {
