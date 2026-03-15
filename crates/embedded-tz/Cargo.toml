@@ -11,7 +11,7 @@ license = "MIT"
 repository = "https://github.com/dickermoshe/rust-zmanim-project"
 
 [features]
-default = []
+default = ["bundled-tzdb"]
 # If you want to use the defmt crate for logging, you can enable this feature.
 defmt = ["dep:defmt"]
 # If you want to use the bundled tzdb, you can enable this feature.

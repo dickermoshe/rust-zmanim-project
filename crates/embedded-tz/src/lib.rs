@@ -173,7 +173,7 @@ impl RcTz {
     /// This function is currently only supported when the `bundled-tzdb` feature is enabled.
     #[cfg(feature = "bundled-tzdb")]
     pub fn named(name: &str) -> Result<Self, Error> {
-        bundled::parse(name).map(Self::new)
+        bundled::get_tz(name).map(Self::new)
     }
 }
 
@@ -213,7 +213,7 @@ impl ArcTz {
     /// This function is currently only supported when the `bundled-tzdb` feature is enabled.
     #[cfg(feature = "bundled-tzdb")]
     pub fn named(name: &str) -> Result<Self, Error> {
-        bundled::parse(name).map(Self::new)
+        bundled::get_tz(name).map(Self::new)
     }
 }
 
@@ -505,7 +505,7 @@ impl Tz {
     /// This function is currently only supported when the `bundled-tzdb` feature is enabled.
     #[cfg(feature = "bundled-tzdb")]
     pub fn named(name: &str) -> Result<Self, Error> {
-        bundled::parse(name).map_err(|_| Error::InvalidTimeZoneFileName)
+        bundled::get_tz(name).map_err(|_| Error::InvalidTimeZoneFileName)
     }
 }
 

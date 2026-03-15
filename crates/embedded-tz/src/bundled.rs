@@ -14,11 +14,37 @@ pub const fn version() -> &'static str {
 pub const fn all() -> &'static [(&'static str, &'static [u8])] {
     BUNDLED_TZDB
 }
-/// Returns the raw tzif bytes for a given time zone name.
+/// Returns the raw TZif bytes for a bundled time zone.
+///
+/// Lookup is case-insensitive (`"Europe/Jerusalem"` and `"europe/jerusalem"`
+/// are treated the same).
+///
+/// # Panics
+///
+/// Panics when `name` does not exist in the bundled database.
+///
+/// This is intended for const/static initialization where a missing zone should
+/// fail fast at compile time or startup.
+pub const fn get_tz_bytes_or_panic(name: &str) -> &'static [u8] {
+    let length = BUNDLED_TZDB.len();
+    let mut index = 0;
+    while index < length {
+        if BUNDLED_TZDB[index].0.eq_ignore_ascii_case(name) {
+            return BUNDLED_TZDB[index].1;
+        }
+        index += 1;
+    }
+    panic!();
+}
+
+/// Returns the raw TZif bytes for a bundled time zone.
+///
+/// Lookup is case-insensitive (`"Europe/Jerusalem"` and `"europe/jerusalem"`
+/// are treated the same).
 ///
 /// Returns [`Error::InvalidTimeZoneFileName`] when `name` is not found in the
 /// bundled database.
-pub const fn get_bytes(name: &str) -> Result<&'static [u8], Error> {
+fn get_bytes(name: &str) -> Result<&'static [u8], Error> {
     let length = BUNDLED_TZDB.len();
     let mut index = 0;
     while index < length {
@@ -34,7 +60,7 @@ pub const fn get_bytes(name: &str) -> Result<&'static [u8], Error> {
 ///
 /// Returns [`Error::InvalidTimeZoneFileName`] when `name` is not found in the
 /// bundled database.
-pub fn parse(name: &str) -> Result<Tz, Error> {
+pub fn get_tz(name: &str) -> Result<Tz, Error> {
     let bytes = get_bytes(name)?;
     Tz::parse(name, bytes)
 }
@@ -46,7 +72,7 @@ mod tests {
     use proptest::prelude::*;
     use std::vec::Vec;
 
-    use crate::bundled::{all, parse};
+    use crate::bundled::{all, get_tz};
 
     fn bundled_entry_strategy() -> impl Strategy<Value = &'static str> {
         let entries = all()
@@ -76,13 +102,13 @@ mod tests {
     #[test]
     fn parse_all() {
         for o in all() {
-            let _ = parse(o.0).unwrap();
+            let _ = get_tz(o.0).unwrap();
         }
     }
 
     #[test]
     fn bundled_matches_chrono_tz_second_offsets_amsterdam() {
-        let our_tz = parse("Europe/Amsterdam").expect("bundled Europe/Amsterdam should parse");
+        let our_tz = get_tz("Europe/Amsterdam").expect("bundled Europe/Amsterdam should parse");
         let chrono_tz = "Europe/Amsterdam"
             .parse::<chrono_tz::Tz>()
             .expect("chrono-tz Europe/Amsterdam should parse");
@@ -116,7 +142,7 @@ mod tests {
             // Limit the upper bound to 10 years from test execution time.
             ts in chrono::DateTime::<Utc>::MIN_UTC.timestamp()..max_test_timestamp()
         ) {
-            let our_tz = parse(tz_name).map_err(|e| {
+            let our_tz = get_tz(tz_name).map_err(|e| {
                 TestCaseError::fail(std::format!("embedded-tz parse failed for {tz_name}: {e:?}"))
             })?;
             let utc = Utc.timestamp_opt(ts, 0).single().ok_or_else(|| {
