@@ -16,7 +16,7 @@ void main(List<String> args) {
         ),
       ),
       // Optional. List of directories that contain the source files for which to generate bindings.
-      sourcePath: [packageRoot.resolve('./kosher-java/src/main/java')],
+      sourcePath: [packageRoot.resolve('../../zmanim-modern/src/main/java')],
       // Required. List of classes or packages for which bindings should be generated.
       classes: [
         // KosherJava

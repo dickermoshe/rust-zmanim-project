@@ -29,7 +29,9 @@ List<String> timezones() => RustLib.instance.api.crateApiTimezones();
         required double longitude,
         required double elevation,
         required String timezone,
-        required PlatformInt64 millisecondsSinceEpoch,
+        required PlatformInt64 randomYear,
+        required PlatformInt64 randomMonth,
+        required PlatformInt64 randomDay,
         required ZmanimPreset zman}) =>
     RustLib.instance.api.crateApiCalculateZman(
         ateretTorahSunsetOffsetMinutes: ateretTorahSunsetOffsetMinutes,
@@ -40,7 +42,9 @@ List<String> timezones() => RustLib.instance.api.crateApiTimezones();
         longitude: longitude,
         elevation: elevation,
         timezone: timezone,
-        millisecondsSinceEpoch: millisecondsSinceEpoch,
+        randomYear: randomYear,
+        randomMonth: randomMonth,
+        randomDay: randomDay,
         zman: zman);
 
 List<ZmanimPreset> presets() => RustLib.instance.api.crateApiPresets();

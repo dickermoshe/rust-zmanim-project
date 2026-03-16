@@ -47,7 +47,7 @@ void main(List<String> args) async {
     output.dependencies.addAll(dependencies);
 
     // Build the Java crate
-    final javaDir = input.packageRoot.resolve('kosher-java');
+    final javaDir = input.packageRoot.resolve('../../zmanim-modern');
     await runCommand(
       'mvn',
       [
@@ -56,7 +56,7 @@ void main(List<String> args) async {
         '-Dmaven.test.skip=true',
         '-Dmaven.javadoc.skip=true',
         '-Dmaven.source.skip=true',
-        'jar:jar'
+        'package'
       ],
       pwd: javaDir.toFilePath(),
       printCommandInStderr: true,

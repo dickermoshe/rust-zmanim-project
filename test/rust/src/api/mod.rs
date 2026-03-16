@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use chrono::{Duration, TimeZone};
+use chrono::{Duration, NaiveDate, TimeZone};
 use chrono_tz::{Tz, TZ_VARIANTS};
 use flutter_rust_bridge::frb;
 use lazy_static::lazy_static;
@@ -48,18 +48,21 @@ pub fn calculate_zman(
     longitude: f64,
     elevation: f64,
     timezone: String,
-    milliseconds_since_epoch: i64,
+    random_year: i64,
+    random_month: i64,
+    random_day: i64,
     zman: &ZmanimPreset,
 ) -> Option<(String, i64)> {
     let tz = Tz::from_str(&timezone).unwrap();
-    let datetime = tz.timestamp_millis_opt(milliseconds_since_epoch).single()?;
+    let date = NaiveDate::from_ymd_opt(random_year as i32, random_month as u32, random_day as u32)
+        .unwrap();
     let location = Location::new(latitude, longitude, elevation, Some(tz)).ok()?;
     let config = CalculatorConfig {
         ateret_torah_sunset_offset: Duration::minutes(ateret_torah_sunset_offset_minutes),
         candle_lighting_offset: Duration::minutes(candle_lighting_offset_minutes),
         use_astronomical_chatzos_for_other_zmanim,
     };
-    let mut calculator = ZmanimCalculator::new(location, datetime.date_naive(), config).ok()?;
+    let mut calculator = ZmanimCalculator::new(location, date, config).ok()?;
     let zman = calculator.calculate(zman.zman).ok()?;
     let at_tz = zman.with_timezone(&tz);
     Some((at_tz.to_string(), zman.timestamp_millis()))

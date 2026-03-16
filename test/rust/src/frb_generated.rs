@@ -122,7 +122,9 @@ fn wire__crate__api__calculate_zman_impl(
             let api_longitude = <f64>::sse_decode(&mut deserializer);
             let api_elevation = <f64>::sse_decode(&mut deserializer);
             let api_timezone = <String>::sse_decode(&mut deserializer);
-            let api_milliseconds_since_epoch = <i64>::sse_decode(&mut deserializer);
+            let api_random_year = <i64>::sse_decode(&mut deserializer);
+            let api_random_month = <i64>::sse_decode(&mut deserializer);
+            let api_random_day = <i64>::sse_decode(&mut deserializer);
             let api_zman = <RustOpaqueMoi<
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ZmanimPreset>,
             >>::sse_decode(&mut deserializer);
@@ -150,7 +152,9 @@ fn wire__crate__api__calculate_zman_impl(
                     api_longitude,
                     api_elevation,
                     api_timezone,
-                    api_milliseconds_since_epoch,
+                    api_random_year,
+                    api_random_month,
+                    api_random_day,
                     &*api_zman_guard,
                 ))?;
                 Ok(output_ok)

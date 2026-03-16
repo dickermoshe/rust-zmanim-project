@@ -89,7 +89,9 @@ abstract class RustLibApi extends BaseApi {
       required double longitude,
       required double elevation,
       required String timezone,
-      required PlatformInt64 millisecondsSinceEpoch,
+      required PlatformInt64 randomYear,
+      required PlatformInt64 randomMonth,
+      required PlatformInt64 randomDay,
       required ZmanimPreset zman});
 
   String crateApiFindTimezone(
@@ -153,7 +155,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       required double longitude,
       required double elevation,
       required String timezone,
-      required PlatformInt64 millisecondsSinceEpoch,
+      required PlatformInt64 randomYear,
+      required PlatformInt64 randomMonth,
+      required PlatformInt64 randomDay,
       required ZmanimPreset zman}) {
     return handler.executeSync(SyncTask(
       callFfi: () {
@@ -165,7 +169,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_f_64(longitude, serializer);
         sse_encode_f_64(elevation, serializer);
         sse_encode_String(timezone, serializer);
-        sse_encode_i_64(millisecondsSinceEpoch, serializer);
+        sse_encode_i_64(randomYear, serializer);
+        sse_encode_i_64(randomMonth, serializer);
+        sse_encode_i_64(randomDay, serializer);
         sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerZmanimPreset(
             zman, serializer);
         return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
@@ -183,7 +189,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         longitude,
         elevation,
         timezone,
-        millisecondsSinceEpoch,
+        randomYear,
+        randomMonth,
+        randomDay,
         zman
       ],
       apiImpl: this,
@@ -200,7 +208,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           "longitude",
           "elevation",
           "timezone",
-          "millisecondsSinceEpoch",
+          "randomYear",
+          "randomMonth",
+          "randomDay",
           "zman"
         ],
       );

@@ -161,7 +161,7 @@ class ZonedDateTime extends jni$_.JObject {
   /// from: `static public java.time.ZonedDateTime of(java.time.LocalDate localDate, java.time.LocalTime localTime, java.time.ZoneId zoneId)`
   /// The returned object must be released after use, by calling the [release] method.
   static ZonedDateTime? of(
-    jni$_.JObject? localDate,
+    LocalDate? localDate,
     jni$_.JObject? localTime,
     ZoneId? zoneId,
   ) {
@@ -867,10 +867,10 @@ class ZonedDateTime extends jni$_.JObject {
 
   /// from: `public java.time.LocalDate toLocalDate()`
   /// The returned object must be released after use, by calling the [release] method.
-  jni$_.JObject? toLocalDate() {
+  LocalDate? toLocalDate() {
     return _toLocalDate(
             reference.pointer, _id_toLocalDate as jni$_.JMethodIDPtr)
-        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+        .object<LocalDate?>(const $LocalDate$NullableType$());
   }
 
   static final _id_getYear = _class.instanceMethodId(
@@ -2578,7 +2578,7 @@ class LocalDateTime extends jni$_.JObject {
   /// from: `static public java.time.LocalDateTime of(java.time.LocalDate localDate, java.time.LocalTime localTime)`
   /// The returned object must be released after use, by calling the [release] method.
   static LocalDateTime? of$6(
-    jni$_.JObject? localDate,
+    LocalDate? localDate,
     jni$_.JObject? localTime,
   ) {
     final _$localDate = localDate?.reference ?? jni$_.jNullReference;
@@ -2900,10 +2900,10 @@ class LocalDateTime extends jni$_.JObject {
 
   /// from: `public java.time.LocalDate toLocalDate()`
   /// The returned object must be released after use, by calling the [release] method.
-  jni$_.JObject? toLocalDate() {
+  LocalDate? toLocalDate() {
     return _toLocalDate(
             reference.pointer, _id_toLocalDate as jni$_.JMethodIDPtr)
-        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+        .object<LocalDate?>(const $LocalDate$NullableType$());
   }
 
   static final _id_getYear = _class.instanceMethodId(
@@ -4377,6 +4377,1952 @@ final class $LocalDateTime$Type$ extends jni$_.JType<LocalDateTime> {
   bool operator ==(Object other) {
     return other.runtimeType == ($LocalDateTime$Type$) &&
         other is $LocalDateTime$Type$;
+  }
+}
+
+/// from: `java.time.LocalDate`
+class LocalDate extends jni$_.JObject {
+  @jni$_.internal
+  @core$_.override
+  final jni$_.JType<LocalDate> $type;
+
+  @jni$_.internal
+  LocalDate.fromReference(
+    jni$_.JReference reference,
+  )   : $type = type,
+        super.fromReference(reference);
+
+  static final _class = jni$_.JClass.forName(r'java/time/LocalDate');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<LocalDate?> nullableType =
+      $LocalDate$NullableType$();
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<LocalDate> type = $LocalDate$Type$();
+  static final _id_MIN = _class.staticFieldId(
+    r'MIN',
+    r'Ljava/time/LocalDate;',
+  );
+
+  /// from: `static public final java.time.LocalDate MIN`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? get MIN =>
+      _id_MIN.get(_class, const $LocalDate$NullableType$());
+
+  static final _id_MAX = _class.staticFieldId(
+    r'MAX',
+    r'Ljava/time/LocalDate;',
+  );
+
+  /// from: `static public final java.time.LocalDate MAX`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? get MAX =>
+      _id_MAX.get(_class, const $LocalDate$NullableType$());
+
+  static final _id_EPOCH = _class.staticFieldId(
+    r'EPOCH',
+    r'Ljava/time/LocalDate;',
+  );
+
+  /// from: `static public final java.time.LocalDate EPOCH`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? get EPOCH =>
+      _id_EPOCH.get(_class, const $LocalDate$NullableType$());
+
+  static final _id_now = _class.staticMethodId(
+    r'now',
+    r'()Ljava/time/LocalDate;',
+  );
+
+  static final _now = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `static public java.time.LocalDate now()`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? now() {
+    return _now(_class.reference.pointer, _id_now as jni$_.JMethodIDPtr)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_now$1 = _class.staticMethodId(
+    r'now',
+    r'(Ljava/time/ZoneId;)Ljava/time/LocalDate;',
+  );
+
+  static final _now$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `static public java.time.LocalDate now(java.time.ZoneId zoneId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? now$1(
+    ZoneId? zoneId,
+  ) {
+    final _$zoneId = zoneId?.reference ?? jni$_.jNullReference;
+    return _now$1(_class.reference.pointer, _id_now$1 as jni$_.JMethodIDPtr,
+            _$zoneId.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_now$2 = _class.staticMethodId(
+    r'now',
+    r'(Ljava/time/Clock;)Ljava/time/LocalDate;',
+  );
+
+  static final _now$2 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `static public java.time.LocalDate now(java.time.Clock clock)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? now$2(
+    jni$_.JObject? clock,
+  ) {
+    final _$clock = clock?.reference ?? jni$_.jNullReference;
+    return _now$2(_class.reference.pointer, _id_now$2 as jni$_.JMethodIDPtr,
+            _$clock.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_of = _class.staticMethodId(
+    r'of',
+    r'(ILjava/time/Month;I)Ljava/time/LocalDate;',
+  );
+
+  static final _of = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<
+                      (
+                        jni$_.Int32,
+                        jni$_.Pointer<jni$_.Void>,
+                        jni$_.Int32
+                      )>)>>('globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, int, jni$_.Pointer<jni$_.Void>, int)>();
+
+  /// from: `static public java.time.LocalDate of(int i, java.time.Month month, int i1)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? of(
+    int i,
+    jni$_.JObject? month,
+    int i1,
+  ) {
+    final _$month = month?.reference ?? jni$_.jNullReference;
+    return _of(_class.reference.pointer, _id_of as jni$_.JMethodIDPtr, i,
+            _$month.pointer, i1)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_of$1 = _class.staticMethodId(
+    r'of',
+    r'(III)Ljava/time/LocalDate;',
+  );
+
+  static final _of$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Int32, jni$_.Int32, jni$_.Int32)>)>>(
+          'globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int, int)>();
+
+  /// from: `static public java.time.LocalDate of(int i, int i1, int i2)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? of$1(
+    int i,
+    int i1,
+    int i2,
+  ) {
+    return _of$1(
+            _class.reference.pointer, _id_of$1 as jni$_.JMethodIDPtr, i, i1, i2)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_ofYearDay = _class.staticMethodId(
+    r'ofYearDay',
+    r'(II)Ljava/time/LocalDate;',
+  );
+
+  static final _ofYearDay = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Int32, jni$_.Int32)>)>>(
+          'globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int)>();
+
+  /// from: `static public java.time.LocalDate ofYearDay(int i, int i1)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? ofYearDay(
+    int i,
+    int i1,
+  ) {
+    return _ofYearDay(_class.reference.pointer,
+            _id_ofYearDay as jni$_.JMethodIDPtr, i, i1)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_ofInstant = _class.staticMethodId(
+    r'ofInstant',
+    r'(Ljava/time/Instant;Ljava/time/ZoneId;)Ljava/time/LocalDate;',
+  );
+
+  static final _ofInstant = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<
+                      (
+                        jni$_.Pointer<jni$_.Void>,
+                        jni$_.Pointer<jni$_.Void>
+                      )>)>>('globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `static public java.time.LocalDate ofInstant(java.time.Instant instant, java.time.ZoneId zoneId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? ofInstant(
+    Instant? instant,
+    ZoneId? zoneId,
+  ) {
+    final _$instant = instant?.reference ?? jni$_.jNullReference;
+    final _$zoneId = zoneId?.reference ?? jni$_.jNullReference;
+    return _ofInstant(
+            _class.reference.pointer,
+            _id_ofInstant as jni$_.JMethodIDPtr,
+            _$instant.pointer,
+            _$zoneId.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_ofEpochDay = _class.staticMethodId(
+    r'ofEpochDay',
+    r'(J)Ljava/time/LocalDate;',
+  );
+
+  static final _ofEpochDay = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr, jni$_.VarArgs<(jni$_.Int64,)>)>>(
+          'globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `static public java.time.LocalDate ofEpochDay(long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? ofEpochDay(
+    int j,
+  ) {
+    return _ofEpochDay(
+            _class.reference.pointer, _id_ofEpochDay as jni$_.JMethodIDPtr, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_from = _class.staticMethodId(
+    r'from',
+    r'(Ljava/time/temporal/TemporalAccessor;)Ljava/time/LocalDate;',
+  );
+
+  static final _from = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `static public java.time.LocalDate from(java.time.temporal.TemporalAccessor temporalAccessor)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? from(
+    jni$_.JObject? temporalAccessor,
+  ) {
+    final _$temporalAccessor =
+        temporalAccessor?.reference ?? jni$_.jNullReference;
+    return _from(_class.reference.pointer, _id_from as jni$_.JMethodIDPtr,
+            _$temporalAccessor.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_parse = _class.staticMethodId(
+    r'parse',
+    r'(Ljava/lang/CharSequence;)Ljava/time/LocalDate;',
+  );
+
+  static final _parse = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `static public java.time.LocalDate parse(java.lang.CharSequence charSequence)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? parse(
+    jni$_.JObject? charSequence,
+  ) {
+    final _$charSequence = charSequence?.reference ?? jni$_.jNullReference;
+    return _parse(_class.reference.pointer, _id_parse as jni$_.JMethodIDPtr,
+            _$charSequence.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_parse$1 = _class.staticMethodId(
+    r'parse',
+    r'(Ljava/lang/CharSequence;Ljava/time/format/DateTimeFormatter;)Ljava/time/LocalDate;',
+  );
+
+  static final _parse$1 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<
+                      (
+                        jni$_.Pointer<jni$_.Void>,
+                        jni$_.Pointer<jni$_.Void>
+                      )>)>>('globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `static public java.time.LocalDate parse(java.lang.CharSequence charSequence, java.time.format.DateTimeFormatter dateTimeFormatter)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static LocalDate? parse$1(
+    jni$_.JObject? charSequence,
+    jni$_.JObject? dateTimeFormatter,
+  ) {
+    final _$charSequence = charSequence?.reference ?? jni$_.jNullReference;
+    final _$dateTimeFormatter =
+        dateTimeFormatter?.reference ?? jni$_.jNullReference;
+    return _parse$1(_class.reference.pointer, _id_parse$1 as jni$_.JMethodIDPtr,
+            _$charSequence.pointer, _$dateTimeFormatter.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_isSupported = _class.instanceMethodId(
+    r'isSupported',
+    r'(Ljava/time/temporal/TemporalField;)Z',
+  );
+
+  static final _isSupported = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public boolean isSupported(java.time.temporal.TemporalField temporalField)`
+  bool isSupported(
+    jni$_.JObject? temporalField,
+  ) {
+    final _$temporalField = temporalField?.reference ?? jni$_.jNullReference;
+    return _isSupported(reference.pointer,
+            _id_isSupported as jni$_.JMethodIDPtr, _$temporalField.pointer)
+        .boolean;
+  }
+
+  static final _id_isSupported$1 = _class.instanceMethodId(
+    r'isSupported',
+    r'(Ljava/time/temporal/TemporalUnit;)Z',
+  );
+
+  static final _isSupported$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public boolean isSupported(java.time.temporal.TemporalUnit temporalUnit)`
+  bool isSupported$1(
+    jni$_.JObject? temporalUnit,
+  ) {
+    final _$temporalUnit = temporalUnit?.reference ?? jni$_.jNullReference;
+    return _isSupported$1(reference.pointer,
+            _id_isSupported$1 as jni$_.JMethodIDPtr, _$temporalUnit.pointer)
+        .boolean;
+  }
+
+  static final _id_range = _class.instanceMethodId(
+    r'range',
+    r'(Ljava/time/temporal/TemporalField;)Ljava/time/temporal/ValueRange;',
+  );
+
+  static final _range = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.temporal.ValueRange range(java.time.temporal.TemporalField temporalField)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? range(
+    jni$_.JObject? temporalField,
+  ) {
+    final _$temporalField = temporalField?.reference ?? jni$_.jNullReference;
+    return _range(reference.pointer, _id_range as jni$_.JMethodIDPtr,
+            _$temporalField.pointer)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_get = _class.instanceMethodId(
+    r'get',
+    r'(Ljava/time/temporal/TemporalField;)I',
+  );
+
+  static final _get = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public int get(java.time.temporal.TemporalField temporalField)`
+  int get(
+    jni$_.JObject? temporalField,
+  ) {
+    final _$temporalField = temporalField?.reference ?? jni$_.jNullReference;
+    return _get(reference.pointer, _id_get as jni$_.JMethodIDPtr,
+            _$temporalField.pointer)
+        .integer;
+  }
+
+  static final _id_getLong = _class.instanceMethodId(
+    r'getLong',
+    r'(Ljava/time/temporal/TemporalField;)J',
+  );
+
+  static final _getLong = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallLongMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public long getLong(java.time.temporal.TemporalField temporalField)`
+  int getLong(
+    jni$_.JObject? temporalField,
+  ) {
+    final _$temporalField = temporalField?.reference ?? jni$_.jNullReference;
+    return _getLong(reference.pointer, _id_getLong as jni$_.JMethodIDPtr,
+            _$temporalField.pointer)
+        .long;
+  }
+
+  static final _id_getChronology = _class.instanceMethodId(
+    r'getChronology',
+    r'()Ljava/time/chrono/IsoChronology;',
+  );
+
+  static final _getChronology = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.time.chrono.IsoChronology getChronology()`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? getChronology() {
+    return _getChronology(
+            reference.pointer, _id_getChronology as jni$_.JMethodIDPtr)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_getEra = _class.instanceMethodId(
+    r'getEra',
+    r'()Ljava/time/chrono/IsoEra;',
+  );
+
+  static final _getEra = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.time.chrono.IsoEra getEra()`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? getEra() {
+    return _getEra(reference.pointer, _id_getEra as jni$_.JMethodIDPtr)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_getYear = _class.instanceMethodId(
+    r'getYear',
+    r'()I',
+  );
+
+  static final _getYear = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getYear()`
+  int getYear() {
+    return _getYear(reference.pointer, _id_getYear as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getMonthValue = _class.instanceMethodId(
+    r'getMonthValue',
+    r'()I',
+  );
+
+  static final _getMonthValue = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getMonthValue()`
+  int getMonthValue() {
+    return _getMonthValue(
+            reference.pointer, _id_getMonthValue as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getMonth = _class.instanceMethodId(
+    r'getMonth',
+    r'()Ljava/time/Month;',
+  );
+
+  static final _getMonth = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.time.Month getMonth()`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? getMonth() {
+    return _getMonth(reference.pointer, _id_getMonth as jni$_.JMethodIDPtr)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_getDayOfMonth = _class.instanceMethodId(
+    r'getDayOfMonth',
+    r'()I',
+  );
+
+  static final _getDayOfMonth = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getDayOfMonth()`
+  int getDayOfMonth() {
+    return _getDayOfMonth(
+            reference.pointer, _id_getDayOfMonth as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getDayOfYear = _class.instanceMethodId(
+    r'getDayOfYear',
+    r'()I',
+  );
+
+  static final _getDayOfYear = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getDayOfYear()`
+  int getDayOfYear() {
+    return _getDayOfYear(
+            reference.pointer, _id_getDayOfYear as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getDayOfWeek = _class.instanceMethodId(
+    r'getDayOfWeek',
+    r'()Ljava/time/DayOfWeek;',
+  );
+
+  static final _getDayOfWeek = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.time.DayOfWeek getDayOfWeek()`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? getDayOfWeek() {
+    return _getDayOfWeek(
+            reference.pointer, _id_getDayOfWeek as jni$_.JMethodIDPtr)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_isLeapYear = _class.instanceMethodId(
+    r'isLeapYear',
+    r'()Z',
+  );
+
+  static final _isLeapYear = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isLeapYear()`
+  bool isLeapYear() {
+    return _isLeapYear(reference.pointer, _id_isLeapYear as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_lengthOfMonth = _class.instanceMethodId(
+    r'lengthOfMonth',
+    r'()I',
+  );
+
+  static final _lengthOfMonth = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int lengthOfMonth()`
+  int lengthOfMonth() {
+    return _lengthOfMonth(
+            reference.pointer, _id_lengthOfMonth as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_lengthOfYear = _class.instanceMethodId(
+    r'lengthOfYear',
+    r'()I',
+  );
+
+  static final _lengthOfYear = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int lengthOfYear()`
+  int lengthOfYear() {
+    return _lengthOfYear(
+            reference.pointer, _id_lengthOfYear as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_with$ = _class.instanceMethodId(
+    r'with',
+    r'(Ljava/time/temporal/TemporalAdjuster;)Ljava/time/LocalDate;',
+  );
+
+  static final _with$ = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.LocalDate with(java.time.temporal.TemporalAdjuster temporalAdjuster)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? with$(
+    jni$_.JObject? temporalAdjuster,
+  ) {
+    final _$temporalAdjuster =
+        temporalAdjuster?.reference ?? jni$_.jNullReference;
+    return _with$(reference.pointer, _id_with$ as jni$_.JMethodIDPtr,
+            _$temporalAdjuster.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_with$1 = _class.instanceMethodId(
+    r'with',
+    r'(Ljava/time/temporal/TemporalField;J)Ljava/time/LocalDate;',
+  );
+
+  static final _with$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_
+                          .VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int64)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>, int)>();
+
+  /// from: `public java.time.LocalDate with(java.time.temporal.TemporalField temporalField, long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? with$1(
+    jni$_.JObject? temporalField,
+    int j,
+  ) {
+    final _$temporalField = temporalField?.reference ?? jni$_.jNullReference;
+    return _with$1(reference.pointer, _id_with$1 as jni$_.JMethodIDPtr,
+            _$temporalField.pointer, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_withYear = _class.instanceMethodId(
+    r'withYear',
+    r'(I)Ljava/time/LocalDate;',
+  );
+
+  static final _withYear = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate withYear(int i)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? withYear(
+    int i,
+  ) {
+    return _withYear(reference.pointer, _id_withYear as jni$_.JMethodIDPtr, i)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_withMonth = _class.instanceMethodId(
+    r'withMonth',
+    r'(I)Ljava/time/LocalDate;',
+  );
+
+  static final _withMonth = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate withMonth(int i)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? withMonth(
+    int i,
+  ) {
+    return _withMonth(reference.pointer, _id_withMonth as jni$_.JMethodIDPtr, i)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_withDayOfMonth = _class.instanceMethodId(
+    r'withDayOfMonth',
+    r'(I)Ljava/time/LocalDate;',
+  );
+
+  static final _withDayOfMonth = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate withDayOfMonth(int i)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? withDayOfMonth(
+    int i,
+  ) {
+    return _withDayOfMonth(
+            reference.pointer, _id_withDayOfMonth as jni$_.JMethodIDPtr, i)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_withDayOfYear = _class.instanceMethodId(
+    r'withDayOfYear',
+    r'(I)Ljava/time/LocalDate;',
+  );
+
+  static final _withDayOfYear = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate withDayOfYear(int i)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? withDayOfYear(
+    int i,
+  ) {
+    return _withDayOfYear(
+            reference.pointer, _id_withDayOfYear as jni$_.JMethodIDPtr, i)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_plus = _class.instanceMethodId(
+    r'plus',
+    r'(Ljava/time/temporal/TemporalAmount;)Ljava/time/LocalDate;',
+  );
+
+  static final _plus = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.LocalDate plus(java.time.temporal.TemporalAmount temporalAmount)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? plus(
+    jni$_.JObject? temporalAmount,
+  ) {
+    final _$temporalAmount = temporalAmount?.reference ?? jni$_.jNullReference;
+    return _plus(reference.pointer, _id_plus as jni$_.JMethodIDPtr,
+            _$temporalAmount.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_plus$1 = _class.instanceMethodId(
+    r'plus',
+    r'(JLjava/time/temporal/TemporalUnit;)Ljava/time/LocalDate;',
+  );
+
+  static final _plus$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_
+                          .VarArgs<(jni$_.Int64, jni$_.Pointer<jni$_.Void>)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, int, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.LocalDate plus(long j, java.time.temporal.TemporalUnit temporalUnit)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? plus$1(
+    int j,
+    jni$_.JObject? temporalUnit,
+  ) {
+    final _$temporalUnit = temporalUnit?.reference ?? jni$_.jNullReference;
+    return _plus$1(reference.pointer, _id_plus$1 as jni$_.JMethodIDPtr, j,
+            _$temporalUnit.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_plusYears = _class.instanceMethodId(
+    r'plusYears',
+    r'(J)Ljava/time/LocalDate;',
+  );
+
+  static final _plusYears = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int64,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate plusYears(long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? plusYears(
+    int j,
+  ) {
+    return _plusYears(reference.pointer, _id_plusYears as jni$_.JMethodIDPtr, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_plusMonths = _class.instanceMethodId(
+    r'plusMonths',
+    r'(J)Ljava/time/LocalDate;',
+  );
+
+  static final _plusMonths = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int64,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate plusMonths(long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? plusMonths(
+    int j,
+  ) {
+    return _plusMonths(
+            reference.pointer, _id_plusMonths as jni$_.JMethodIDPtr, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_plusWeeks = _class.instanceMethodId(
+    r'plusWeeks',
+    r'(J)Ljava/time/LocalDate;',
+  );
+
+  static final _plusWeeks = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int64,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate plusWeeks(long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? plusWeeks(
+    int j,
+  ) {
+    return _plusWeeks(reference.pointer, _id_plusWeeks as jni$_.JMethodIDPtr, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_plusDays = _class.instanceMethodId(
+    r'plusDays',
+    r'(J)Ljava/time/LocalDate;',
+  );
+
+  static final _plusDays = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int64,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate plusDays(long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? plusDays(
+    int j,
+  ) {
+    return _plusDays(reference.pointer, _id_plusDays as jni$_.JMethodIDPtr, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_minus = _class.instanceMethodId(
+    r'minus',
+    r'(Ljava/time/temporal/TemporalAmount;)Ljava/time/LocalDate;',
+  );
+
+  static final _minus = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.LocalDate minus(java.time.temporal.TemporalAmount temporalAmount)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? minus(
+    jni$_.JObject? temporalAmount,
+  ) {
+    final _$temporalAmount = temporalAmount?.reference ?? jni$_.jNullReference;
+    return _minus(reference.pointer, _id_minus as jni$_.JMethodIDPtr,
+            _$temporalAmount.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_minus$1 = _class.instanceMethodId(
+    r'minus',
+    r'(JLjava/time/temporal/TemporalUnit;)Ljava/time/LocalDate;',
+  );
+
+  static final _minus$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_
+                          .VarArgs<(jni$_.Int64, jni$_.Pointer<jni$_.Void>)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, int, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.LocalDate minus(long j, java.time.temporal.TemporalUnit temporalUnit)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? minus$1(
+    int j,
+    jni$_.JObject? temporalUnit,
+  ) {
+    final _$temporalUnit = temporalUnit?.reference ?? jni$_.jNullReference;
+    return _minus$1(reference.pointer, _id_minus$1 as jni$_.JMethodIDPtr, j,
+            _$temporalUnit.pointer)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_minusYears = _class.instanceMethodId(
+    r'minusYears',
+    r'(J)Ljava/time/LocalDate;',
+  );
+
+  static final _minusYears = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int64,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate minusYears(long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? minusYears(
+    int j,
+  ) {
+    return _minusYears(
+            reference.pointer, _id_minusYears as jni$_.JMethodIDPtr, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_minusMonths = _class.instanceMethodId(
+    r'minusMonths',
+    r'(J)Ljava/time/LocalDate;',
+  );
+
+  static final _minusMonths = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int64,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate minusMonths(long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? minusMonths(
+    int j,
+  ) {
+    return _minusMonths(
+            reference.pointer, _id_minusMonths as jni$_.JMethodIDPtr, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_minusWeeks = _class.instanceMethodId(
+    r'minusWeeks',
+    r'(J)Ljava/time/LocalDate;',
+  );
+
+  static final _minusWeeks = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int64,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate minusWeeks(long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? minusWeeks(
+    int j,
+  ) {
+    return _minusWeeks(
+            reference.pointer, _id_minusWeeks as jni$_.JMethodIDPtr, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_minusDays = _class.instanceMethodId(
+    r'minusDays',
+    r'(J)Ljava/time/LocalDate;',
+  );
+
+  static final _minusDays = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int64,)>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public java.time.LocalDate minusDays(long j)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDate? minusDays(
+    int j,
+  ) {
+    return _minusDays(reference.pointer, _id_minusDays as jni$_.JMethodIDPtr, j)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_query = _class.instanceMethodId(
+    r'query',
+    r'(Ljava/time/temporal/TemporalQuery;)Ljava/lang/Object;',
+  );
+
+  static final _query = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public R query(java.time.temporal.TemporalQuery<R> temporalQuery)`
+  /// The returned object must be released after use, by calling the [release] method.
+  $R? query<$R extends jni$_.JObject?>(
+    jni$_.JObject? temporalQuery, {
+    required jni$_.JType<$R> R,
+  }) {
+    final _$temporalQuery = temporalQuery?.reference ?? jni$_.jNullReference;
+    return _query(reference.pointer, _id_query as jni$_.JMethodIDPtr,
+            _$temporalQuery.pointer)
+        .object<$R?>(R.nullableType);
+  }
+
+  static final _id_adjustInto = _class.instanceMethodId(
+    r'adjustInto',
+    r'(Ljava/time/temporal/Temporal;)Ljava/time/temporal/Temporal;',
+  );
+
+  static final _adjustInto = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal temporal)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? adjustInto(
+    jni$_.JObject? temporal,
+  ) {
+    final _$temporal = temporal?.reference ?? jni$_.jNullReference;
+    return _adjustInto(reference.pointer, _id_adjustInto as jni$_.JMethodIDPtr,
+            _$temporal.pointer)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_until = _class.instanceMethodId(
+    r'until',
+    r'(Ljava/time/temporal/Temporal;Ljava/time/temporal/TemporalUnit;)J',
+  );
+
+  static final _until = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<
+                      (
+                        jni$_.Pointer<jni$_.Void>,
+                        jni$_.Pointer<jni$_.Void>
+                      )>)>>('globalEnv_CallLongMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public long until(java.time.temporal.Temporal temporal, java.time.temporal.TemporalUnit temporalUnit)`
+  int until(
+    jni$_.JObject? temporal,
+    jni$_.JObject? temporalUnit,
+  ) {
+    final _$temporal = temporal?.reference ?? jni$_.jNullReference;
+    final _$temporalUnit = temporalUnit?.reference ?? jni$_.jNullReference;
+    return _until(reference.pointer, _id_until as jni$_.JMethodIDPtr,
+            _$temporal.pointer, _$temporalUnit.pointer)
+        .long;
+  }
+
+  static final _id_until$1 = _class.instanceMethodId(
+    r'until',
+    r'(Ljava/time/chrono/ChronoLocalDate;)Ljava/time/Period;',
+  );
+
+  static final _until$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.Period until(java.time.chrono.ChronoLocalDate chronoLocalDate)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? until$1(
+    jni$_.JObject? chronoLocalDate,
+  ) {
+    final _$chronoLocalDate =
+        chronoLocalDate?.reference ?? jni$_.jNullReference;
+    return _until$1(reference.pointer, _id_until$1 as jni$_.JMethodIDPtr,
+            _$chronoLocalDate.pointer)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_datesUntil = _class.instanceMethodId(
+    r'datesUntil',
+    r'(Ljava/time/LocalDate;)Ljava/util/stream/Stream;',
+  );
+
+  static final _datesUntil = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.util.stream.Stream<java.time.LocalDate> datesUntil(java.time.LocalDate localDate)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? datesUntil(
+    LocalDate? localDate,
+  ) {
+    final _$localDate = localDate?.reference ?? jni$_.jNullReference;
+    return _datesUntil(reference.pointer, _id_datesUntil as jni$_.JMethodIDPtr,
+            _$localDate.pointer)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_datesUntil$1 = _class.instanceMethodId(
+    r'datesUntil',
+    r'(Ljava/time/LocalDate;Ljava/time/Period;)Ljava/util/stream/Stream;',
+  );
+
+  static final _datesUntil$1 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<
+                      (
+                        jni$_.Pointer<jni$_.Void>,
+                        jni$_.Pointer<jni$_.Void>
+                      )>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.util.stream.Stream<java.time.LocalDate> datesUntil(java.time.LocalDate localDate, java.time.Period period)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? datesUntil$1(
+    LocalDate? localDate,
+    jni$_.JObject? period,
+  ) {
+    final _$localDate = localDate?.reference ?? jni$_.jNullReference;
+    final _$period = period?.reference ?? jni$_.jNullReference;
+    return _datesUntil$1(
+            reference.pointer,
+            _id_datesUntil$1 as jni$_.JMethodIDPtr,
+            _$localDate.pointer,
+            _$period.pointer)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_format = _class.instanceMethodId(
+    r'format',
+    r'(Ljava/time/format/DateTimeFormatter;)Ljava/lang/String;',
+  );
+
+  static final _format = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.lang.String format(java.time.format.DateTimeFormatter dateTimeFormatter)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JString? format(
+    jni$_.JObject? dateTimeFormatter,
+  ) {
+    final _$dateTimeFormatter =
+        dateTimeFormatter?.reference ?? jni$_.jNullReference;
+    return _format(reference.pointer, _id_format as jni$_.JMethodIDPtr,
+            _$dateTimeFormatter.pointer)
+        .object<jni$_.JString?>(const jni$_.$JString$NullableType$());
+  }
+
+  static final _id_atTime = _class.instanceMethodId(
+    r'atTime',
+    r'(Ljava/time/LocalTime;)Ljava/time/LocalDateTime;',
+  );
+
+  static final _atTime = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.LocalDateTime atTime(java.time.LocalTime localTime)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDateTime? atTime(
+    jni$_.JObject? localTime,
+  ) {
+    final _$localTime = localTime?.reference ?? jni$_.jNullReference;
+    return _atTime(reference.pointer, _id_atTime as jni$_.JMethodIDPtr,
+            _$localTime.pointer)
+        .object<LocalDateTime?>(const $LocalDateTime$NullableType$());
+  }
+
+  static final _id_atTime$1 = _class.instanceMethodId(
+    r'atTime',
+    r'(II)Ljava/time/LocalDateTime;',
+  );
+
+  static final _atTime$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Int32, jni$_.Int32)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int)>();
+
+  /// from: `public java.time.LocalDateTime atTime(int i, int i1)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDateTime? atTime$1(
+    int i,
+    int i1,
+  ) {
+    return _atTime$1(
+            reference.pointer, _id_atTime$1 as jni$_.JMethodIDPtr, i, i1)
+        .object<LocalDateTime?>(const $LocalDateTime$NullableType$());
+  }
+
+  static final _id_atTime$2 = _class.instanceMethodId(
+    r'atTime',
+    r'(III)Ljava/time/LocalDateTime;',
+  );
+
+  static final _atTime$2 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Int32, jni$_.Int32, jni$_.Int32)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int, int)>();
+
+  /// from: `public java.time.LocalDateTime atTime(int i, int i1, int i2)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDateTime? atTime$2(
+    int i,
+    int i1,
+    int i2,
+  ) {
+    return _atTime$2(
+            reference.pointer, _id_atTime$2 as jni$_.JMethodIDPtr, i, i1, i2)
+        .object<LocalDateTime?>(const $LocalDateTime$NullableType$());
+  }
+
+  static final _id_atTime$3 = _class.instanceMethodId(
+    r'atTime',
+    r'(IIII)Ljava/time/LocalDateTime;',
+  );
+
+  static final _atTime$3 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<
+                      (
+                        jni$_.Int32,
+                        jni$_.Int32,
+                        jni$_.Int32,
+                        jni$_.Int32
+                      )>)>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, int, int, int, int)>();
+
+  /// from: `public java.time.LocalDateTime atTime(int i, int i1, int i2, int i3)`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDateTime? atTime$3(
+    int i,
+    int i1,
+    int i2,
+    int i3,
+  ) {
+    return _atTime$3(reference.pointer, _id_atTime$3 as jni$_.JMethodIDPtr, i,
+            i1, i2, i3)
+        .object<LocalDateTime?>(const $LocalDateTime$NullableType$());
+  }
+
+  static final _id_atTime$4 = _class.instanceMethodId(
+    r'atTime',
+    r'(Ljava/time/OffsetTime;)Ljava/time/OffsetDateTime;',
+  );
+
+  static final _atTime$4 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.OffsetDateTime atTime(java.time.OffsetTime offsetTime)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JObject? atTime$4(
+    jni$_.JObject? offsetTime,
+  ) {
+    final _$offsetTime = offsetTime?.reference ?? jni$_.jNullReference;
+    return _atTime$4(reference.pointer, _id_atTime$4 as jni$_.JMethodIDPtr,
+            _$offsetTime.pointer)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_atStartOfDay = _class.instanceMethodId(
+    r'atStartOfDay',
+    r'()Ljava/time/LocalDateTime;',
+  );
+
+  static final _atStartOfDay = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.time.LocalDateTime atStartOfDay()`
+  /// The returned object must be released after use, by calling the [release] method.
+  LocalDateTime? atStartOfDay() {
+    return _atStartOfDay(
+            reference.pointer, _id_atStartOfDay as jni$_.JMethodIDPtr)
+        .object<LocalDateTime?>(const $LocalDateTime$NullableType$());
+  }
+
+  static final _id_atStartOfDay$1 = _class.instanceMethodId(
+    r'atStartOfDay',
+    r'(Ljava/time/ZoneId;)Ljava/time/ZonedDateTime;',
+  );
+
+  static final _atStartOfDay$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public java.time.ZonedDateTime atStartOfDay(java.time.ZoneId zoneId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ZonedDateTime? atStartOfDay$1(
+    ZoneId? zoneId,
+  ) {
+    final _$zoneId = zoneId?.reference ?? jni$_.jNullReference;
+    return _atStartOfDay$1(reference.pointer,
+            _id_atStartOfDay$1 as jni$_.JMethodIDPtr, _$zoneId.pointer)
+        .object<ZonedDateTime?>(const $ZonedDateTime$NullableType$());
+  }
+
+  static final _id_toEpochDay = _class.instanceMethodId(
+    r'toEpochDay',
+    r'()J',
+  );
+
+  static final _toEpochDay = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallLongMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public long toEpochDay()`
+  int toEpochDay() {
+    return _toEpochDay(reference.pointer, _id_toEpochDay as jni$_.JMethodIDPtr)
+        .long;
+  }
+
+  static final _id_toEpochSecond = _class.instanceMethodId(
+    r'toEpochSecond',
+    r'(Ljava/time/LocalTime;Ljava/time/ZoneOffset;)J',
+  );
+
+  static final _toEpochSecond = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<
+                      (
+                        jni$_.Pointer<jni$_.Void>,
+                        jni$_.Pointer<jni$_.Void>
+                      )>)>>('globalEnv_CallLongMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public long toEpochSecond(java.time.LocalTime localTime, java.time.ZoneOffset zoneOffset)`
+  int toEpochSecond(
+    jni$_.JObject? localTime,
+    jni$_.JObject? zoneOffset,
+  ) {
+    final _$localTime = localTime?.reference ?? jni$_.jNullReference;
+    final _$zoneOffset = zoneOffset?.reference ?? jni$_.jNullReference;
+    return _toEpochSecond(
+            reference.pointer,
+            _id_toEpochSecond as jni$_.JMethodIDPtr,
+            _$localTime.pointer,
+            _$zoneOffset.pointer)
+        .long;
+  }
+
+  static final _id_compareTo = _class.instanceMethodId(
+    r'compareTo',
+    r'(Ljava/time/chrono/ChronoLocalDate;)I',
+  );
+
+  static final _compareTo = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public int compareTo(java.time.chrono.ChronoLocalDate chronoLocalDate)`
+  int compareTo(
+    jni$_.JObject? chronoLocalDate,
+  ) {
+    final _$chronoLocalDate =
+        chronoLocalDate?.reference ?? jni$_.jNullReference;
+    return _compareTo(reference.pointer, _id_compareTo as jni$_.JMethodIDPtr,
+            _$chronoLocalDate.pointer)
+        .integer;
+  }
+
+  static final _id_isAfter = _class.instanceMethodId(
+    r'isAfter',
+    r'(Ljava/time/chrono/ChronoLocalDate;)Z',
+  );
+
+  static final _isAfter = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public boolean isAfter(java.time.chrono.ChronoLocalDate chronoLocalDate)`
+  bool isAfter(
+    jni$_.JObject? chronoLocalDate,
+  ) {
+    final _$chronoLocalDate =
+        chronoLocalDate?.reference ?? jni$_.jNullReference;
+    return _isAfter(reference.pointer, _id_isAfter as jni$_.JMethodIDPtr,
+            _$chronoLocalDate.pointer)
+        .boolean;
+  }
+
+  static final _id_isBefore = _class.instanceMethodId(
+    r'isBefore',
+    r'(Ljava/time/chrono/ChronoLocalDate;)Z',
+  );
+
+  static final _isBefore = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public boolean isBefore(java.time.chrono.ChronoLocalDate chronoLocalDate)`
+  bool isBefore(
+    jni$_.JObject? chronoLocalDate,
+  ) {
+    final _$chronoLocalDate =
+        chronoLocalDate?.reference ?? jni$_.jNullReference;
+    return _isBefore(reference.pointer, _id_isBefore as jni$_.JMethodIDPtr,
+            _$chronoLocalDate.pointer)
+        .boolean;
+  }
+
+  static final _id_isEqual = _class.instanceMethodId(
+    r'isEqual',
+    r'(Ljava/time/chrono/ChronoLocalDate;)Z',
+  );
+
+  static final _isEqual = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public boolean isEqual(java.time.chrono.ChronoLocalDate chronoLocalDate)`
+  bool isEqual(
+    jni$_.JObject? chronoLocalDate,
+  ) {
+    final _$chronoLocalDate =
+        chronoLocalDate?.reference ?? jni$_.jNullReference;
+    return _isEqual(reference.pointer, _id_isEqual as jni$_.JMethodIDPtr,
+            _$chronoLocalDate.pointer)
+        .boolean;
+  }
+
+  static final _id_equals = _class.instanceMethodId(
+    r'equals',
+    r'(Ljava/lang/Object;)Z',
+  );
+
+  static final _equals = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public boolean equals(java.lang.Object object)`
+  bool equals(
+    jni$_.JObject? object,
+  ) {
+    final _$object = object?.reference ?? jni$_.jNullReference;
+    return _equals(reference.pointer, _id_equals as jni$_.JMethodIDPtr,
+            _$object.pointer)
+        .boolean;
+  }
+
+  static final _id_hashCode$1 = _class.instanceMethodId(
+    r'hashCode',
+    r'()I',
+  );
+
+  static final _hashCode$1 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int hashCode()`
+  int hashCode$1() {
+    return _hashCode$1(reference.pointer, _id_hashCode$1 as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_toString$1 = _class.instanceMethodId(
+    r'toString',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _toString$1 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.lang.String toString()`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JString? toString$1() {
+    return _toString$1(reference.pointer, _id_toString$1 as jni$_.JMethodIDPtr)
+        .object<jni$_.JString?>(const jni$_.$JString$NullableType$());
+  }
+}
+
+final class $LocalDate$NullableType$ extends jni$_.JType<LocalDate?> {
+  @jni$_.internal
+  const $LocalDate$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ljava/time/LocalDate;';
+
+  @jni$_.internal
+  @core$_.override
+  LocalDate? fromReference(jni$_.JReference reference) => reference.isNull
+      ? null
+      : LocalDate.fromReference(
+          reference,
+        );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const jni$_.$JObject$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<LocalDate?> get nullableType => this;
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 1;
+
+  @core$_.override
+  int get hashCode => ($LocalDate$NullableType$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($LocalDate$NullableType$) &&
+        other is $LocalDate$NullableType$;
+  }
+}
+
+final class $LocalDate$Type$ extends jni$_.JType<LocalDate> {
+  @jni$_.internal
+  const $LocalDate$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ljava/time/LocalDate;';
+
+  @jni$_.internal
+  @core$_.override
+  LocalDate fromReference(jni$_.JReference reference) =>
+      LocalDate.fromReference(
+        reference,
+      );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const jni$_.$JObject$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<LocalDate?> get nullableType => const $LocalDate$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 1;
+
+  @core$_.override
+  int get hashCode => ($LocalDate$Type$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($LocalDate$Type$) && other is $LocalDate$Type$;
   }
 }
 
@@ -15005,7 +16951,7 @@ final class $ZmanimCalendar$Type$ extends jni$_.JType<ZmanimCalendar> {
 
 /// from: `com.kosherjava.zmanim.AstronomicalCalendar`
 ///
-/// A Java calendar that calculates astronomical times such as \#getSunrise() sunrise, \#getSunset() sunset and twilight times. This class contains a \#getZonedDateTime() zonedDateTime and can therefore use the standard
+/// A Java calendar that calculates astronomical times such as \#getSunrise() sunrise, \#getSunset() sunset and twilight times. This class contains a \#getLocalDate() zonedDateTime and can therefore use the standard
 /// Calendar functionality to change dates etc. The calculation engine used to calculate the astronomical times can be
 /// changed to a different implementation by implementing the abstract AstronomicalCalculator and setting it with
 /// the \#setAstronomicalCalculator(AstronomicalCalculator). A number of different calculation engine
@@ -15892,8 +17838,8 @@ class AstronomicalCalendar extends jni$_.JObject {
   ///         it does not set), a <code>null</code> will be returned. See detailed explanation on top of the page.
   ///@see \#getSunTransit(Instant, Instant)
   ///@see \#getTemporalHour()
-  ///@see com.kosherjava.zmanim.util.NOAACalculator\#getUTCNoon(ZonedDateTime, GeoLocation) (Calendar, GeoLocation)
-  ///@see com.kosherjava.zmanim.util.SunTimesCalculator\#getUTCNoon(ZonedDateTime, GeoLocation) (Calendar, GeoLocation)
+  ///@see com.kosherjava.zmanim.util.NOAACalculator\#getUTCNoon(Calendar, GeoLocation)
+  ///@see com.kosherjava.zmanim.util.SunTimesCalculator\#getUTCNoon(Calendar, GeoLocation)
   Instant? getSunTransit() {
     return _getSunTransit(
             reference.pointer, _id_getSunTransit as jni$_.JMethodIDPtr)
@@ -16367,18 +18313,18 @@ class AstronomicalCalendar extends jni$_.JObject {
   ///
   /// returns the <code>ZonedDateTime</code> object encapsulated in this class.
   ///@return Returns the ZonedDateTime.
-  jni$_.JObject? getLocalDate() {
+  LocalDate? getLocalDate() {
     return _getLocalDate(
             reference.pointer, _id_getLocalDate as jni$_.JMethodIDPtr)
-        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+        .object<LocalDate?>(const $LocalDate$NullableType$());
   }
 
-  static final _id_setZonedDateTime = _class.instanceMethodId(
-    r'setZonedDateTime',
+  static final _id_setLocalDate = _class.instanceMethodId(
+    r'setLocalDate',
     r'(Ljava/time/LocalDate;)V',
   );
 
-  static final _setZonedDateTime = jni$_.ProtectedJniExtensions.lookup<
+  static final _setLocalDate = jni$_.ProtectedJniExtensions.lookup<
               jni$_.NativeFunction<
                   jni$_.JThrowablePtr Function(
                       jni$_.Pointer<jni$_.Void>,
@@ -16389,16 +18335,16 @@ class AstronomicalCalendar extends jni$_.JObject {
           jni$_.JThrowablePtr Function(jni$_.Pointer<jni$_.Void>,
               jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
 
-  /// from: `public void setZonedDateTime(java.time.LocalDate localDate)`
+  /// from: `public void setLocalDate(java.time.LocalDate localDate)`
   ///
-  /// Sets the <code>LocalDate</code>  object for us in this class.
-  ///@param localDate The <code>LocalDate</code> to set.
-  void setZonedDateTime(
-    jni$_.JObject? localDate,
+  /// Sets the <code>ZonedDateTime</code>  object for us in this class.
+  ///@param localDate The <code>ZonedDateTime</code> to set.
+  void setLocalDate(
+    LocalDate? localDate,
   ) {
     final _$localDate = localDate?.reference ?? jni$_.jNullReference;
-    _setZonedDateTime(reference.pointer,
-            _id_setZonedDateTime as jni$_.JMethodIDPtr, _$localDate.pointer)
+    _setLocalDate(reference.pointer, _id_setLocalDate as jni$_.JMethodIDPtr,
+            _$localDate.pointer)
         .check();
   }
 
@@ -16425,7 +18371,7 @@ class AstronomicalCalendar extends jni$_.JObject {
   /// A method that creates a <a href="https://en.wikipedia.org/wiki/Object_copy\#Deep_copy">deep copy</a> of the object.
   /// __Note:__ If the java.util.TimeZone in the cloned com.kosherjava.zmanim.util.GeoLocation will
   /// be changed from the original, it is critical that
-  /// com.kosherjava.zmanim.AstronomicalCalendar\#getZonedDateTime().
+  /// com.kosherjava.zmanim.AstronomicalCalendar\#getLocalDate().
   /// java.util.Calendar\#setTimeZone(TimeZone) setTimeZone(TimeZone) be called in order for the
   /// AstronomicalCalendar to output times in the expected offset after being cloned.
   ///@see java.lang.Object\#clone()
@@ -16678,11 +18624,11 @@ class AstronomicalCalculator extends jni$_.JObject {
               double,
               int)>();
 
-  /// from: `public abstract double getUTCSunrise(java.time.LocalDate date, com.kosherjava.zmanim.util.GeoLocation geoLocation, double zenith, boolean adjustForElevation)`
+  /// from: `public abstract double getUTCSunrise(java.time.LocalDate localDate, com.kosherjava.zmanim.util.GeoLocation geoLocation, double zenith, boolean adjustForElevation)`
   ///
   /// A method that calculates UTC sunrise as well as any time based on an angle above or below sunrise. This abstract
   /// method is implemented by the classes that extend this class.
-  ///@param date Used to calculate day of year.
+  ///@param localDate Used to calculate day of year.
   ///@param geoLocation The location information used for astronomical calculating sun times.
   ///@param zenith the azimuth below the vertical zenith of 90 degrees. for sunrise typically the \#adjustZenith zenith used for the calculation uses geometric zenith of 90&deg; and \#adjustZenith adjusts
   ///            this slightly to account for solar refraction and the sun's radius. Another example would be
@@ -16694,17 +18640,17 @@ class AstronomicalCalculator extends jni$_.JObject {
   ///         java.lang.Double\#NaN will be returned.
   ///@see \#getElevationAdjustment(double)
   double getUTCSunrise(
-    jni$_.JObject? date,
+    LocalDate? localDate,
     GeoLocation? geoLocation,
     double zenith,
     bool adjustForElevation,
   ) {
-    final _$date = date?.reference ?? jni$_.jNullReference;
+    final _$localDate = localDate?.reference ?? jni$_.jNullReference;
     final _$geoLocation = geoLocation?.reference ?? jni$_.jNullReference;
     return _getUTCSunrise(
             reference.pointer,
             _id_getUTCSunrise as jni$_.JMethodIDPtr,
-            _$date.pointer,
+            _$localDate.pointer,
             _$geoLocation.pointer,
             zenith,
             adjustForElevation ? 1 : 0)
@@ -16737,11 +18683,11 @@ class AstronomicalCalculator extends jni$_.JObject {
               double,
               int)>();
 
-  /// from: `public abstract double getUTCSunset(java.time.LocalDate date, com.kosherjava.zmanim.util.GeoLocation geoLocation, double zenith, boolean adjustForElevation)`
+  /// from: `public abstract double getUTCSunset(java.time.LocalDate localDate, com.kosherjava.zmanim.util.GeoLocation geoLocation, double zenith, boolean adjustForElevation)`
   ///
   /// A method that calculates UTC sunset as well as any time based on an angle above or below sunset. This abstract
   /// method is implemented by the classes that extend this class.
-  ///@param date Used to calculate day of year.
+  ///@param localDate Used to calculate day of year.
   ///@param geoLocation The location information used for astronomical calculating sun times.
   ///@param zenith the azimuth below the vertical zenith of 90&deg;. For sunset typically the \#adjustZenith zenith used for the calculation uses geometric zenith of 90&deg; and \#adjustZenith adjusts
   ///            this slightly to account for solar refraction and the sun's radius. Another example would be
@@ -16753,17 +18699,17 @@ class AstronomicalCalculator extends jni$_.JObject {
   ///         java.lang.Double\#NaN will be returned.
   ///@see \#getElevationAdjustment(double)
   double getUTCSunset(
-    jni$_.JObject? date,
+    LocalDate? localDate,
     GeoLocation? geoLocation,
     double zenith,
     bool adjustForElevation,
   ) {
-    final _$date = date?.reference ?? jni$_.jNullReference;
+    final _$localDate = localDate?.reference ?? jni$_.jNullReference;
     final _$geoLocation = geoLocation?.reference ?? jni$_.jNullReference;
     return _getUTCSunset(
             reference.pointer,
             _id_getUTCSunset as jni$_.JMethodIDPtr,
-            _$date.pointer,
+            _$localDate.pointer,
             _$geoLocation.pointer,
             zenith,
             adjustForElevation ? 1 : 0)
@@ -16792,23 +18738,23 @@ class AstronomicalCalculator extends jni$_.JObject {
               jni$_.Pointer<jni$_.Void>,
               jni$_.Pointer<jni$_.Void>)>();
 
-  /// from: `public abstract double getUTCNoon(java.time.LocalDate date, com.kosherjava.zmanim.util.GeoLocation geoLocation)`
+  /// from: `public abstract double getUTCNoon(java.time.LocalDate localDate, com.kosherjava.zmanim.util.GeoLocation geoLocation)`
   ///
   /// Return <a href="https://en.wikipedia.org/wiki/Noon\#Solar_noon">solar noon</a> (UTC) for the given day at the
   /// given location on earth. The com.kosherjava.zmanim.util.NOAACalculator implementation calculates
   /// true solar noon, while the com.kosherjava.zmanim.util.SunTimesCalculator approximates it, calculating
   /// the time as halfway between sunrise and sunset.
-  ///@param date Used to calculate day of year.
+  ///@param localDate Used to calculate day of year.
   ///@param geoLocation The location information used for astronomical calculating sun times.
   ///@return the time in minutes from zero UTC
   double getUTCNoon(
-    jni$_.JObject? date,
+    LocalDate? localDate,
     GeoLocation? geoLocation,
   ) {
-    final _$date = date?.reference ?? jni$_.jNullReference;
+    final _$localDate = localDate?.reference ?? jni$_.jNullReference;
     final _$geoLocation = geoLocation?.reference ?? jni$_.jNullReference;
     return _getUTCNoon(reference.pointer, _id_getUTCNoon as jni$_.JMethodIDPtr,
-            _$date.pointer, _$geoLocation.pointer)
+            _$localDate.pointer, _$geoLocation.pointer)
         .doubleFloat;
   }
 
@@ -16834,32 +18780,32 @@ class AstronomicalCalculator extends jni$_.JObject {
               jni$_.Pointer<jni$_.Void>,
               jni$_.Pointer<jni$_.Void>)>();
 
-  /// from: `public abstract double getUTCMidnight(java.time.LocalDate date, com.kosherjava.zmanim.util.GeoLocation geoLocation)`
+  /// from: `public abstract double getUTCMidnight(java.time.LocalDate localDate, com.kosherjava.zmanim.util.GeoLocation geoLocation)`
   ///
   /// Return <a href="https://en.wikipedia.org/wiki/Midnight">solar midnight</a> (UTC) for the given day at the
   /// given location on earth. The the com.kosherjava.zmanim.util.NOAACalculator implementation calculates
   /// true solar midnight, while the com.kosherjava.zmanim.util.SunTimesCalculator approximates it, calculating
   /// the time as 12 hours after halfway between sunrise and sunset.
-  ///@param date Used to calculate day of year.
+  ///@param localDate Used to calculate day of year.
   ///@param geoLocation The location information used for astronomical calculating sun times.
   ///@return the time in minutes from zero UTC
   double getUTCMidnight(
-    jni$_.JObject? date,
+    LocalDate? localDate,
     GeoLocation? geoLocation,
   ) {
-    final _$date = date?.reference ?? jni$_.jNullReference;
+    final _$localDate = localDate?.reference ?? jni$_.jNullReference;
     final _$geoLocation = geoLocation?.reference ?? jni$_.jNullReference;
     return _getUTCMidnight(
             reference.pointer,
             _id_getUTCMidnight as jni$_.JMethodIDPtr,
-            _$date.pointer,
+            _$localDate.pointer,
             _$geoLocation.pointer)
         .doubleFloat;
   }
 
   static final _id_getSolarElevation = _class.instanceMethodId(
     r'getSolarElevation',
-    r'(Ljava/time/LocalDate;Lcom/kosherjava/zmanim/util/GeoLocation;)D',
+    r'(Ljava/time/ZonedDateTime;Lcom/kosherjava/zmanim/util/GeoLocation;)D',
   );
 
   static final _getSolarElevation = jni$_.ProtectedJniExtensions.lookup<
@@ -16879,33 +18825,33 @@ class AstronomicalCalculator extends jni$_.JObject {
               jni$_.Pointer<jni$_.Void>,
               jni$_.Pointer<jni$_.Void>)>();
 
-  /// from: `public abstract double getSolarElevation(java.time.LocalDate date, com.kosherjava.zmanim.util.GeoLocation geoLocation)`
+  /// from: `public abstract double getSolarElevation(java.time.ZonedDateTime zonedDateTime, com.kosherjava.zmanim.util.GeoLocation geoLocation)`
   ///
   /// Return the <a href="https://en.wikipedia.org/wiki/Celestial_coordinate_system">Solar Elevation</a> for the
   /// horizontal coordinate system at the given location at the given time. Can be negative if the sun is below the
   /// horizon. Not corrected for altitude.
-  ///@param date time of calculation
+  ///@param localDate time of calculation
   ///@param geoLocation The location information
   ///@return solar elevation in degrees. The horizon (calculated in a vacuum using the solar radius as the point)
   ///            is 090&deg;, civil twilight is -690&deg; etc. This means that sunrise and sunset that do use
   ///            refraction and are calculated from the upper limb of the sun will return about 0.83390&deg;.
   double getSolarElevation(
-    jni$_.JObject? date,
+    ZonedDateTime? zonedDateTime,
     GeoLocation? geoLocation,
   ) {
-    final _$date = date?.reference ?? jni$_.jNullReference;
+    final _$zonedDateTime = zonedDateTime?.reference ?? jni$_.jNullReference;
     final _$geoLocation = geoLocation?.reference ?? jni$_.jNullReference;
     return _getSolarElevation(
             reference.pointer,
             _id_getSolarElevation as jni$_.JMethodIDPtr,
-            _$date.pointer,
+            _$zonedDateTime.pointer,
             _$geoLocation.pointer)
         .doubleFloat;
   }
 
   static final _id_getSolarAzimuth = _class.instanceMethodId(
     r'getSolarAzimuth',
-    r'(Ljava/time/LocalDate;Lcom/kosherjava/zmanim/util/GeoLocation;)D',
+    r'(Ljava/time/ZonedDateTime;Lcom/kosherjava/zmanim/util/GeoLocation;)D',
   );
 
   static final _getSolarAzimuth = jni$_.ProtectedJniExtensions.lookup<
@@ -16925,26 +18871,26 @@ class AstronomicalCalculator extends jni$_.JObject {
               jni$_.Pointer<jni$_.Void>,
               jni$_.Pointer<jni$_.Void>)>();
 
-  /// from: `public abstract double getSolarAzimuth(java.time.LocalDate date, com.kosherjava.zmanim.util.GeoLocation geoLocation)`
+  /// from: `public abstract double getSolarAzimuth(java.time.ZonedDateTime zonedDateTime, com.kosherjava.zmanim.util.GeoLocation geoLocation)`
   ///
   /// Return the <a href="https://en.wikipedia.org/wiki/Celestial_coordinate_system">Solar Azimuth</a> for the
   /// horizontal coordinate system at the given location at the given time. Not corrected for altitude. True south is 180
   /// degrees.
-  ///@param date time of calculation
+  ///@param localDate time of calculation
   ///@param geoLocation The location information
   ///@return the solar azimuth in degrees. Astronomical midday would be 180 in the norther hemosphere and 0 in the
   ///            southern hemosphere. Depending on the location and time of year, sunrise will have an azimuth of about
   ///            90&deg; and sunset about 270&deg;.
   double getSolarAzimuth(
-    jni$_.JObject? date,
+    ZonedDateTime? zonedDateTime,
     GeoLocation? geoLocation,
   ) {
-    final _$date = date?.reference ?? jni$_.jNullReference;
+    final _$zonedDateTime = zonedDateTime?.reference ?? jni$_.jNullReference;
     final _$geoLocation = geoLocation?.reference ?? jni$_.jNullReference;
     return _getSolarAzimuth(
             reference.pointer,
             _id_getSolarAzimuth as jni$_.JMethodIDPtr,
-            _$date.pointer,
+            _$zonedDateTime.pointer,
             _$geoLocation.pointer)
         .doubleFloat;
   }
@@ -18126,7 +20072,7 @@ class GeoLocation extends jni$_.JObject {
   ///
   /// An implementation of the java.lang.Object\#clone() method that creates a <a href="https://en.wikipedia.org/wiki/Object_copy\#Deep_copy">deep copy</a> of the object.
   /// __Note:__ If the java.time.ZoneId in the clone will be changed from the original, it is critical
-  /// that com.kosherjava.zmanim.AstronomicalCalendar\#getZonedDateTime().
+  /// that com.kosherjava.zmanim.AstronomicalCalendar\#getLocalDate().
   ///@see java.lang.Object\#clone()
   jni$_.JObject? clone() {
     return _clone(reference.pointer, _id_clone as jni$_.JMethodIDPtr)
