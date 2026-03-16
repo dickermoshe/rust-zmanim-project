@@ -1,0 +1,17 @@
+name: Run unit tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'adopt'
+          java-version: 11
+
+      - name: Run tests
+        run: mvn test
