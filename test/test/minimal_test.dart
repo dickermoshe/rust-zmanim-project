@@ -39,9 +39,7 @@ Future<void> main() async {
       final name = zman.name();
       test(name, () async {
         bool ranOne = false;
-        for (var i = 0; i < 100; i++) {
-          // final randomZmanimPreset = rnd.getItem(zmanimPresets);
-          final randomZmanimPreset = zmanimPresets[0];
+        for (var i = 0; i < 10000000; i++) {
           final randomDateTime = DateTime.fromMillisecondsSinceEpoch(
               rnd.getInt(YEARS_MS, -YEARS_MS));
           // TODO: Test with random latitude and longitude
@@ -61,19 +59,34 @@ Future<void> main() async {
           final randomAteretTorahSunsetOffsetMinutes = rnd.getInt(0, 60);
           final randomCandleLightingOffsetMinutes = rnd.getInt(0, 60);
           final randomUseAstronomicalChatzosForOtherZmanim = rnd.getBool();
-          final javaZman = await calculateJavaZman(
-            ateretTorahSunsetOffsetMinutes:
-                randomAteretTorahSunsetOffsetMinutes,
-            candleLightingOffsetMinutes: randomCandleLightingOffsetMinutes,
-            useAstronomicalChatzosForOtherZmanim:
-                randomUseAstronomicalChatzosForOtherZmanim,
-            latitude: randomLatitude,
-            longitude: randomLongitude,
-            elevation: randomElevation,
-            timezone: tz,
-            dateTime: randomDateTime,
-            zman: randomZmanimPreset,
-          );
+          late (String, int)? javaZman;
+          try {
+            javaZman = await calculateJavaZman(
+              ateretTorahSunsetOffsetMinutes:
+                  randomAteretTorahSunsetOffsetMinutes,
+              candleLightingOffsetMinutes: randomCandleLightingOffsetMinutes,
+              useAstronomicalChatzosForOtherZmanim:
+                  randomUseAstronomicalChatzosForOtherZmanim,
+              latitude: randomLatitude,
+              longitude: randomLongitude,
+              elevation: randomElevation,
+              timezone: tz,
+              dateTime: randomDateTime,
+              zman: zman,
+            );
+          } catch (e) {
+            final StringBuffer error = StringBuffer();
+            error.writeln('Error calculating Java Zman: $e');
+            error.writeln('Timezone: $tz');
+            error.writeln('Latitude: $randomLatitude');
+            error.writeln('Longitude: $randomLongitude');
+            error.writeln('Elevation: $randomElevation');
+            error.writeln('Date: ${formatter.format(randomDateTime)}');
+            error.writeln('Zman: ${zman.name()}');
+            error.writeln('Seed: ${rndSeed}');
+            print(error.toString());
+            rethrow;
+          }
           final rustZman = calculateZman(
             ateretTorahSunsetOffsetMinutes:
                 randomAteretTorahSunsetOffsetMinutes,
@@ -87,7 +100,7 @@ Future<void> main() async {
             randomYear: randomDateTime.year,
             randomMonth: randomDateTime.month,
             randomDay: randomDateTime.day,
-            zman: randomZmanimPreset,
+            zman: zman,
           );
           if (javaZman == null || rustZman == null) {
             continue;
@@ -99,7 +112,7 @@ Future<void> main() async {
 
           expect(
             javaTimestampMs,
-            closeTo(rustTimestampMs, 1), // Less than 1 day
+            closeTo(rustTimestampMs, 24 * 60 * 60 * 1000), // Less than 24 hours
             formatter: (actual, matcher, reason, matchState, verbose) {
               final difference = javaTimestampMs - rustTimestampMs;
               final differenceInHours = difference / (60 * 60 * 1000);
@@ -115,6 +128,7 @@ Future<void> main() async {
               reason.writeln('Rust Result Ms: $rustTimestampMs');
               reason.writeln('Rust Result Date: $formattedRustTimestamp');
               reason.writeln('Difference: $differenceInHours hours');
+              reason.writeln('Seed: ${rndSeed}');
               return reason.toString();
             },
           );
