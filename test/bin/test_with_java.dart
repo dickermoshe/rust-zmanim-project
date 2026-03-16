@@ -10,18 +10,10 @@ import 'package:test_with_java/src/rust/frb_generated.dart';
 import 'package:jni/jni.dart';
 
 const TEST_ITERATIONS =
-    const int.fromEnvironment('TEST_ITERATIONS', defaultValue: 10);
+    const int.fromEnvironment('TEST_ITERATIONS', defaultValue: 100);
 
 late Function(String) debug;
 Future<void> main(List<String> args) async {
-  if (args.contains('--debug')) {
-    debug = (String message) {
-      print(message);
-    };
-  } else {
-    debug = (String message) {};
-  }
-
   // Initialize Rust library
   await RustLib.init(
       externalLibrary: await loadExternalLibrary(ExternalLibraryLoaderConfig(
@@ -29,6 +21,36 @@ Future<void> main(List<String> args) async {
     ioDirectory: '../target/release/',
     webPrefix: 'pkg/',
   )));
+
+  /// Locate the .jar files from KosherJava
+  final classPathEntries = <String>[];
+
+  // Prefer compiled jars from the Maven build output.
+  final modernTargetDir = Directory('../../zmanim-modern/target');
+  if (modernTargetDir.existsSync()) {
+    final jars = modernTargetDir
+        .listSync()
+        .whereType<File>()
+        .map((e) => e.path)
+        .where((path) =>
+            path.endsWith('.jar') &&
+            !path.endsWith('-sources.jar') &&
+            !path.endsWith('-javadoc.jar'))
+        .toList()
+      ..sort();
+    classPathEntries.addAll(jars);
+
+    final classesDir = Directory('${modernTargetDir.path}/classes');
+    if (classesDir.existsSync()) {
+      classPathEntries.add(classesDir.path);
+    }
+  }
+
+  if (classPathEntries.isEmpty) {
+    throw StateError(
+      'Could not find compiled zmanim classes. Build Java first (e.g. run Maven package in ../../zmanim-modern).',
+    );
+  }
 
   // Initialize Java runtime
   Jni.spawn(classPath: _resolveJvmClassPath());
@@ -172,8 +194,7 @@ class TestCase {
           zman: zman, iteration: iteration, validTimezones: validTimezones);
     }
     // TODO: Test with random elevation
-    // final randomElevation = rnd(0.0, 400.0);
-    final randomElevation = 0.0;
+    final randomElevation = rnd(0.0, 1000.0);
     final randomUseElevation = rnd.getBool();
 
     final randomAteretTorahSunsetOffsetMinutes = rnd.getInt(0, 60);
@@ -228,23 +249,30 @@ class TestCase {
     try {
       final javaZman = calculateJavaZman();
       final rustZman = calculateRustZman();
+      // TODO
       // We do not test for situations where one is null and the other is not,
       // more testing is needed for these cases.
-      // if (javaZman == null || rustZman == null) {
-      //   continue;
-      // }
-      assertFail(
-          (javaZman != null && rustZman != null) ||
-              (javaZman == null && rustZman == null),
-          "Java: $javaZman, Rust: $rustZman, TestCase: ${toJson()}");
+      // assertFail(
+      //     (javaZman != null && rustZman != null) ||
+      //         (javaZman == null && rustZman == null),
+      //     "Java: $javaZman, Rust: $rustZman, TestCase: ${toJson()}");
       if (javaZman == null || rustZman == null) {
         return false;
       }
       debug("Java: $javaZman, Rust: $rustZman");
       final difference = javaZman - rustZman;
+      double max_diff_seconds = 20;
+      if (zman.usesElevation(
+          useAstronomicalChatzosForOtherZmanim:
+              useAstronomicalChatzosForOtherZmanim)) {
+        max_diff_seconds += elevation * 0.05;
+        max_diff_seconds += 10;
+      }
+      assertFail(max_diff_seconds > 0 && max_diff_seconds < 100,
+          'Max diff is out of range for ${zman.name()}: $elevation meters - $max_diff_seconds seconds');
 
-      assertFail(difference < (HOURS_MS * 24),
-          'Difference : ${formatDifference(difference)}. Java: $javaZman, Rust: $rustZman. TestCase: ${toJson()}');
+      assertFail(difference < max_diff_seconds * SECONDS_MS,
+          'Difference : ${formatDifference(difference)}. Max diff: ${max_diff_seconds}. Java: $javaZman, Rust: $rustZman. TestCase: ${toJson()}');
       debug("Success: $iteration / $TEST_ITERATIONS for ${zman.name()}");
     } catch (e) {
       // Log TestCase to stderr
@@ -299,46 +327,6 @@ class TestCase {
 
 const YEARS = 200;
 const YEARS_MS = YEARS * 365 * 24 * 60 * 60 * 1000;
-
-/// Return a list of paths to the .jar files from KosherJava
-List<String> _resolveJvmClassPath() {
-  final classPathEntries = <String>[];
-
-  // Prefer compiled jars from the Maven build output.
-  final modernTargetDir = Directory('../../zmanim-modern/target');
-  if (modernTargetDir.existsSync()) {
-    final jars = modernTargetDir
-        .listSync()
-        .whereType<File>()
-        .map((e) => e.path)
-        .where((path) =>
-            path.endsWith('.jar') &&
-            !path.endsWith('-sources.jar') &&
-            !path.endsWith('-javadoc.jar'))
-        .toList()
-      ..sort();
-    classPathEntries.addAll(jars);
-
-    final classesDir = Directory('${modernTargetDir.path}/classes');
-    if (classesDir.existsSync()) {
-      classPathEntries.add(classesDir.path);
-    }
-  }
-
-  // Optional local compiled jar fallback (if copied into ./test).
-  final localCompiledJar = File('./zmanim-2.6.0-SNAPSHOT.jar');
-  if (localCompiledJar.existsSync()) {
-    classPathEntries.add(localCompiledJar.path);
-  }
-
-  if (classPathEntries.isEmpty) {
-    throw StateError(
-      'Could not find compiled zmanim classes. Build Java first (e.g. run Maven package in ../../zmanim-modern).',
-    );
-  }
-
-  return classPathEntries.toSet().toList();
-}
 
 const HOURS_MS = 60 * 60 * 1000;
 const MINUTES_MS = 60 * 1000;

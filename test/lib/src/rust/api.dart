@@ -52,4 +52,6 @@ List<ZmanimPreset> presets() => RustLib.instance.api.crateApiPresets();
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ZmanimPreset>>
 abstract class ZmanimPreset implements RustOpaqueInterface {
   String name();
+
+  bool usesElevation({required bool useAstronomicalChatzosForOtherZmanim});
 }

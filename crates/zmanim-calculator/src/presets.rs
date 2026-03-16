@@ -22,7 +22,7 @@ use chrono::{DateTime, Utc};
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct ZmanPreset<'a> {
     /// The underlying low-level computation definition for this preset.
-    event: ZmanPrimitive<'a>,
+    pub event: ZmanPrimitive<'a>,
     #[cfg(feature = "_java_testing")]
     /// The KosherJava-style preset name used by parity tests.
     pub name: &'a str,
@@ -178,7 +178,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for BainHashmashosRt2Stars {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for BainHashmashosRt2Stars {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         true
     }
     fn name(&self) -> &str {
@@ -288,7 +288,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaAhavatShalom {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaAhavatShalom {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         true
     }
     fn name(&self) -> &str {
@@ -339,7 +339,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaBaalHatanyaGreaterThan30 {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaBaalHatanyaGreaterThan30 {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         true
     }
     fn name(&self) -> &str {
@@ -377,7 +377,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaGreaterThan30 {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaGreaterThan30 {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         true
     }
     fn name(&self) -> &str {
@@ -431,7 +431,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaKetanaAhavatShalom {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaKetanaAhavatShalom {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         true
     }
     fn name(&self) -> &str {
@@ -522,7 +522,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for PlagAhavatShalom {
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for PlagAhavatShalom {
     #[cfg(feature = "_java_testing")]
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         true
     }
     #[cfg(feature = "_java_testing")]
@@ -1297,7 +1297,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevana15Days {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for SofZmanKidushLevana15Days {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         false
     }
     fn name(&self) -> &str {
@@ -1339,7 +1339,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevanaBetweenMoldos {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for SofZmanKidushLevanaBetweenMoldos {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         false
     }
     fn name(&self) -> &str {
@@ -1383,7 +1383,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana3Days {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for TchilasZmanKidushLevana3Days {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         false
     }
     fn name(&self) -> &str {
@@ -1424,7 +1424,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana7Days {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for TchilasZmanKidushLevana7Days {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         false
     }
     fn name(&self) -> &str {
@@ -1466,7 +1466,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for Molad {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for Molad {
-    fn uses_elevation(&self, _calculator: &ZmanimCalculator<Tz>) -> bool {
+    fn uses_elevation(&self, _use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         false
     }
     fn name(&self) -> &str {
@@ -1480,15 +1480,16 @@ pub static MOLAD: Molad = Molad;
 #[cfg(feature = "_java_testing")]
 pub(crate) trait ZmanPresetLike<Tz: TimeZone>: ZmanLike<Tz> {
     /// Returns whether this zman uses elevation in its calculation (test-only).
-    fn uses_elevation(&self, calculator: &ZmanimCalculator<Tz>) -> bool;
+    fn uses_elevation(&self, use_astronomical_chatzos_for_other_zmanim: &bool) -> bool;
     /// Returns the KosherJava-style method name for this zman (test-only).
     fn name(&self) -> &str;
 }
 
 #[cfg(feature = "_java_testing")]
 impl<'a, Tz: TimeZone> ZmanPresetLike<Tz> for ZmanPreset<'a> {
-    fn uses_elevation(&self, calculator: &ZmanimCalculator<Tz>) -> bool {
-        self.event.uses_elevation(calculator)
+    fn uses_elevation(&self, use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
+        self.event
+            .uses_elevation(use_astronomical_chatzos_for_other_zmanim)
     }
     fn name(&self) -> &str {
         self.name

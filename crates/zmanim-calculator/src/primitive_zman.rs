@@ -252,7 +252,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
 #[cfg(feature = "_java_testing")]
 impl<'a> ZmanPrimitive<'a> {
     /// Whether or not the elevation is used in the calculation.
-    pub fn uses_elevation<Tz: TimeZone>(&self, calculator: &ZmanimCalculator<Tz>) -> bool {
+    pub fn uses_elevation(&self, use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
         match self {
             ZmanPrimitive::SeaLevelSunrise => false,
             ZmanPrimitive::SeaLevelSunset => false,
@@ -264,10 +264,13 @@ impl<'a> ZmanPrimitive<'a> {
             ZmanPrimitive::LocalMeanTime(_) => false,
             ZmanPrimitive::CandleLighting => false,
             ZmanPrimitive::ZmanisOffset(_, _) => true,
-            ZmanPrimitive::Offset(event, _) => event.uses_elevation(calculator),
+            ZmanPrimitive::Offset(event, _) => {
+                event.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
+            }
             ZmanPrimitive::ShaahZmanisBasedOffset(event1, event2, _)
             | ZmanPrimitive::HalfDayBasedOffset(event1, event2, _) => {
-                event1.uses_elevation(calculator) || event2.uses_elevation(calculator)
+                event1.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
+                    || event2.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
             }
             ZmanPrimitive::Shema(event1, event2, synchronous)
             | ZmanPrimitive::Tefila(event1, event2, synchronous)
@@ -275,11 +278,12 @@ impl<'a> ZmanPrimitive<'a> {
             | ZmanPrimitive::SamuchLeMinchaKetana(event1, event2, synchronous)
             | ZmanPrimitive::MinchaKetana(event1, event2, synchronous)
             | ZmanPrimitive::PlagHamincha(event1, event2, synchronous) => {
-                if calculator.config.use_astronomical_chatzos_for_other_zmanim && *synchronous {
+                if *use_astronomical_chatzos_for_other_zmanim && *synchronous {
                     // This path always uses SolarTransit, which is elevation-adjusted.
                     true
                 } else {
-                    event1.uses_elevation(calculator) || event2.uses_elevation(calculator)
+                    event1.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
+                        || event2.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
                 }
             }
             ZmanPrimitive::TzaisAteretTorah => true,

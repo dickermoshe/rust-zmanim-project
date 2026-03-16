@@ -5,7 +5,7 @@ publish_to: none
 environment:
   sdk: ">=3.3.0 <4.0.0"
 dependencies:
-  lints: ^5.1.1
+  lints: ^6.1.0
   flutter_rust_bridge:
     git:
       url: https://github.com/fzyzcjy/flutter_rust_bridge

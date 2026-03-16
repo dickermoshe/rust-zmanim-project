@@ -34,6 +34,10 @@ impl ZmanimPreset {
     pub fn name(&self) -> String {
         self.zman.name.to_string()
     }
+    #[frb(sync)]
+    pub fn uses_elevation(&self, use_astronomical_chatzos_for_other_zmanim: bool) -> bool {
+        self.zman.event.uses_elevation(&use_astronomical_chatzos_for_other_zmanim)
+    }
 }
 #[frb(sync)]
 pub fn timezones() -> Vec<String> {
