@@ -9,18 +9,15 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `FINDER`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `deref`, `initialize`
 
+/// Find the timezone for a given longitude and latitude
 String findTimezone({required double longitude, required double latitude}) =>
     RustLib.instance.api
         .crateApiFindTimezone(longitude: longitude, latitude: latitude);
 
-String? timestampAtTimezone(
-        {required String timezone,
-        required PlatformInt64 millisecondsSinceEpoch}) =>
-    RustLib.instance.api.crateApiTimestampAtTimezone(
-        timezone: timezone, millisecondsSinceEpoch: millisecondsSinceEpoch);
-
+/// Get all the timezones supported by the library
 List<String> timezones() => RustLib.instance.api.crateApiTimezones();
 
+/// Calculate a zman at a given location and date
 (String, PlatformInt64)? calculateZman(
         {required PlatformInt64 ateretTorahSunsetOffsetMinutes,
         required PlatformInt64 candleLightingOffsetMinutes,
@@ -47,11 +44,17 @@ List<String> timezones() => RustLib.instance.api.crateApiTimezones();
         randomDay: randomDay,
         zman: zman);
 
+/// Get all the ZmanimPresets supported by the library
 List<ZmanimPreset> presets() => RustLib.instance.api.crateApiPresets();
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ZmanimPreset>>
 abstract class ZmanimPreset implements RustOpaqueInterface {
+  /// Get the name of the ZmanimPreset
+  /// This is also the method name in the Java side
   String name();
 
+  /// Check if the ZmanimPreset uses elevation in its calculation
+  /// Functions which use elevation have more margin for error due to the differences
+  /// in how refraction is calculated between the two libraries
   bool usesElevation({required bool useAstronomicalChatzosForOtherZmanim});
 }

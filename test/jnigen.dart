@@ -10,7 +10,7 @@ void main(List<String> args) {
       outputConfig: OutputConfig(
         dartConfig: DartCodeOutputConfig(
           // Required. Output path for generated bindings.
-          path: packageRoot.resolve('lib/kosher_java.g.dart'),
+          path: packageRoot.resolve('lib/src/java/kosher_java.g.dart'),
           // Optional. Write bindings into a single file (instead of one file per class).
           structure: OutputStructure.singleFile,
         ),

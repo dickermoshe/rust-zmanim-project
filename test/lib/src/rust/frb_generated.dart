@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 1538175644;
+  int get rustContentHash => 1592075689;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -102,10 +102,6 @@ abstract class RustLibApi extends BaseApi {
       {required double longitude, required double latitude});
 
   List<ZmanimPreset> crateApiPresets();
-
-  String? crateApiTimestampAtTimezone(
-      {required String timezone,
-      required PlatformInt64 millisecondsSinceEpoch});
 
   List<String> crateApiTimezones();
 
@@ -296,38 +292,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  String? crateApiTimestampAtTimezone(
-      {required String timezone,
-      required PlatformInt64 millisecondsSinceEpoch}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(timezone, serializer);
-        sse_encode_i_64(millisecondsSinceEpoch, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_opt_String,
-        decodeErrorData: null,
-      ),
-      constMeta: kCrateApiTimestampAtTimezoneConstMeta,
-      argValues: [timezone, millisecondsSinceEpoch],
-      apiImpl: this,
-    ));
-  }
-
-  TaskConstMeta get kCrateApiTimestampAtTimezoneConstMeta =>
-      const TaskConstMeta(
-        debugName: "timestamp_at_timezone",
-        argNames: ["timezone", "millisecondsSinceEpoch"],
-      );
-
-  @override
   List<String> crateApiTimezones() {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_String,
@@ -428,12 +397,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
-  }
-
-  @protected
-  String? dco_decode_opt_String(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw == null ? null : dco_decode_String(raw);
   }
 
   @protected
@@ -566,17 +529,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
-  }
-
-  @protected
-  String? sse_decode_opt_String(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    if (sse_decode_bool(deserializer)) {
-      return (sse_decode_String(deserializer));
-    } else {
-      return null;
-    }
   }
 
   @protected
@@ -714,16 +666,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_opt_String(String? self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    sse_encode_bool(self != null, serializer);
-    if (self != null) {
-      sse_encode_String(self, serializer);
-    }
-  }
-
-  @protected
   void sse_encode_opt_box_autoadd_record_string_i_64(
       (String, PlatformInt64)? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -785,10 +727,15 @@ class ZmanimPresetImpl extends RustOpaque implements ZmanimPreset {
         RustLib.instance.api.rust_arc_decrement_strong_count_ZmanimPresetPtr,
   );
 
+  /// Get the name of the ZmanimPreset
+  /// This is also the method name in the Java side
   String name() => RustLib.instance.api.crateApiZmanimPresetName(
         that: this,
       );
 
+  /// Check if the ZmanimPreset uses elevation in its calculation
+  /// Functions which use elevation have more margin for error due to the differences
+  /// in how refraction is calculated between the two libraries
   bool usesElevation({required bool useAstronomicalChatzosForOtherZmanim}) =>
       RustLib.instance.api.crateApiZmanimPresetUsesElevation(
           that: this,

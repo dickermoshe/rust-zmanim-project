@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use chrono::{Duration, NaiveDate, TimeZone};
+use chrono::{Duration, NaiveDate};
 use chrono_tz::{Tz, TZ_VARIANTS};
 use flutter_rust_bridge::frb;
 use lazy_static::lazy_static;
@@ -13,36 +13,38 @@ lazy_static! {
 }
 
 #[frb(sync)]
+/// Find the timezone for a given longitude and latitude
 pub fn find_timezone(longitude: f64, latitude: f64) -> String {
     FINDER.get_tz_name(longitude, latitude).to_string()
 }
-
-#[frb(sync)]
-pub fn timestamp_at_timezone(timezone: String, milliseconds_since_epoch: i64) -> Option<String> {
-    let tz = Tz::from_str(&timezone).unwrap();
-    tz.timestamp_millis_opt(milliseconds_since_epoch)
-        .single()
-        .map(|dt| dt.to_string())
-}
-
+/// An Opaque wrapper for a ZmanimPreset to be used in the Dart side
 #[frb(opaque)]
 pub struct ZmanimPreset {
     zman: &'static ZmanPreset<'static>,
 }
 impl ZmanimPreset {
+    /// Get the name of the ZmanimPreset
+    /// This is also the method name in the Java side
     #[frb(sync)]
     pub fn name(&self) -> String {
         self.zman.name.to_string()
     }
+    /// Check if the ZmanimPreset uses elevation in its calculation
+    /// Functions which use elevation have more margin for error due to the differences
+    /// in how refraction is calculated between the two libraries
     #[frb(sync)]
     pub fn uses_elevation(&self, use_astronomical_chatzos_for_other_zmanim: bool) -> bool {
-        self.zman.event.uses_elevation(&use_astronomical_chatzos_for_other_zmanim)
+        self.zman
+            .event
+            .uses_elevation(&use_astronomical_chatzos_for_other_zmanim)
     }
 }
+/// Get all the timezones supported by the library
 #[frb(sync)]
 pub fn timezones() -> Vec<String> {
     TZ_VARIANTS.iter().map(|tz| tz.to_string()).collect()
 }
+/// Calculate a zman at a given location and date
 #[frb(sync)]
 pub fn calculate_zman(
     ateret_torah_sunset_offset_minutes: i64,
@@ -71,6 +73,7 @@ pub fn calculate_zman(
     let at_tz = zman.with_timezone(&tz);
     Some((at_tz.to_string(), zman.timestamp_millis()))
 }
+/// Get all the ZmanimPresets supported by the library
 #[frb(sync)]
 pub fn presets() -> Vec<ZmanimPreset> {
     ALL.iter().map(|zman| ZmanimPreset { zman }).collect()

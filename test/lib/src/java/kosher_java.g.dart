@@ -15327,9 +15327,9 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// accurate. This method allows you to use the NOAACalculator and still calculate _chatzos_ as six _shaos
   /// zmaniyos_ after sunrise. See <a href="https://kosherjava.com/2020/07/02/definition-of-chatzos/">The Definition
   /// of _Chatzos_</a> for a detailed explanation of the ways to calculate _Chatzos_.
-  ///@see com.kosherjava.zmanim.util.NOAACalculator\#getUTCNoon(ZonedDateTime, GeoLocation)
-  ///@see com.kosherjava.zmanim.util.SunTimesCalculator\#getUTCNoon(ZonedDateTime, GeoLocation)
-  ///@see com.kosherjava.zmanim.util.AstronomicalCalculator\#getUTCNoon(ZonedDateTime, GeoLocation)
+  ///@see com.kosherjava.zmanim.util.NOAACalculator\#getUTCNoon(LocalDate, GeoLocation)
+  ///@see com.kosherjava.zmanim.util.SunTimesCalculator\#getUTCNoon(LocalDate, GeoLocation)
+  ///@see com.kosherjava.zmanim.util.AstronomicalCalculator\#getUTCNoon(LocalDate, GeoLocation)
   ///@see AstronomicalCalendar\#getSunTransit(Instant, Instant)
   ///@see \#getChatzos()
   ///@see \#getSunTransit()
@@ -17999,10 +17999,10 @@ class AstronomicalCalendar extends jni$_.JObject {
   ///@return the degrees below the horizon after sunset that match the offset in minutes passed it as a parameter. If
   ///            the calculation can't be computed (no sunset occurs on this day) a Double\#NaN will be returned.
   ///@deprecated This method is slow and inefficient and should NEVER be used in a loop. This method should be replaced
-  ///            by calls to AstronomicalCalculator\#getSolarElevation(Calendar, GeoLocation). That method will
+  ///            by calls to AstronomicalCalculator\#getSolarElevation(ZonedDateTime, GeoLocation). That method will
   ///            efficiently return the the solar elevation (the sun's position in degrees below (or above) the horizon)
   ///            at the given time even in the arctic when there is no sunrise.
-  ///@see AstronomicalCalculator\#getSolarElevation(Calendar, GeoLocation)
+  ///@see AstronomicalCalculator\#getSolarElevation(ZonedDateTime, GeoLocation)
   ///@see \#getSunriseSolarDipFromOffset(double)
   double getSunsetSolarDipFromOffset(
     double minutes,
@@ -18372,8 +18372,6 @@ class AstronomicalCalendar extends jni$_.JObject {
   /// __Note:__ If the java.util.TimeZone in the cloned com.kosherjava.zmanim.util.GeoLocation will
   /// be changed from the original, it is critical that
   /// com.kosherjava.zmanim.AstronomicalCalendar\#getLocalDate().
-  /// java.util.Calendar\#setTimeZone(TimeZone) setTimeZone(TimeZone) be called in order for the
-  /// AstronomicalCalendar to output times in the expected offset after being cloned.
   ///@see java.lang.Object\#clone()
   jni$_.JObject? clone() {
     return _clone(reference.pointer, _id_clone as jni$_.JMethodIDPtr)
