@@ -597,7 +597,7 @@ impl AstronomicalCalculator {
         let z1 = self._get_prev_solar_midnight()?.position.zenith;
         let z2 = self._get_solar_transit()?.position.zenith;
         let dip = self.compute_dip();
-        let target_zenith = dip + PI / 2.0 + SUN_RADIUS;
+        let target_zenith = dip + PI / 2.0 + SUN_RADIUS + self.refraction.sunrise_sunset_refraction();
 
         let result = self.find_solar_event(prev_midnight, transit, z1, z2, target_zenith);
         let _ = self.sunrise.set(result);
@@ -628,7 +628,7 @@ impl AstronomicalCalculator {
         let z2 = self._get_next_solar_midnight()?.position.zenith;
 
         let dip = self.compute_dip();
-        let target_zenith = dip + PI / 2.0 + SUN_RADIUS;
+        let target_zenith = dip + PI / 2.0 + SUN_RADIUS + self.refraction.sunrise_sunset_refraction();
 
         let result = self.find_solar_event(transit, next_midnight, z1, z2, target_zenith);
         let _ = self.sunset.set(result);
@@ -1137,9 +1137,22 @@ pub enum Refraction {
     ApSolposBennetNA,
     /// No refraction
     NoRefraction,
+    #[cfg(feature = "_java_testing")]
+    /// NOAA refraction model, suitable for most applications
+    NOAA,
 }
 
 impl Refraction {
+    /// Refraction term added to true sunrise/sunset zenith targets.
+    /// This should not be used for other zenith angles and only used for sunrise/sunset.
+    fn sunrise_sunset_refraction(self) -> f64 {
+        match self {
+            #[cfg(feature = "_java_testing")]
+            Refraction::NOAA => (34.0_f64 / 60.0_f64).to_radians(),
+            _ => 0.0,
+        }
+    }
+
     fn apply(
         self,
         position: SolarPosition,
@@ -1167,6 +1180,10 @@ impl Refraction {
                 pressure,
                 temperature,
             ),
+            // KosherJava's NOAA "standard atmosphere" is modeled as a fixed
+            // zenith offset for sunrise/sunset, not dynamic per-position bending.
+            #[cfg(feature = "_java_testing")]
+            Refraction::NOAA => Ok(position),
             Refraction::NoRefraction => Ok(position),
         }
     }

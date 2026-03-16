@@ -33,10 +33,16 @@ impl ZmanimPreset {
     /// Functions which use elevation have more margin for error due to the differences
     /// in how refraction is calculated between the two libraries
     #[frb(sync)]
-    pub fn uses_elevation(&self, use_astronomical_chatzos_for_other_zmanim: bool) -> bool {
-        self.zman
-            .event
-            .uses_elevation(&use_astronomical_chatzos_for_other_zmanim)
+    pub fn uses_elevation(
+        &self,
+        use_elevation: bool,
+        use_astronomical_chatzos_for_other_zmanim: bool,
+    ) -> bool {
+        self.zman.event.uses_elevation(&CalculatorConfig {
+            use_elevation,
+            use_astronomical_chatzos_for_other_zmanim,
+            ..Default::default()
+        })
     }
 }
 /// Get all the timezones supported by the library
@@ -57,6 +63,7 @@ pub fn calculate_zman(
     random_year: i64,
     random_month: i64,
     random_day: i64,
+    use_elevation: bool,
     zman: &ZmanimPreset,
 ) -> Option<(String, i64)> {
     let tz = Tz::from_str(&timezone).unwrap();
@@ -64,6 +71,7 @@ pub fn calculate_zman(
         .unwrap();
     let location = Location::new(latitude, longitude, elevation, Some(tz)).ok()?;
     let config = CalculatorConfig {
+        use_elevation,
         ateret_torah_sunset_offset: Duration::minutes(ateret_torah_sunset_offset_minutes),
         candle_lighting_offset: Duration::minutes(candle_lighting_offset_minutes),
         use_astronomical_chatzos_for_other_zmanim,

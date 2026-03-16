@@ -14,11 +14,11 @@ import 'package:test_with_java/src/test_case.dart';
 const HOURS_MS = 60 * 60 * 1000;
 const MINUTES_MS = 60 * 1000;
 const SECONDS_MS = 1000;
-const MAX_DIFF_MS = 40 * SECONDS_MS;
+const MAX_DIFF_MS = 10 * SECONDS_MS;
 const MAX_YEAR = 2040;
 const MIN_YEAR = 1900;
 const TEST_ITERATIONS =
-    const int.fromEnvironment('TEST_ITERATIONS', defaultValue: 100);
+    const int.fromEnvironment('TEST_ITERATIONS', defaultValue: 1000);
 
 /// Global random instance
 late Random random;
@@ -65,8 +65,8 @@ Future<void> main(List<String> args) async {
       ZoneId.getAvailableZoneIds()!.map((e) => e!.toDartString()).toSet();
   final rustTimezones = timezones().toSet();
   final validTimezones = javaTimezones.intersection(rustTimezones).toList();
-
   final zmanimPresets = presets();
+
   for (final zman in zmanimPresets) {
     bool allSkipped = true;
     for (var iteration = 0; iteration < TEST_ITERATIONS; iteration++) {
@@ -142,13 +142,13 @@ TestCase randomTestCase(
 /// Throws an exception if the test fails
 /// Returns true if the test passes, false if the test was skipped
 bool test(TestCase testCase) {
-  final int maxDiffMs;
-  if (testCase.usesElevation()) {
-    // Elevation adds 10 seconds per 100 meters
-    maxDiffMs = MAX_DIFF_MS + (testCase.elevation / .1 * SECONDS_MS).toInt();
-  } else {
-    maxDiffMs = MAX_DIFF_MS;
-  }
+  final int maxDiffMs = MAX_DIFF_MS;
+  // if (testCase.usesElevation()) {
+  //   // Elevation adds 10 seconds per 100 meters
+  //   maxDiffMs = MAX_DIFF_MS + (testCase.elevation / .1 * SECONDS_MS).toInt();
+  // } else {
+  //   maxDiffMs = MAX_DIFF_MS;
+  // }
   final javaZman = calculateJavaZman(testCase);
   final rustZman = calculateRustZman(testCase);
 
@@ -243,13 +243,14 @@ ZmanResult? calculateJavaZman(TestCase testCase) {
 
 ZmanResult? calculateRustZman(TestCase testCase) {
   final result = calculateZman(
+    useElevation: testCase.useElevation,
     ateretTorahSunsetOffsetMinutes: testCase.ateretTorahSunsetOffsetMinutes,
     candleLightingOffsetMinutes: testCase.candleLightingOffsetMinutes,
     useAstronomicalChatzosForOtherZmanim:
         testCase.useAstronomicalChatzosForOtherZmanim,
     latitude: testCase.latitude,
     longitude: testCase.longitude,
-    elevation: testCase.useElevation ? testCase.elevation : 0.0,
+    elevation: testCase.elevation,
     timezone: testCase.timezone,
     randomYear: testCase.year,
     randomMonth: testCase.month,

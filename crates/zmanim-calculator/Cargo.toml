@@ -14,7 +14,7 @@ default = []
 # Enable this feature to use the defmt crate for logging.
 defmt = ["dep:defmt", "astronomical-calculator/defmt"]
 # Internal: Used for testing against KosherJava.
-_java_testing = []
+_java_testing = ["astronomical-calculator/_java_testing"]
 
 
 [dependencies]

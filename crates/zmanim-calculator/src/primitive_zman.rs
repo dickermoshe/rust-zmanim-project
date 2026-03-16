@@ -12,6 +12,8 @@
 
 use chrono::{DateTime, Duration, TimeZone, Utc};
 
+#[cfg(feature = "_java_testing")]
+use crate::prelude::CalculatorConfig;
 use crate::{
     calculator::ZmanLike,
     duration_helper::multiply_duration,
@@ -23,13 +25,17 @@ use crate::{
 #[derive(Debug, Clone)]
 pub enum ZmanPrimitive<'a> {
     /// Sunrise at the configured location/date.
-    Sunrise,
+    ElevationAdjustedSunrise,
     /// Sunrise at sea level (no elevation adjustment).
     SeaLevelSunrise,
+    /// Sunrise using the configured elevation mode (sea-level or elevation-adjusted).
+    ConfiguredSunrise,
+    /// Sunset using the configured elevation mode (sea-level or elevation-adjusted).
+    ConfiguredSunset,
     /// Solar transit (local apparent noon / astronomical chatzos).
     SolarTransit,
     /// Sunset at the configured location/date.
-    Sunset,
+    ElevationAdjustedSunset,
     /// Sunset at sea level (no elevation adjustment).
     SeaLevelSunset,
     /// Time before sunrise when the sun is `degrees` below the geometric horizon (no elevation adjustment).
@@ -70,7 +76,21 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
         calculator: &mut ZmanimCalculator<Tz>,
     ) -> Result<DateTime<Utc>, ZmanimError> {
         match *self {
-            ZmanPrimitive::Sunrise => calculator
+            ZmanPrimitive::ConfiguredSunrise => {
+                if calculator.config.use_elevation {
+                    calculator.calculate(&ZmanPrimitive::ElevationAdjustedSunrise)
+                } else {
+                    calculator.calculate(&ZmanPrimitive::SeaLevelSunrise)
+                }
+            }
+            ZmanPrimitive::ConfiguredSunset => {
+                if calculator.config.use_elevation {
+                    calculator.calculate(&ZmanPrimitive::ElevationAdjustedSunset)
+                } else {
+                    calculator.calculate(&ZmanPrimitive::SeaLevelSunset)
+                }
+            }
+            ZmanPrimitive::ElevationAdjustedSunrise => calculator
                 .elevation_adjusted_calculator
                 .get_sunrise()
                 .into_date_time_result(),
@@ -82,7 +102,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                 .elevation_adjusted_calculator
                 .get_solar_transit()
                 .into_date_time_result(),
-            ZmanPrimitive::Sunset => calculator
+            ZmanPrimitive::ElevationAdjustedSunset => calculator
                 .elevation_adjusted_calculator
                 .get_sunset()
                 .into_date_time_result(),
@@ -113,8 +133,8 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
             }
             ZmanPrimitive::ZmanisOffset(event, hours) => {
                 let event_time = event.calculate(calculator)?;
-                let sunrise = calculator.calculate(&ZmanPrimitive::Sunrise)?;
-                let sunset = calculator.calculate(&ZmanPrimitive::Sunset)?;
+                let sunrise = calculator.calculate(&ZmanPrimitive::ConfiguredSunrise)?;
+                let sunset = calculator.calculate(&ZmanPrimitive::ConfiguredSunset)?;
                 let shaah_zmanis = (sunset - sunrise) / 12;
                 let offset = multiply_duration(shaah_zmanis, hours)
                     .ok_or(ZmanimError::TimeConversionError)?;
@@ -243,7 +263,7 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                 }
             }
             Self::TzaisAteretTorah => {
-                let sunset = ZmanPrimitive::Sunset.calculate(calculator)?;
+                let sunset = ZmanPrimitive::ConfiguredSunset.calculate(calculator)?;
                 Ok(sunset + calculator.config.ateret_torah_sunset_offset)
             }
         }
@@ -252,25 +272,24 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
 #[cfg(feature = "_java_testing")]
 impl<'a> ZmanPrimitive<'a> {
     /// Whether or not the elevation is used in the calculation.
-    pub fn uses_elevation(&self, use_astronomical_chatzos_for_other_zmanim: &bool) -> bool {
+    pub fn uses_elevation(&self, config: &CalculatorConfig) -> bool {
         match self {
+            ZmanPrimitive::ConfiguredSunrise => config.use_elevation,
+            ZmanPrimitive::ConfiguredSunset => config.use_elevation,
             ZmanPrimitive::SeaLevelSunrise => false,
             ZmanPrimitive::SeaLevelSunset => false,
             ZmanPrimitive::SunriseOffsetByDegrees(_) => true,
             ZmanPrimitive::SunsetOffsetByDegrees(_) => true,
-            ZmanPrimitive::Sunrise => true,
+            ZmanPrimitive::ElevationAdjustedSunrise => true,
             ZmanPrimitive::SolarTransit => true,
-            ZmanPrimitive::Sunset => true,
+            ZmanPrimitive::ElevationAdjustedSunset => true,
             ZmanPrimitive::LocalMeanTime(_) => false,
             ZmanPrimitive::CandleLighting => false,
             ZmanPrimitive::ZmanisOffset(_, _) => true,
-            ZmanPrimitive::Offset(event, _) => {
-                event.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
-            }
+            ZmanPrimitive::Offset(event, _) => event.uses_elevation(config),
             ZmanPrimitive::ShaahZmanisBasedOffset(event1, event2, _)
             | ZmanPrimitive::HalfDayBasedOffset(event1, event2, _) => {
-                event1.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
-                    || event2.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
+                event1.uses_elevation(config) || event2.uses_elevation(config)
             }
             ZmanPrimitive::Shema(event1, event2, synchronous)
             | ZmanPrimitive::Tefila(event1, event2, synchronous)
@@ -278,12 +297,11 @@ impl<'a> ZmanPrimitive<'a> {
             | ZmanPrimitive::SamuchLeMinchaKetana(event1, event2, synchronous)
             | ZmanPrimitive::MinchaKetana(event1, event2, synchronous)
             | ZmanPrimitive::PlagHamincha(event1, event2, synchronous) => {
-                if *use_astronomical_chatzos_for_other_zmanim && *synchronous {
+                if config.use_astronomical_chatzos_for_other_zmanim && *synchronous {
                     // This path always uses SolarTransit, which is elevation-adjusted.
                     true
                 } else {
-                    event1.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
-                        || event2.uses_elevation(use_astronomical_chatzos_for_other_zmanim)
+                    event1.uses_elevation(config) || event2.uses_elevation(config)
                 }
             }
             ZmanPrimitive::TzaisAteretTorah => true,

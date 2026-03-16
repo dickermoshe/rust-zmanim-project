@@ -83,6 +83,7 @@ abstract class RustLibApi extends BaseApi {
 
   bool crateApiZmanimPresetUsesElevation(
       {required ZmanimPreset that,
+      required bool useElevation,
       required bool useAstronomicalChatzosForOtherZmanim});
 
   (String, PlatformInt64)? crateApiCalculateZman(
@@ -96,6 +97,7 @@ abstract class RustLibApi extends BaseApi {
       required PlatformInt64 randomYear,
       required PlatformInt64 randomMonth,
       required PlatformInt64 randomDay,
+      required bool useElevation,
       required ZmanimPreset zman});
 
   String crateApiFindTimezone(
@@ -149,12 +151,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @override
   bool crateApiZmanimPresetUsesElevation(
       {required ZmanimPreset that,
+      required bool useElevation,
       required bool useAstronomicalChatzosForOtherZmanim}) {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerZmanimPreset(
             that, serializer);
+        sse_encode_bool(useElevation, serializer);
         sse_encode_bool(useAstronomicalChatzosForOtherZmanim, serializer);
         return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
       },
@@ -163,7 +167,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         decodeErrorData: null,
       ),
       constMeta: kCrateApiZmanimPresetUsesElevationConstMeta,
-      argValues: [that, useAstronomicalChatzosForOtherZmanim],
+      argValues: [that, useElevation, useAstronomicalChatzosForOtherZmanim],
       apiImpl: this,
     ));
   }
@@ -171,7 +175,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiZmanimPresetUsesElevationConstMeta =>
       const TaskConstMeta(
         debugName: "ZmanimPreset_uses_elevation",
-        argNames: ["that", "useAstronomicalChatzosForOtherZmanim"],
+        argNames: [
+          "that",
+          "useElevation",
+          "useAstronomicalChatzosForOtherZmanim"
+        ],
       );
 
   @override
@@ -186,6 +194,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       required PlatformInt64 randomYear,
       required PlatformInt64 randomMonth,
       required PlatformInt64 randomDay,
+      required bool useElevation,
       required ZmanimPreset zman}) {
     return handler.executeSync(SyncTask(
       callFfi: () {
@@ -200,6 +209,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_i_64(randomYear, serializer);
         sse_encode_i_64(randomMonth, serializer);
         sse_encode_i_64(randomDay, serializer);
+        sse_encode_bool(useElevation, serializer);
         sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerZmanimPreset(
             zman, serializer);
         return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
@@ -220,6 +230,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         randomYear,
         randomMonth,
         randomDay,
+        useElevation,
         zman
       ],
       apiImpl: this,
@@ -239,6 +250,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           "randomYear",
           "randomMonth",
           "randomDay",
+          "useElevation",
           "zman"
         ],
       );
@@ -736,9 +748,12 @@ class ZmanimPresetImpl extends RustOpaque implements ZmanimPreset {
   /// Check if the ZmanimPreset uses elevation in its calculation
   /// Functions which use elevation have more margin for error due to the differences
   /// in how refraction is calculated between the two libraries
-  bool usesElevation({required bool useAstronomicalChatzosForOtherZmanim}) =>
+  bool usesElevation(
+          {required bool useElevation,
+          required bool useAstronomicalChatzosForOtherZmanim}) =>
       RustLib.instance.api.crateApiZmanimPresetUsesElevation(
           that: this,
+          useElevation: useElevation,
           useAstronomicalChatzosForOtherZmanim:
               useAstronomicalChatzosForOtherZmanim);
 }

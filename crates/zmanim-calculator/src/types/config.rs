@@ -9,7 +9,8 @@ pub struct CalculatorConfig {
     /// When `true`, derived zmanim (sof zman shma, mincha gedola, etc.) are computed
     /// relative to solar noon rather than as a fraction of the sunrise–sunset interval. Default: `false`.
     pub use_astronomical_chatzos_for_other_zmanim: bool,
-
+    /// Is elevation above sea level calculated for times besides sunrise and sunset. Default: `false`.
+    pub use_elevation: bool,
     /// Offset added to elevation-adjusted sunset for the Ateret Torah opinion (see [`crate::presets::TZAIS_ATERET_TORAH`]). Default: 40 min.
     pub ateret_torah_sunset_offset: Duration,
 }
@@ -19,6 +20,7 @@ impl Default for CalculatorConfig {
         Self {
             candle_lighting_offset: Duration::minutes(18),
             use_astronomical_chatzos_for_other_zmanim: false,
+            use_elevation: false,
             ateret_torah_sunset_offset: Duration::minutes(40),
         }
     }

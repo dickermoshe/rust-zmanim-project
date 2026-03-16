@@ -80,6 +80,7 @@ class TestCase {
   bool usesElevation() {
     return useElevation &&
         zman.usesElevation(
+            useElevation: useElevation,
             useAstronomicalChatzosForOtherZmanim:
                 useAstronomicalChatzosForOtherZmanim);
   }

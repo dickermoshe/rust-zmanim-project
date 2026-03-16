@@ -56,6 +56,9 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             22.0,
             1013.25,
             None,
+            #[cfg(feature = "_java_testing")]
+            Refraction::NOAA,
+            #[cfg(not(feature = "_java_testing"))]
             Refraction::ApSolposBennet,
         )
         .map_err(ZmanimError::AstronomicalCalculatorError)?;
@@ -69,6 +72,9 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             22.0,
             1013.25,
             None,
+            #[cfg(feature = "_java_testing")]
+            Refraction::NOAA,
+            #[cfg(not(feature = "_java_testing"))]
             Refraction::ApSolposBennet,
         )
         .map_err(ZmanimError::AstronomicalCalculatorError)?;

@@ -7,11 +7,6 @@
 	url = https://github.com/dickermoshe/zmanim
 	branch = icu
 
-[submodule "crates/zmanim-calculator/kosher-java"]
-	path = crates/zmanim-calculator/kosher-java
-	url = https://github.com/dickermoshe/zmanim
-	branch = icu
-
 [submodule "test/kosher-java"]
 	path = test/kosher-java
 	url = https://github.com/kosherjava/zmanim

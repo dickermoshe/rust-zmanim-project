@@ -29,6 +29,7 @@ List<String> timezones() => RustLib.instance.api.crateApiTimezones();
         required PlatformInt64 randomYear,
         required PlatformInt64 randomMonth,
         required PlatformInt64 randomDay,
+        required bool useElevation,
         required ZmanimPreset zman}) =>
     RustLib.instance.api.crateApiCalculateZman(
         ateretTorahSunsetOffsetMinutes: ateretTorahSunsetOffsetMinutes,
@@ -42,6 +43,7 @@ List<String> timezones() => RustLib.instance.api.crateApiTimezones();
         randomYear: randomYear,
         randomMonth: randomMonth,
         randomDay: randomDay,
+        useElevation: useElevation,
         zman: zman);
 
 /// Get all the ZmanimPresets supported by the library
@@ -56,5 +58,7 @@ abstract class ZmanimPreset implements RustOpaqueInterface {
   /// Check if the ZmanimPreset uses elevation in its calculation
   /// Functions which use elevation have more margin for error due to the differences
   /// in how refraction is calculated between the two libraries
-  bool usesElevation({required bool useAstronomicalChatzosForOtherZmanim});
+  bool usesElevation(
+      {required bool useElevation,
+      required bool useAstronomicalChatzosForOtherZmanim});
 }

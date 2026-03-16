@@ -117,6 +117,7 @@ fn wire__crate__api__ZmanimPreset_uses_elevation_impl(
             let api_that = <RustOpaqueMoi<
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ZmanimPreset>,
             >>::sse_decode(&mut deserializer);
+            let api_use_elevation = <bool>::sse_decode(&mut deserializer);
             let api_use_astronomical_chatzos_for_other_zmanim =
                 <bool>::sse_decode(&mut deserializer);
             deserializer.end();
@@ -137,6 +138,7 @@ fn wire__crate__api__ZmanimPreset_uses_elevation_impl(
                 let api_that_guard = api_that_guard.unwrap();
                 let output_ok = Result::<_, ()>::Ok(crate::api::ZmanimPreset::uses_elevation(
                     &*api_that_guard,
+                    api_use_elevation,
                     api_use_astronomical_chatzos_for_other_zmanim,
                 ))?;
                 Ok(output_ok)
@@ -176,6 +178,7 @@ fn wire__crate__api__calculate_zman_impl(
             let api_random_year = <i64>::sse_decode(&mut deserializer);
             let api_random_month = <i64>::sse_decode(&mut deserializer);
             let api_random_day = <i64>::sse_decode(&mut deserializer);
+            let api_use_elevation = <bool>::sse_decode(&mut deserializer);
             let api_zman = <RustOpaqueMoi<
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ZmanimPreset>,
             >>::sse_decode(&mut deserializer);
@@ -206,6 +209,7 @@ fn wire__crate__api__calculate_zman_impl(
                     api_random_year,
                     api_random_month,
                     api_random_day,
+                    api_use_elevation,
                     &*api_zman_guard,
                 ))?;
                 Ok(output_ok)
