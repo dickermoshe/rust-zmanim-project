@@ -4,8 +4,10 @@ import 'dart:math';
 /// A collection of helpful extensions for the dart:math Random class.
 extension RndExtensions on Random {
   /// Returns a random `double` between min and max.
+  /// Optionally transformed with the specified `Curve`.
+  /// For example, passing `Curves.easeIn` would favor numbers closer to `min`.
   double getDouble(double min, double max) {
-    return min + nextDouble() * (max - min);
+    return min + (nextDouble() * (max - min));
   }
 
   /// Returns a random item from the specified `List`.

@@ -121,8 +121,7 @@ TestCase randomTestCase(
     required List<String> validTimezones}) {
   /// Create a random timestamp in seconds between the minimum and maximum year
   final timestamp =
-      random.getDouble(-yearToTimestamp(MIN_YEAR), yearToTimestamp(MAX_YEAR));
-
+      random.getDouble(yearToTimestamp(MIN_YEAR), yearToTimestamp(MAX_YEAR));
   final randomDateTime =
       DateTime.fromMillisecondsSinceEpoch((timestamp * 1000).toInt());
 
