@@ -7,8 +7,6 @@ use chrono::{Datelike, TimeZone};
 use hebrew_holiday_calendar::MoladCalendar;
 use icu_calendar::Date;
 
-#[cfg(feature = "_java_testing")]
-use crate::prelude::CalculatorConfig;
 use crate::prelude::ZmanimCalculator;
 use crate::types::error::ZmanimError;
 
@@ -69,10 +67,7 @@ pub static SEA_LEVEL_SUNSET: ZmanPreset<'static> =
 
 /// *Alos* as a fixed `60` minutes before sunrise.
 pub static ALOS_60_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
-    ZmanPrimitive::Offset(
-        &ZmanPrimitive::ElevationAdjustedSunrise,
-        Duration::minutes(-60),
-    ),
+    ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-60)),
     "getAlos60",
 );
 /// *Alos* as a fixed `72` minutes before sunrise.
@@ -87,10 +82,7 @@ pub static ALOS_72_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 );
 /// *Alos* as a fixed `90` minutes before sunrise.
 pub static ALOS_90_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
-    ZmanPrimitive::Offset(
-        &ZmanPrimitive::ElevationAdjustedSunrise,
-        Duration::minutes(-90),
-    ),
+    ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-90)),
     "getAlos90",
 );
 /// *Alos* as `90 zmaniyos` minutes before sunrise (1.5 *shaos zmaniyos*).
@@ -100,10 +92,7 @@ pub static ALOS_90_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 );
 /// *Alos* as a fixed `96` minutes before sunrise.
 pub static ALOS_96_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
-    ZmanPrimitive::Offset(
-        &ZmanPrimitive::ElevationAdjustedSunrise,
-        Duration::minutes(-96),
-    ),
+    ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-96)),
     "getAlos96",
 );
 /// *Alos* as `96 zmaniyos` minutes before sunrise (1.6 *shaos zmaniyos*).
@@ -113,10 +102,7 @@ pub static ALOS_96_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 );
 /// *Alos* as a fixed `120` minutes before sunrise.
 pub static ALOS_120_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
-    ZmanPrimitive::Offset(
-        &ZmanPrimitive::ElevationAdjustedSunrise,
-        Duration::minutes(-120),
-    ),
+    ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-120)),
     "getAlos120",
 );
 /// *Alos* as `120 zmaniyos` minutes before sunrise (2.0 *shaos zmaniyos*).
@@ -188,7 +174,7 @@ impl<Tz: TimeZone> ZmanLike<Tz> for BainHashmashosRt2Stars {
         calculator: &mut ZmanimCalculator<Tz>,
     ) -> Result<DateTime<Utc>, ZmanimError> {
         let alos19_point_8 = ZmanPrimitive::SunriseOffsetByDegrees(19.8).calculate(calculator)?;
-        let sunrise = ZmanPrimitive::ElevationAdjustedSunrise.calculate(calculator)?;
+        let sunrise = ZmanPrimitive::ConfiguredSunrise.calculate(calculator)?;
         let sunset = ZmanPrimitive::ConfiguredSunset.calculate(calculator)?;
         let time_diff = sunrise.signed_duration_since(alos19_point_8);
         let offset = time_diff.num_milliseconds() as f64 * (5.0 / 18.0);
@@ -198,9 +184,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for BainHashmashosRt2Stars {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for BainHashmashosRt2Stars {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        true
-    }
     fn name(&self) -> &str {
         "getBainHashmashosRT2Stars"
     }
@@ -278,14 +261,8 @@ pub static MINCHA_GEDOLA_MINUTES_30: ZmanPreset<'static> = ZmanPreset::new(
 /// Mincha gedola: `6.5` shaos after alos `72` minutes (or `0.5` shaah after chatzos if configured).
 pub static MINCHA_GEDOLA_MINUTES_72: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::MinchaGedola(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         true,
     ),
     "getMinchaGedola72Minutes",
@@ -318,9 +295,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaAhavatShalom {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaAhavatShalom {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        true
-    }
     fn name(&self) -> &str {
         "getMinchaGedolaAhavatShalom"
     }
@@ -369,9 +343,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaBaalHatanyaGreaterThan30 {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaBaalHatanyaGreaterThan30 {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        true
-    }
     fn name(&self) -> &str {
         "getMinchaGedolaBaalHatanyaGreaterThan30"
     }
@@ -407,9 +378,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaGreaterThan30 {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaGreaterThan30 {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        true
-    }
     fn name(&self) -> &str {
         "getMinchaGedolaGreaterThan30"
     }
@@ -440,14 +408,8 @@ pub static MINCHA_KETANA_16_POINT_1_DEGREES: ZmanPreset<'static> = ZmanPreset::n
 /// Mincha ketana: `9.5` shaos after alos `72` minutes (or `3.5` shaos after chatzos if configured).
 pub static MINCHA_KETANA_MINUTES_72: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::MinchaKetana(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         true,
     ),
     "getMinchaKetana72Minutes",
@@ -471,9 +433,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for MinchaKetanaAhavatShalom {
 
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaKetanaAhavatShalom {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        true
-    }
     fn name(&self) -> &str {
         "getMinchaKetanaAhavatShalom"
     }
@@ -566,10 +525,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for PlagAhavatShalom {
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for PlagAhavatShalom {
     #[cfg(feature = "_java_testing")]
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        true
-    }
-    #[cfg(feature = "_java_testing")]
     fn name(&self) -> &str {
         "getPlagAhavatShalom"
     }
@@ -599,14 +554,8 @@ pub static PLAG_HAMINCHA_ALOS_TO_SUNSET: ZmanPreset<'static> = ZmanPreset::new(
 /// Plag hamincha: `10.75` shaos after alos `60` minutes (or `4.75` shaos after chatzos if configured).
 pub static PLAG_HAMINCHA_60_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::PlagHamincha(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-60),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(60),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-60)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(60)),
         true,
     ),
     "getPlagHamincha60Minutes",
@@ -614,14 +563,8 @@ pub static PLAG_HAMINCHA_60_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
 /// Plag hamincha: `10.75` shaos after alos `72` minutes (or `4.75` shaos after chatzos if configured).
 pub static PLAG_HAMINCHA_72_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::PlagHamincha(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         true,
     ),
     "getPlagHamincha72Minutes",
@@ -638,14 +581,8 @@ pub static PLAG_HAMINCHA_72_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 /// Plag hamincha: `10.75` shaos after alos `90` minutes (or `4.75` shaos after chatzos if configured).
 pub static PLAG_HAMINCHA_90_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::PlagHamincha(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-90),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(90),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-90)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(90)),
         true,
     ),
     "getPlagHamincha90Minutes",
@@ -662,14 +599,8 @@ pub static PLAG_HAMINCHA_90_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 /// Plag hamincha: `10.75` shaos after alos `96` minutes (or `4.75` shaos after chatzos if configured).
 pub static PLAG_HAMINCHA_96_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::PlagHamincha(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-96),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(96),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-96)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(96)),
         true,
     ),
     "getPlagHamincha96Minutes",
@@ -686,14 +617,8 @@ pub static PLAG_HAMINCHA_96_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 /// Plag hamincha: `10.75` shaos after alos `120` minutes (or `4.75` shaos after chatzos if configured).
 pub static PLAG_HAMINCHA_120_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::PlagHamincha(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-120),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(120),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-120)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(120)),
         true,
     ),
     "getPlagHamincha120Minutes",
@@ -774,7 +699,7 @@ pub static PLAG_HAMINCHA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET: ZmanPreset<'static> 
 /// Samuch le-mincha ketana: `9` shaos after sunrise (or `3` shaos after chatzos if configured).
 pub static SAMUCH_LE_MINCHA_KETANA_GRA: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::SamuchLeMinchaKetana(
-        &ZmanPrimitive::ElevationAdjustedSunrise,
+        &ZmanPrimitive::ConfiguredSunrise,
         &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
@@ -792,14 +717,8 @@ pub static SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES: ZmanPreset<'static> = Zma
 /// Samuch le-mincha ketana: `9` shaos after alos `72` minutes (or `3` shaos after chatzos if configured).
 pub static SAMUCH_LE_MINCHA_KETANA_72_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::SamuchLeMinchaKetana(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         true,
     ),
     "getSamuchLeMinchaKetana72Minutes",
@@ -808,8 +727,8 @@ pub static SAMUCH_LE_MINCHA_KETANA_72_MINUTES: ZmanPreset<'static> = ZmanPreset:
 /// Sof zman achilas chametz: `4` shaos after sunrise (or half-day based if configured).
 pub static SOF_ZMAN_ACHILAS_CHAMETZ_GRA: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Tefila(
-        &ZmanPrimitive::ElevationAdjustedSunrise,
-        &ZmanPrimitive::ElevationAdjustedSunset,
+        &ZmanPrimitive::ConfiguredSunrise,
+        &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
     "getSofZmanAchilasChametzGRA",
@@ -817,14 +736,8 @@ pub static SOF_ZMAN_ACHILAS_CHAMETZ_GRA: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman achilas chametz: `4` shaos after alos `72` minutes (or half-day based if configured).
 pub static SOF_ZMAN_ACHILAS_CHAMETZ_MGA_72_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Tefila(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         true,
     ),
     "getSofZmanAchilasChametzMGA72Minutes",
@@ -856,14 +769,8 @@ pub static SOF_ZMAN_BIUR_CHAMETZ_GRA: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman biur chametz: `5` shaos zmaniyos after alos `72` minutes (day = alos72 → tzais72).
 pub static SOF_ZMAN_BIUR_CHAMETZ_MGA_72_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::ShaahZmanisBasedOffset(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         5.0,
     ),
     "getSofZmanBiurChametzMGA72Minutes",
@@ -899,14 +806,8 @@ pub static SOF_ZMAN_SHMA_GRA: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman shma: `3` shaos after alos `72` minutes (or half-day based if configured).
 pub static SOF_ZMAN_SHMA_MGA: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Shema(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         true,
     ),
     "getSofZmanShmaMGA",
@@ -941,14 +842,8 @@ pub static SOF_ZMAN_SHMA_MGA_18_DEGREES: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman shma: `3` shaos after alos `72` minutes (or half-day based if configured).
 pub static SOF_ZMAN_SHMA_MGA_72_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Shema(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         true,
     ),
     "getSofZmanShmaMGA72Minutes",
@@ -965,14 +860,8 @@ pub static SOF_ZMAN_SHMA_MGA_72_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman shma: `3` shaos after alos `90` minutes (or half-day based if configured).
 pub static SOF_ZMAN_SHMA_MGA_90_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Shema(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-90),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(90),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-90)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(90)),
         true,
     ),
     "getSofZmanShmaMGA90Minutes",
@@ -989,14 +878,8 @@ pub static SOF_ZMAN_SHMA_MGA_90_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman shma: `3` shaos after alos `96` minutes (or half-day based if configured).
 pub static SOF_ZMAN_SHMA_MGA_96_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Shema(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-96),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(96),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-96)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(96)),
         true,
     ),
     "getSofZmanShmaMGA96Minutes",
@@ -1018,14 +901,8 @@ pub static SOF_ZMAN_SHMA_HOURS_3_BEFORE_CHATZOS: ZmanPreset<'static> = ZmanPrese
 /// Sof zman shma: `3` shaos zmaniyos after alos `120` minutes (day = alos120 → tzais120).
 pub static SOF_ZMAN_SHMA_MGA_120_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Shema(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-120),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(120),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-120)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(120)),
         true,
     ),
     "getSofZmanShmaMGA120Minutes",
@@ -1071,7 +948,7 @@ pub static SOF_ZMAN_SHMA_BAAL_HATANYA: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman shma: `3` shaos zmaniyos after sunrise (day end = fixed local chatzos).
 pub static SOF_ZMAN_SHMA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::HalfDayBasedOffset(
-        &ZmanPrimitive::ElevationAdjustedSunrise,
+        &ZmanPrimitive::ConfiguredSunrise,
         &ZmanPrimitive::LocalMeanTime(12.0),
         3.0,
     ),
@@ -1101,10 +978,7 @@ pub static SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES_TO_FIXED_LOCAL_CHATZOS: ZmanPres
 pub static SOF_ZMAN_SHMA_MGA_90_MINUTES_TO_FIXED_LOCAL_CHATZOS: ZmanPreset<'static> =
     ZmanPreset::new(
         ZmanPrimitive::HalfDayBasedOffset(
-            &ZmanPrimitive::Offset(
-                &ZmanPrimitive::ElevationAdjustedSunrise,
-                Duration::minutes(-90),
-            ),
+            &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-90)),
             &ZmanPrimitive::LocalMeanTime(12.0),
             3.0,
         ),
@@ -1114,10 +988,7 @@ pub static SOF_ZMAN_SHMA_MGA_90_MINUTES_TO_FIXED_LOCAL_CHATZOS: ZmanPreset<'stat
 pub static SOF_ZMAN_SHMA_MGA_72_MINUTES_TO_FIXED_LOCAL_CHATZOS: ZmanPreset<'static> =
     ZmanPreset::new(
         ZmanPrimitive::HalfDayBasedOffset(
-            &ZmanPrimitive::Offset(
-                &ZmanPrimitive::ElevationAdjustedSunrise,
-                Duration::minutes(-72),
-            ),
+            &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
             &ZmanPrimitive::LocalMeanTime(12.0),
             3.0,
         ),
@@ -1136,14 +1007,8 @@ pub static SOF_ZMAN_TFILA_GRA: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman tfila: `4` shaos after alos `72` minutes (or half-day based if configured).
 pub static SOF_ZMAN_TFILA_MGA: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Tefila(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         true,
     ),
     "getSofZmanTfilaMGA",
@@ -1178,14 +1043,8 @@ pub static SOF_ZMAN_TFILA_MGA_18_DEGREES: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman tfila: `4` shaos after alos `72` minutes (or half-day based if configured).
 pub static SOF_ZMAN_TFILA_MGA_72_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Tefila(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-72),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(72),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-72)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(72)),
         true,
     ),
     "getSofZmanTfilaMGA72Minutes",
@@ -1202,14 +1061,8 @@ pub static SOF_ZMAN_TFILA_MGA_72_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman tfila: `4` shaos after alos `90` minutes (or half-day based if configured).
 pub static SOF_ZMAN_TFILA_MGA_90_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Tefila(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-90),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(90),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-90)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(90)),
         true,
     ),
     "getSofZmanTfilaMGA90Minutes",
@@ -1226,14 +1079,8 @@ pub static SOF_ZMAN_TFILA_MGA_90_ZMANIS: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman tfila: `4` shaos after alos `96` minutes (or half-day based if configured).
 pub static SOF_ZMAN_TFILA_MGA_96_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Tefila(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-96),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(96),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-96)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(96)),
         true,
     ),
     "getSofZmanTfilaMGA96Minutes",
@@ -1255,14 +1102,8 @@ pub static SOF_ZMAN_TFILA_HOURS_2_BEFORE_CHATZOS: ZmanPreset<'static> = ZmanPres
 /// Sof zman tfila: `4` shaos zmaniyos after alos `120` minutes (day = alos120 → tzais120).
 pub static SOF_ZMAN_TFILA_MGA_120_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Tefila(
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunrise,
-            Duration::minutes(-120),
-        ),
-        &ZmanPrimitive::Offset(
-            &ZmanPrimitive::ElevationAdjustedSunset,
-            Duration::minutes(120),
-        ),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::minutes(-120)),
+        &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(120)),
         true,
     ),
     "getSofZmanTfilaMGA120Minutes",
@@ -1288,7 +1129,7 @@ pub static SOF_ZMAN_TFILA_BAAL_HATANYA: ZmanPreset<'static> = ZmanPreset::new(
 /// Sof zman tfila: `4` shaos zmaniyos after sunrise (day end = fixed local chatzos).
 pub static SOF_ZMAN_TFILA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::HalfDayBasedOffset(
-        &ZmanPrimitive::ElevationAdjustedSunrise,
+        &ZmanPrimitive::ConfiguredSunrise,
         &ZmanPrimitive::LocalMeanTime(12.0),
         4.0,
     ),
@@ -1471,9 +1312,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevana15Days {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for SofZmanKidushLevana15Days {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        false
-    }
     fn name(&self) -> &str {
         "getSofZmanKidushLevana15Days"
     }
@@ -1513,9 +1351,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevanaBetweenMoldos {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for SofZmanKidushLevanaBetweenMoldos {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        false
-    }
     fn name(&self) -> &str {
         "getSofZmanKidushLevanaBetweenMoldos"
     }
@@ -1557,9 +1392,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana3Days {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for TchilasZmanKidushLevana3Days {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        false
-    }
     fn name(&self) -> &str {
         "getTchilasZmanKidushLevana3Days"
     }
@@ -1598,9 +1430,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana7Days {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for TchilasZmanKidushLevana7Days {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        false
-    }
     fn name(&self) -> &str {
         "getTchilasZmanKidushLevana7Days"
     }
@@ -1640,9 +1469,6 @@ impl<Tz: TimeZone> ZmanLike<Tz> for Molad {
 }
 #[cfg(feature = "_java_testing")]
 impl<Tz: TimeZone> ZmanPresetLike<Tz> for Molad {
-    fn uses_elevation(&self, _config: &CalculatorConfig) -> bool {
-        false
-    }
     fn name(&self) -> &str {
         "getZmanMolad"
     }
@@ -1653,17 +1479,12 @@ pub static MOLAD: Molad = Molad;
 #[allow(unused)]
 #[cfg(feature = "_java_testing")]
 pub(crate) trait ZmanPresetLike<Tz: TimeZone>: ZmanLike<Tz> {
-    /// Returns whether this zman uses elevation in its calculation (test-only).
-    fn uses_elevation(&self, config: &CalculatorConfig) -> bool;
     /// Returns the KosherJava-style method name for this zman (test-only).
     fn name(&self) -> &str;
 }
 
 #[cfg(feature = "_java_testing")]
 impl<'a, Tz: TimeZone> ZmanPresetLike<Tz> for ZmanPreset<'a> {
-    fn uses_elevation(&self, config: &CalculatorConfig) -> bool {
-        self.event.uses_elevation(config)
-    }
     fn name(&self) -> &str {
         self.name
     }

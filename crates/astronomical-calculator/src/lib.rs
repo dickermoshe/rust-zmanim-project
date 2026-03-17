@@ -478,15 +478,9 @@ impl AstronomicalCalculator {
 
             let tc = find_solar_time(t, 12, 0, 0, self.delta_t, self.delta_ut1, self.lon_radians)?;
             let mut calculator = self.with_time(unix_to_datetime(tc)?);
-            let pos = self.refraction.apply(
-                *calculator.get_solar_position(),
-                self.gdip,
-                self.elevation,
-                self.pressure,
-                self.temperature,
-            )?;
+            let pos = calculator.get_solar_position();
             Ok(SolarInfo {
-                position: pos,
+                position: *pos,
                 timestamp: tc,
             })
         });
@@ -1131,13 +1125,12 @@ pub struct SolarPosition {
 /// - `NoRefraction`: No refraction
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Refraction {
-    /// Bennett refraction model (suitable for most applications)
+    /// Bennett refraction model
     ApSolposBennet,
-    /// Bennett refraction model optimized for accuracy, matches closer with The Nautical Almanac (recommended for precision astronomical calculations)
+    /// Bennett refraction model, matches closer with The Nautical Almanac
     ApSolposBennetNA,
     /// No refraction
     NoRefraction,
-    #[cfg(feature = "_java_testing")]
     /// NOAA refraction model, suitable for most applications
     NOAA,
 }
@@ -1147,7 +1140,6 @@ impl Refraction {
     /// This should not be used for other zenith angles and only used for sunrise/sunset.
     fn sunrise_sunset_refraction(self) -> f64 {
         match self {
-            #[cfg(feature = "_java_testing")]
             Refraction::NOAA => (34.0_f64 / 60.0_f64).to_radians(),
             _ => 0.0,
         }
@@ -1180,11 +1172,7 @@ impl Refraction {
                 pressure,
                 temperature,
             ),
-            // KosherJava's NOAA "standard atmosphere" is modeled as a fixed
-            // zenith offset for sunrise/sunset, not dynamic per-position bending.
-            #[cfg(feature = "_java_testing")]
-            Refraction::NOAA => Ok(position),
-            Refraction::NoRefraction => Ok(position),
+            Refraction::NoRefraction | Refraction::NOAA => Ok(position),
         }
     }
 }

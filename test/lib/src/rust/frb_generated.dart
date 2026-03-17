@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 1592075689;
+  int get rustContentHash => 1618619683;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -80,11 +80,6 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
 abstract class RustLibApi extends BaseApi {
   String crateApiZmanimPresetName({required ZmanimPreset that});
-
-  bool crateApiZmanimPresetUsesElevation(
-      {required ZmanimPreset that,
-      required bool useElevation,
-      required bool useAstronomicalChatzosForOtherZmanim});
 
   (String, PlatformInt64)? crateApiCalculateZman(
       {required PlatformInt64 ateretTorahSunsetOffsetMinutes,
@@ -149,40 +144,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  bool crateApiZmanimPresetUsesElevation(
-      {required ZmanimPreset that,
-      required bool useElevation,
-      required bool useAstronomicalChatzosForOtherZmanim}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerZmanimPreset(
-            that, serializer);
-        sse_encode_bool(useElevation, serializer);
-        sse_encode_bool(useAstronomicalChatzosForOtherZmanim, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_bool,
-        decodeErrorData: null,
-      ),
-      constMeta: kCrateApiZmanimPresetUsesElevationConstMeta,
-      argValues: [that, useElevation, useAstronomicalChatzosForOtherZmanim],
-      apiImpl: this,
-    ));
-  }
-
-  TaskConstMeta get kCrateApiZmanimPresetUsesElevationConstMeta =>
-      const TaskConstMeta(
-        debugName: "ZmanimPreset_uses_elevation",
-        argNames: [
-          "that",
-          "useElevation",
-          "useAstronomicalChatzosForOtherZmanim"
-        ],
-      );
-
-  @override
   (String, PlatformInt64)? crateApiCalculateZman(
       {required PlatformInt64 ateretTorahSunsetOffsetMinutes,
       required PlatformInt64 candleLightingOffsetMinutes,
@@ -212,7 +173,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_bool(useElevation, serializer);
         sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerZmanimPreset(
             zman, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_opt_box_autoadd_record_string_i_64,
@@ -263,7 +224,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_f_64(longitude, serializer);
         sse_encode_f_64(latitude, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -285,7 +246,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -308,7 +269,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_String,
@@ -744,16 +705,4 @@ class ZmanimPresetImpl extends RustOpaque implements ZmanimPreset {
   String name() => RustLib.instance.api.crateApiZmanimPresetName(
         that: this,
       );
-
-  /// Check if the ZmanimPreset uses elevation in its calculation
-  /// Functions which use elevation have more margin for error due to the differences
-  /// in how refraction is calculated between the two libraries
-  bool usesElevation(
-          {required bool useElevation,
-          required bool useAstronomicalChatzosForOtherZmanim}) =>
-      RustLib.instance.api.crateApiZmanimPresetUsesElevation(
-          that: this,
-          useElevation: useElevation,
-          useAstronomicalChatzosForOtherZmanim:
-              useAstronomicalChatzosForOtherZmanim);
 }

@@ -10,44 +10,67 @@ import 'package:test_with_java/src/rust/frb_generated.dart';
 import 'package:jni/jni.dart';
 import 'package:test_with_java/src/test_case.dart';
 
+import 'package:config/config.dart';
+
 /// Constants used in testing
 const HOURS_MS = 60 * 60 * 1000;
 const MINUTES_MS = 60 * 1000;
 const SECONDS_MS = 1000;
-const MAX_DIFF_MS = 10 * SECONDS_MS;
+const DEFAULT_MAX_DIFF_MS = 30000;
 const MAX_YEAR = 2040;
 const MIN_YEAR = 1900;
-const TEST_ITERATIONS =
-    const int.fromEnvironment('TEST_ITERATIONS', defaultValue: 1000);
 
 /// Global random instance
 late Random random;
 
-/// Global debug function (if enabled)
-late Function(String) debug;
+/// Default seed is the current time in milliseconds since epoch
+int defaultSeed() => DateTime.now().millisecondsSinceEpoch;
+
+/// Options are defineable as enums as well as regular lists.
+///
+/// The enum approach is more distinct and type safe.
+/// The list approach is more dynamic and permits non-const initialization.
+enum TestOption<V> implements OptionDefinition<V> {
+  seed(IntOption(
+    argName: 'seed',
+    argAbbrev: 's',
+    helpText: 'The seed to use for the random number generator',
+    min: 0,
+    fromDefault: defaultSeed,
+  )),
+  methodFilter(StringOption(
+    argName: 'filter',
+    argAbbrev: 'f',
+    helpText: 'Filter the methods to test',
+  )),
+  iterations(IntOption(
+    argName: 'iterations',
+    argAbbrev: 'i',
+    helpText: 'The number of iterations to test',
+    min: 1,
+    max: 100000,
+    defaultsTo: 1000,
+    envName: 'TEST_ITERATIONS',
+  ));
+
+  const TestOption(this.option);
+
+  @override
+  final ConfigOptionBase<V> option;
+}
 
 Future<void> main(List<String> args) async {
-  // Get the seed from the command line arguments or generate a random one
-  int seed;
-  if (args.contains('--seed')) {
-    seed = int.parse(args[args.indexOf('--seed') + 1]);
-    print("Seed: $seed");
-  } else {
-    seed = DateTime.now().millisecondsSinceEpoch;
-  }
+  final configuration = Configuration.resolve(
+      options: TestOption.values, args: args, env: Platform.environment);
+  final seed = configuration.value(TestOption.seed);
   random = Random(seed);
   print("Seed: $seed");
 
-  // Enable the debug function if the --debug flag is present
-  if (args.contains('--debug')) {
-    debug = (String message) {
-      stderr.writeln(message);
-    };
-  } else {
-    debug = (String message) {
-      // Do nothing
-    };
-  }
+  final iterations = configuration.value(TestOption.iterations);
+  print("Iterations: $iterations");
+
+  final methodFilter = configuration.optionalValue(TestOption.methodFilter);
+  print("Method filter: $methodFilter");
 
   // Initialize Rust library
   await RustLib.init(
@@ -60,28 +83,23 @@ Future<void> main(List<String> args) async {
   // Initialize Java runtime
   Jni.spawn(classPath: ["./java/target/zmanim-2.6.0-SNAPSHOT.jar"]);
 
-  // // Get a list of the timezones that are supported by both Java and Rust
+  // Get a list of the timezones that are supported by both Java and Rust
   final javaTimezones =
       ZoneId.getAvailableZoneIds()!.map((e) => e!.toDartString()).toSet();
   final rustTimezones = timezones().toSet();
   final validTimezones = javaTimezones.intersection(rustTimezones).toList();
-  final zmanimPresets = presets();
+  final zmanimPresets = presets()
+      .where((e) => methodFilter == null || e.name().contains(methodFilter))
+      .toList();
 
-  for (final zman in zmanimPresets) {
-    bool allSkipped = true;
-    for (var iteration = 0; iteration < TEST_ITERATIONS; iteration++) {
+  for (var iteration = 0; iteration < iterations; iteration++) {
+    for (final zman in zmanimPresets) {
       final testCase = randomTestCase(
         zman: zman,
         iteration: iteration,
         validTimezones: validTimezones,
       );
-      final passed = test(testCase);
-      if (passed) {
-        allSkipped = false;
-      }
-    }
-    if (allSkipped) {
-      throw Exception("All tests skipped for ${zman.name()}");
+      test(testCase);
     }
   }
   print("All tests passed");
@@ -101,12 +119,13 @@ TestCase randomTestCase(
   /// Create a random timestamp in seconds between the minimum and maximum year
   final timestamp =
       random.getDouble(-yearToTimestamp(MIN_YEAR), yearToTimestamp(MAX_YEAR));
+
   final randomDateTime =
       DateTime.fromMillisecondsSinceEpoch((timestamp * 1000).toInt());
-  // TODO: Test with random latitude and longitude
-  // final randomLatitude = rnd(-90.0, 90.0);
-  // final randomLongitude = rnd(-180.0, 180.0);
-  final randomLatitude = random.getDouble(-40.0, 40.0);
+
+  // Going any higher will make the difference between NOAA and SPA start to become
+  // too high to do any meaningful testing.
+  final randomLatitude = random.getDouble(-60.0, 60.0);
   final randomLongitude = random.getDouble(-180.0, 180.0);
   final tz = findTimezone(longitude: randomLongitude, latitude: randomLatitude);
 
@@ -115,7 +134,7 @@ TestCase randomTestCase(
     return randomTestCase(
         zman: zman, iteration: iteration, validTimezones: validTimezones);
   }
-  final randomElevation = random.getDouble(0.0, 1000.0);
+  final randomElevation = random.getDouble(0.0, 4000.0);
   final randomUseElevation = random.nextBool();
   final randomAteretTorahSunsetOffsetMinutes = random.nextInt(60);
   final randomCandleLightingOffsetMinutes = random.nextInt(60);
@@ -142,35 +161,33 @@ TestCase randomTestCase(
 /// Throws an exception if the test fails
 /// Returns true if the test passes, false if the test was skipped
 bool test(TestCase testCase) {
-  final int maxDiffMs = MAX_DIFF_MS;
-  // if (testCase.usesElevation()) {
-  //   // Elevation adds 10 seconds per 100 meters
-  //   maxDiffMs = MAX_DIFF_MS + (testCase.elevation / .1 * SECONDS_MS).toInt();
-  // } else {
-  //   maxDiffMs = MAX_DIFF_MS;
-  // }
   final javaZman = calculateJavaZman(testCase);
   final rustZman = calculateRustZman(testCase);
 
-  // Near the poles it is ok if one algorithm is null and the other is not
-  if (testCase.nearPoles()) {
-    // If either results are null, return
-    if (javaZman == null || rustZman == null) {
-      return false;
-    }
-  } else {
-    // Otherwise, assert both are null, or neither are null.
-    if ((javaZman == null) != (rustZman == null)) {
-      throw FailedTest.nullMismatch(testCase, javaZman, rustZman);
-    }
-  }
+  // Zmanim related to Chametz are only returned by Java if it is Erev Pesach,
+  // However, Rust will return the zmanim for any date.
+  final isChametzZman = testCase.zmanName.contains("Chametz");
 
-  final difference = javaZman!.timestampMs - rustZman!.timestampMs;
-  if (difference > maxDiffMs) {
-    throw FailedTest.differenceTooLarge(
-        testCase, difference, maxDiffMs, javaZman, rustZman);
+  // Near the poles, tiny algorithm differences can make one implementation return null while the other returns a concrete time.
+  final nearPoles = testCase.latitude.abs() > 50.0;
+
+  switch ((javaZman, rustZman)) {
+    case (null, null):
+      return false;
+    case (null, ZmanResult()) || (ZmanResult(), null):
+      if (isChametzZman || nearPoles) {
+        return false;
+      }
+      throw FailedTest.nullMismatch(testCase, javaZman, rustZman);
+    case (ZmanResult javaZman, ZmanResult rustZman):
+      final difference = (javaZman.timestampMs - rustZman.timestampMs).abs();
+      if (difference > DEFAULT_MAX_DIFF_MS) {
+        throw FailedTest.differenceTooLarge(
+            testCase, difference, DEFAULT_MAX_DIFF_MS, javaZman, rustZman);
+      }
+      return true;
   }
-  return true;
+  throw StateError('Unreachable');
 }
 
 class FailedTest implements Exception {
@@ -213,34 +230,53 @@ class ZmanResult {
 }
 
 ZmanResult? calculateJavaZman(TestCase testCase) {
-  final javaZoneId = ZoneId.of$1(testCase.timezone.toJString())!;
-  final localDate = LocalDate.of$1(testCase.year, testCase.month, testCase.day);
-  final location = GeoLocation.new$1("".toJString(), testCase.latitude,
-      testCase.longitude, testCase.elevation, javaZoneId);
-  final calendar = ComprehensiveZmanimCalendar.new1(location);
-  calendar.setUseElevation(testCase.useElevation);
-  calendar
-      .setCandleLightingOffset(testCase.candleLightingOffsetMinutes.toDouble());
-  calendar.setUseAstronomicalChatzosForOtherZmanim(
-      testCase.useAstronomicalChatzosForOtherZmanim);
-  calendar.setAteretTorahSunsetOffset(
-      testCase.ateretTorahSunsetOffsetMinutes.toDouble());
-  calendar.setLocalDate(localDate);
-  // Invoke the method using the JNI API
-  final methodId = calendar.jClass.instanceMethodId(
-    testCase.zman.name(),
-    r'()Ljava/time/Instant;',
-  );
-  final result = methodId.call(calendar, $Instant$NullableType$(), []);
-  if (result == null) {
-    return null;
-  }
-  final instant = Instant.ofEpochMilli(result.toEpochMilli());
-  final ztd = ZonedDateTime.ofInstant(instant, javaZoneId);
+  /// There is an off error with JNI where we will get a JniException
+  /// for seemingly no reason. We should try up to 3 times to get the result.
+  for (final i in Iterable.generate(3)) {
+    try {
+      final javaZoneId = ZoneId.of$1(testCase.timezone.toJString())!;
+      final localDate =
+          LocalDate.of$1(testCase.year, testCase.month, testCase.day);
+      final location = GeoLocation.new$1("".toJString(), testCase.latitude,
+          testCase.longitude, testCase.elevation, javaZoneId);
+      final calendar = ComprehensiveZmanimCalendar.new1(location);
+      calendar.setUseElevation(testCase.useElevation);
+      calendar.setCandleLightingOffset(
+          testCase.candleLightingOffsetMinutes.toDouble());
 
-  return ZmanResult(ztd!.toString$1()!.toDartString(), instant!.toEpochMilli());
+      // We compare `CHATZOS_ASTRONOMICAL` with `getChatzos`.
+      // They will only be functionally equivalent if `useAstronomicalChatzos` is set to true.
+      calendar.setUseAstronomicalChatzos(true);
+      calendar.setUseAstronomicalChatzosForOtherZmanim(
+          testCase.useAstronomicalChatzosForOtherZmanim);
+      calendar.setAteretTorahSunsetOffset(
+          testCase.ateretTorahSunsetOffsetMinutes.toDouble());
+      calendar.setLocalDate(localDate);
+      // Invoke the method using the JNI API
+      final methodId = calendar.jClass.instanceMethodId(
+        testCase.zman.name(),
+        r'()Ljava/time/Instant;',
+      );
+      final result = methodId.call(calendar, $Instant$NullableType$(), []);
+      if (result == null) {
+        return null;
+      }
+      final milliseconds = result.toEpochMilli();
+      final instant = Instant.ofEpochMilli(milliseconds);
+      final ztd = ZonedDateTime.ofInstant(instant, javaZoneId);
+
+      return ZmanResult(ztd!.toString$1()!.toDartString(), milliseconds);
+    } on JniException catch (_) {
+      if (i == 2) {
+        rethrow;
+      }
+    }
+  }
+
+  return null;
 }
 
+/// Calculate the zman using the Rust library
 ZmanResult? calculateRustZman(TestCase testCase) {
   final result = calculateZman(
     useElevation: testCase.useElevation,

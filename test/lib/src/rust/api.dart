@@ -54,11 +54,4 @@ abstract class ZmanimPreset implements RustOpaqueInterface {
   /// Get the name of the ZmanimPreset
   /// This is also the method name in the Java side
   String name();
-
-  /// Check if the ZmanimPreset uses elevation in its calculation
-  /// Functions which use elevation have more margin for error due to the differences
-  /// in how refraction is calculated between the two libraries
-  bool usesElevation(
-      {required bool useElevation,
-      required bool useAstronomicalChatzosForOtherZmanim});
 }

@@ -4,7 +4,11 @@
 //! then pass any [`ZmanLike`] implementor (typically a value from [`crate::presets`]) to
 //! [`ZmanimCalculator::calculate`] to obtain a `DateTime<Utc>`.
 
-use crate::types::{config::CalculatorConfig, error::ZmanimError, location::Location};
+use crate::types::{
+    config::CalculatorConfig,
+    error::{IntoDateTimeResult, ZmanimError},
+    location::Location,
+};
 use astronomical_calculator::{AstronomicalCalculator, Refraction};
 use chrono::{
     offset::LocalResult, DateTime, Datelike, Duration, NaiveDate, TimeDelta, TimeZone, Utc,
@@ -27,8 +31,8 @@ pub struct ZmanimCalculator<Tz: TimeZone> {
     pub date: NaiveDate,
     /// Calculation configuration options.
     pub config: CalculatorConfig,
-    pub(crate) elevation_adjusted_calculator: AstronomicalCalculator,
-    pub(crate) sea_level_calculator: AstronomicalCalculator,
+    elevation_adjusted_calculator: AstronomicalCalculator,
+    sea_level_calculator: AstronomicalCalculator,
 }
 
 impl<Tz: TimeZone> ZmanimCalculator<Tz> {
@@ -45,6 +49,10 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
         date: NaiveDate,
         config: CalculatorConfig,
     ) -> Result<Self, ZmanimError> {
+        #[cfg(feature = "_java_testing")]
+        let refraction = Refraction::NOAA;
+        #[cfg(not(feature = "_java_testing"))]
+        let refraction = Refraction::ApSolposBennet;
         let localnoon = Self::local_noon(date, &location)?;
         let elevation_adjusted_calculator = AstronomicalCalculator::new(
             localnoon,
@@ -56,10 +64,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             22.0,
             1013.25,
             None,
-            #[cfg(feature = "_java_testing")]
-            Refraction::NOAA,
-            #[cfg(not(feature = "_java_testing"))]
-            Refraction::ApSolposBennet,
+            refraction,
         )
         .map_err(ZmanimError::AstronomicalCalculatorError)?;
         let sea_level_calculator = AstronomicalCalculator::new(
@@ -72,10 +77,7 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             22.0,
             1013.25,
             None,
-            #[cfg(feature = "_java_testing")]
-            Refraction::NOAA,
-            #[cfg(not(feature = "_java_testing"))]
-            Refraction::ApSolposBennet,
+            refraction,
         )
         .map_err(ZmanimError::AstronomicalCalculatorError)?;
         Ok(Self {
@@ -184,6 +186,39 @@ impl<Tz: TimeZone> ZmanimCalculator<Tz> {
             let offset_seconds = (location.longitude * 240.0).round() as i64;
             Ok((lmt_dt - Duration::seconds(offset_seconds)).and_utc())
         }
+    }
+    pub(crate) fn configured_calculator(&mut self) -> &mut AstronomicalCalculator {
+        if self.config.use_elevation {
+            &mut self.elevation_adjusted_calculator
+        } else {
+            &mut self.sea_level_calculator
+        }
+    }
+    pub(crate) fn elevation_adjusted_sunrise(&mut self) -> Result<DateTime<Utc>, ZmanimError> {
+        self.elevation_adjusted_calculator
+            .get_sunrise()
+            .into_date_time_result()
+    }
+    pub(crate) fn elevation_adjusted_sunset(&mut self) -> Result<DateTime<Utc>, ZmanimError> {
+        self.elevation_adjusted_calculator
+            .get_sunset()
+            .into_date_time_result()
+    }
+    pub(crate) fn sea_level_sunrise(&mut self) -> Result<DateTime<Utc>, ZmanimError> {
+        self.sea_level_calculator
+            .get_sea_level_sunrise()
+            .into_date_time_result()
+    }
+    pub(crate) fn sea_level_sunset(&mut self) -> Result<DateTime<Utc>, ZmanimError> {
+        self.sea_level_calculator
+            .get_sea_level_sunset()
+            .into_date_time_result()
+    }
+    pub(crate) fn solar_transit(&mut self) -> Result<DateTime<Utc>, ZmanimError> {
+        // Solar transit calculations do not use elevation, so the calculator used here is irrelevant
+        self.elevation_adjusted_calculator
+            .get_solar_transit()
+            .into_date_time_result()
     }
 }
 

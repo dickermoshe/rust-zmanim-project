@@ -29,21 +29,6 @@ impl ZmanimPreset {
     pub fn name(&self) -> String {
         self.zman.name.to_string()
     }
-    /// Check if the ZmanimPreset uses elevation in its calculation
-    /// Functions which use elevation have more margin for error due to the differences
-    /// in how refraction is calculated between the two libraries
-    #[frb(sync)]
-    pub fn uses_elevation(
-        &self,
-        use_elevation: bool,
-        use_astronomical_chatzos_for_other_zmanim: bool,
-    ) -> bool {
-        self.zman.event.uses_elevation(&CalculatorConfig {
-            use_elevation,
-            use_astronomical_chatzos_for_other_zmanim,
-            ..Default::default()
-        })
-    }
 }
 /// Get all the timezones supported by the library
 #[frb(sync)]

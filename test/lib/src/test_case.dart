@@ -18,6 +18,7 @@ class TestCase {
   final int candleLightingOffsetMinutes;
   final bool useAstronomicalChatzosForOtherZmanim;
   final bool useElevation;
+  String? _name;
 
   TestCase(
       {required this.iteration,
@@ -77,15 +78,11 @@ class TestCase {
     return fromMap(jsonDecode(json), zmanimPresets);
   }
 
-  bool usesElevation() {
-    return useElevation &&
-        zman.usesElevation(
-            useElevation: useElevation,
-            useAstronomicalChatzosForOtherZmanim:
-                useAstronomicalChatzosForOtherZmanim);
-  }
-
-  bool nearPoles() {
-    return latitude.abs() > 75.0;
+  String get zmanName {
+    if (_name != null) {
+      return _name!;
+    }
+    _name = zman.name();
+    return _name!;
   }
 }
