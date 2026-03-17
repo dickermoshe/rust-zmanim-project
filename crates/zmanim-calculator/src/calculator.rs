@@ -31,8 +31,8 @@ pub struct ZmanimCalculator<Tz: TimeZone> {
     pub date: NaiveDate,
     /// Calculation configuration options.
     pub config: CalculatorConfig,
-    elevation_adjusted_calculator: AstronomicalCalculator,
-    sea_level_calculator: AstronomicalCalculator,
+    pub(crate) elevation_adjusted_calculator: AstronomicalCalculator,
+    pub(crate) sea_level_calculator: AstronomicalCalculator,
 }
 
 impl<Tz: TimeZone> ZmanimCalculator<Tz> {

@@ -16,7 +16,10 @@ import 'package:config/config.dart';
 const HOURS_MS = 60 * 60 * 1000;
 const MINUTES_MS = 60 * 1000;
 const SECONDS_MS = 1000;
+
+/// Default max difference in milliseconds
 const DEFAULT_MAX_DIFF_MS = 30000;
+
 const MAX_YEAR = 2040;
 const MIN_YEAR = 1900;
 
@@ -106,12 +109,12 @@ Future<void> main(List<String> args) async {
   exit(0);
 }
 
-// Convert a year to a timestamp in seconds
+/// Convert a year to a timestamp in seconds
 double yearToTimestamp(int year) {
   return (year - 1970) * 365.25 * 24 * 60 * 60;
 }
 
-// Generate a random TestCase for a given zman
+/// Generate a random TestCase for a given zman
 TestCase randomTestCase(
     {required ZmanimPreset zman,
     required int iteration,
@@ -123,9 +126,8 @@ TestCase randomTestCase(
   final randomDateTime =
       DateTime.fromMillisecondsSinceEpoch((timestamp * 1000).toInt());
 
-  // Going any higher will make the difference between NOAA and SPA start to become
-  // too high to do any meaningful testing.
-  final randomLatitude = random.getDouble(-60.0, 60.0);
+  final maxLatitude = maxLatitudeForZman(zman);
+  final randomLatitude = random.getDouble(-maxLatitude, maxLatitude);
   final randomLongitude = random.getDouble(-180.0, 180.0);
   final tz = findTimezone(longitude: randomLongitude, latitude: randomLatitude);
 
@@ -164,18 +166,13 @@ bool test(TestCase testCase) {
   final javaZman = calculateJavaZman(testCase);
   final rustZman = calculateRustZman(testCase);
 
-  // Zmanim related to Chametz are only returned by Java if it is Erev Pesach,
-  // However, Rust will return the zmanim for any date.
-  final isChametzZman = testCase.zmanName.contains("Chametz");
-
-  // Near the poles, tiny algorithm differences can make one implementation return null while the other returns a concrete time.
-  final nearPoles = testCase.latitude.abs() > 50.0;
-
   switch ((javaZman, rustZman)) {
     case (null, null):
       return false;
     case (null, ZmanResult()) || (ZmanResult(), null):
-      if (isChametzZman || nearPoles) {
+      // Zmanim related to Chametz are only returned by Java if it is Erev Pesach,
+      // However, Rust will return the zmanim for any date.
+      if (testCase.zmanName.contains("Chametz")) {
         return false;
       }
       throw FailedTest.nullMismatch(testCase, javaZman, rustZman);
@@ -190,6 +187,7 @@ bool test(TestCase testCase) {
   throw StateError('Unreachable');
 }
 
+/// A custom exception for failed tests.
 class FailedTest implements Exception {
   final TestCase testCase;
   final String message;
@@ -220,6 +218,7 @@ class FailedTest implements Exception {
   String toString() => message;
 }
 
+/// A result from the zman calculation.
 class ZmanResult {
   final String formattedDate;
   final int timestampMs;
@@ -229,6 +228,7 @@ class ZmanResult {
   }
 }
 
+/// Calculate the zman using the Java library. Returns null if the zman could not be calculated.
 ZmanResult? calculateJavaZman(TestCase testCase) {
   /// There is an off error with JNI where we will get a JniException
   /// for seemingly no reason. We should try up to 3 times to get the result.
@@ -277,6 +277,7 @@ ZmanResult? calculateJavaZman(TestCase testCase) {
 }
 
 /// Calculate the zman using the Rust library
+/// Returns null if the zman could not be calculated.
 ZmanResult? calculateRustZman(TestCase testCase) {
   final result = calculateZman(
     useElevation: testCase.useElevation,
@@ -300,7 +301,7 @@ ZmanResult? calculateRustZman(TestCase testCase) {
   return ZmanResult(formattedDate, timestampMs);
 }
 
-// Show as hours if more than 1 hour, minutes if more than 1 minute, seconds if more than 1 second, milliseconds if less than 1 second
+/// Format a difference in milliseconds as a human readable string.
 String formatDifference(int differenceMs) {
   if (differenceMs > HOURS_MS) {
     return '${differenceMs / HOURS_MS} hours';
@@ -312,4 +313,41 @@ String formatDifference(int differenceMs) {
     return '${differenceMs / SECONDS_MS} seconds';
   }
   return '${differenceMs} milliseconds';
+}
+
+// The Java and Rust implementations use slightly different astronomical models.
+// While usually negligible, these differences become significant near solar transition
+// boundaries (e.g., sunrise/sunset, dawn/dusk), especially at high latitudes.
+//
+// In extreme latitudes, there are periods when the sun does not rise or set at all.
+// In such cases, the calculation correctly returns null.
+//
+// The more subtle case occurs near the *edge* of these periods. For example, if a given
+// day (e.g., Sunday) has no sunset, then the preceding day (Saturday) may produce
+// noticeably different sunset times between the two implementations. This is because
+// the underlying math is operating near a discontinuity, where small differences in
+// the model or inputs can lead to large variations in the result.
+//
+// Similar instability can occur for other zmanim (e.g., dawn), in locations and dates
+// where those events are close to ceasing to exist.
+//
+// As a result, discrepancies between implementations are expected in these edge cases,
+// and are not necessarily indicative of a bug.
+//
+// We will use a different range of latitudes depending on the zman.
+double maxLatitudeForZman(ZmanimPreset zman) {
+  switch (zman.name()) {
+    case "getChatzos":
+      return 85.0;
+    case "getSunriseWithElevation" ||
+          "getSeaLevelSunrise" ||
+          "getSunsetWithElevation" ||
+          "getSeaLevelSunset" ||
+          "getChatzos" ||
+          "getChatzosAsHalfDay" ||
+          "getFixedLocalChatzos":
+      return 60.0;
+    default:
+      return 40.0;
+  }
 }
