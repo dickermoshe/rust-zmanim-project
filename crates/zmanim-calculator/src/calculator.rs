@@ -26,11 +26,11 @@ use core_maths::*;
 #[derive(Clone, Debug)]
 pub struct ZmanimCalculator<Tz: TimeZone> {
     /// The location to calculate for.
-    pub location: Location<Tz>,
+    pub(crate) location: Location<Tz>,
     /// The civil date at `location` for which zmanim are calculated.
-    pub date: NaiveDate,
+    pub(crate) date: NaiveDate,
     /// Calculation configuration options.
-    pub config: CalculatorConfig,
+    pub(crate) config: CalculatorConfig,
     pub(crate) elevation_adjusted_calculator: AstronomicalCalculator,
     pub(crate) sea_level_calculator: AstronomicalCalculator,
 }

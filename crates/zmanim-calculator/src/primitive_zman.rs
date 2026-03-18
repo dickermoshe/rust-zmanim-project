@@ -10,16 +10,25 @@
 //! Use this module when you need to compose a custom zman definition that is
 //! not already provided by a preset.
 
-use chrono::{DateTime, Duration, TimeZone, Utc};
+use chrono::{DateTime, Datelike, Duration, TimeZone, Utc};
+use hebrew_holiday_calendar::MoladCalendar;
+use icu_calendar::Date;
 
 use crate::{
     calculator::ZmanLike,
     duration_helper::multiply_duration,
     prelude::ZmanimCalculator,
+    presets::{
+        ALOS_16_POINT_1_DEGREES, MINCHA_GEDOLA_BAAL_HATANYA, MINCHA_GEDOLA_MINUTES_30,
+        MINCHA_GEDOLA_SUNRISE_SUNSET, TZAIS_GEONIM_DEGREES_3_POINT_7,
+        TZAIS_GEONIM_DEGREES_3_POINT_8,
+    },
     types::error::{IntoDateTimeResult, ZmanimError},
 };
 
 /// A low-level building block for calculating zmanim.
+///
+/// These should typically not be used directly. Instead, use the presets in [`crate::presets`].
 #[derive(Debug, Clone)]
 pub enum ZmanPrimitive<'a> {
     /// Sunrise at the configured location/date.
@@ -66,6 +75,30 @@ pub enum ZmanPrimitive<'a> {
     PlagHamincha(&'a ZmanPrimitive<'a>, &'a ZmanPrimitive<'a>, bool),
     /// Tzais according to the shita of Yeshivas Ateret Torah
     TzaisAteretTorah,
+    /// The latest time of _Kiddush Levana_ calculated as 15 days after the molad.
+    SofZmanKidushLevana15Days,
+    /// The latest time of _Kiddush Levana_ according to the the opinion of the Maharil
+    /// that it is calculated as halfway between molad and molad.
+    SofZmanKidushLevanaBetweenMoldos,
+    /// The earliest time of _Kiddush Levana_ according to Rabbeinu Yonahs opinion that it can be said 3 days after the molad.
+    TchilasZmanKidushLevana3Days,
+    /// The earliest time of _Kiddush Levana_ according to the opinions that it should
+    /// not be said until 7 days after the molad.
+    TchilasZmanKidushLevana7Days,
+    /// Bain hashmashos (Rabbeinu Tam, 2-stars): `sunset + (sunrise - alos19.8°) * 5/18`.
+    BainHashmashosRt2Stars,
+    /// Mincha gedola (Ahavat Shalom): later of `chatzos + 30m` and `chatzos + 1/2 shaah`.
+    MinchaGedolaAhavatShalom,
+    /// Mincha gedola: later of Baal HaTanya mincha gedola and `30` minutes after solar transit.
+    MinchaGedolaBaalHatanyaGreaterThan30,
+    /// Mincha gedola: later of [`MINCHA_GEDOLA_SUNRISE_SUNSET`] and [`MINCHA_GEDOLA_MINUTES_30`].
+    MinchaGedolaGreaterThan30,
+    /// Mincha ketana (Ahavat Shalom): `2.5` shaos zmaniyos before tzais `3.8°` (day = alos16.1° → tzais3.8°).
+    MinchaKetanaAhavatShalom,
+    /// Plag hamincha (Ahavat Shalom): `1.25` shaos zmaniyos before tzais `3.8°` (day = alos16.1° → tzais3.8°).
+    PlagAhavatShalom,
+    /// Returns the latest time of _Kiddush Levana_ calculated as 15 days after the molad.
+    Molad,
 }
 
 impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
@@ -252,6 +285,139 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPrimitive<'a> {
                     .get_sunset()
                     .into_date_time_result()?;
                 Ok(sunset + calculator.config.ateret_torah_sunset_offset)
+            }
+            ZmanPrimitive::SofZmanKidushLevana15Days => {
+                let tz = calculator
+                    .location
+                    .timezone
+                    .as_ref()
+                    .ok_or(ZmanimError::TimeZoneRequired)?;
+                let date = Date::try_new_gregorian(
+                    calculator.date.year(),
+                    calculator.date.month() as u8,
+                    calculator.date.day() as u8,
+                )
+                .map_err(|_| ZmanimError::TimeConversionError)?;
+                date.sof_zman_kidush_levana_15_days(tz)
+                    .map(|i| i.0.to_utc())
+                    .ok_or(ZmanimError::TimeConversionError)
+            }
+            ZmanPrimitive::SofZmanKidushLevanaBetweenMoldos => {
+                let tz = calculator
+                    .location
+                    .timezone
+                    .as_ref()
+                    .ok_or(ZmanimError::TimeZoneRequired)?;
+                let date = Date::try_new_gregorian(
+                    calculator.date.year(),
+                    calculator.date.month() as u8,
+                    calculator.date.day() as u8,
+                )
+                .map_err(|_| ZmanimError::TimeConversionError)?;
+                date.sof_zman_kidush_levana_between_moldos(tz)
+                    .map(|i| i.0.to_utc())
+                    .ok_or(ZmanimError::TimeConversionError)
+            }
+            ZmanPrimitive::TchilasZmanKidushLevana3Days => {
+                let tz = calculator
+                    .location
+                    .timezone
+                    .as_ref()
+                    .ok_or(ZmanimError::TimeZoneRequired)?;
+                let date = Date::try_new_gregorian(
+                    calculator.date.year(),
+                    calculator.date.month() as u8,
+                    calculator.date.day() as u8,
+                )
+                .map_err(|_| ZmanimError::TimeConversionError)?;
+                date.tchilas_zman_kidush_levana_3_days(tz)
+                    .map(|i| i.0.to_utc())
+                    .ok_or(ZmanimError::TimeConversionError)
+            }
+            ZmanPrimitive::TchilasZmanKidushLevana7Days => {
+                let tz = calculator
+                    .location
+                    .timezone
+                    .as_ref()
+                    .ok_or(ZmanimError::TimeZoneRequired)?;
+                let date = Date::try_new_gregorian(
+                    calculator.date.year(),
+                    calculator.date.month() as u8,
+                    calculator.date.day() as u8,
+                )
+                .map_err(|_| ZmanimError::TimeConversionError)?;
+                date.tchilas_zman_kidush_levana_7_days(tz)
+                    .map(|i| i.0.to_utc())
+                    .ok_or(ZmanimError::TimeConversionError)
+            }
+            ZmanPrimitive::BainHashmashosRt2Stars => {
+                let alos19_point_8 =
+                    ZmanPrimitive::SunriseOffsetByDegrees(19.8).calculate(calculator)?;
+                let sunrise = ZmanPrimitive::ConfiguredSunrise.calculate(calculator)?;
+                let sunset = ZmanPrimitive::ConfiguredSunset.calculate(calculator)?;
+                let time_diff = sunrise.signed_duration_since(alos19_point_8);
+                let offset = time_diff.num_milliseconds() as f64 * (5.0 / 18.0);
+                Ok(sunset + Duration::milliseconds(offset as i64))
+            }
+            ZmanPrimitive::MinchaGedolaAhavatShalom => {
+                let chatzos = ZmanPrimitive::SolarTransit.calculate(calculator)?;
+                let mincha_gedola_30 = chatzos + Duration::minutes(30);
+
+                let alos = ALOS_16_POINT_1_DEGREES.calculate(calculator)?;
+                let tzais = TZAIS_GEONIM_DEGREES_3_POINT_7.calculate(calculator)?;
+                let shaah_zmanis = (tzais - alos) / 12;
+                let mincha_alternative = chatzos + (shaah_zmanis / 2);
+                if mincha_gedola_30 > mincha_alternative {
+                    Ok(mincha_gedola_30)
+                } else {
+                    Ok(mincha_alternative)
+                }
+            }
+            ZmanPrimitive::MinchaGedolaBaalHatanyaGreaterThan30 => {
+                let mincha_30 = MINCHA_GEDOLA_MINUTES_30.calculate(calculator)?;
+                let mincha_baal_hatanya = MINCHA_GEDOLA_BAAL_HATANYA.calculate(calculator)?;
+                if mincha_30 > mincha_baal_hatanya {
+                    Ok(mincha_30)
+                } else {
+                    Ok(mincha_baal_hatanya)
+                }
+            }
+            ZmanPrimitive::MinchaGedolaGreaterThan30 => {
+                let mincha_30 = MINCHA_GEDOLA_MINUTES_30.calculate(calculator)?;
+                let mincha_regular = MINCHA_GEDOLA_SUNRISE_SUNSET.calculate(calculator)?;
+                if mincha_30 > mincha_regular {
+                    Ok(mincha_30)
+                } else {
+                    Ok(mincha_regular)
+                }
+            }
+            ZmanPrimitive::MinchaKetanaAhavatShalom => {
+                let tzais = TZAIS_GEONIM_DEGREES_3_POINT_8.calculate(calculator)?;
+                let alos = ALOS_16_POINT_1_DEGREES.calculate(calculator)?;
+                let shaah_zmanis = (tzais - alos) / 12;
+                Ok(tzais - (shaah_zmanis * 5 / 2))
+            }
+            ZmanPrimitive::PlagAhavatShalom => {
+                let tzais = ZmanPrimitive::SunsetOffsetByDegrees(3.8).calculate(calculator)?;
+                let alos = ZmanPrimitive::SunriseOffsetByDegrees(16.1).calculate(calculator)?;
+                let shaah_zmanis = (tzais - alos) / 12;
+                Ok(tzais - (shaah_zmanis * 5 / 4))
+            }
+            ZmanPrimitive::Molad => {
+                let tz = calculator
+                    .location
+                    .timezone
+                    .as_ref()
+                    .ok_or(ZmanimError::TimeZoneRequired)?;
+                let date = Date::try_new_gregorian(
+                    calculator.date.year(),
+                    calculator.date.month() as u8,
+                    calculator.date.day() as u8,
+                )
+                .map_err(|_| ZmanimError::TimeConversionError)?;
+                date.molad(tz)
+                    .map(|i| i.0.to_utc())
+                    .ok_or(ZmanimError::TimeConversionError)
             }
         }
     }

@@ -3,9 +3,7 @@
 //! Prefer these presets for standard zmanim usage. Reach for `primitive_zman` only when
 //! you need to compose a custom calculation that is not already provided here.
 
-use chrono::{Datelike, TimeZone};
-use hebrew_holiday_calendar::MoladCalendar;
-use icu_calendar::Date;
+use chrono::TimeZone;
 
 use crate::prelude::ZmanimCalculator;
 use crate::types::error::ZmanimError;
@@ -44,19 +42,6 @@ impl<'a, Tz: TimeZone> ZmanLike<Tz> for ZmanPreset<'a> {
         calculator: &mut ZmanimCalculator<Tz>,
     ) -> Result<DateTime<Utc>, ZmanimError> {
         self.event.calculate(calculator)
-    }
-}
-#[allow(unused)]
-#[cfg(feature = "_java_testing")]
-pub(crate) trait ZmanPresetLike<Tz: TimeZone>: ZmanLike<Tz> {
-    /// Returns the KosherJava-style method name for this zman (test-only).
-    fn name(&self) -> &str;
-}
-
-#[cfg(feature = "_java_testing")]
-impl<'a, Tz: TimeZone> ZmanPresetLike<Tz> for ZmanPreset<'a> {
-    fn name(&self) -> &str {
-        self.name
     }
 }
 
@@ -176,35 +161,12 @@ pub static BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES: Zma
         ),
         "getBainHashmashosRT13Point5MinutesBefore7Point083Degrees",
     );
-#[allow(missing_docs)]
-pub struct BainHashmashosRt2Stars {
-    _private: (),
-}
-
-impl<Tz: TimeZone> ZmanLike<Tz> for BainHashmashosRt2Stars {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let alos19_point_8 = ZmanPrimitive::SunriseOffsetByDegrees(19.8).calculate(calculator)?;
-        let sunrise = ZmanPrimitive::ConfiguredSunrise.calculate(calculator)?;
-        let sunset = ZmanPrimitive::ConfiguredSunset.calculate(calculator)?;
-        let time_diff = sunrise.signed_duration_since(alos19_point_8);
-        let offset = time_diff.num_milliseconds() as f64 * (5.0 / 18.0);
-        Ok(sunset + Duration::milliseconds(offset as i64))
-    }
-}
-
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for BainHashmashosRt2Stars {
-    fn name(&self) -> &str {
-        "getBainHashmashosRT2Stars"
-    }
-}
 
 /// Bain hashmashos (Rabbeinu Tam, 2-stars): `sunset + (sunrise - alos19.8°) * 5/18`.
-pub static BAIN_HASHMASHOS_RT_2_STARS: BainHashmashosRt2Stars =
-    BainHashmashosRt2Stars { _private: () };
+pub static BAIN_HASHMASHOS_RT_2_STARS: ZmanPreset<'static> = ZmanPreset::new(
+    ZmanPrimitive::BainHashmashosRt2Stars,
+    "getBainHashmashosRT2Stars",
+);
 /// Bain hashmashos (Yereim): `18` minutes before sunset.
 pub static BAIN_HASHMASHOS_YEREIM_18_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::minutes(-18)),
@@ -281,40 +243,11 @@ pub static MINCHA_GEDOLA_MINUTES_72: ZmanPreset<'static> = ZmanPreset::new(
     "getMinchaGedola72Minutes",
 );
 
-#[allow(missing_docs)]
-pub struct MinchaGedolaAhavatShalom {
-    _private: (),
-}
-
-impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaAhavatShalom {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let chatzos = ZmanPrimitive::SolarTransit.calculate(calculator)?;
-        let mincha_gedola_30 = chatzos + Duration::minutes(30);
-
-        let alos = ALOS_16_POINT_1_DEGREES.calculate(calculator)?;
-        let tzais = TZAIS_GEONIM_DEGREES_3_POINT_7.calculate(calculator)?;
-        let shaah_zmanis = (tzais - alos) / 12;
-        let mincha_alternative = chatzos + (shaah_zmanis / 2);
-        if mincha_gedola_30 > mincha_alternative {
-            Ok(mincha_gedola_30)
-        } else {
-            Ok(mincha_alternative)
-        }
-    }
-}
-
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaAhavatShalom {
-    fn name(&self) -> &str {
-        "getMinchaGedolaAhavatShalom"
-    }
-}
 /// Mincha gedola (Ahavat Shalom): later of `chatzos + 30m` and `chatzos + 1/2 shaah`.
-pub static MINCHA_GEDOLA_AHAVAT_SHALOM: MinchaGedolaAhavatShalom =
-    MinchaGedolaAhavatShalom { _private: () };
+pub static MINCHA_GEDOLA_AHAVAT_SHALOM: ZmanPreset<'static> = ZmanPreset::new(
+    ZmanPrimitive::MinchaGedolaAhavatShalom,
+    "getMinchaGedolaAhavatShalom",
+);
 /// Mincha gedola: `6.5` shaos zmaniyos after alos `72 zmaniyos` (day end = Ateret Torah tzais).
 pub static MINCHA_GEDOLA_ATERET_TORAH: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::MinchaGedola(
@@ -334,71 +267,22 @@ pub static MINCHA_GEDOLA_BAAL_HATANYA: ZmanPreset<'static> = ZmanPreset::new(
     "getMinchaGedolaBaalHatanya",
 );
 
-#[allow(missing_docs)]
-pub struct MinchaGedolaBaalHatanyaGreaterThan30 {
-    _private: (),
-}
-
-impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaBaalHatanyaGreaterThan30 {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let mincha_30 = MINCHA_GEDOLA_MINUTES_30.calculate(calculator)?;
-        let mincha_baal_hatanya = MINCHA_GEDOLA_BAAL_HATANYA.calculate(calculator)?;
-        if mincha_30 > mincha_baal_hatanya {
-            Ok(mincha_30)
-        } else {
-            Ok(mincha_baal_hatanya)
-        }
-    }
-}
-
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaBaalHatanyaGreaterThan30 {
-    fn name(&self) -> &str {
-        "getMinchaGedolaBaalHatanyaGreaterThan30"
-    }
-}
-
 /// Mincha gedola: later of Baal HaTanya mincha gedola and `30` minutes after solar transit.
-pub static MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30: MinchaGedolaBaalHatanyaGreaterThan30 =
-    MinchaGedolaBaalHatanyaGreaterThan30 { _private: () };
+pub static MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30: ZmanPreset<'static> = ZmanPreset::new(
+    ZmanPrimitive::MinchaGedolaBaalHatanyaGreaterThan30,
+    "getMinchaGedolaBaalHatanyaGreaterThan30",
+);
 /// Mincha gedola: `30` minutes after fixed local chatzos (12:00 local mean time).
 pub static MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::Offset(&ZmanPrimitive::LocalMeanTime(12.0), Duration::minutes(30)),
     "getMinchaGedolaGRAFixedLocalChatzos30Minutes",
 );
-#[allow(missing_docs)]
-pub struct MinchaGedolaGreaterThan30 {
-    _private: (),
-}
-
-impl<Tz: TimeZone> ZmanLike<Tz> for MinchaGedolaGreaterThan30 {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let mincha_30 = MINCHA_GEDOLA_MINUTES_30.calculate(calculator)?;
-        let mincha_regular = MINCHA_GEDOLA_SUNRISE_SUNSET.calculate(calculator)?;
-        if mincha_30 > mincha_regular {
-            Ok(mincha_30)
-        } else {
-            Ok(mincha_regular)
-        }
-    }
-}
-
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaGedolaGreaterThan30 {
-    fn name(&self) -> &str {
-        "getMinchaGedolaGreaterThan30"
-    }
-}
 
 /// Mincha gedola: later of [`MINCHA_GEDOLA_SUNRISE_SUNSET`] and [`MINCHA_GEDOLA_MINUTES_30`].
-pub static MINCHA_GEDOLA_GREATER_THAN_30: MinchaGedolaGreaterThan30 =
-    MinchaGedolaGreaterThan30 { _private: () };
+pub static MINCHA_GEDOLA_GREATER_THAN_30: ZmanPreset<'static> = ZmanPreset::new(
+    ZmanPrimitive::MinchaGedolaGreaterThan30,
+    "getMinchaGedolaGreaterThan30",
+);
 
 /// Mincha ketana: `9.5` shaos after sunrise (or `3.5` shaos after chatzos if configured).
 pub static MINCHA_KETANA_SUNRISE_SUNSET: ZmanPreset<'static> = ZmanPreset::new(
@@ -427,33 +311,12 @@ pub static MINCHA_KETANA_MINUTES_72: ZmanPreset<'static> = ZmanPreset::new(
     ),
     "getMinchaKetana72Minutes",
 );
-#[allow(missing_docs)]
-pub struct MinchaKetanaAhavatShalom {
-    _private: (),
-}
-
-impl<Tz: TimeZone> ZmanLike<Tz> for MinchaKetanaAhavatShalom {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let tzais = TZAIS_GEONIM_DEGREES_3_POINT_8.calculate(calculator)?;
-        let alos = ALOS_16_POINT_1_DEGREES.calculate(calculator)?;
-        let shaah_zmanis = (tzais - alos) / 12;
-        Ok(tzais - (shaah_zmanis * 5 / 2))
-    }
-}
-
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for MinchaKetanaAhavatShalom {
-    fn name(&self) -> &str {
-        "getMinchaKetanaAhavatShalom"
-    }
-}
 
 /// Mincha ketana (Ahavat Shalom): `2.5` shaos zmaniyos before tzais `3.8°` (day = alos16.1° → tzais3.8°).
-pub static MINCHA_KETANA_AHAVAT_SHALOM: MinchaKetanaAhavatShalom =
-    MinchaKetanaAhavatShalom { _private: () };
+pub static MINCHA_KETANA_AHAVAT_SHALOM: ZmanPreset<'static> = ZmanPreset::new(
+    ZmanPrimitive::MinchaKetanaAhavatShalom,
+    "getMinchaKetanaAhavatShalom",
+);
 /// Mincha ketana: `9.5` shaos zmaniyos after alos `72 zmaniyos` (day end = Ateret Torah tzais).
 pub static MINCHA_KETANA_ATERET_TORAH: ZmanPreset<'static> = ZmanPreset::new(
     ZmanPrimitive::MinchaKetana(
@@ -518,33 +381,9 @@ pub static PLAG_HAMINCHA_SUNRISE_SUNSET: ZmanPreset<'static> = ZmanPreset::new(
     "getPlagHamincha",
 );
 
-#[allow(missing_docs)]
-pub struct PlagAhavatShalom {
-    _private: (),
-}
-
-impl<Tz: TimeZone> ZmanLike<Tz> for PlagAhavatShalom {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let tzais = ZmanPrimitive::SunsetOffsetByDegrees(3.8).calculate(calculator)?;
-        let alos = ZmanPrimitive::SunriseOffsetByDegrees(16.1).calculate(calculator)?;
-        let shaah_zmanis = (tzais - alos) / 12;
-        Ok(tzais - (shaah_zmanis * 5 / 4))
-    }
-}
-
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for PlagAhavatShalom {
-    #[cfg(feature = "_java_testing")]
-    fn name(&self) -> &str {
-        "getPlagAhavatShalom"
-    }
-}
-
 /// Plag hamincha (Ahavat Shalom): `1.25` shaos zmaniyos before tzais `3.8°` (day = alos16.1° → tzais3.8°).
-pub static PLAG_HAMINCHA_AHAVAT_SHALOM: PlagAhavatShalom = PlagAhavatShalom { _private: () };
+pub static PLAG_HAMINCHA_AHAVAT_SHALOM: ZmanPreset<'static> =
+    ZmanPreset::new(ZmanPrimitive::PlagAhavatShalom, "getPlagAhavatShalom");
 /// Plag hamincha: `10.75` shaos zmaniyos after alos `16.1°` (day = alos16.1° → tzais7.083°).
 pub static PLAG_HAMINCHA_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083: ZmanPreset<'static> =
     ZmanPreset::new(
@@ -1298,437 +1137,203 @@ pub static TZAIS_GEONIM_DEGREES_9_POINT_75: ZmanPreset<'static> = ZmanPreset::ne
     "getTzaisGeonim9Point75Degrees",
 );
 
-#[allow(missing_docs)]
-pub struct SofZmanKidushLevana15Days {
-    _private: (),
-}
-impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevana15Days {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let tz = calculator
-            .location
-            .timezone
-            .as_ref()
-            .ok_or(ZmanimError::TimeZoneRequired)?;
-        let date = Date::try_new_gregorian(
-            calculator.date.year(),
-            calculator.date.month() as u8,
-            calculator.date.day() as u8,
-        )
-        .map_err(|_| ZmanimError::TimeConversionError)?;
-        date.sof_zman_kidush_levana_15_days(tz)
-            .map(|i| i.0.to_utc())
-            .ok_or(ZmanimError::TimeConversionError)
-    }
-}
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for SofZmanKidushLevana15Days {
-    fn name(&self) -> &str {
-        "getSofZmanKidushLevana15Days"
-    }
-}
-
 /// Returns the latest time of _Kiddush Levana_ calculated as 15 days after the molad.
 ///
 /// Will return None if the zman will not occur on this day. If the location does not contain
 /// a timezone, this will always return None.
-pub static SOF_ZMAN_KIDUSH_LEVANA_15_DAYS: SofZmanKidushLevana15Days =
-    SofZmanKidushLevana15Days { _private: () };
-
-#[allow(missing_docs)]
-pub struct SofZmanKidushLevanaBetweenMoldos {
-    _private: (),
-}
-impl<Tz: TimeZone> ZmanLike<Tz> for SofZmanKidushLevanaBetweenMoldos {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let tz = calculator
-            .location
-            .timezone
-            .as_ref()
-            .ok_or(ZmanimError::TimeZoneRequired)?;
-        let date = Date::try_new_gregorian(
-            calculator.date.year(),
-            calculator.date.month() as u8,
-            calculator.date.day() as u8,
-        )
-        .map_err(|_| ZmanimError::TimeConversionError)?;
-        date.sof_zman_kidush_levana_between_moldos(tz)
-            .map(|i| i.0.to_utc())
-            .ok_or(ZmanimError::TimeConversionError)
-    }
-}
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for SofZmanKidushLevanaBetweenMoldos {
-    fn name(&self) -> &str {
-        "getSofZmanKidushLevanaBetweenMoldos"
-    }
-}
-
+pub static SOF_ZMAN_KIDUSH_LEVANA_15_DAYS: ZmanPreset<'static> = ZmanPreset::new(
+    ZmanPrimitive::SofZmanKidushLevana15Days,
+    "getSofZmanKidushLevana15Days",
+);
 /// The latest time of _Kiddush Levana_ according to the
 /// [Maharil](https://en.wikipedia.org/wiki/Yaakov_ben_Moshe_Levi_Moelin)'s opinion that it
 /// is calculated as halfway between molad and molad.
 ///
 /// Will return None if the zman will not occur on this day. If the location does not contain
 /// a timezone, this will always return None.
-pub static SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS: SofZmanKidushLevanaBetweenMoldos =
-    SofZmanKidushLevanaBetweenMoldos { _private: () };
+pub static SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS: ZmanPreset<'static> = ZmanPreset::new(
+    ZmanPrimitive::SofZmanKidushLevanaBetweenMoldos,
+    "getSofZmanKidushLevanaBetweenMoldos",
+);
 
-#[allow(missing_docs)]
-pub struct TchilasZmanKidushLevana3Days {
-    _private: (),
-}
-impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana3Days {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let tz = calculator
-            .location
-            .timezone
-            .as_ref()
-            .ok_or(ZmanimError::TimeZoneRequired)?;
-        let date = Date::try_new_gregorian(
-            calculator.date.year(),
-            calculator.date.month() as u8,
-            calculator.date.day() as u8,
-        )
-        .map_err(|_| ZmanimError::TimeConversionError)?;
-        date.tchilas_zman_kidush_levana_3_days(tz)
-            .map(|i| i.0.to_utc())
-            .ok_or(ZmanimError::TimeConversionError)
-    }
-}
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for TchilasZmanKidushLevana3Days {
-    fn name(&self) -> &str {
-        "getTchilasZmanKidushLevana3Days"
-    }
-}
 /// The earliest time of _Kiddush Levana_ according to [Rabbeinu Yonah](https://en.wikipedia.org/wiki/Yonah_Gerondi)'s opinion that it can be said 3 days after the molad.
 ///
 /// Will return None if the zman will not occur on this day. If the location does not contain
 /// a timezone, this will always return None.
-pub static TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS: TchilasZmanKidushLevana3Days =
-    TchilasZmanKidushLevana3Days { _private: () };
-
-#[allow(missing_docs)]
-pub struct TchilasZmanKidushLevana7Days {
-    _private: (),
-}
-impl<Tz: TimeZone> ZmanLike<Tz> for TchilasZmanKidushLevana7Days {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let tz = calculator
-            .location
-            .timezone
-            .as_ref()
-            .ok_or(ZmanimError::TimeZoneRequired)?;
-        let date = Date::try_new_gregorian(
-            calculator.date.year(),
-            calculator.date.month() as u8,
-            calculator.date.day() as u8,
-        )
-        .map_err(|_| ZmanimError::TimeConversionError)?;
-        date.tchilas_zman_kidush_levana_7_days(tz)
-            .map(|i| i.0.to_utc())
-            .ok_or(ZmanimError::TimeConversionError)
-    }
-}
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for TchilasZmanKidushLevana7Days {
-    fn name(&self) -> &str {
-        "getTchilasZmanKidushLevana7Days"
-    }
-}
+pub static TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS: ZmanPreset<'static> = ZmanPreset::new(
+    ZmanPrimitive::TchilasZmanKidushLevana3Days,
+    "getTchilasZmanKidushLevana3Days",
+);
 
 /// The earliest time of _Kiddush Levana_ according to the opinions that it should
 /// not be said until 7 days after the molad.
 ///
 /// Will return None if the zman will not occur on this day. If the location does not contain
 /// a timezone, this will always return None.
-pub static TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS: TchilasZmanKidushLevana7Days =
-    TchilasZmanKidushLevana7Days { _private: () };
+pub static TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS: ZmanPreset<'static> = ZmanPreset::new(
+    ZmanPrimitive::TchilasZmanKidushLevana7Days,
+    "getTchilasZmanKidushLevana7Days",
+);
 
-#[allow(missing_docs)]
-pub struct Molad;
-
-impl<Tz: TimeZone> ZmanLike<Tz> for Molad {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        let tz = calculator
-            .location
-            .timezone
-            .as_ref()
-            .ok_or(ZmanimError::TimeZoneRequired)?;
-        let date = Date::try_new_gregorian(
-            calculator.date.year(),
-            calculator.date.month() as u8,
-            calculator.date.day() as u8,
-        )
-        .map_err(|_| ZmanimError::TimeConversionError)?;
-        date.molad(tz)
-            .map(|i| i.0.to_utc())
-            .ok_or(ZmanimError::TimeConversionError)
-    }
-}
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for Molad {
-    fn name(&self) -> &str {
-        "getZmanMolad"
-    }
-}
 /// The time of the molad (new moon) for the current date's Hebrew month.
-pub static MOLAD: Molad = Molad;
+pub static MOLAD: ZmanPreset<'static> = ZmanPreset::new(ZmanPrimitive::Molad, "getZmanMolad");
 
-pub enum StaticZmanWrapper {
-    ZmanPreset(&'static ZmanPreset<'static>),
-    Molad(&'static Molad),
-    SofZmanKidushLevana15Days(&'static SofZmanKidushLevana15Days),
-    SofZmanKidushLevanaBetweenMoldos(&'static SofZmanKidushLevanaBetweenMoldos),
-    TchilasZmanKidushLevana3Days(&'static TchilasZmanKidushLevana3Days),
-    TchilasZmanKidushLevana7Days(&'static TchilasZmanKidushLevana7Days),
-    BainHashmashosRt2Stars(&'static BainHashmashosRt2Stars),
-    MinchaGedolaAhavatShalom(&'static MinchaGedolaAhavatShalom),
-    MinchaGedolaBaalHatanyaGreaterThan30(&'static MinchaGedolaBaalHatanyaGreaterThan30),
-    MinchaGedolaGreaterThan30(&'static MinchaGedolaGreaterThan30),
-    MinchaKetanaAhavatShalom(&'static MinchaKetanaAhavatShalom),
-    PlagAhavatShalom(&'static PlagAhavatShalom),
-}
-impl<Tz: TimeZone> ZmanLike<Tz> for StaticZmanWrapper {
-    fn calculate(
-        &self,
-        calculator: &mut ZmanimCalculator<Tz>,
-    ) -> Result<DateTime<Utc>, ZmanimError> {
-        match self {
-            StaticZmanWrapper::ZmanPreset(preset) => preset.calculate(calculator),
-            StaticZmanWrapper::Molad(molad) => molad.calculate(calculator),
-            StaticZmanWrapper::SofZmanKidushLevana15Days(preset) => preset.calculate(calculator),
-            StaticZmanWrapper::SofZmanKidushLevanaBetweenMoldos(preset) => {
-                preset.calculate(calculator)
-            }
-            StaticZmanWrapper::TchilasZmanKidushLevana3Days(preset) => preset.calculate(calculator),
-            StaticZmanWrapper::TchilasZmanKidushLevana7Days(preset) => preset.calculate(calculator),
-            StaticZmanWrapper::BainHashmashosRt2Stars(preset) => preset.calculate(calculator),
-            StaticZmanWrapper::MinchaGedolaAhavatShalom(preset) => preset.calculate(calculator),
-            StaticZmanWrapper::MinchaGedolaBaalHatanyaGreaterThan30(preset) => {
-                preset.calculate(calculator)
-            }
-            StaticZmanWrapper::MinchaGedolaGreaterThan30(preset) => preset.calculate(calculator),
-            StaticZmanWrapper::MinchaKetanaAhavatShalom(preset) => preset.calculate(calculator),
-            StaticZmanWrapper::PlagAhavatShalom(preset) => preset.calculate(calculator),
-        }
-    }
-}
-
-#[cfg(feature = "_java_testing")]
-impl<Tz: TimeZone> ZmanPresetLike<Tz> for StaticZmanWrapper {
-    fn name(&self) -> &str {
-        match self {
-            StaticZmanWrapper::ZmanPreset(preset) => preset.name,
-            StaticZmanWrapper::Molad(molad) => <Molad as ZmanPresetLike<Tz>>::name(molad),
-            StaticZmanWrapper::SofZmanKidushLevana15Days(preset) => {
-                <SofZmanKidushLevana15Days as ZmanPresetLike<Tz>>::name(preset)
-            }
-            StaticZmanWrapper::SofZmanKidushLevanaBetweenMoldos(preset) => {
-                <SofZmanKidushLevanaBetweenMoldos as ZmanPresetLike<Tz>>::name(preset)
-            }
-            StaticZmanWrapper::TchilasZmanKidushLevana3Days(preset) => {
-                <TchilasZmanKidushLevana3Days as ZmanPresetLike<Tz>>::name(preset)
-            }
-            StaticZmanWrapper::TchilasZmanKidushLevana7Days(preset) => {
-                <TchilasZmanKidushLevana7Days as ZmanPresetLike<Tz>>::name(preset)
-            }
-            StaticZmanWrapper::BainHashmashosRt2Stars(preset) => {
-                <BainHashmashosRt2Stars as ZmanPresetLike<Tz>>::name(preset)
-            }
-            StaticZmanWrapper::MinchaGedolaAhavatShalom(preset) => {
-                <MinchaGedolaAhavatShalom as ZmanPresetLike<Tz>>::name(preset)
-            }
-            StaticZmanWrapper::MinchaGedolaBaalHatanyaGreaterThan30(preset) => {
-                <MinchaGedolaBaalHatanyaGreaterThan30 as ZmanPresetLike<Tz>>::name(preset)
-            }
-            StaticZmanWrapper::MinchaGedolaGreaterThan30(preset) => {
-                <MinchaGedolaGreaterThan30 as ZmanPresetLike<Tz>>::name(preset)
-            }
-            StaticZmanWrapper::MinchaKetanaAhavatShalom(preset) => {
-                <MinchaKetanaAhavatShalom as ZmanPresetLike<Tz>>::name(preset)
-            }
-            StaticZmanWrapper::PlagAhavatShalom(preset) => {
-                <PlagAhavatShalom as ZmanPresetLike<Tz>>::name(preset)
-            }
-        }
-    }
-}
-
-#[allow(missing_docs)]
-pub static ALL: &[StaticZmanWrapper] = &[
-    StaticZmanWrapper::Molad(&MOLAD),
-    StaticZmanWrapper::SofZmanKidushLevana15Days(&SOF_ZMAN_KIDUSH_LEVANA_15_DAYS),
-    StaticZmanWrapper::SofZmanKidushLevanaBetweenMoldos(&SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS),
-    StaticZmanWrapper::TchilasZmanKidushLevana3Days(&TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS),
-    StaticZmanWrapper::TchilasZmanKidushLevana7Days(&TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS),
-    StaticZmanWrapper::BainHashmashosRt2Stars(&BAIN_HASHMASHOS_RT_2_STARS),
-    StaticZmanWrapper::MinchaGedolaAhavatShalom(&MINCHA_GEDOLA_AHAVAT_SHALOM),
-    StaticZmanWrapper::MinchaGedolaBaalHatanyaGreaterThan30(
-        &MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30,
-    ),
-    StaticZmanWrapper::MinchaGedolaGreaterThan30(&MINCHA_GEDOLA_GREATER_THAN_30),
-    StaticZmanWrapper::MinchaKetanaAhavatShalom(&MINCHA_KETANA_AHAVAT_SHALOM),
-    StaticZmanWrapper::PlagAhavatShalom(&PLAG_HAMINCHA_AHAVAT_SHALOM),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_KETANA_SUNRISE_SUNSET),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_KETANA_ATERET_TORAH),
-    StaticZmanWrapper::ZmanPreset(&ELEVATION_ADJUSTED_SUNRISE),
-    StaticZmanWrapper::ZmanPreset(&SEA_LEVEL_SUNRISE),
-    StaticZmanWrapper::ZmanPreset(&ELEVATION_ADJUSTED_SUNSET),
-    StaticZmanWrapper::ZmanPreset(&SEA_LEVEL_SUNSET),
-    StaticZmanWrapper::ZmanPreset(&ALOS_60_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_72_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_72_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&ALOS_90_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_90_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&ALOS_96_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_96_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&ALOS_120_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_120_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&ALOS_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_18_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_19_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_19_POINT_8_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_26_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&ALOS_BAAL_HATANYA),
-    StaticZmanWrapper::ZmanPreset(&BAIN_HASHMASHOS_RT_13_POINT_24_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&BAIN_HASHMASHOS_RT_58_POINT_5_MINUTES),
-    StaticZmanWrapper::ZmanPreset(
-        &BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES,
-    ),
-    StaticZmanWrapper::ZmanPreset(&BAIN_HASHMASHOS_YEREIM_18_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&BAIN_HASHMASHOS_YEREIM_16_POINT_875_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&BAIN_HASHMASHOS_YEREIM_13_POINT_5_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&CANDLE_LIGHTING),
-    StaticZmanWrapper::ZmanPreset(&CHATZOS_ASTRONOMICAL),
-    StaticZmanWrapper::ZmanPreset(&CHATZOS_HALF_DAY),
-    StaticZmanWrapper::ZmanPreset(&CHATZOS_FIXED_LOCAL),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_GEDOLA_SUNRISE_SUNSET),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_GEDOLA_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_GEDOLA_MINUTES_30),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_GEDOLA_MINUTES_72),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_GEDOLA_ATERET_TORAH),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_GEDOLA_BAAL_HATANYA),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_KETANA_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_KETANA_MINUTES_72),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_KETANA_BAAL_HATANYA),
-    StaticZmanWrapper::ZmanPreset(&MINCHA_KETANA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET),
-    StaticZmanWrapper::ZmanPreset(&MISHEYAKIR_10_POINT_2_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&MISHEYAKIR_11_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&MISHEYAKIR_11_POINT_5_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&MISHEYAKIR_7_POINT_65_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&MISHEYAKIR_9_POINT_5_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_SUNRISE_SUNSET),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_ALOS_TO_SUNSET),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_60_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_72_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_72_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_90_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_90_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_96_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_96_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_120_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_120_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_18_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_19_POINT_8_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_26_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_ATERET_TORAH),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_BAAL_HATANYA),
-    StaticZmanWrapper::ZmanPreset(&PLAG_HAMINCHA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET),
-    StaticZmanWrapper::ZmanPreset(&SAMUCH_LE_MINCHA_KETANA_GRA),
-    StaticZmanWrapper::ZmanPreset(&SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&SAMUCH_LE_MINCHA_KETANA_72_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_ACHILAS_CHAMETZ_GRA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_ACHILAS_CHAMETZ_MGA_72_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_ACHILAS_CHAMETZ_MGA_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_ACHILAS_CHAMETZ_BAAL_HATANYA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_BIUR_CHAMETZ_GRA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_BIUR_CHAMETZ_MGA_72_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_BIUR_CHAMETZ_MGA_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_BIUR_CHAMETZ_BAAL_HATANYA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_GRA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_19_POINT_8_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_18_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_72_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_72_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_90_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_90_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_96_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_96_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_HOURS_3_BEFORE_CHATZOS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_120_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_SUNSET),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_ATERET_TORAH),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_BAAL_HATANYA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_18_DEGREES_TO_FIXED_LOCAL_CHATZOS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES_TO_FIXED_LOCAL_CHATZOS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_90_MINUTES_TO_FIXED_LOCAL_CHATZOS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_SHMA_MGA_72_MINUTES_TO_FIXED_LOCAL_CHATZOS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_GRA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_19_POINT_8_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_18_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_72_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_72_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_90_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_90_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_96_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_96_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_HOURS_2_BEFORE_CHATZOS),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_MGA_120_MINUTES),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_ATERET_TORAH),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_BAAL_HATANYA),
-    StaticZmanWrapper::ZmanPreset(&SOF_ZMAN_TFILA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_DEGREES_8_POINT_5),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_MINUTES_50),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_MINUTES_60),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_MINUTES_72),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_72_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_MINUTES_90),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_90_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_MINUTES_96),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_96_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_MINUTES_120),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_120_ZMANIS),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_16_POINT_1_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_18_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_19_POINT_8_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_26_DEGREES),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_ATERET_TORAH),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_BAAL_HATANYA),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_3_POINT_7),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_3_POINT_8),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_5_POINT_95),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_4_POINT_61),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_4_POINT_37),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_5_POINT_88),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_4_POINT_8),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_6_POINT_45),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_7_POINT_083),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_7_POINT_67),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_8_POINT_5),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_9_POINT_3),
-    StaticZmanWrapper::ZmanPreset(&TZAIS_GEONIM_DEGREES_9_POINT_75),
+/// An array of all the presets.
+pub static ALL: [&ZmanPreset<'static>; 156] = [
+    &ELEVATION_ADJUSTED_SUNRISE,
+    &SEA_LEVEL_SUNRISE,
+    &ELEVATION_ADJUSTED_SUNSET,
+    &SEA_LEVEL_SUNSET,
+    &ALOS_60_MINUTES,
+    &ALOS_72_MINUTES,
+    &ALOS_72_ZMANIS,
+    &ALOS_90_MINUTES,
+    &ALOS_90_ZMANIS,
+    &ALOS_96_MINUTES,
+    &ALOS_96_ZMANIS,
+    &ALOS_120_MINUTES,
+    &ALOS_120_ZMANIS,
+    &ALOS_16_POINT_1_DEGREES,
+    &ALOS_18_DEGREES,
+    &ALOS_19_DEGREES,
+    &ALOS_19_POINT_8_DEGREES,
+    &ALOS_26_DEGREES,
+    &ALOS_BAAL_HATANYA,
+    &BAIN_HASHMASHOS_RT_13_POINT_24_DEGREES,
+    &BAIN_HASHMASHOS_RT_58_POINT_5_MINUTES,
+    &BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES,
+    &BAIN_HASHMASHOS_RT_2_STARS,
+    &BAIN_HASHMASHOS_YEREIM_18_MINUTES,
+    &BAIN_HASHMASHOS_YEREIM_16_POINT_875_MINUTES,
+    &BAIN_HASHMASHOS_YEREIM_13_POINT_5_MINUTES,
+    &CANDLE_LIGHTING,
+    &CHATZOS_ASTRONOMICAL,
+    &CHATZOS_HALF_DAY,
+    &CHATZOS_FIXED_LOCAL,
+    &MINCHA_GEDOLA_SUNRISE_SUNSET,
+    &MINCHA_GEDOLA_16_POINT_1_DEGREES,
+    &MINCHA_GEDOLA_MINUTES_30,
+    &MINCHA_GEDOLA_MINUTES_72,
+    &MINCHA_GEDOLA_AHAVAT_SHALOM,
+    &MINCHA_GEDOLA_ATERET_TORAH,
+    &MINCHA_GEDOLA_BAAL_HATANYA,
+    &MINCHA_GEDOLA_BAAL_HATANYA_GREATER_THAN_30,
+    &MINCHA_GEDOLA_GRA_FIXED_LOCAL_CHATZOS_30_MINUTES,
+    &MINCHA_GEDOLA_GREATER_THAN_30,
+    &MINCHA_KETANA_SUNRISE_SUNSET,
+    &MINCHA_KETANA_16_POINT_1_DEGREES,
+    &MINCHA_KETANA_MINUTES_72,
+    &MINCHA_KETANA_AHAVAT_SHALOM,
+    &MINCHA_KETANA_ATERET_TORAH,
+    &MINCHA_KETANA_BAAL_HATANYA,
+    &MINCHA_KETANA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET,
+    &MISHEYAKIR_10_POINT_2_DEGREES,
+    &MISHEYAKIR_11_DEGREES,
+    &MISHEYAKIR_11_POINT_5_DEGREES,
+    &MISHEYAKIR_7_POINT_65_DEGREES,
+    &MISHEYAKIR_9_POINT_5_DEGREES,
+    &PLAG_HAMINCHA_SUNRISE_SUNSET,
+    &PLAG_HAMINCHA_AHAVAT_SHALOM,
+    &PLAG_HAMINCHA_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083,
+    &PLAG_HAMINCHA_ALOS_TO_SUNSET,
+    &PLAG_HAMINCHA_60_MINUTES,
+    &PLAG_HAMINCHA_72_MINUTES,
+    &PLAG_HAMINCHA_72_ZMANIS,
+    &PLAG_HAMINCHA_90_MINUTES,
+    &PLAG_HAMINCHA_90_ZMANIS,
+    &PLAG_HAMINCHA_96_MINUTES,
+    &PLAG_HAMINCHA_96_ZMANIS,
+    &PLAG_HAMINCHA_120_MINUTES,
+    &PLAG_HAMINCHA_120_ZMANIS,
+    &PLAG_HAMINCHA_16_POINT_1_DEGREES,
+    &PLAG_HAMINCHA_18_DEGREES,
+    &PLAG_HAMINCHA_19_POINT_8_DEGREES,
+    &PLAG_HAMINCHA_26_DEGREES,
+    &PLAG_HAMINCHA_ATERET_TORAH,
+    &PLAG_HAMINCHA_BAAL_HATANYA,
+    &PLAG_HAMINCHA_GRA_FIXED_LOCAL_CHATZOS_TO_SUNSET,
+    &SAMUCH_LE_MINCHA_KETANA_GRA,
+    &SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES,
+    &SAMUCH_LE_MINCHA_KETANA_72_MINUTES,
+    &SOF_ZMAN_ACHILAS_CHAMETZ_GRA,
+    &SOF_ZMAN_ACHILAS_CHAMETZ_MGA_72_MINUTES,
+    &SOF_ZMAN_ACHILAS_CHAMETZ_MGA_16_POINT_1_DEGREES,
+    &SOF_ZMAN_ACHILAS_CHAMETZ_BAAL_HATANYA,
+    &SOF_ZMAN_BIUR_CHAMETZ_GRA,
+    &SOF_ZMAN_BIUR_CHAMETZ_MGA_72_MINUTES,
+    &SOF_ZMAN_BIUR_CHAMETZ_MGA_16_POINT_1_DEGREES,
+    &SOF_ZMAN_BIUR_CHAMETZ_BAAL_HATANYA,
+    &SOF_ZMAN_SHMA_GRA,
+    &SOF_ZMAN_SHMA_MGA,
+    &SOF_ZMAN_SHMA_MGA_19_POINT_8_DEGREES,
+    &SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES,
+    &SOF_ZMAN_SHMA_MGA_18_DEGREES,
+    &SOF_ZMAN_SHMA_MGA_72_MINUTES,
+    &SOF_ZMAN_SHMA_MGA_72_ZMANIS,
+    &SOF_ZMAN_SHMA_MGA_90_MINUTES,
+    &SOF_ZMAN_SHMA_MGA_90_ZMANIS,
+    &SOF_ZMAN_SHMA_MGA_96_MINUTES,
+    &SOF_ZMAN_SHMA_MGA_96_ZMANIS,
+    &SOF_ZMAN_SHMA_HOURS_3_BEFORE_CHATZOS,
+    &SOF_ZMAN_SHMA_MGA_120_MINUTES,
+    &SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_SUNSET,
+    &SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_TZAIS_GEONIM_7_POINT_083,
+    &SOF_ZMAN_SHMA_ATERET_TORAH,
+    &SOF_ZMAN_SHMA_BAAL_HATANYA,
+    &SOF_ZMAN_SHMA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS,
+    &SOF_ZMAN_SHMA_MGA_18_DEGREES_TO_FIXED_LOCAL_CHATZOS,
+    &SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES_TO_FIXED_LOCAL_CHATZOS,
+    &SOF_ZMAN_SHMA_MGA_90_MINUTES_TO_FIXED_LOCAL_CHATZOS,
+    &SOF_ZMAN_SHMA_MGA_72_MINUTES_TO_FIXED_LOCAL_CHATZOS,
+    &SOF_ZMAN_TFILA_GRA,
+    &SOF_ZMAN_TFILA_MGA,
+    &SOF_ZMAN_TFILA_MGA_19_POINT_8_DEGREES,
+    &SOF_ZMAN_TFILA_MGA_16_POINT_1_DEGREES,
+    &SOF_ZMAN_TFILA_MGA_18_DEGREES,
+    &SOF_ZMAN_TFILA_MGA_72_MINUTES,
+    &SOF_ZMAN_TFILA_MGA_72_ZMANIS,
+    &SOF_ZMAN_TFILA_MGA_90_MINUTES,
+    &SOF_ZMAN_TFILA_MGA_90_ZMANIS,
+    &SOF_ZMAN_TFILA_MGA_96_MINUTES,
+    &SOF_ZMAN_TFILA_MGA_96_ZMANIS,
+    &SOF_ZMAN_TFILA_HOURS_2_BEFORE_CHATZOS,
+    &SOF_ZMAN_TFILA_MGA_120_MINUTES,
+    &SOF_ZMAN_TFILA_ATERET_TORAH,
+    &SOF_ZMAN_TFILA_BAAL_HATANYA,
+    &SOF_ZMAN_TFILA_GRA_SUNRISE_TO_FIXED_LOCAL_CHATZOS,
+    &TZAIS_DEGREES_8_POINT_5,
+    &TZAIS_MINUTES_50,
+    &TZAIS_MINUTES_60,
+    &TZAIS_MINUTES_72,
+    &TZAIS_72_ZMANIS,
+    &TZAIS_MINUTES_90,
+    &TZAIS_90_ZMANIS,
+    &TZAIS_MINUTES_96,
+    &TZAIS_96_ZMANIS,
+    &TZAIS_MINUTES_120,
+    &TZAIS_120_ZMANIS,
+    &TZAIS_16_POINT_1_DEGREES,
+    &TZAIS_18_DEGREES,
+    &TZAIS_19_POINT_8_DEGREES,
+    &TZAIS_26_DEGREES,
+    &TZAIS_ATERET_TORAH,
+    &TZAIS_BAAL_HATANYA,
+    &TZAIS_GEONIM_DEGREES_3_POINT_7,
+    &TZAIS_GEONIM_DEGREES_3_POINT_8,
+    &TZAIS_GEONIM_DEGREES_5_POINT_95,
+    &TZAIS_GEONIM_DEGREES_4_POINT_61,
+    &TZAIS_GEONIM_DEGREES_4_POINT_37,
+    &TZAIS_GEONIM_DEGREES_5_POINT_88,
+    &TZAIS_GEONIM_DEGREES_4_POINT_8,
+    &TZAIS_GEONIM_DEGREES_6_POINT_45,
+    &TZAIS_GEONIM_DEGREES_7_POINT_083,
+    &TZAIS_GEONIM_DEGREES_7_POINT_67,
+    &TZAIS_GEONIM_DEGREES_8_POINT_5,
+    &TZAIS_GEONIM_DEGREES_9_POINT_3,
+    &TZAIS_GEONIM_DEGREES_9_POINT_75,
+    &SOF_ZMAN_KIDUSH_LEVANA_15_DAYS,
+    &SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS,
+    &TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS,
+    &TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS,
+    &MOLAD,
 ];
