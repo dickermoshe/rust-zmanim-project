@@ -512,7 +512,7 @@ fn java_holiday_index_to_rust(index: i32) -> Option<Holiday> {
     match index {
         0 => Some(Holiday::ErevPesach),
         1 => Some(Holiday::Pesach),
-        2 => Some(Holiday::CholHamoed), // Chol Hamoed Pesach
+        2 => Some(Holiday::CholHamoedPesach),
         3 => Some(Holiday::PesachSheni),
         4 => Some(Holiday::ErevShavuos),
         5 => Some(Holiday::Shavuos),
@@ -526,7 +526,7 @@ fn java_holiday_index_to_rust(index: i32) -> Option<Holiday> {
         13 => Some(Holiday::YomKippur),
         14 => Some(Holiday::ErevSuccos),
         15 => Some(Holiday::Succos),
-        16 => Some(Holiday::CholHamoed), // Chol Hamoed Succos
+        16 => Some(Holiday::CholHamoedSuccos),
         17 => Some(Holiday::HoshanaRabbah),
         18 => Some(Holiday::SheminiAtzeres),
         19 => Some(Holiday::SimchasTorah),

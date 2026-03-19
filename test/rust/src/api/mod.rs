@@ -207,6 +207,12 @@ pub fn test_jewish_calendar(
     );
     assert_eq!(hebrew_date.day_of_chanukah(), java.getDayOfChanukah);
     assert_eq!(hebrew_date.day_of_the_omer(), java.getDayOfOmer);
+    let yom_tov_index = hebrew_date
+        .holidays(in_israel, use_modern_holidays)
+        .collect::<Vec<&'static Holiday>>();
+    let java_yom_tov_index = java_holiday_index_to_rust(java.getYomTovIndex);
+    // Assert that the java_yom_tov_index is contained in the yom_tov_index
+    assert!(yom_tov_index.contains(&java_yom_tov_index));
 }
 
 #[allow(non_snake_case)]
@@ -361,5 +367,48 @@ impl JavaJewishCalendarTestResults {
             getTekufasTishreiElapsedDays,
             isIsruChag,
         }
+    }
+}
+fn java_holiday_index_to_rust(index: i32) -> Option<Holiday> {
+    match index {
+        0 => Some(Holiday::ErevPesach),
+        1 => Some(Holiday::Pesach),
+        2 => Some(Holiday::CholHamoedPesach),
+        3 => Some(Holiday::PesachSheni),
+        4 => Some(Holiday::ErevShavuos),
+        5 => Some(Holiday::Shavuos),
+        6 => Some(Holiday::SeventeenthOfTammuz),
+        7 => Some(Holiday::TishahBav),
+        8 => Some(Holiday::TuBav),
+        9 => Some(Holiday::ErevRoshHashana),
+        10 => Some(Holiday::RoshHashana),
+        11 => Some(Holiday::FastOfGedalyah),
+        12 => Some(Holiday::ErevYomKippur),
+        13 => Some(Holiday::YomKippur),
+        14 => Some(Holiday::ErevSuccos),
+        15 => Some(Holiday::Succos),
+        16 => Some(Holiday::CholHamoedSuccos),
+        17 => Some(Holiday::HoshanaRabbah),
+        18 => Some(Holiday::SheminiAtzeres),
+        19 => Some(Holiday::SimchasTorah),
+        // 20 => EREV_CHANUKAH (commented out in Java source)
+        21 => Some(Holiday::Chanukah),
+        22 => Some(Holiday::TenthOfTeves),
+        23 => Some(Holiday::TuBshvat),
+        24 => Some(Holiday::FastOfEsther),
+        25 => Some(Holiday::Purim),
+        26 => Some(Holiday::ShushanPurim),
+        27 => Some(Holiday::PurimKatan),
+        28 => Some(Holiday::RoshChodesh),
+        29 => Some(Holiday::YomHaShoah),
+        30 => Some(Holiday::YomHazikaron),
+        31 => Some(Holiday::YomHaatzmaut),
+        32 => Some(Holiday::YomYerushalayim),
+        33 => Some(Holiday::LagBomer),
+        34 => Some(Holiday::ShushanPurimKatan),
+        35 => Some(Holiday::IsruChag),
+        36 => Some(Holiday::YomKippurKatan),
+        37 => Some(Holiday::Behab),
+        _ => None, // Unknown or not mapped
     }
 }

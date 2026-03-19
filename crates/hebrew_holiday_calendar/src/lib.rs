@@ -927,7 +927,7 @@ impl HolidayRule<'_> {
 pub enum Holiday {
     ErevPesach,
     Pesach,
-    CholHamoed,
+    CholHamoedPesach,
     PesachSheni,
     ErevShavuos,
     Shavuos,
@@ -941,6 +941,7 @@ pub enum Holiday {
     YomKippur,
     ErevSuccos,
     Succos,
+    CholHamoedSuccos,
     HoshanaRabbah,
     SheminiAtzeres,
     SimchasTorah,
@@ -978,11 +979,9 @@ impl Holiday {
                 &HolidayRule::ExactDateChutz(16, HebrewMonth::Nissan),
                 &HolidayRule::ExactDateChutz(22, HebrewMonth::Nissan),
             ]),
-            Holiday::CholHamoed => HolidayRule::ExactDates4([
+            Holiday::CholHamoedPesach => HolidayRule::ExactDates2([
                 &HolidayRule::ExactDateIsrael(16, HebrewMonth::Nissan),
                 &HolidayRule::ExactDates(17..=20, HebrewMonth::Nissan),
-                &HolidayRule::ExactDateIsrael(16, HebrewMonth::Tishrei),
-                &HolidayRule::ExactDates(17..=20, HebrewMonth::Tishrei),
             ]),
             Holiday::PesachSheni => HolidayRule::ExactDate(14, HebrewMonth::Iyar),
             Holiday::ErevShavuos => HolidayRule::ExactDate(5, HebrewMonth::Sivan),
@@ -1027,7 +1026,10 @@ impl Holiday {
                 &HolidayRule::ExactDate(15, HebrewMonth::Tishrei),
                 &HolidayRule::ExactDateChutz(16, HebrewMonth::Tishrei),
             ]),
-
+            Holiday::CholHamoedSuccos => HolidayRule::ExactDates2([
+                &HolidayRule::ExactDateIsrael(16, HebrewMonth::Tishrei),
+                &HolidayRule::ExactDates(17..=20, HebrewMonth::Tishrei),
+            ]),
             Holiday::HoshanaRabbah => HolidayRule::ExactDate(21, HebrewMonth::Tishrei),
             Holiday::SheminiAtzeres => HolidayRule::ExactDate(22, HebrewMonth::Tishrei),
             Holiday::SimchasTorah => HolidayRule::ExactDateChutz(23, HebrewMonth::Tishrei),
@@ -1239,14 +1241,14 @@ impl Holiday {
     }
 
     /// Returns a slice of all possible holidays.
-    pub const fn all() -> &'static [Holiday; 41] {
+    pub const fn all() -> &'static [Holiday; 42] {
         &ALL_HOLIDAYS
     }
     pub fn he(&self) -> &str {
         match self {
             Holiday::ErevPesach => "ערב פסח",
             Holiday::Pesach => "פסח",
-            Holiday::CholHamoed => "חול המועד",
+            Holiday::CholHamoedPesach => "חול המועד פסח",
             Holiday::PesachSheni => "פסח שני",
             Holiday::ErevShavuos => "ערב שבועות",
             Holiday::Shavuos => "שבועות",
@@ -1260,6 +1262,7 @@ impl Holiday {
             Holiday::YomKippur => "יום כיפור",
             Holiday::ErevSuccos => "ערב סוכות",
             Holiday::Succos => "סוכות",
+            Holiday::CholHamoedSuccos => "חול המועד סוכות",
             Holiday::HoshanaRabbah => "הושענא רבה",
             Holiday::SheminiAtzeres => "שמיני עצרת",
             Holiday::SimchasTorah => "שמחת תורה",
@@ -1295,9 +1298,10 @@ impl core::fmt::Display for Holiday {
     }
 }
 
-const ALL_HOLIDAYS: [Holiday; 41] = [
+static ALL_HOLIDAYS: [Holiday; 42] = [
     Holiday::ErevPesach,
     Holiday::Pesach,
+    Holiday::CholHamoedPesach,
     Holiday::PesachSheni,
     Holiday::ErevShavuos,
     Holiday::Shavuos,
@@ -1311,7 +1315,7 @@ const ALL_HOLIDAYS: [Holiday; 41] = [
     Holiday::YomKippur,
     Holiday::ErevSuccos,
     Holiday::Succos,
-    Holiday::CholHamoed,
+    Holiday::CholHamoedSuccos,
     Holiday::HoshanaRabbah,
     Holiday::SheminiAtzeres,
     Holiday::SimchasTorah,
@@ -1516,7 +1520,7 @@ mod tests {
 
         // In Israel
         let holidays_israel: Vec<_> = date.holidays(true, false).collect();
-        assert!(holidays_israel.contains(&&Holiday::CholHamoed));
+        assert!(holidays_israel.contains(&&Holiday::CholHamoedPesach));
         assert!(!date.is_assur_bemelacha(true));
     }
 
