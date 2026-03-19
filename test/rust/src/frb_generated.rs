@@ -38,7 +38,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1762524272;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1805115147;
 
 // Section: executor
 
@@ -344,6 +344,131 @@ fn wire__crate__api__gregorian_date_to_jewish_date_impl(
         },
     )
 }
+fn wire__crate__api__java_jewish_calendar_test_results_new_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "java_jewish_calendar_test_results_new",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_isUseModernHolidays = <bool>::sse_decode(&mut deserializer);
+            let api_getInIsrael = <bool>::sse_decode(&mut deserializer);
+            let api_getIsMukafChoma = <bool>::sse_decode(&mut deserializer);
+            let api_isBirkasHachamah = <bool>::sse_decode(&mut deserializer);
+            let api_getParshah = <Option<i32>>::sse_decode(&mut deserializer);
+            let api_getUpcomingParshah = <i32>::sse_decode(&mut deserializer);
+            let api_getSpecialShabbos = <Option<i32>>::sse_decode(&mut deserializer);
+            let api_getYomTovIndex = <i32>::sse_decode(&mut deserializer);
+            let api_isYomTov = <bool>::sse_decode(&mut deserializer);
+            let api_isYomTovAssurBemelacha = <bool>::sse_decode(&mut deserializer);
+            let api_isAssurBemelacha = <bool>::sse_decode(&mut deserializer);
+            let api_hasCandleLighting = <bool>::sse_decode(&mut deserializer);
+            let api_isTomorrowShabbosOrYomTov = <bool>::sse_decode(&mut deserializer);
+            let api_isErevYomTovSheni = <bool>::sse_decode(&mut deserializer);
+            let api_isAseresYemeiTeshuva = <bool>::sse_decode(&mut deserializer);
+            let api_isPesach = <bool>::sse_decode(&mut deserializer);
+            let api_isCholHamoedPesach = <bool>::sse_decode(&mut deserializer);
+            let api_isShavuos = <bool>::sse_decode(&mut deserializer);
+            let api_isRoshHashana = <bool>::sse_decode(&mut deserializer);
+            let api_isYomKippur = <bool>::sse_decode(&mut deserializer);
+            let api_isSuccos = <bool>::sse_decode(&mut deserializer);
+            let api_isHoshanaRabba = <bool>::sse_decode(&mut deserializer);
+            let api_isShminiAtzeres = <bool>::sse_decode(&mut deserializer);
+            let api_isSimchasTorah = <bool>::sse_decode(&mut deserializer);
+            let api_isCholHamoedSuccos = <bool>::sse_decode(&mut deserializer);
+            let api_isCholHamoed = <bool>::sse_decode(&mut deserializer);
+            let api_isErevYomTov = <bool>::sse_decode(&mut deserializer);
+            let api_isErevRoshChodesh = <bool>::sse_decode(&mut deserializer);
+            let api_isYomKippurKatan = <bool>::sse_decode(&mut deserializer);
+            let api_isBeHaB = <bool>::sse_decode(&mut deserializer);
+            let api_isTaanis = <bool>::sse_decode(&mut deserializer);
+            let api_isTaanisBechoros = <bool>::sse_decode(&mut deserializer);
+            let api_getDayOfChanukah = <Option<u8>>::sse_decode(&mut deserializer);
+            let api_isChanukah = <bool>::sse_decode(&mut deserializer);
+            let api_isPurim = <bool>::sse_decode(&mut deserializer);
+            let api_isRoshChodesh = <bool>::sse_decode(&mut deserializer);
+            let api_isMacharChodesh = <bool>::sse_decode(&mut deserializer);
+            let api_isShabbosMevorchim = <bool>::sse_decode(&mut deserializer);
+            let api_getDayOfOmer = <Option<u8>>::sse_decode(&mut deserializer);
+            let api_isTishaBav = <bool>::sse_decode(&mut deserializer);
+            let api_getMoladAsInstant = <i64>::sse_decode(&mut deserializer);
+            let api_getTchilasZmanKidushLevana3Days = <i64>::sse_decode(&mut deserializer);
+            let api_getTchilasZmanKidushLevana7Days = <i64>::sse_decode(&mut deserializer);
+            let api_getSofZmanKidushLevanaBetweenMoldos = <i64>::sse_decode(&mut deserializer);
+            let api_getSofZmanKidushLevana15Days = <i64>::sse_decode(&mut deserializer);
+            let api_getTekufasTishreiElapsedDays = <i32>::sse_decode(&mut deserializer);
+            let api_isIsruChag = <bool>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Result::<_, ()>::Ok(crate::api::JavaJewishCalendarTestResults::new(
+                        api_isUseModernHolidays,
+                        api_getInIsrael,
+                        api_getIsMukafChoma,
+                        api_isBirkasHachamah,
+                        api_getParshah,
+                        api_getUpcomingParshah,
+                        api_getSpecialShabbos,
+                        api_getYomTovIndex,
+                        api_isYomTov,
+                        api_isYomTovAssurBemelacha,
+                        api_isAssurBemelacha,
+                        api_hasCandleLighting,
+                        api_isTomorrowShabbosOrYomTov,
+                        api_isErevYomTovSheni,
+                        api_isAseresYemeiTeshuva,
+                        api_isPesach,
+                        api_isCholHamoedPesach,
+                        api_isShavuos,
+                        api_isRoshHashana,
+                        api_isYomKippur,
+                        api_isSuccos,
+                        api_isHoshanaRabba,
+                        api_isShminiAtzeres,
+                        api_isSimchasTorah,
+                        api_isCholHamoedSuccos,
+                        api_isCholHamoed,
+                        api_isErevYomTov,
+                        api_isErevRoshChodesh,
+                        api_isYomKippurKatan,
+                        api_isBeHaB,
+                        api_isTaanis,
+                        api_isTaanisBechoros,
+                        api_getDayOfChanukah,
+                        api_isChanukah,
+                        api_isPurim,
+                        api_isRoshChodesh,
+                        api_isMacharChodesh,
+                        api_isShabbosMevorchim,
+                        api_getDayOfOmer,
+                        api_isTishaBav,
+                        api_getMoladAsInstant,
+                        api_getTchilasZmanKidushLevana3Days,
+                        api_getTchilasZmanKidushLevana7Days,
+                        api_getSofZmanKidushLevanaBetweenMoldos,
+                        api_getSofZmanKidushLevana15Days,
+                        api_getTekufasTishreiElapsedDays,
+                        api_isIsruChag,
+                    ))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__jewish_date_to_gregorian_date_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -402,6 +527,53 @@ fn wire__crate__api__presets_impl(
             deserializer.end();
             transform_result_sse::<_, ()>((move || {
                 let output_ok = Result::<_, ()>::Ok(crate::api::presets())?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__test_jewish_calendar_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "test_jewish_calendar",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_year = <i32>::sse_decode(&mut deserializer);
+            let api_month = <u8>::sse_decode(&mut deserializer);
+            let api_day = <u8>::sse_decode(&mut deserializer);
+            let api_in_israel = <bool>::sse_decode(&mut deserializer);
+            let api_is_mukaf_choma = <bool>::sse_decode(&mut deserializer);
+            let api_use_modern_holidays = <bool>::sse_decode(&mut deserializer);
+            let api_java =
+                <crate::api::JavaJewishCalendarTestResults>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Result::<_, ()>::Ok({
+                    crate::api::test_jewish_calendar(
+                        api_year,
+                        api_month,
+                        api_day,
+                        api_in_israel,
+                        api_is_mukaf_choma,
+                        api_use_modern_holidays,
+                        api_java,
+                    );
+                })?;
                 Ok(output_ok)
             })())
         },
@@ -501,6 +673,108 @@ impl SseDecode for i64 {
     }
 }
 
+impl SseDecode for crate::api::JavaJewishCalendarTestResults {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_isUseModernHolidays = <bool>::sse_decode(deserializer);
+        let mut var_getInIsrael = <bool>::sse_decode(deserializer);
+        let mut var_getIsMukafChoma = <bool>::sse_decode(deserializer);
+        let mut var_isBirkasHachamah = <bool>::sse_decode(deserializer);
+        let mut var_getParshah = <Option<i32>>::sse_decode(deserializer);
+        let mut var_getUpcomingParshah = <i32>::sse_decode(deserializer);
+        let mut var_getSpecialShabbos = <Option<i32>>::sse_decode(deserializer);
+        let mut var_getYomTovIndex = <i32>::sse_decode(deserializer);
+        let mut var_isYomTov = <bool>::sse_decode(deserializer);
+        let mut var_isYomTovAssurBemelacha = <bool>::sse_decode(deserializer);
+        let mut var_isAssurBemelacha = <bool>::sse_decode(deserializer);
+        let mut var_hasCandleLighting = <bool>::sse_decode(deserializer);
+        let mut var_isTomorrowShabbosOrYomTov = <bool>::sse_decode(deserializer);
+        let mut var_isErevYomTovSheni = <bool>::sse_decode(deserializer);
+        let mut var_isAseresYemeiTeshuva = <bool>::sse_decode(deserializer);
+        let mut var_isPesach = <bool>::sse_decode(deserializer);
+        let mut var_isCholHamoedPesach = <bool>::sse_decode(deserializer);
+        let mut var_isShavuos = <bool>::sse_decode(deserializer);
+        let mut var_isRoshHashana = <bool>::sse_decode(deserializer);
+        let mut var_isYomKippur = <bool>::sse_decode(deserializer);
+        let mut var_isSuccos = <bool>::sse_decode(deserializer);
+        let mut var_isHoshanaRabba = <bool>::sse_decode(deserializer);
+        let mut var_isShminiAtzeres = <bool>::sse_decode(deserializer);
+        let mut var_isSimchasTorah = <bool>::sse_decode(deserializer);
+        let mut var_isCholHamoedSuccos = <bool>::sse_decode(deserializer);
+        let mut var_isCholHamoed = <bool>::sse_decode(deserializer);
+        let mut var_isErevYomTov = <bool>::sse_decode(deserializer);
+        let mut var_isErevRoshChodesh = <bool>::sse_decode(deserializer);
+        let mut var_isYomKippurKatan = <bool>::sse_decode(deserializer);
+        let mut var_isBeHaB = <bool>::sse_decode(deserializer);
+        let mut var_isTaanis = <bool>::sse_decode(deserializer);
+        let mut var_isTaanisBechoros = <bool>::sse_decode(deserializer);
+        let mut var_getDayOfChanukah = <Option<u8>>::sse_decode(deserializer);
+        let mut var_isChanukah = <bool>::sse_decode(deserializer);
+        let mut var_isPurim = <bool>::sse_decode(deserializer);
+        let mut var_isRoshChodesh = <bool>::sse_decode(deserializer);
+        let mut var_isMacharChodesh = <bool>::sse_decode(deserializer);
+        let mut var_isShabbosMevorchim = <bool>::sse_decode(deserializer);
+        let mut var_getDayOfOmer = <Option<u8>>::sse_decode(deserializer);
+        let mut var_isTishaBav = <bool>::sse_decode(deserializer);
+        let mut var_getMoladAsInstant = <i64>::sse_decode(deserializer);
+        let mut var_getTchilasZmanKidushLevana3Days = <i64>::sse_decode(deserializer);
+        let mut var_getTchilasZmanKidushLevana7Days = <i64>::sse_decode(deserializer);
+        let mut var_getSofZmanKidushLevanaBetweenMoldos = <i64>::sse_decode(deserializer);
+        let mut var_getSofZmanKidushLevana15Days = <i64>::sse_decode(deserializer);
+        let mut var_getTekufasTishreiElapsedDays = <i32>::sse_decode(deserializer);
+        let mut var_isIsruChag = <bool>::sse_decode(deserializer);
+        return crate::api::JavaJewishCalendarTestResults {
+            isUseModernHolidays: var_isUseModernHolidays,
+            getInIsrael: var_getInIsrael,
+            getIsMukafChoma: var_getIsMukafChoma,
+            isBirkasHachamah: var_isBirkasHachamah,
+            getParshah: var_getParshah,
+            getUpcomingParshah: var_getUpcomingParshah,
+            getSpecialShabbos: var_getSpecialShabbos,
+            getYomTovIndex: var_getYomTovIndex,
+            isYomTov: var_isYomTov,
+            isYomTovAssurBemelacha: var_isYomTovAssurBemelacha,
+            isAssurBemelacha: var_isAssurBemelacha,
+            hasCandleLighting: var_hasCandleLighting,
+            isTomorrowShabbosOrYomTov: var_isTomorrowShabbosOrYomTov,
+            isErevYomTovSheni: var_isErevYomTovSheni,
+            isAseresYemeiTeshuva: var_isAseresYemeiTeshuva,
+            isPesach: var_isPesach,
+            isCholHamoedPesach: var_isCholHamoedPesach,
+            isShavuos: var_isShavuos,
+            isRoshHashana: var_isRoshHashana,
+            isYomKippur: var_isYomKippur,
+            isSuccos: var_isSuccos,
+            isHoshanaRabba: var_isHoshanaRabba,
+            isShminiAtzeres: var_isShminiAtzeres,
+            isSimchasTorah: var_isSimchasTorah,
+            isCholHamoedSuccos: var_isCholHamoedSuccos,
+            isCholHamoed: var_isCholHamoed,
+            isErevYomTov: var_isErevYomTov,
+            isErevRoshChodesh: var_isErevRoshChodesh,
+            isYomKippurKatan: var_isYomKippurKatan,
+            isBeHaB: var_isBeHaB,
+            isTaanis: var_isTaanis,
+            isTaanisBechoros: var_isTaanisBechoros,
+            getDayOfChanukah: var_getDayOfChanukah,
+            isChanukah: var_isChanukah,
+            isPurim: var_isPurim,
+            isRoshChodesh: var_isRoshChodesh,
+            isMacharChodesh: var_isMacharChodesh,
+            isShabbosMevorchim: var_isShabbosMevorchim,
+            getDayOfOmer: var_getDayOfOmer,
+            isTishaBav: var_isTishaBav,
+            getMoladAsInstant: var_getMoladAsInstant,
+            getTchilasZmanKidushLevana3Days: var_getTchilasZmanKidushLevana3Days,
+            getTchilasZmanKidushLevana7Days: var_getTchilasZmanKidushLevana7Days,
+            getSofZmanKidushLevanaBetweenMoldos: var_getSofZmanKidushLevanaBetweenMoldos,
+            getSofZmanKidushLevana15Days: var_getSofZmanKidushLevana15Days,
+            getTekufasTishreiElapsedDays: var_getTekufasTishreiElapsedDays,
+            isIsruChag: var_isIsruChag,
+        };
+    }
+}
+
 impl SseDecode for Vec<ZmanimPreset> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -537,6 +811,17 @@ impl SseDecode for Vec<u8> {
     }
 }
 
+impl SseDecode for Option<i32> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<i32>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<(i32, u8, u8)> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -553,6 +838,17 @@ impl SseDecode for Option<(String, i64)> {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
             return Some(<(String, i64)>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<u8> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<u8>::sse_decode(deserializer));
         } else {
             return None;
         }
@@ -625,9 +921,15 @@ fn pde_ffi_dispatcher_sync_impl(
         5 => wire__crate__api__calculate_zman_impl(ptr, rust_vec_len, data_len),
         6 => wire__crate__api__find_timezone_impl(ptr, rust_vec_len, data_len),
         7 => wire__crate__api__gregorian_date_to_jewish_date_impl(ptr, rust_vec_len, data_len),
-        8 => wire__crate__api__jewish_date_to_gregorian_date_impl(ptr, rust_vec_len, data_len),
-        9 => wire__crate__api__presets_impl(ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__timezones_impl(ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__java_jewish_calendar_test_results_new_impl(
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        9 => wire__crate__api__jewish_date_to_gregorian_date_impl(ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__presets_impl(ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__test_jewish_calendar_impl(ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__timezones_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -646,6 +948,83 @@ impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<
 impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<ZmanimPreset>> for ZmanimPreset {
     fn into_into_dart(self) -> FrbWrapper<ZmanimPreset> {
         self.into()
+    }
+}
+
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::JavaJewishCalendarTestResults {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.isUseModernHolidays.into_into_dart().into_dart(),
+            self.getInIsrael.into_into_dart().into_dart(),
+            self.getIsMukafChoma.into_into_dart().into_dart(),
+            self.isBirkasHachamah.into_into_dart().into_dart(),
+            self.getParshah.into_into_dart().into_dart(),
+            self.getUpcomingParshah.into_into_dart().into_dart(),
+            self.getSpecialShabbos.into_into_dart().into_dart(),
+            self.getYomTovIndex.into_into_dart().into_dart(),
+            self.isYomTov.into_into_dart().into_dart(),
+            self.isYomTovAssurBemelacha.into_into_dart().into_dart(),
+            self.isAssurBemelacha.into_into_dart().into_dart(),
+            self.hasCandleLighting.into_into_dart().into_dart(),
+            self.isTomorrowShabbosOrYomTov.into_into_dart().into_dart(),
+            self.isErevYomTovSheni.into_into_dart().into_dart(),
+            self.isAseresYemeiTeshuva.into_into_dart().into_dart(),
+            self.isPesach.into_into_dart().into_dart(),
+            self.isCholHamoedPesach.into_into_dart().into_dart(),
+            self.isShavuos.into_into_dart().into_dart(),
+            self.isRoshHashana.into_into_dart().into_dart(),
+            self.isYomKippur.into_into_dart().into_dart(),
+            self.isSuccos.into_into_dart().into_dart(),
+            self.isHoshanaRabba.into_into_dart().into_dart(),
+            self.isShminiAtzeres.into_into_dart().into_dart(),
+            self.isSimchasTorah.into_into_dart().into_dart(),
+            self.isCholHamoedSuccos.into_into_dart().into_dart(),
+            self.isCholHamoed.into_into_dart().into_dart(),
+            self.isErevYomTov.into_into_dart().into_dart(),
+            self.isErevRoshChodesh.into_into_dart().into_dart(),
+            self.isYomKippurKatan.into_into_dart().into_dart(),
+            self.isBeHaB.into_into_dart().into_dart(),
+            self.isTaanis.into_into_dart().into_dart(),
+            self.isTaanisBechoros.into_into_dart().into_dart(),
+            self.getDayOfChanukah.into_into_dart().into_dart(),
+            self.isChanukah.into_into_dart().into_dart(),
+            self.isPurim.into_into_dart().into_dart(),
+            self.isRoshChodesh.into_into_dart().into_dart(),
+            self.isMacharChodesh.into_into_dart().into_dart(),
+            self.isShabbosMevorchim.into_into_dart().into_dart(),
+            self.getDayOfOmer.into_into_dart().into_dart(),
+            self.isTishaBav.into_into_dart().into_dart(),
+            self.getMoladAsInstant.into_into_dart().into_dart(),
+            self.getTchilasZmanKidushLevana3Days
+                .into_into_dart()
+                .into_dart(),
+            self.getTchilasZmanKidushLevana7Days
+                .into_into_dart()
+                .into_dart(),
+            self.getSofZmanKidushLevanaBetweenMoldos
+                .into_into_dart()
+                .into_dart(),
+            self.getSofZmanKidushLevana15Days
+                .into_into_dart()
+                .into_dart(),
+            self.getTekufasTishreiElapsedDays
+                .into_into_dart()
+                .into_dart(),
+            self.isIsruChag.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::JavaJewishCalendarTestResults
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::JavaJewishCalendarTestResults>
+    for crate::api::JavaJewishCalendarTestResults
+{
+    fn into_into_dart(self) -> crate::api::JavaJewishCalendarTestResults {
+        self
     }
 }
 
@@ -702,6 +1081,59 @@ impl SseEncode for i64 {
     }
 }
 
+impl SseEncode for crate::api::JavaJewishCalendarTestResults {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.isUseModernHolidays, serializer);
+        <bool>::sse_encode(self.getInIsrael, serializer);
+        <bool>::sse_encode(self.getIsMukafChoma, serializer);
+        <bool>::sse_encode(self.isBirkasHachamah, serializer);
+        <Option<i32>>::sse_encode(self.getParshah, serializer);
+        <i32>::sse_encode(self.getUpcomingParshah, serializer);
+        <Option<i32>>::sse_encode(self.getSpecialShabbos, serializer);
+        <i32>::sse_encode(self.getYomTovIndex, serializer);
+        <bool>::sse_encode(self.isYomTov, serializer);
+        <bool>::sse_encode(self.isYomTovAssurBemelacha, serializer);
+        <bool>::sse_encode(self.isAssurBemelacha, serializer);
+        <bool>::sse_encode(self.hasCandleLighting, serializer);
+        <bool>::sse_encode(self.isTomorrowShabbosOrYomTov, serializer);
+        <bool>::sse_encode(self.isErevYomTovSheni, serializer);
+        <bool>::sse_encode(self.isAseresYemeiTeshuva, serializer);
+        <bool>::sse_encode(self.isPesach, serializer);
+        <bool>::sse_encode(self.isCholHamoedPesach, serializer);
+        <bool>::sse_encode(self.isShavuos, serializer);
+        <bool>::sse_encode(self.isRoshHashana, serializer);
+        <bool>::sse_encode(self.isYomKippur, serializer);
+        <bool>::sse_encode(self.isSuccos, serializer);
+        <bool>::sse_encode(self.isHoshanaRabba, serializer);
+        <bool>::sse_encode(self.isShminiAtzeres, serializer);
+        <bool>::sse_encode(self.isSimchasTorah, serializer);
+        <bool>::sse_encode(self.isCholHamoedSuccos, serializer);
+        <bool>::sse_encode(self.isCholHamoed, serializer);
+        <bool>::sse_encode(self.isErevYomTov, serializer);
+        <bool>::sse_encode(self.isErevRoshChodesh, serializer);
+        <bool>::sse_encode(self.isYomKippurKatan, serializer);
+        <bool>::sse_encode(self.isBeHaB, serializer);
+        <bool>::sse_encode(self.isTaanis, serializer);
+        <bool>::sse_encode(self.isTaanisBechoros, serializer);
+        <Option<u8>>::sse_encode(self.getDayOfChanukah, serializer);
+        <bool>::sse_encode(self.isChanukah, serializer);
+        <bool>::sse_encode(self.isPurim, serializer);
+        <bool>::sse_encode(self.isRoshChodesh, serializer);
+        <bool>::sse_encode(self.isMacharChodesh, serializer);
+        <bool>::sse_encode(self.isShabbosMevorchim, serializer);
+        <Option<u8>>::sse_encode(self.getDayOfOmer, serializer);
+        <bool>::sse_encode(self.isTishaBav, serializer);
+        <i64>::sse_encode(self.getMoladAsInstant, serializer);
+        <i64>::sse_encode(self.getTchilasZmanKidushLevana3Days, serializer);
+        <i64>::sse_encode(self.getTchilasZmanKidushLevana7Days, serializer);
+        <i64>::sse_encode(self.getSofZmanKidushLevanaBetweenMoldos, serializer);
+        <i64>::sse_encode(self.getSofZmanKidushLevana15Days, serializer);
+        <i32>::sse_encode(self.getTekufasTishreiElapsedDays, serializer);
+        <bool>::sse_encode(self.isIsruChag, serializer);
+    }
+}
+
 impl SseEncode for Vec<ZmanimPreset> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -732,6 +1164,16 @@ impl SseEncode for Vec<u8> {
     }
 }
 
+impl SseEncode for Option<i32> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <i32>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<(i32, u8, u8)> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -748,6 +1190,16 @@ impl SseEncode for Option<(String, i64)> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <(String, i64)>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<u8> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <u8>::sse_encode(value, serializer);
         }
     }
 }

@@ -21423,13 +21423,13 @@ class JewishDate extends jni$_.JObject {
           jni$_.JThrowablePtr Function(
               jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int)>();
 
-  /// from: `public void addYears(int years, boolean useAdarAlephInLeapYear)`
+  /// from: `public void addYears(int years, boolean useAdarAlephForLeapYear)`
   void addYears(
     int years,
-    bool useAdarAlephInLeapYear,
+    bool useAdarAlephForLeapYear,
   ) {
     _addYears(reference.pointer, _id_addYears as jni$_.JMethodIDPtr, years,
-            useAdarAlephInLeapYear ? 1 : 0)
+            useAdarAlephForLeapYear ? 1 : 0)
         .check();
   }
 
@@ -21772,5 +21772,3776 @@ final class $JewishDate$Type$ extends jni$_.JType<JewishDate> {
   bool operator ==(Object other) {
     return other.runtimeType == ($JewishDate$Type$) &&
         other is $JewishDate$Type$;
+  }
+}
+
+/// from: `com.kosherjava.zmanim.hebrewcalendar.JewishCalendar`
+///
+/// The JewishCalendar extends the JewishDate class and adds calendar methods.
+///
+/// This open source Java code was originally ported by <a href="http://www.facebook.com/avromf">Avrom Finkelstien</a>
+/// from his C++ code. It was refactored to fit the KosherJava Zmanim API with simplification of the code, enhancements
+/// and some bug fixing. The class allows setting whether the holiday and _parsha_ scheme follows the Israel scheme
+/// or outside Israel scheme. The default is the outside Israel scheme.
+/// The parsha code was ported by Y. Paritcher from his <a href="https://github.com/yparitcher/libzmanim">libzmanim</a> code.
+///@todo Some do not belong in this class, but here is a partial list of what should still be implemented in some form:
+/// <ol>
+/// <li>Mishna yomis etc</li>
+/// </ol>
+///@see java.util.Date
+///@see java.util.Calendar
+///@author &copy; Y. Paritcher 2019 - 2022
+///@author &copy; Avrom Finkelstien 2002
+///@author &copy; Eliyahu Hershfeld 2011 - 2026
+class JewishCalendar extends JewishDate {
+  @jni$_.internal
+  @core$_.override
+  final jni$_.JType<JewishCalendar> $type;
+
+  @jni$_.internal
+  JewishCalendar.fromReference(
+    jni$_.JReference reference,
+  )   : $type = type,
+        super.fromReference(reference);
+
+  static final _class = jni$_.JClass.forName(
+      r'com/kosherjava/zmanim/hebrewcalendar/JewishCalendar');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<JewishCalendar?> nullableType =
+      $JewishCalendar$NullableType$();
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<JewishCalendar> type = $JewishCalendar$Type$();
+
+  /// from: `static public final int EREV_PESACH`
+  ///
+  /// The 14th day of Nissan, the day before Pesach (Passover).
+  static const EREV_PESACH = 0;
+
+  /// from: `static public final int PESACH`
+  ///
+  /// The holiday of Pesach (Passover) on the 15th (and 16th out of Israel) day of Nissan.
+  static const PESACH = 1;
+
+  /// from: `static public final int CHOL_HAMOED_PESACH`
+  ///
+  /// Chol Hamoed (interim days) of Pesach (Passover)
+  static const CHOL_HAMOED_PESACH = 2;
+
+  /// from: `static public final int PESACH_SHENI`
+  ///
+  /// Pesach Sheni, the 14th day of Iyar, a minor holiday.
+  static const PESACH_SHENI = 3;
+
+  /// from: `static public final int EREV_SHAVUOS`
+  ///
+  /// Erev Shavuos (the day before Shavuos), the 5th of Sivan
+  static const EREV_SHAVUOS = 4;
+
+  /// from: `static public final int SHAVUOS`
+  ///
+  /// Shavuos (Pentecost), the 6th of Sivan
+  static const SHAVUOS = 5;
+
+  /// from: `static public final int SEVENTEEN_OF_TAMMUZ`
+  ///
+  /// The fast of the 17th day of Tammuz
+  static const SEVENTEEN_OF_TAMMUZ = 6;
+
+  /// from: `static public final int TISHA_BEAV`
+  ///
+  /// The fast of the 9th of Av
+  static const TISHA_BEAV = 7;
+
+  /// from: `static public final int TU_BEAV`
+  ///
+  /// The 15th day of Av, a minor holiday
+  static const TU_BEAV = 8;
+
+  /// from: `static public final int EREV_ROSH_HASHANA`
+  ///
+  /// Erev Rosh Hashana (the day before Rosh Hashana), the 29th of Elul
+  static const EREV_ROSH_HASHANA = 9;
+
+  /// from: `static public final int ROSH_HASHANA`
+  ///
+  /// Rosh Hashana, the first and second days of Tishrei.
+  static const ROSH_HASHANA = 10;
+
+  /// from: `static public final int FAST_OF_GEDALYAH`
+  ///
+  /// The fast of Gedalyah, the 3rd of Tishrei.
+  static const FAST_OF_GEDALYAH = 11;
+
+  /// from: `static public final int EREV_YOM_KIPPUR`
+  ///
+  /// The 9th day of Tishrei, the day before of Yom Kippur.
+  static const EREV_YOM_KIPPUR = 12;
+
+  /// from: `static public final int YOM_KIPPUR`
+  ///
+  /// The holiday of Yom Kippur, the 10th day of Tishrei
+  static const YOM_KIPPUR = 13;
+
+  /// from: `static public final int EREV_SUCCOS`
+  ///
+  /// The 14th day of Tishrei, the day before of Succos/Sukkos (Tabernacles).
+  static const EREV_SUCCOS = 14;
+
+  /// from: `static public final int SUCCOS`
+  ///
+  /// The holiday of Succos/Sukkos (Tabernacles), the 15th (and 16th out of Israel) day of Tishrei
+  static const SUCCOS = 15;
+
+  /// from: `static public final int CHOL_HAMOED_SUCCOS`
+  ///
+  /// Chol Hamoed (interim days) of Succos/Sukkos (Tabernacles)
+  static const CHOL_HAMOED_SUCCOS = 16;
+
+  /// from: `static public final int HOSHANA_RABBA`
+  ///
+  /// Hoshana Rabba, the 7th day of Succos/Sukkos that occurs on the 21st of Tishrei.
+  static const HOSHANA_RABBA = 17;
+
+  /// from: `static public final int SHEMINI_ATZERES`
+  ///
+  /// Shmini Atzeres, the 8th day of Succos/Sukkos is an independent holiday that occurs on the 22nd of Tishrei.
+  static const SHEMINI_ATZERES = 18;
+
+  /// from: `static public final int SIMCHAS_TORAH`
+  ///
+  /// Simchas Torah, the 9th day of Succos/Sukkos, or the second day of Shmini Atzeres that is celebrated
+  /// \#getInIsrael() out of Israel on the 23rd of Tishrei.
+  static const SIMCHAS_TORAH = 19;
+
+  /// from: `static public final int CHANUKAH`
+  ///
+  /// The holiday of Chanukah. 8 days starting on the 25th day Kislev.
+  static const CHANUKAH = 21;
+
+  /// from: `static public final int TENTH_OF_TEVES`
+  ///
+  /// The fast of the 10th day of Teves.
+  static const TENTH_OF_TEVES = 22;
+
+  /// from: `static public final int TU_BESHVAT`
+  ///
+  /// Tu Bishvat on the 15th day of Shevat, a minor holiday.
+  static const TU_BESHVAT = 23;
+
+  /// from: `static public final int FAST_OF_ESTHER`
+  ///
+  /// The fast of Esther, usually on the 13th day of Adar (or Adar II on leap years). It is earlier on some years.
+  static const FAST_OF_ESTHER = 24;
+
+  /// from: `static public final int PURIM`
+  ///
+  /// The holiday of Purim on the 14th day of Adar (or Adar II on leap years).
+  static const PURIM = 25;
+
+  /// from: `static public final int SHUSHAN_PURIM`
+  ///
+  /// The holiday of Shushan Purim on the 15th day of Adar (or Adar II on leap years).
+  static const SHUSHAN_PURIM = 26;
+
+  /// from: `static public final int PURIM_KATAN`
+  ///
+  /// The holiday of Purim Katan on the 14th day of Adar I on a leap year when Purim is on Adar II, a minor holiday.
+  static const PURIM_KATAN = 27;
+
+  /// from: `static public final int ROSH_CHODESH`
+  ///
+  /// Rosh Chodesh, the new moon on the first day of the Jewish month, and the 30th day of the previous month in the
+  /// case of a month with 30 days.
+  static const ROSH_CHODESH = 28;
+
+  /// from: `static public final int YOM_HASHOAH`
+  ///
+  /// Yom HaShoah, Holocaust Remembrance Day, usually held on the 27th of Nissan. If it falls on a Friday, it is moved
+  /// to the 26th, and if it falls on a Sunday it is moved to the 28th. A \#isUseModernHolidays() modern holiday.
+  static const YOM_HASHOAH = 29;
+
+  /// from: `static public final int YOM_HAZIKARON`
+  ///
+  /// Yom HaZikaron, Israeli Memorial Day, held a day before Yom Ha'atzmaut.  A \#isUseModernHolidays() modern holiday.
+  static const YOM_HAZIKARON = 30;
+
+  /// from: `static public final int YOM_HAATZMAUT`
+  ///
+  /// Yom Ha'atzmaut, Israel Independence Day, the 5th of Iyar, but if it occurs on a Friday or Saturday, the holiday is
+  /// moved back to Thursday, the 3rd of 4th of Iyar, and if it falls on a Monday, it is moved forward to Tuesday the
+  /// 6th of Iyar.  A \#isUseModernHolidays() modern holiday.
+  static const YOM_HAATZMAUT = 31;
+
+  /// from: `static public final int YOM_YERUSHALAYIM`
+  ///
+  /// Yom Yerushalayim or Jerusalem Day, on 28 Iyar. A \#isUseModernHolidays() modern holiday.
+  static const YOM_YERUSHALAYIM = 32;
+
+  /// from: `static public final int LAG_BAOMER`
+  ///
+  /// The 33rd day of the Omer, the 18th of Iyar, a minor holiday.
+  static const LAG_BAOMER = 33;
+
+  /// from: `static public final int SHUSHAN_PURIM_KATAN`
+  ///
+  /// The holiday of Purim Katan on the 15th day of Adar I on a leap year when Purim is on Adar II, a minor holiday.
+  static const SHUSHAN_PURIM_KATAN = 34;
+
+  /// from: `static public final int ISRU_CHAG`
+  ///
+  /// The day following the last day of Pesach, Shavuos and Sukkos.
+  static const ISRU_CHAG = 35;
+
+  /// from: `static public final int YOM_KIPPUR_KATAN`
+  ///
+  /// The day before _Rosh Chodesh_ (moved to Thursday if _Rosh Chodesh_ is on a Friday or _Shabbos_) in most months.
+  /// This constant is not actively in use.
+  ///@see \#isYomKippurKatan()
+  static const YOM_KIPPUR_KATAN = 36;
+
+  /// from: `static public final int BEHAB`
+  ///
+  /// The Monday, Thursday and Monday after the first _Shabbos_ after _Rosh Chodesh Cheshvan_ and _Iyar_) are BeHab
+  /// days. This constant is not actively in use.
+  ///@see \#isBeHaB()
+  static const BEHAB = 37;
+  static final _id_parshalist = _class.staticFieldId(
+    r'parshalist',
+    r'[[Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha[][] parshalist`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// An array of _parshiyos_ in the 17 possible combinations.
+  static jni$_.JArray<jni$_.JArray<JewishCalendar$Parsha?>?>? get parshalist =>
+      _id_parshalist.get(
+          _class,
+          const jni$_
+              .$JArray$NullableType$<jni$_.JArray<JewishCalendar$Parsha?>?>(
+              jni$_.$JArray$NullableType$<JewishCalendar$Parsha?>(
+                  $JewishCalendar$Parsha$NullableType$())));
+
+  static final _id_isUseModernHolidays = _class.instanceMethodId(
+    r'isUseModernHolidays',
+    r'()Z',
+  );
+
+  static final _isUseModernHolidays = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isUseModernHolidays()`
+  ///
+  /// Is this calendar set to return modern Israeli national holidays. By default, this value is false. The holidays
+  /// are \#YOM_HASHOAH _Yom HaShoah_, \#YOM_HAZIKARON _Yom Hazikaron_, \#YOM_HAATZMAUT _Yom Ha'atzmaut_ and \#YOM_YERUSHALAYIM _Yom Yerushalayim_.
+  ///@return the useModernHolidays true if set to return modern Israeli national holidays
+  ///@see \#setUseModernHolidays(boolean)
+  bool isUseModernHolidays() {
+    return _isUseModernHolidays(
+            reference.pointer, _id_isUseModernHolidays as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_setUseModernHolidays = _class.instanceMethodId(
+    r'setUseModernHolidays',
+    r'(Z)V',
+  );
+
+  static final _setUseModernHolidays = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setUseModernHolidays(boolean useModernHolidays)`
+  ///
+  /// Sets the calendar to return modern Israeli national holidays. By default, this value is false. The holidays are:
+  /// \#YOM_HASHOAH _Yom HaShoah_, \#YOM_HAZIKARON _Yom Hazikaron_, \#YOM_HAATZMAUT _Yom Ha'atzmaut_ and \#YOM_YERUSHALAYIM _Yom Yerushalayim_.
+  ///@param useModernHolidays the useModernHolidays to set
+  ///@see \#isUseModernHolidays()
+  void setUseModernHolidays(
+    bool useModernHolidays,
+  ) {
+    _setUseModernHolidays(
+            reference.pointer,
+            _id_setUseModernHolidays as jni$_.JMethodIDPtr,
+            useModernHolidays ? 1 : 0)
+        .check();
+  }
+
+  static final _id_new2 = _class.constructorId(
+    r'()V',
+  );
+
+  static final _new2 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public void <init>()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Default constructor will set a default date to the current system date.
+  factory JewishCalendar.new2() {
+    return JewishCalendar.fromReference(
+        _new2(_class.reference.pointer, _id_new2 as jni$_.JMethodIDPtr)
+            .reference);
+  }
+
+  static final _id_new3 = _class.constructorId(
+    r'(Ljava/time/ZonedDateTime;)V',
+  );
+
+  static final _new3 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public void <init>(java.time.ZonedDateTime zonedDateTime)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// A constructor that initializes the date to the java.util.Calendar Calendar parameter.
+  ///@param zonedDateTime the <code>ZonedDateTime</code> to set the calendar to
+  factory JewishCalendar.new3(
+    ZonedDateTime? zonedDateTime,
+  ) {
+    final _$zonedDateTime = zonedDateTime?.reference ?? jni$_.jNullReference;
+    return JewishCalendar.fromReference(_new3(_class.reference.pointer,
+            _id_new3 as jni$_.JMethodIDPtr, _$zonedDateTime.pointer)
+        .reference);
+  }
+
+  static final _id_new4 = _class.constructorId(
+    r'(Ljava/time/LocalDate;)V',
+  );
+
+  static final _new4 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public void <init>(java.time.LocalDate localDate)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// A constructor that initializes the date to the java.time.LocalDate LocalDate parameter.
+  ///@param localDate the <code>LocalDate</code> to set the calendar to
+  factory JewishCalendar.new4(
+    LocalDate? localDate,
+  ) {
+    final _$localDate = localDate?.reference ?? jni$_.jNullReference;
+    return JewishCalendar.fromReference(_new4(_class.reference.pointer,
+            _id_new4 as jni$_.JMethodIDPtr, _$localDate.pointer)
+        .reference);
+  }
+
+  static final _id_new1 = _class.constructorId(
+    r'(III)V',
+  );
+
+  static final _new1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Int32, jni$_.Int32, jni$_.Int32)>)>>(
+          'globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int, int)>();
+
+  /// from: `public void <init>(int jewishYear, int jewishMonth, int jewishDayOfMonth)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Creates a Jewish date based on a Jewish year, month and day of month.
+  ///@param jewishYear the Jewish year
+  ///@param jewishMonth the Jewish month. The method expects a 1 for Nissan ... 12 for Adar and 13 for Adar II. Use the
+  ///            constants \#NISSAN ... \#ADAR (or \#ADAR_II for a leap year Adar II) to avoid any
+  ///            confusion.
+  ///@param jewishDayOfMonth the Jewish day of month. If 30 is passed in for a month with only 29 days (for example \#IYAR,
+  ///            or \#KISLEV in a year that \#isKislevShort()), the 29th (last valid date of the month)
+  ///            will be set
+  ///@throws IllegalArgumentException if the day of month is &lt; 1 or &gt; 30, or a year of &lt; 0 is passed in.
+  factory JewishCalendar.new1(
+    int jewishYear,
+    int jewishMonth,
+    int jewishDayOfMonth,
+  ) {
+    return JewishCalendar.fromReference(_new1(
+            _class.reference.pointer,
+            _id_new1 as jni$_.JMethodIDPtr,
+            jewishYear,
+            jewishMonth,
+            jewishDayOfMonth)
+        .reference);
+  }
+
+  static final _id_new$5 = _class.constructorId(
+    r'(IIIZ)V',
+  );
+
+  static final _new$5 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<
+                      (
+                        jni$_.Int32,
+                        jni$_.Int32,
+                        jni$_.Int32,
+                        jni$_.Int32
+                      )>)>>('globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, int, int, int, int)>();
+
+  /// from: `public void <init>(int jewishYear, int jewishMonth, int jewishDayOfMonth, boolean inIsrael)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Creates a Jewish date based on a Jewish date and whether in Israel
+  ///@param jewishYear the Jewish year
+  ///@param jewishMonth the Jewish month. The method expects a 1 for _Nissan_ ... 12 for _Adar_ and 13 for
+  ///            _Adar II_. Use the constants \#NISSAN ... \#ADAR (or \#ADAR_II for a
+  ///            leap year Adar II) to avoid any confusion.
+  ///@param jewishDayOfMonth the Jewish day of month. If 30 is passed in for a month with only 29 days (for example \#IYAR,
+  ///            or \#KISLEV in a year that \#isKislevShort()), the 29th (last valid date of the month)
+  ///            will be set.
+  ///@param inIsrael whether in Israel. This affects _Yom Tov_ calculations
+  factory JewishCalendar.new$5(
+    int jewishYear,
+    int jewishMonth,
+    int jewishDayOfMonth,
+    bool inIsrael,
+  ) {
+    return JewishCalendar.fromReference(_new$5(
+            _class.reference.pointer,
+            _id_new$5 as jni$_.JMethodIDPtr,
+            jewishYear,
+            jewishMonth,
+            jewishDayOfMonth,
+            inIsrael ? 1 : 0)
+        .reference);
+  }
+
+  static final _id_setInIsrael = _class.instanceMethodId(
+    r'setInIsrael',
+    r'(Z)V',
+  );
+
+  static final _setInIsrael = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setInIsrael(boolean inIsrael)`
+  ///
+  /// Sets whether to use Israel holiday scheme or not. Default is false.
+  ///@param inIsrael set to true for calculations for Israel
+  ///@see \#getInIsrael()
+  void setInIsrael(
+    bool inIsrael,
+  ) {
+    _setInIsrael(reference.pointer, _id_setInIsrael as jni$_.JMethodIDPtr,
+            inIsrael ? 1 : 0)
+        .check();
+  }
+
+  static final _id_getInIsrael = _class.instanceMethodId(
+    r'getInIsrael',
+    r'()Z',
+  );
+
+  static final _getInIsrael = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean getInIsrael()`
+  ///
+  /// Gets whether Israel holiday scheme is used or not. The default (if not set) is false.
+  ///@return if the calendar is set to Israel
+  ///@see \#setInIsrael(boolean)
+  bool getInIsrael() {
+    return _getInIsrael(
+            reference.pointer, _id_getInIsrael as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_getIsMukafChoma = _class.instanceMethodId(
+    r'getIsMukafChoma',
+    r'()Z',
+  );
+
+  static final _getIsMukafChoma = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean getIsMukafChoma()`
+  ///
+  /// Returns if the city is set as a city surrounded by a wall from the time of Yehoshua, and Shushan Purim
+  /// should be celebrated as opposed to regular Purim.
+  ///@return if the city is set as a city surrounded by a wall from the time of Yehoshua, and Shushan Purim
+  ///         should be celebrated as opposed to regular Purim.
+  ///@see \#setIsMukafChoma(boolean)
+  bool getIsMukafChoma() {
+    return _getIsMukafChoma(
+            reference.pointer, _id_getIsMukafChoma as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_setIsMukafChoma = _class.instanceMethodId(
+    r'setIsMukafChoma',
+    r'(Z)V',
+  );
+
+  static final _setIsMukafChoma = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setIsMukafChoma(boolean isMukafChoma)`
+  ///
+  /// Sets if the location is surrounded by a wall from the time of Yehoshua, and Shushan Purim should be
+  /// celebrated as opposed to regular Purim. This should be set for Yerushalayim, Shushan and other cities.
+  ///@param isMukafChoma is the city surrounded by a wall from the time of Yehoshua.
+  ///@see \#getIsMukafChoma()
+  void setIsMukafChoma(
+    bool isMukafChoma,
+  ) {
+    _setIsMukafChoma(reference.pointer,
+            _id_setIsMukafChoma as jni$_.JMethodIDPtr, isMukafChoma ? 1 : 0)
+        .check();
+  }
+
+  static final _id_isBirkasHachamah = _class.instanceMethodId(
+    r'isBirkasHachamah',
+    r'()Z',
+  );
+
+  static final _isBirkasHachamah = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isBirkasHachamah()`
+  ///
+  /// <a href="https://en.wikipedia.org/wiki/Birkat_Hachama">Birkas Hachamah</a> is recited every 28 years based on
+  /// _Tekufas Shmuel_ (Julian years) that a year is 365.25 days. The <a href="https://en.wikipedia.org/wiki/Maimonides">Rambam</a> in <a href="http://hebrewbooks.org/pdfpager.aspx?req=14278&amp;st=&amp;pgnum=323">Hilchos Kiddush Hachodesh 9:3</a>
+  /// states that _tekufas Nissan_ of year 1 was 7 days + 9 hours before _molad Nissan_. This is calculated as every
+  /// 10,227 days (28 * 365.25).
+  ///@return true for a day that _Birkas Hachamah_ is recited.
+  bool isBirkasHachamah() {
+    return _isBirkasHachamah(
+            reference.pointer, _id_isBirkasHachamah as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_getParshah = _class.instanceMethodId(
+    r'getParshah',
+    r'()Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  static final _getParshah = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha getParshah()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns this week's Parsha _Parsha_ if it is _Shabbos_. It returns Parsha\#NONE if the date
+  /// is a weekday or if there is no _parsha_ that week (for example _Yom Tov_ that falls on a _Shabbos_).
+  ///@return the current _parsha_.
+  JewishCalendar$Parsha? getParshah() {
+    return _getParshah(reference.pointer, _id_getParshah as jni$_.JMethodIDPtr)
+        .object<JewishCalendar$Parsha?>(
+            const $JewishCalendar$Parsha$NullableType$());
+  }
+
+  static final _id_getUpcomingParshah = _class.instanceMethodId(
+    r'getUpcomingParshah',
+    r'()Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  static final _getUpcomingParshah = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha getUpcomingParshah()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the upcoming Parsha _Parsha_ regardless of if it is the weekday or _Shabbos_ (where next
+  /// Shabbos's _Parsha_ will be returned. This is unlike \#getParshah() that returns Parsha\#NONE if
+  /// the date is not _Shabbos_. If the upcoming _Shabbos_ is a _Yom Tov_ and has no _Parsha_, the
+  /// following week's _Parsha_ will be returned.
+  ///@return the upcoming _parsha_.
+  JewishCalendar$Parsha? getUpcomingParshah() {
+    return _getUpcomingParshah(
+            reference.pointer, _id_getUpcomingParshah as jni$_.JMethodIDPtr)
+        .object<JewishCalendar$Parsha?>(
+            const $JewishCalendar$Parsha$NullableType$());
+  }
+
+  static final _id_getSpecialShabbos = _class.instanceMethodId(
+    r'getSpecialShabbos',
+    r'()Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  static final _getSpecialShabbos = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha getSpecialShabbos()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns a Parsha _Parsha_ enum if the _Shabbos_ is one of the four _parshiyos_ of Parsha\#SHKALIM _Shkalim_, Parsha\#ZACHOR _Zachor_, Parsha\#PARA _Para_, Parsha\#HACHODESH _Hachdesh_, or five other special _Shabbasos_ of Parsha\#HAGADOL _Hagadol_,
+  /// Parsha\#CHAZON _Chazon_, Parsha\#NACHAMU _Nachamu_, Parsha\#SHUVA _Shuva_,
+  /// Parsha\#SHIRA _Shira_, or Parsha\#NONE Parsha.NONE for a regular _Shabbos_ (or any weekday).
+  ///@return one of the four _parshiyos_ of Parsha\#SHKALIM _Shkalim_, Parsha\#ZACHOR _Zachor_,
+  /// 		Parsha\#PARA _Para_, Parsha\#HACHODESH _Hachodesh_, or five other special _Shabbasos_
+  /// 		of Parsha\#HAGADOL _Hagadol_, Parsha\#CHAZON _Chazon_, Parsha\#NACHAMU _Nachamu_,
+  /// 		Parsha\#SHUVA _Shuva_, Parsha\#SHIRA _Shira_, or Parsha\#NONE Parsha.NONE for a regular
+  /// 		_Shabbos_ (or any weekday).
+  JewishCalendar$Parsha? getSpecialShabbos() {
+    return _getSpecialShabbos(
+            reference.pointer, _id_getSpecialShabbos as jni$_.JMethodIDPtr)
+        .object<JewishCalendar$Parsha?>(
+            const $JewishCalendar$Parsha$NullableType$());
+  }
+
+  static final _id_getYomTovIndex = _class.instanceMethodId(
+    r'getYomTovIndex',
+    r'()I',
+  );
+
+  static final _getYomTovIndex = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getYomTovIndex()`
+  ///
+  /// Returns an index of the Jewish holiday or fast day for the current day, or a -1 if there is no holiday for this day.
+  /// There are constants in this class representing each _Yom Tov_. Formatting of the _Yomim tovim_ is done
+  /// in the HebrewDateFormatter\#formatYomTov(JewishCalendar).
+  ///@todo Consider using enums instead of the constant ints.
+  ///@return the index of the holiday such as the constant \#LAG_BAOMER or \#YOM_KIPPUR or a -1 if it is not a holiday.
+  ///@see HebrewDateFormatter\#formatYomTov(JewishCalendar)
+  int getYomTovIndex() {
+    return _getYomTovIndex(
+            reference.pointer, _id_getYomTovIndex as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_isYomTov = _class.instanceMethodId(
+    r'isYomTov',
+    r'()Z',
+  );
+
+  static final _isYomTov = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isYomTov()`
+  ///
+  /// Returns true if the current day is _Yom Tov_. The method returns true even for holidays such as \#CHANUKAH
+  /// and minor ones such as \#TU_BEAV and \#PESACH_SHENI. _Erev Yom Tov_ (with the exception of
+  /// \#HOSHANA_RABBA and _erev_ the second days of \#PESACH) returns false, as do \#isTaanis() fast
+  /// days besides \#YOM_KIPPUR. Use \#isAssurBemelacha() to find the days that have a prohibition of work.
+  ///@return true if the current day is a Yom Tov
+  ///@see \#getYomTovIndex()
+  ///@see \#isErevYomTov()
+  ///@see \#isErevYomTovSheni()
+  ///@see \#isTaanis()
+  ///@see \#isAssurBemelacha()
+  ///@see \#isCholHamoed()
+  bool isYomTov() {
+    return _isYomTov(reference.pointer, _id_isYomTov as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isYomTovAssurBemelacha = _class.instanceMethodId(
+    r'isYomTovAssurBemelacha',
+    r'()Z',
+  );
+
+  static final _isYomTovAssurBemelacha = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isYomTovAssurBemelacha()`
+  ///
+  /// Returns true if the _Yom Tov_ day has a _melacha_ (work)  prohibition. This method will return false for a
+  /// non-_Yom Tov_ day, even if it is _Shabbos_.
+  ///@return if the _Yom Tov_ day has a _melacha_ (work)  prohibition.
+  bool isYomTovAssurBemelacha() {
+    return _isYomTovAssurBemelacha(
+            reference.pointer, _id_isYomTovAssurBemelacha as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isAssurBemelacha = _class.instanceMethodId(
+    r'isAssurBemelacha',
+    r'()Z',
+  );
+
+  static final _isAssurBemelacha = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isAssurBemelacha()`
+  ///
+  /// Returns true if it is _Shabbos_ or if it is a _Yom Tov_ day that has a _melacha_ (work)  prohibition.
+  ///@return if the day is a _Yom Tov_ that is _assur bemlacha_ or _Shabbos_
+  bool isAssurBemelacha() {
+    return _isAssurBemelacha(
+            reference.pointer, _id_isAssurBemelacha as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_hasCandleLighting = _class.instanceMethodId(
+    r'hasCandleLighting',
+    r'()Z',
+  );
+
+  static final _hasCandleLighting = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean hasCandleLighting()`
+  ///
+  /// Returns true if the day has candle lighting. This will return true on _Erev Shabbos_, _Erev Yom Tov_, the
+  /// first day of _Rosh Hashana_ and the first days of _Yom Tov_ out of Israel. It is identical
+  /// to calling \#isTomorrowShabbosOrYomTov().
+  ///@return if the day has candle lighting.
+  ///@see \#isTomorrowShabbosOrYomTov()
+  bool hasCandleLighting() {
+    return _hasCandleLighting(
+            reference.pointer, _id_hasCandleLighting as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isTomorrowShabbosOrYomTov = _class.instanceMethodId(
+    r'isTomorrowShabbosOrYomTov',
+    r'()Z',
+  );
+
+  static final _isTomorrowShabbosOrYomTov = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isTomorrowShabbosOrYomTov()`
+  ///
+  /// Returns true if tomorrow is _Shabbos_ or _Yom Tov_. This will return true on _Erev Shabbos_,
+  /// _Erev Yom Tov_, the first day of _Rosh Hashana_ and _erev_ the first days of _Yom Tov_
+  /// out of Israel. It is identical to calling \#hasCandleLighting().
+  ///@return will return if the next day is _Shabbos_ or _Yom Tov_.
+  ///@see \#hasCandleLighting()
+  bool isTomorrowShabbosOrYomTov() {
+    return _isTomorrowShabbosOrYomTov(reference.pointer,
+            _id_isTomorrowShabbosOrYomTov as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isErevYomTovSheni = _class.instanceMethodId(
+    r'isErevYomTovSheni',
+    r'()Z',
+  );
+
+  static final _isErevYomTovSheni = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isErevYomTovSheni()`
+  ///
+  /// Returns true if the day is the second day of _Yom Tov_. This impacts the second day of _Rosh Hashana_ everywhere and
+  /// the second days of Yom Tov in _chutz laaretz_ (out of Israel).
+  ///@return if the day is the second day of _Yom Tov_.
+  bool isErevYomTovSheni() {
+    return _isErevYomTovSheni(
+            reference.pointer, _id_isErevYomTovSheni as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isAseresYemeiTeshuva = _class.instanceMethodId(
+    r'isAseresYemeiTeshuva',
+    r'()Z',
+  );
+
+  static final _isAseresYemeiTeshuva = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isAseresYemeiTeshuva()`
+  ///
+  /// Returns true if the current day is _Aseres Yemei Teshuva_.
+  ///@return if the current day is _Aseres Yemei Teshuva_
+  bool isAseresYemeiTeshuva() {
+    return _isAseresYemeiTeshuva(
+            reference.pointer, _id_isAseresYemeiTeshuva as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isPesach = _class.instanceMethodId(
+    r'isPesach',
+    r'()Z',
+  );
+
+  static final _isPesach = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isPesach()`
+  ///
+  /// Returns true if the current day is _Pesach_ (either  the _Yom Tov_ of _Pesach_ or_Chol Hamoed Pesach_).
+  ///@return true if the current day is _Pesach_ (either  the _Yom Tov_ of _Pesach_ or_Chol Hamoed Pesach_).
+  ///@see \#isYomTov()
+  ///@see \#isCholHamoedPesach()
+  ///@see \#PESACH
+  ///@see \#CHOL_HAMOED_PESACH
+  bool isPesach() {
+    return _isPesach(reference.pointer, _id_isPesach as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isCholHamoedPesach = _class.instanceMethodId(
+    r'isCholHamoedPesach',
+    r'()Z',
+  );
+
+  static final _isCholHamoedPesach = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isCholHamoedPesach()`
+  ///
+  /// Returns true if the current day is _Chol Hamoed_ of _Pesach_.
+  ///@return true if the current day is _Chol Hamoed_ of _Pesach_
+  ///@see \#isYomTov()
+  ///@see \#isPesach()
+  ///@see \#CHOL_HAMOED_PESACH
+  bool isCholHamoedPesach() {
+    return _isCholHamoedPesach(
+            reference.pointer, _id_isCholHamoedPesach as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isShavuos = _class.instanceMethodId(
+    r'isShavuos',
+    r'()Z',
+  );
+
+  static final _isShavuos = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isShavuos()`
+  ///
+  /// Returns true if the current day is _Shavuos_.
+  ///@return true if the current day is _Shavuos_.
+  ///@see \#isYomTov()
+  ///@see \#SHAVUOS
+  bool isShavuos() {
+    return _isShavuos(reference.pointer, _id_isShavuos as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isRoshHashana = _class.instanceMethodId(
+    r'isRoshHashana',
+    r'()Z',
+  );
+
+  static final _isRoshHashana = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isRoshHashana()`
+  ///
+  /// Returns true if the current day is _Rosh Hashana_.
+  ///@return true if the current day is _Rosh Hashana_.
+  ///@see \#isYomTov()
+  ///@see \#ROSH_HASHANA
+  bool isRoshHashana() {
+    return _isRoshHashana(
+            reference.pointer, _id_isRoshHashana as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isYomKippur = _class.instanceMethodId(
+    r'isYomKippur',
+    r'()Z',
+  );
+
+  static final _isYomKippur = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isYomKippur()`
+  ///
+  /// Returns true if the current day is _Yom Kippur_.
+  ///@return true if the current day is _Yom Kippur_.
+  ///@see \#isYomTov()
+  ///@see \#YOM_KIPPUR
+  bool isYomKippur() {
+    return _isYomKippur(
+            reference.pointer, _id_isYomKippur as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isSuccos = _class.instanceMethodId(
+    r'isSuccos',
+    r'()Z',
+  );
+
+  static final _isSuccos = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isSuccos()`
+  ///
+  /// Returns true if the current day is _Succos_ (either  the _Yom Tov_ of _Succos_ or_Chol Hamoed Succos_).
+  /// It will return false for \#isShminiAtzeres() Shmini Atzeres and \#isSimchasTorah() Simchas Torah.
+  ///@return true if the current day is _Succos_ (either  the _Yom Tov_ of _Succos_ or_Chol Hamoed Succos_.
+  ///@see \#isYomTov()
+  ///@see \#isCholHamoedSuccos()
+  ///@see \#isHoshanaRabba()
+  ///@see \#SUCCOS
+  ///@see \#CHOL_HAMOED_SUCCOS
+  ///@see \#HOSHANA_RABBA
+  bool isSuccos() {
+    return _isSuccos(reference.pointer, _id_isSuccos as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isHoshanaRabba = _class.instanceMethodId(
+    r'isHoshanaRabba',
+    r'()Z',
+  );
+
+  static final _isHoshanaRabba = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isHoshanaRabba()`
+  ///
+  /// Returns true if the current day is _Hoshana Rabba_.
+  ///@return true if the current day is _Hoshana Rabba_.
+  ///@see \#isYomTov()
+  ///@see \#HOSHANA_RABBA
+  bool isHoshanaRabba() {
+    return _isHoshanaRabba(
+            reference.pointer, _id_isHoshanaRabba as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isShminiAtzeres = _class.instanceMethodId(
+    r'isShminiAtzeres',
+    r'()Z',
+  );
+
+  static final _isShminiAtzeres = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isShminiAtzeres()`
+  ///
+  /// Returns true if the current day is _Shmini Atzeres_.
+  ///@return true if the current day is _Shmini Atzeres_.
+  ///@see \#isYomTov()
+  ///@see \#SHEMINI_ATZERES
+  bool isShminiAtzeres() {
+    return _isShminiAtzeres(
+            reference.pointer, _id_isShminiAtzeres as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isSimchasTorah = _class.instanceMethodId(
+    r'isSimchasTorah',
+    r'()Z',
+  );
+
+  static final _isSimchasTorah = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isSimchasTorah()`
+  ///
+  /// Returns true if the current day is _Simchas Torah_. This will always return false if \#getInIsrael() in Israel
+  ///@return true if the current day is _Shmini Atzeres_.
+  ///@see \#isYomTov()
+  ///@see \#SIMCHAS_TORAH
+  bool isSimchasTorah() {
+    return _isSimchasTorah(
+            reference.pointer, _id_isSimchasTorah as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isCholHamoedSuccos = _class.instanceMethodId(
+    r'isCholHamoedSuccos',
+    r'()Z',
+  );
+
+  static final _isCholHamoedSuccos = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isCholHamoedSuccos()`
+  ///
+  /// Returns true if the current day is _Chol Hamoed_ of _Succos_.
+  ///@return true if the current day is _Chol Hamoed_ of _Succos_
+  ///@see \#isYomTov()
+  ///@see \#CHOL_HAMOED_SUCCOS
+  bool isCholHamoedSuccos() {
+    return _isCholHamoedSuccos(
+            reference.pointer, _id_isCholHamoedSuccos as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isCholHamoed = _class.instanceMethodId(
+    r'isCholHamoed',
+    r'()Z',
+  );
+
+  static final _isCholHamoed = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isCholHamoed()`
+  ///
+  /// Returns true if the current day is _Chol Hamoed_ of _Pesach_ or _Succos_.
+  ///@return true if the current day is _Chol Hamoed_ of _Pesach_ or _Succos_
+  ///@see \#isYomTov()
+  ///@see \#CHOL_HAMOED_PESACH
+  ///@see \#CHOL_HAMOED_SUCCOS
+  bool isCholHamoed() {
+    return _isCholHamoed(
+            reference.pointer, _id_isCholHamoed as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isErevYomTov = _class.instanceMethodId(
+    r'isErevYomTov',
+    r'()Z',
+  );
+
+  static final _isErevYomTov = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isErevYomTov()`
+  ///
+  /// Returns true if the current day is _Erev Yom Tov_. The method returns true for _Erev_ - _Pesach_
+  /// (first and last days), _Shavuos_, _Rosh Hashana_, _Yom Kippur_, _Succos_ and _Hoshana
+  /// Rabba_.
+  ///@return true if the current day is _Erev_ - _Pesach_, _Shavuos_, _Rosh Hashana_, _Yom
+  /// Kippur_, _Succos_ and _Hoshana Rabba_.
+  ///@see \#isYomTov()
+  ///@see \#isErevYomTovSheni()
+  bool isErevYomTov() {
+    return _isErevYomTov(
+            reference.pointer, _id_isErevYomTov as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isErevRoshChodesh = _class.instanceMethodId(
+    r'isErevRoshChodesh',
+    r'()Z',
+  );
+
+  static final _isErevRoshChodesh = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isErevRoshChodesh()`
+  ///
+  /// Returns true if the current day is _Erev Rosh Chodesh_. Returns false for _Erev Rosh Hashana_.
+  ///@return true if the current day is _Erev Rosh Chodesh_. Returns false for _Erev Rosh Hashana_.
+  ///@see \#isRoshChodesh()
+  bool isErevRoshChodesh() {
+    return _isErevRoshChodesh(
+            reference.pointer, _id_isErevRoshChodesh as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isYomKippurKatan = _class.instanceMethodId(
+    r'isYomKippurKatan',
+    r'()Z',
+  );
+
+  static final _isYomKippurKatan = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isYomKippurKatan()`
+  ///
+  /// Returns true if the current day is _Yom Kippur Katan_. Returns false for _Erev Rosh Hashana_,
+  /// _Erev Rosh Chodesh Cheshvan_, _Teves_ and _Iyyar_. If _Erev Rosh Chodesh_ occurs
+  /// on a Friday or _Shabbos_, _Yom Kippur Katan_ is moved back to Thursday.
+  ///@return true if the current day is _Erev Rosh Chodesh_. Returns false for _Erev Rosh Hashana_.
+  ///@see \#isRoshChodesh()
+  bool isYomKippurKatan() {
+    return _isYomKippurKatan(
+            reference.pointer, _id_isYomKippurKatan as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isBeHaB = _class.instanceMethodId(
+    r'isBeHaB',
+    r'()Z',
+  );
+
+  static final _isBeHaB = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isBeHaB()`
+  ///
+  /// The Monday, Thursday and Monday after the first _Shabbos_ after \#isRoshChodesh() _Rosh Chodesh_
+  /// JewishDate\#CHESHVAN _Cheshvan_ and JewishDate\#IYAR _Iyar_ are <a href="https://outorah.org/p/41334/"> _BeHaB_</a> days. If the last Monday of Iyar's BeHaB coincides with \#PESACH_SHENI _Pesach Sheni_, the method currently considers it both _Pesach Sheni_ and _BeHaB_.
+  /// As seen in an Ohr Sameach  article on the subject <a href="https://ohr.edu/this_week/insights_into_halacha/9340">The
+  /// unknown Days: BeHaB Vs. Pesach Sheini?</a> there are some customs that delay the day to various points in the future.
+  ///@return true if the day is _BeHaB_.
+  bool isBeHaB() {
+    return _isBeHaB(reference.pointer, _id_isBeHaB as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isTaanis = _class.instanceMethodId(
+    r'isTaanis',
+    r'()Z',
+  );
+
+  static final _isTaanis = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isTaanis()`
+  ///
+  /// Return true if the day is a Taanis (fast day). Return true for _17 of Tammuz_, _Tisha B'Av_,
+  /// _Yom Kippur_, _Fast of Gedalyah_, _10 of Teves_ and the _Fast of Esther_.
+  ///@return true if today is a fast day
+  bool isTaanis() {
+    return _isTaanis(reference.pointer, _id_isTaanis as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isTaanisBechoros = _class.instanceMethodId(
+    r'isTaanisBechoros',
+    r'()Z',
+  );
+
+  static final _isTaanisBechoros = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isTaanisBechoros()`
+  ///
+  /// Return true if the day is _Taanis Bechoros_ (on _Erev Pesach_). It will return true for the 14th
+  /// of _Nissan_ if it is not on _Shabbos_, or if the 12th of _Nissan_ occurs on a Thursday.
+  ///@return true if today is _Taanis Bechoros_.
+  bool isTaanisBechoros() {
+    return _isTaanisBechoros(
+            reference.pointer, _id_isTaanisBechoros as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_getDayOfChanukah = _class.instanceMethodId(
+    r'getDayOfChanukah',
+    r'()I',
+  );
+
+  static final _getDayOfChanukah = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getDayOfChanukah()`
+  ///
+  /// Returns the day of _Chanukah_ or -1 if it is not _Chanukah_.
+  ///@return the day of _Chanukah_ or -1 if it is not _Chanukah_.
+  ///@see \#isChanukah()
+  int getDayOfChanukah() {
+    return _getDayOfChanukah(
+            reference.pointer, _id_getDayOfChanukah as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_isChanukah = _class.instanceMethodId(
+    r'isChanukah',
+    r'()Z',
+  );
+
+  static final _isChanukah = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isChanukah()`
+  ///
+  /// Returns true if the current day is one of the 8 days of _Chanukah_.
+  ///@return if the current day is one of the 8 days of _Chanukah_.
+  ///@see \#getDayOfChanukah()
+  bool isChanukah() {
+    return _isChanukah(reference.pointer, _id_isChanukah as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isPurim = _class.instanceMethodId(
+    r'isPurim',
+    r'()Z',
+  );
+
+  static final _isPurim = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isPurim()`
+  ///
+  /// Returns if the day is Purim (<a href="https://en.wikipedia.org/wiki/Purim\#Shushan_Purim">Shushan Purim</a>
+  /// in a mukaf choma and regular Purim in a non-mukaf choma).
+  ///@return if the day is Purim (Shushan Purim in a mukaf choma and regular Purim in a non-mukaf choma)
+  ///@see \#getIsMukafChoma()
+  ///@see \#setIsMukafChoma(boolean)
+  bool isPurim() {
+    return _isPurim(reference.pointer, _id_isPurim as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isRoshChodesh = _class.instanceMethodId(
+    r'isRoshChodesh',
+    r'()Z',
+  );
+
+  static final _isRoshChodesh = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isRoshChodesh()`
+  ///
+  /// Returns if the day is Rosh Chodesh. Rosh Hashana will return false
+  ///@return true if it is Rosh Chodesh. Rosh Hashana will return false
+  bool isRoshChodesh() {
+    return _isRoshChodesh(
+            reference.pointer, _id_isRoshChodesh as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isMacharChodesh = _class.instanceMethodId(
+    r'isMacharChodesh',
+    r'()Z',
+  );
+
+  static final _isMacharChodesh = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isMacharChodesh()`
+  ///
+  /// Returns if the day is _Shabbos_ and Sunday is _Rosh Chodesh_.
+  ///@return true if it is _Shabbos_ and Sunday is _Rosh Chodesh_.
+  ///@todo There is more to tweak in this method (it does not cover all cases and opinions), and it may be removed.
+  bool isMacharChodesh() {
+    return _isMacharChodesh(
+            reference.pointer, _id_isMacharChodesh as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isShabbosMevorchim = _class.instanceMethodId(
+    r'isShabbosMevorchim',
+    r'()Z',
+  );
+
+  static final _isShabbosMevorchim = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isShabbosMevorchim()`
+  ///
+  /// Returns if the day is _Shabbos Mevorchim_.
+  ///@return true if it is _Shabbos Mevorchim_.
+  bool isShabbosMevorchim() {
+    return _isShabbosMevorchim(
+            reference.pointer, _id_isShabbosMevorchim as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_getDayOfOmer = _class.instanceMethodId(
+    r'getDayOfOmer',
+    r'()I',
+  );
+
+  static final _getDayOfOmer = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getDayOfOmer()`
+  ///
+  /// Returns the int value of the _Omer_ day or -1 if the day is not in the _Omer_.
+  ///@return The _Omer_ count as an int or -1 if it is not a day of the _Omer_.
+  int getDayOfOmer() {
+    return _getDayOfOmer(
+            reference.pointer, _id_getDayOfOmer as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_isTishaBav = _class.instanceMethodId(
+    r'isTishaBav',
+    r'()Z',
+  );
+
+  static final _isTishaBav = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isTishaBav()`
+  ///
+  /// Returns if the day is Tisha Be'Av (the 9th of Av).
+  ///@return if the day is Tisha Be'Av (the 9th of Av).
+  bool isTishaBav() {
+    return _isTishaBav(reference.pointer, _id_isTishaBav as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_getMoladAsInstant = _class.instanceMethodId(
+    r'getMoladAsInstant',
+    r'()Ljava/time/Instant;',
+  );
+
+  static final _getMoladAsInstant = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.time.Instant getMoladAsInstant()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the _molad_ in Standard Time in Yerushalayim as a Date. The traditional calculation uses local time.
+  /// This method subtracts 20.94 minutes (20 minutes and 56.496 seconds) from the local time (of _Har Habayis_
+  /// with a longitude of 35.2354&deg; is 5.2354&deg; away from the %15 timezone longitude) to get to standard time. This
+  /// method intentionally uses standard time and not daylight savings time. Java will implicitly format the time to the
+  /// default (or set) Timezone.
+  ///@return the Date representing the moment of the _molad_ in Yerushalayim standard time (GMT + 2)
+  Instant? getMoladAsInstant() {
+    return _getMoladAsInstant(
+            reference.pointer, _id_getMoladAsInstant as jni$_.JMethodIDPtr)
+        .object<Instant?>(const $Instant$NullableType$());
+  }
+
+  static final _id_getTchilasZmanKidushLevana3Days = _class.instanceMethodId(
+    r'getTchilasZmanKidushLevana3Days',
+    r'()Ljava/time/Instant;',
+  );
+
+  static final _getTchilasZmanKidushLevana3Days =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallObjectMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `public java.time.Instant getTchilasZmanKidushLevana3Days()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the earliest time of _Kiddush Levana_ calculated as 3 days after the molad. This method returns the time
+  /// even if it is during the day when _Kiddush Levana_ can't be said. Callers of this method should consider
+  /// displaying the next _tzais_ if the _zman_ is between _alos_ and _tzais_.
+  ///@return the Date representing the moment 3 days after the molad.
+  ///@see com.kosherjava.zmanim.ComprehensiveZmanimCalendar\#getTchilasZmanKidushLevana3Days()
+  ///@see com.kosherjava.zmanim.ComprehensiveZmanimCalendar\#getTchilasZmanKidushLevana3Days(Instant, Instant)
+  Instant? getTchilasZmanKidushLevana3Days() {
+    return _getTchilasZmanKidushLevana3Days(reference.pointer,
+            _id_getTchilasZmanKidushLevana3Days as jni$_.JMethodIDPtr)
+        .object<Instant?>(const $Instant$NullableType$());
+  }
+
+  static final _id_getTchilasZmanKidushLevana7Days = _class.instanceMethodId(
+    r'getTchilasZmanKidushLevana7Days',
+    r'()Ljava/time/Instant;',
+  );
+
+  static final _getTchilasZmanKidushLevana7Days =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallObjectMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `public java.time.Instant getTchilasZmanKidushLevana7Days()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the earliest time of _Kiddush Levana_ calculated as 7 days after the _molad_ as mentioned
+  /// by the <a href="http://en.wikipedia.org/wiki/Yosef_Karo">Mechaber</a>. See the <a href="http://en.wikipedia.org/wiki/Yoel_Sirkis">Bach's</a> opinion on this time. This method returns the time
+  /// even if it is during the day when _Kiddush Levana_ can't be said. Callers of this method should consider
+  /// displaying the next _tzais_ if the _zman_ is between _alos_ and _tzais_.
+  ///@return the Date representing the moment 7 days after the molad.
+  ///@see com.kosherjava.zmanim.ComprehensiveZmanimCalendar\#getTchilasZmanKidushLevana7Days()
+  ///@see com.kosherjava.zmanim.ComprehensiveZmanimCalendar\#getTchilasZmanKidushLevana7Days(Instant, Instant)
+  Instant? getTchilasZmanKidushLevana7Days() {
+    return _getTchilasZmanKidushLevana7Days(reference.pointer,
+            _id_getTchilasZmanKidushLevana7Days as jni$_.JMethodIDPtr)
+        .object<Instant?>(const $Instant$NullableType$());
+  }
+
+  static final _id_getSofZmanKidushLevanaBetweenMoldos =
+      _class.instanceMethodId(
+    r'getSofZmanKidushLevanaBetweenMoldos',
+    r'()Ljava/time/Instant;',
+  );
+
+  static final _getSofZmanKidushLevanaBetweenMoldos =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallObjectMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `public java.time.Instant getSofZmanKidushLevanaBetweenMoldos()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the latest time of Kiddush Levana according to the <a href="http://en.wikipedia.org/wiki/Yaakov_ben_Moshe_Levi_Moelin">Maharil's</a> opinion that it is calculated as
+  /// halfway between _molad_ and _molad_. This adds half the 29 days, 12 hours and 793 _chalakim_
+  /// time between _molad_ and _molad_ (14 days, 18 hours, 22 minutes and 666 milliseconds) to the month's
+  /// _molad_. This method returns the time even if it is during the day when _Kiddush Levana_ can't be
+  /// recited. Callers of this method should consider displaying _alos_ before this time if the _zman_ is
+  /// between _alos_ and _tzais_.
+  ///@return the Date representing the moment halfway between _molad_ and _molad_.
+  ///@see \#getSofZmanKidushLevana15Days()
+  ///@see com.kosherjava.zmanim.ComprehensiveZmanimCalendar\#getSofZmanKidushLevanaBetweenMoldos()
+  ///@see com.kosherjava.zmanim.ComprehensiveZmanimCalendar\#getSofZmanKidushLevanaBetweenMoldos(Instant, Instant)
+  Instant? getSofZmanKidushLevanaBetweenMoldos() {
+    return _getSofZmanKidushLevanaBetweenMoldos(reference.pointer,
+            _id_getSofZmanKidushLevanaBetweenMoldos as jni$_.JMethodIDPtr)
+        .object<Instant?>(const $Instant$NullableType$());
+  }
+
+  static final _id_getSofZmanKidushLevana15Days = _class.instanceMethodId(
+    r'getSofZmanKidushLevana15Days',
+    r'()Ljava/time/Instant;',
+  );
+
+  static final _getSofZmanKidushLevana15Days =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallObjectMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `public java.time.Instant getSofZmanKidushLevana15Days()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the latest time of _Kiddush Levana_ calculated as 15 days after the _molad._ This is the
+  /// opinion brought down in the Shulchan Aruch (Orach Chaim 426). It should be noted that some opinions hold that
+  /// the <a href="http://en.wikipedia.org/wiki/Moses_Isserles">Rema</a> who brings down the <a href="http://en.wikipedia.org/wiki/Yaakov_ben_Moshe_Levi_Moelin">Maharil's</a> opinion of calculating it as
+  /// \#getSofZmanKidushLevanaBetweenMoldos() half way between _molad_ and _molad_ is of the
+  /// opinion of the Mechaber as well. Also see the Aruch Hashulchan. For additional details on the subject, See Rabbi
+  /// Dovid Heber's very detailed writeup in Siman Daled (chapter 4) of <a href="http://www.worldcat.org/oclc/461326125">Shaarei Zmanim</a>. This method returns the time even if it is during
+  /// the day when _Kiddush Levana_ can't be said. Callers of this method should consider displaying _alos_
+  /// before this time if the _zman_ is between _alos_ and _tzais_.
+  ///@return the Date representing the moment 15 days after the _molad_.
+  ///@see \#getSofZmanKidushLevanaBetweenMoldos()
+  ///@see com.kosherjava.zmanim.ComprehensiveZmanimCalendar\#getSofZmanKidushLevana15Days()
+  ///@see com.kosherjava.zmanim.ComprehensiveZmanimCalendar\#getSofZmanKidushLevana15Days(Instant, Instant)
+  Instant? getSofZmanKidushLevana15Days() {
+    return _getSofZmanKidushLevana15Days(reference.pointer,
+            _id_getSofZmanKidushLevana15Days as jni$_.JMethodIDPtr)
+        .object<Instant?>(const $Instant$NullableType$());
+  }
+
+  static final _id_getDafYomiBavli = _class.instanceMethodId(
+    r'getDafYomiBavli',
+    r'()Lcom/kosherjava/zmanim/hebrewcalendar/Daf;',
+  );
+
+  static final _getDafYomiBavli = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public com.kosherjava.zmanim.hebrewcalendar.Daf getDafYomiBavli()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the _Daf Yomi (Bavli)_ for the date that the calendar is set to. See the
+  /// HebrewDateFormatter\#formatDafYomiBavli(Daf) for the ability to format the _daf_ in
+  /// Hebrew or transliterated _masechta_ names.
+  ///@return the daf as a Daf
+  Daf? getDafYomiBavli() {
+    return _getDafYomiBavli(
+            reference.pointer, _id_getDafYomiBavli as jni$_.JMethodIDPtr)
+        .object<Daf?>(const $Daf$NullableType$());
+  }
+
+  static final _id_getDafYomiYerushalmi = _class.instanceMethodId(
+    r'getDafYomiYerushalmi',
+    r'()Lcom/kosherjava/zmanim/hebrewcalendar/Daf;',
+  );
+
+  static final _getDafYomiYerushalmi = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public com.kosherjava.zmanim.hebrewcalendar.Daf getDafYomiYerushalmi()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the _Daf Yomi (Yerushalmi)_ for the date that the calendar is set to. See the
+  /// HebrewDateFormatter\#formatDafYomiYerushalmi(Daf) for the ability to format the _daf_
+  /// in Hebrew or transliterated _masechta_ names.
+  ///@return the daf as a Daf
+  Daf? getDafYomiYerushalmi() {
+    return _getDafYomiYerushalmi(
+            reference.pointer, _id_getDafYomiYerushalmi as jni$_.JMethodIDPtr)
+        .object<Daf?>(const $Daf$NullableType$());
+  }
+
+  static final _id_getTekufasTishreiElapsedDays = _class.instanceMethodId(
+    r'getTekufasTishreiElapsedDays',
+    r'()I',
+  );
+
+  static final _getTekufasTishreiElapsedDays =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallIntMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `public int getTekufasTishreiElapsedDays()`
+  ///
+  /// Returns the elapsed days since _Tekufas Tishrei_. This uses _Tekufas Shmuel_ (identical to the <a href="https://en.wikipedia.org/wiki/Julian_year_(astronomy)">Julian Year</a> with a solar year length of 365.25 days).
+  /// The notation used below is D = days, H = hours and C = chalakim. _<a href="https://en.wikipedia.org/wiki/Molad">Molad</a> BaHaRad_ was 2D,5H,204C or 5H,204C from the start of _Rosh Hashana_ year 1. For _molad
+  /// Nissan_ add 177D, 4H and 438C (6 * 29D, 12H and 793C), or 177D,9H,642C after _Rosh Hashana_ year 1.
+  /// _Tekufas Nissan_ was 7D, 9H and 642C before _molad Nissan_ according to the Rambam, or 170D, 0H and
+  /// 0C after _Rosh Hashana_ year 1. _Tekufas Tishrei_ was 182D and 3H (365.25 / 2) before _tekufas
+  /// Nissan_, or 12D and 15H before _Rosh Hashana_ of year 1. Outside of Israel we start reciting _Tal
+  /// Umatar_ in _Birkas Hashanim_ from 60 days after _tekufas Tishrei_. The 60 days include the day of
+  /// the _tekufah_ and the day we start reciting _Tal Umatar_. 60 days from the tekufah == 47D and 9H
+  /// from _Rosh Hashana_ year 1.
+  ///@return the number of elapsed days since _tekufas Tishrei_.
+  ///@see com.kosherjava.zmanim.hebrewcalendar.TefilaRules\#isVeseinTalUmatarStartDate(JewishCalendar)
+  ///@see com.kosherjava.zmanim.hebrewcalendar.TefilaRules\#isVeseinTalUmatarStartingTonight(JewishCalendar)
+  ///@see com.kosherjava.zmanim.hebrewcalendar.TefilaRules\#isYaalehVeyavoRecited(JewishCalendar)
+  int getTekufasTishreiElapsedDays() {
+    return _getTekufasTishreiElapsedDays(reference.pointer,
+            _id_getTekufasTishreiElapsedDays as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_isIsruChag = _class.instanceMethodId(
+    r'isIsruChag',
+    r'()Z',
+  );
+
+  static final _isIsruChag = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isIsruChag()`
+  ///
+  /// Returns true if the current day is _Isru Chag_. The method returns true for the day following _Pesach_
+  /// _Shavuos_ and _Succos_. It utilizes {@see \#getInIsrael()} to return the proper date.
+  ///@return true if the current day is _Isru Chag_. The method returns true for the day following _Pesach_
+  /// _Shavuos_ and _Succos_. It utilizes {@see \#getInIsrael()} to return the proper date.
+  bool isIsruChag() {
+    return _isIsruChag(reference.pointer, _id_isIsruChag as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_equals = _class.instanceMethodId(
+    r'equals',
+    r'(Ljava/lang/Object;)Z',
+  );
+
+  static final _equals = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public boolean equals(java.lang.Object object)`
+  ///
+  /// Indicates whether some other object is "equal to" this one.
+  ///@see Object\#equals(Object)
+  bool equals(
+    jni$_.JObject? object,
+  ) {
+    final _$object = object?.reference ?? jni$_.jNullReference;
+    return _equals(reference.pointer, _id_equals as jni$_.JMethodIDPtr,
+            _$object.pointer)
+        .boolean;
+  }
+
+  static final _id_hashCode1 = _class.instanceMethodId(
+    r'hashCode',
+    r'()I',
+  );
+
+  static final _hashCode1 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int hashCode()`
+  ///
+  /// Overrides Object\#hashCode().
+  ///@see Object\#hashCode()
+  int hashCode1() {
+    return _hashCode1(reference.pointer, _id_hashCode1 as jni$_.JMethodIDPtr)
+        .integer;
+  }
+}
+
+final class $JewishCalendar$NullableType$ extends jni$_.JType<JewishCalendar?> {
+  @jni$_.internal
+  const $JewishCalendar$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature =>
+      r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar;';
+
+  @jni$_.internal
+  @core$_.override
+  JewishCalendar? fromReference(jni$_.JReference reference) => reference.isNull
+      ? null
+      : JewishCalendar.fromReference(
+          reference,
+        );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const $JewishDate$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<JewishCalendar?> get nullableType => this;
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 2;
+
+  @core$_.override
+  int get hashCode => ($JewishCalendar$NullableType$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($JewishCalendar$NullableType$) &&
+        other is $JewishCalendar$NullableType$;
+  }
+}
+
+final class $JewishCalendar$Type$ extends jni$_.JType<JewishCalendar> {
+  @jni$_.internal
+  const $JewishCalendar$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature =>
+      r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar;';
+
+  @jni$_.internal
+  @core$_.override
+  JewishCalendar fromReference(jni$_.JReference reference) =>
+      JewishCalendar.fromReference(
+        reference,
+      );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const $JewishDate$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<JewishCalendar?> get nullableType =>
+      const $JewishCalendar$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 2;
+
+  @core$_.override
+  int get hashCode => ($JewishCalendar$Type$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($JewishCalendar$Type$) &&
+        other is $JewishCalendar$Type$;
+  }
+}
+
+/// from: `com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha`
+///
+/// List of _parshiyos_ or special _Shabasos_. \#NONE indicates a week without a _parsha_, while the enum for
+/// the _parsha_ of \#VZOS_HABERACHA exists for consistency, but is not currently used. The special _Shabasos_ of
+/// Shekalim, Zachor, Para, Hachodesh, as well as Shabbos Shuva, Shira, Hagadol, Chazon and Nachamu are also represented in this collection
+/// of _parshiyos_.
+///@see \#getSpecialShabbos()
+///@see \#getParshah()
+class JewishCalendar$Parsha extends jni$_.JObject {
+  @jni$_.internal
+  @core$_.override
+  final jni$_.JType<JewishCalendar$Parsha> $type;
+
+  @jni$_.internal
+  JewishCalendar$Parsha.fromReference(
+    jni$_.JReference reference,
+  )   : $type = type,
+        super.fromReference(reference);
+
+  static final _class = jni$_.JClass.forName(
+      r'com/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<JewishCalendar$Parsha?> nullableType =
+      $JewishCalendar$Parsha$NullableType$();
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<JewishCalendar$Parsha> type =
+      $JewishCalendar$Parsha$Type$();
+  static final _id_NONE = _class.staticFieldId(
+    r'NONE',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha NONE`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// NONE A week without any _parsha_ such as _Shabbos Chol Hamoed_
+  static JewishCalendar$Parsha get NONE =>
+      _id_NONE.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_BERESHIS = _class.staticFieldId(
+    r'BERESHIS',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha BERESHIS`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// BERESHIS
+  static JewishCalendar$Parsha get BERESHIS =>
+      _id_BERESHIS.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_NOACH = _class.staticFieldId(
+    r'NOACH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha NOACH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// NOACH
+  static JewishCalendar$Parsha get NOACH =>
+      _id_NOACH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_LECH_LECHA = _class.staticFieldId(
+    r'LECH_LECHA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha LECH_LECHA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// LECH_LECHA
+  static JewishCalendar$Parsha get LECH_LECHA =>
+      _id_LECH_LECHA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYERA = _class.staticFieldId(
+    r'VAYERA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYERA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAYERA
+  static JewishCalendar$Parsha get VAYERA =>
+      _id_VAYERA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_CHAYEI_SARA = _class.staticFieldId(
+    r'CHAYEI_SARA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha CHAYEI_SARA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// CHAYEI_SARA
+  static JewishCalendar$Parsha get CHAYEI_SARA =>
+      _id_CHAYEI_SARA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_TOLDOS = _class.staticFieldId(
+    r'TOLDOS',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha TOLDOS`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// TOLDOS
+  static JewishCalendar$Parsha get TOLDOS =>
+      _id_TOLDOS.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYETZEI = _class.staticFieldId(
+    r'VAYETZEI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYETZEI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAYETZEI
+  static JewishCalendar$Parsha get VAYETZEI =>
+      _id_VAYETZEI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYISHLACH = _class.staticFieldId(
+    r'VAYISHLACH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYISHLACH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAYISHLACH
+  static JewishCalendar$Parsha get VAYISHLACH =>
+      _id_VAYISHLACH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYESHEV = _class.staticFieldId(
+    r'VAYESHEV',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYESHEV`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAYESHEV
+  static JewishCalendar$Parsha get VAYESHEV =>
+      _id_VAYESHEV.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_MIKETZ = _class.staticFieldId(
+    r'MIKETZ',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha MIKETZ`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// MIKETZ
+  static JewishCalendar$Parsha get MIKETZ =>
+      _id_MIKETZ.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYIGASH = _class.staticFieldId(
+    r'VAYIGASH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYIGASH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAYIGASH
+  static JewishCalendar$Parsha get VAYIGASH =>
+      _id_VAYIGASH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYECHI = _class.staticFieldId(
+    r'VAYECHI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYECHI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAYECHI
+  static JewishCalendar$Parsha get VAYECHI =>
+      _id_VAYECHI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_SHEMOS = _class.staticFieldId(
+    r'SHEMOS',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha SHEMOS`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// SHEMOS
+  static JewishCalendar$Parsha get SHEMOS =>
+      _id_SHEMOS.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAERA = _class.staticFieldId(
+    r'VAERA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAERA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAERA
+  static JewishCalendar$Parsha get VAERA =>
+      _id_VAERA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_BO = _class.staticFieldId(
+    r'BO',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha BO`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// BO
+  static JewishCalendar$Parsha get BO =>
+      _id_BO.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_BESHALACH = _class.staticFieldId(
+    r'BESHALACH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha BESHALACH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// BESHALACH
+  static JewishCalendar$Parsha get BESHALACH =>
+      _id_BESHALACH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_YISRO = _class.staticFieldId(
+    r'YISRO',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha YISRO`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// YISRO
+  static JewishCalendar$Parsha get YISRO =>
+      _id_YISRO.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_MISHPATIM = _class.staticFieldId(
+    r'MISHPATIM',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha MISHPATIM`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// MISHPATIM
+  static JewishCalendar$Parsha get MISHPATIM =>
+      _id_MISHPATIM.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_TERUMAH = _class.staticFieldId(
+    r'TERUMAH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha TERUMAH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// TERUMAH
+  static JewishCalendar$Parsha get TERUMAH =>
+      _id_TERUMAH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_TETZAVEH = _class.staticFieldId(
+    r'TETZAVEH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha TETZAVEH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// TETZAVEH
+  static JewishCalendar$Parsha get TETZAVEH =>
+      _id_TETZAVEH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_KI_SISA = _class.staticFieldId(
+    r'KI_SISA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha KI_SISA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// KI_SISA
+  static JewishCalendar$Parsha get KI_SISA =>
+      _id_KI_SISA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYAKHEL = _class.staticFieldId(
+    r'VAYAKHEL',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYAKHEL`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAYAKHEL
+  static JewishCalendar$Parsha get VAYAKHEL =>
+      _id_VAYAKHEL.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_PEKUDEI = _class.staticFieldId(
+    r'PEKUDEI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha PEKUDEI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// PEKUDEI
+  static JewishCalendar$Parsha get PEKUDEI =>
+      _id_PEKUDEI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYIKRA = _class.staticFieldId(
+    r'VAYIKRA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYIKRA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAYIKRA
+  static JewishCalendar$Parsha get VAYIKRA =>
+      _id_VAYIKRA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_TZAV = _class.staticFieldId(
+    r'TZAV',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha TZAV`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// TZAV
+  static JewishCalendar$Parsha get TZAV =>
+      _id_TZAV.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_SHMINI = _class.staticFieldId(
+    r'SHMINI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha SHMINI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// SHMINI
+  static JewishCalendar$Parsha get SHMINI =>
+      _id_SHMINI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_TAZRIA = _class.staticFieldId(
+    r'TAZRIA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha TAZRIA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// TAZRIA
+  static JewishCalendar$Parsha get TAZRIA =>
+      _id_TAZRIA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_METZORA = _class.staticFieldId(
+    r'METZORA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha METZORA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// METZORA
+  static JewishCalendar$Parsha get METZORA =>
+      _id_METZORA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_ACHREI_MOS = _class.staticFieldId(
+    r'ACHREI_MOS',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha ACHREI_MOS`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// ACHREI_MOS
+  static JewishCalendar$Parsha get ACHREI_MOS =>
+      _id_ACHREI_MOS.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_KEDOSHIM = _class.staticFieldId(
+    r'KEDOSHIM',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha KEDOSHIM`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// KEDOSHIM
+  static JewishCalendar$Parsha get KEDOSHIM =>
+      _id_KEDOSHIM.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_EMOR = _class.staticFieldId(
+    r'EMOR',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha EMOR`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// EMOR
+  static JewishCalendar$Parsha get EMOR =>
+      _id_EMOR.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_BEHAR = _class.staticFieldId(
+    r'BEHAR',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha BEHAR`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// BEHAR
+  static JewishCalendar$Parsha get BEHAR =>
+      _id_BEHAR.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_BECHUKOSAI = _class.staticFieldId(
+    r'BECHUKOSAI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha BECHUKOSAI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// BECHUKOSAI
+  static JewishCalendar$Parsha get BECHUKOSAI =>
+      _id_BECHUKOSAI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_BAMIDBAR = _class.staticFieldId(
+    r'BAMIDBAR',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha BAMIDBAR`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// BAMIDBAR
+  static JewishCalendar$Parsha get BAMIDBAR =>
+      _id_BAMIDBAR.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_NASSO = _class.staticFieldId(
+    r'NASSO',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha NASSO`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// NASSO
+  static JewishCalendar$Parsha get NASSO =>
+      _id_NASSO.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_BEHAALOSCHA = _class.staticFieldId(
+    r'BEHAALOSCHA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha BEHAALOSCHA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// BEHAALOSCHA
+  static JewishCalendar$Parsha get BEHAALOSCHA =>
+      _id_BEHAALOSCHA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_SHLACH = _class.staticFieldId(
+    r'SHLACH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha SHLACH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// SHLACH
+  static JewishCalendar$Parsha get SHLACH =>
+      _id_SHLACH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_KORACH = _class.staticFieldId(
+    r'KORACH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha KORACH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// KORACH
+  static JewishCalendar$Parsha get KORACH =>
+      _id_KORACH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_CHUKAS = _class.staticFieldId(
+    r'CHUKAS',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha CHUKAS`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// CHUKAS
+  static JewishCalendar$Parsha get CHUKAS =>
+      _id_CHUKAS.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_BALAK = _class.staticFieldId(
+    r'BALAK',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha BALAK`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// BALAK
+  static JewishCalendar$Parsha get BALAK =>
+      _id_BALAK.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_PINCHAS = _class.staticFieldId(
+    r'PINCHAS',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha PINCHAS`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// PINCHAS
+  static JewishCalendar$Parsha get PINCHAS =>
+      _id_PINCHAS.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_MATOS = _class.staticFieldId(
+    r'MATOS',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha MATOS`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// MATOS
+  static JewishCalendar$Parsha get MATOS =>
+      _id_MATOS.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_MASEI = _class.staticFieldId(
+    r'MASEI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha MASEI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// MASEI
+  static JewishCalendar$Parsha get MASEI =>
+      _id_MASEI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_DEVARIM = _class.staticFieldId(
+    r'DEVARIM',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha DEVARIM`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// DEVARIM
+  static JewishCalendar$Parsha get DEVARIM =>
+      _id_DEVARIM.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAESCHANAN = _class.staticFieldId(
+    r'VAESCHANAN',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAESCHANAN`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAESCHANAN
+  static JewishCalendar$Parsha get VAESCHANAN =>
+      _id_VAESCHANAN.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_EIKEV = _class.staticFieldId(
+    r'EIKEV',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha EIKEV`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// EIKEV
+  static JewishCalendar$Parsha get EIKEV =>
+      _id_EIKEV.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_REEH = _class.staticFieldId(
+    r'REEH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha REEH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// REEH
+  static JewishCalendar$Parsha get REEH =>
+      _id_REEH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_SHOFTIM = _class.staticFieldId(
+    r'SHOFTIM',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha SHOFTIM`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// SHOFTIM
+  static JewishCalendar$Parsha get SHOFTIM =>
+      _id_SHOFTIM.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_KI_SEITZEI = _class.staticFieldId(
+    r'KI_SEITZEI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha KI_SEITZEI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// KI_SEITZEI
+  static JewishCalendar$Parsha get KI_SEITZEI =>
+      _id_KI_SEITZEI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_KI_SAVO = _class.staticFieldId(
+    r'KI_SAVO',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha KI_SAVO`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// KI_SAVO
+  static JewishCalendar$Parsha get KI_SAVO =>
+      _id_KI_SAVO.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_NITZAVIM = _class.staticFieldId(
+    r'NITZAVIM',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha NITZAVIM`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// NITZAVIM
+  static JewishCalendar$Parsha get NITZAVIM =>
+      _id_NITZAVIM.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYEILECH = _class.staticFieldId(
+    r'VAYEILECH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYEILECH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VAYEILECH
+  static JewishCalendar$Parsha get VAYEILECH =>
+      _id_VAYEILECH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_HAAZINU = _class.staticFieldId(
+    r'HAAZINU',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha HAAZINU`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// HAAZINU
+  static JewishCalendar$Parsha get HAAZINU =>
+      _id_HAAZINU.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VZOS_HABERACHA = _class.staticFieldId(
+    r'VZOS_HABERACHA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VZOS_HABERACHA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// VZOS_HABERACHA
+  static JewishCalendar$Parsha get VZOS_HABERACHA =>
+      _id_VZOS_HABERACHA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_VAYAKHEL_PEKUDEI = _class.staticFieldId(
+    r'VAYAKHEL_PEKUDEI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha VAYAKHEL_PEKUDEI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The double parsha of Vayakhel &amp; Peudei
+  static JewishCalendar$Parsha get VAYAKHEL_PEKUDEI =>
+      _id_VAYAKHEL_PEKUDEI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_TAZRIA_METZORA = _class.staticFieldId(
+    r'TAZRIA_METZORA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha TAZRIA_METZORA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The double _parsha_ of Tazria
+  /// &amp; Metzora
+  static JewishCalendar$Parsha get TAZRIA_METZORA =>
+      _id_TAZRIA_METZORA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_ACHREI_MOS_KEDOSHIM = _class.staticFieldId(
+    r'ACHREI_MOS_KEDOSHIM',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha ACHREI_MOS_KEDOSHIM`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The double _parsha_ of Achrei Mos &amp; Kedoshim
+  static JewishCalendar$Parsha get ACHREI_MOS_KEDOSHIM =>
+      _id_ACHREI_MOS_KEDOSHIM.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_BEHAR_BECHUKOSAI = _class.staticFieldId(
+    r'BEHAR_BECHUKOSAI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha BEHAR_BECHUKOSAI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The double _parsha_
+  /// of Behar &amp; Bechukosai
+  static JewishCalendar$Parsha get BEHAR_BECHUKOSAI =>
+      _id_BEHAR_BECHUKOSAI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_CHUKAS_BALAK = _class.staticFieldId(
+    r'CHUKAS_BALAK',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha CHUKAS_BALAK`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The double _parsha_ of Chukas &amp; Balak
+  static JewishCalendar$Parsha get CHUKAS_BALAK =>
+      _id_CHUKAS_BALAK.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_MATOS_MASEI = _class.staticFieldId(
+    r'MATOS_MASEI',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha MATOS_MASEI`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The double
+  /// _parsha_ of Matos &amp; Masei
+  static JewishCalendar$Parsha get MATOS_MASEI =>
+      _id_MATOS_MASEI.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_NITZAVIM_VAYEILECH = _class.staticFieldId(
+    r'NITZAVIM_VAYEILECH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha NITZAVIM_VAYEILECH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The double _parsha_ of Nitzavim &amp; Vayelech
+  static JewishCalendar$Parsha get NITZAVIM_VAYEILECH =>
+      _id_NITZAVIM_VAYEILECH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_SHKALIM = _class.staticFieldId(
+    r'SHKALIM',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha SHKALIM`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The special _parsha_ of Shekalim
+  static JewishCalendar$Parsha get SHKALIM =>
+      _id_SHKALIM.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_ZACHOR = _class.staticFieldId(
+    r'ZACHOR',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha ZACHOR`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The special _parsha_ of Zachor
+  static JewishCalendar$Parsha get ZACHOR =>
+      _id_ZACHOR.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_PARA = _class.staticFieldId(
+    r'PARA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha PARA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The special _parsha_ of
+  /// Para
+  static JewishCalendar$Parsha get PARA =>
+      _id_PARA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_HACHODESH = _class.staticFieldId(
+    r'HACHODESH',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha HACHODESH`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The special _parsha_ of Hachodesh
+  static JewishCalendar$Parsha get HACHODESH =>
+      _id_HACHODESH.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_SHUVA = _class.staticFieldId(
+    r'SHUVA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha SHUVA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// _Shabbos_ Shuva
+  static JewishCalendar$Parsha get SHUVA =>
+      _id_SHUVA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_SHIRA = _class.staticFieldId(
+    r'SHIRA',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha SHIRA`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// _Shabbos_ Shira
+  static JewishCalendar$Parsha get SHIRA =>
+      _id_SHIRA.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_HAGADOL = _class.staticFieldId(
+    r'HAGADOL',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha HAGADOL`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// _Shabbos_ Hagadol
+  static JewishCalendar$Parsha get HAGADOL =>
+      _id_HAGADOL.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_CHAZON = _class.staticFieldId(
+    r'CHAZON',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha CHAZON`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// _Shabbos_ Chazon
+  static JewishCalendar$Parsha get CHAZON =>
+      _id_CHAZON.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_NACHAMU = _class.staticFieldId(
+    r'NACHAMU',
+    r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  /// from: `static public final com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha NACHAMU`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// _Shabbos_ Nachamu
+  static JewishCalendar$Parsha get NACHAMU =>
+      _id_NACHAMU.get(_class, const $JewishCalendar$Parsha$Type$());
+
+  static final _id_values = _class.staticMethodId(
+    r'values',
+    r'()[Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  static final _values = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `static public com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha[] values()`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JArray<JewishCalendar$Parsha?>? values() {
+    return _values(_class.reference.pointer, _id_values as jni$_.JMethodIDPtr)
+        .object<jni$_.JArray<JewishCalendar$Parsha?>?>(
+            const jni$_.$JArray$NullableType$<JewishCalendar$Parsha?>(
+                $JewishCalendar$Parsha$NullableType$()));
+  }
+
+  static final _id_valueOf = _class.staticMethodId(
+    r'valueOf',
+    r'(Ljava/lang/String;)Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;',
+  );
+
+  static final _valueOf = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `static public com.kosherjava.zmanim.hebrewcalendar.JewishCalendar$Parsha valueOf(java.lang.String name)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static JewishCalendar$Parsha? valueOf(
+    jni$_.JString? name,
+  ) {
+    final _$name = name?.reference ?? jni$_.jNullReference;
+    return _valueOf(_class.reference.pointer, _id_valueOf as jni$_.JMethodIDPtr,
+            _$name.pointer)
+        .object<JewishCalendar$Parsha?>(
+            const $JewishCalendar$Parsha$NullableType$());
+  }
+}
+
+final class $JewishCalendar$Parsha$NullableType$
+    extends jni$_.JType<JewishCalendar$Parsha?> {
+  @jni$_.internal
+  const $JewishCalendar$Parsha$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature =>
+      r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;';
+
+  @jni$_.internal
+  @core$_.override
+  JewishCalendar$Parsha? fromReference(jni$_.JReference reference) =>
+      reference.isNull
+          ? null
+          : JewishCalendar$Parsha.fromReference(
+              reference,
+            );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const jni$_.$JObject$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<JewishCalendar$Parsha?> get nullableType => this;
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 1;
+
+  @core$_.override
+  int get hashCode => ($JewishCalendar$Parsha$NullableType$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($JewishCalendar$Parsha$NullableType$) &&
+        other is $JewishCalendar$Parsha$NullableType$;
+  }
+}
+
+final class $JewishCalendar$Parsha$Type$
+    extends jni$_.JType<JewishCalendar$Parsha> {
+  @jni$_.internal
+  const $JewishCalendar$Parsha$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature =>
+      r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha;';
+
+  @jni$_.internal
+  @core$_.override
+  JewishCalendar$Parsha fromReference(jni$_.JReference reference) =>
+      JewishCalendar$Parsha.fromReference(
+        reference,
+      );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const jni$_.$JObject$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<JewishCalendar$Parsha?> get nullableType =>
+      const $JewishCalendar$Parsha$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 1;
+
+  @core$_.override
+  int get hashCode => ($JewishCalendar$Parsha$Type$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($JewishCalendar$Parsha$Type$) &&
+        other is $JewishCalendar$Parsha$Type$;
+  }
+}
+
+/// from: `com.kosherjava.zmanim.hebrewcalendar.Daf`
+///
+/// An Object representing a _daf_ (page) in the <a href="https://en.wikipedia.org/wiki/Daf_Yomi">Daf Yomi</a> cycle.
+///@author &copy; Eliyahu Hershfeld 2011 - 2023
+class Daf extends jni$_.JObject {
+  @jni$_.internal
+  @core$_.override
+  final jni$_.JType<Daf> $type;
+
+  @jni$_.internal
+  Daf.fromReference(
+    jni$_.JReference reference,
+  )   : $type = type,
+        super.fromReference(reference);
+
+  static final _class =
+      jni$_.JClass.forName(r'com/kosherjava/zmanim/hebrewcalendar/Daf');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<Daf?> nullableType = $Daf$NullableType$();
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<Daf> type = $Daf$Type$();
+  static final _id_getMasechtaNumber = _class.instanceMethodId(
+    r'getMasechtaNumber',
+    r'()I',
+  );
+
+  static final _getMasechtaNumber = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getMasechtaNumber()`
+  ///
+  /// Gets the _masechta_ number of the currently set _Daf_. The sequence is: Berachos, Shabbos, Eruvin,
+  /// Pesachim, Shekalim, Yoma, Sukkah, Beitzah, Rosh Hashana, Taanis, Megillah, Moed Katan, Chagigah, Yevamos, Kesubos,
+  /// Nedarim, Nazir, Sotah, Gitin, Kiddushin, Bava Kamma, Bava Metzia, Bava Basra, Sanhedrin, Makkos, Shevuos, Avodah
+  /// Zarah, Horiyos, Zevachim, Menachos, Chullin, Bechoros, Arachin, Temurah, Kerisos, Meilah, Kinnim, Tamid, Midos and
+  /// Niddah.
+  ///@return the masechtaNumber.
+  ///@see \#setMasechtaNumber(int)
+  int getMasechtaNumber() {
+    return _getMasechtaNumber(
+            reference.pointer, _id_getMasechtaNumber as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_setMasechtaNumber = _class.instanceMethodId(
+    r'setMasechtaNumber',
+    r'(I)V',
+  );
+
+  static final _setMasechtaNumber = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setMasechtaNumber(int masechtaNumber)`
+  ///
+  /// Set the _masechta_ number in the order of the Daf Yomi. The sequence is: Berachos, Shabbos, Eruvin, Pesachim,
+  /// Shekalim, Yoma, Sukkah, Beitzah, Rosh Hashana, Taanis, Megillah, Moed Katan, Chagigah, Yevamos, Kesubos, Nedarim,
+  /// Nazir, Sotah, Gitin, Kiddushin, Bava Kamma, Bava Metzia, Bava Basra, Sanhedrin, Makkos, Shevuos, Avodah Zarah,
+  /// Horiyos, Zevachim, Menachos, Chullin, Bechoros, Arachin, Temurah, Kerisos, Meilah, Kinnim, Tamid, Midos and
+  /// Niddah.
+  ///@param masechtaNumber the _masechta_ number in the order of the Daf Yomi to set.
+  void setMasechtaNumber(
+    int masechtaNumber,
+  ) {
+    _setMasechtaNumber(reference.pointer,
+            _id_setMasechtaNumber as jni$_.JMethodIDPtr, masechtaNumber)
+        .check();
+  }
+
+  static final _id_new$ = _class.constructorId(
+    r'(II)V',
+  );
+
+  static final _new$ = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Int32, jni$_.Int32)>)>>(
+          'globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int)>();
+
+  /// from: `public void <init>(int masechtaNumber, int daf)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Constructor that creates a Daf setting the \#setMasechtaNumber(int) _masechta_ number and
+  /// \#setDaf(int) _daf_ number.
+  ///@param masechtaNumber the _masechta_ number in the order of the Daf Yomi to set as the current _masechta_.
+  ///@param daf the _daf_ (page) number to set.
+  factory Daf(
+    int masechtaNumber,
+    int daf,
+  ) {
+    return Daf.fromReference(_new$(_class.reference.pointer,
+            _id_new$ as jni$_.JMethodIDPtr, masechtaNumber, daf)
+        .reference);
+  }
+
+  static final _id_getDaf = _class.instanceMethodId(
+    r'getDaf',
+    r'()I',
+  );
+
+  static final _getDaf = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getDaf()`
+  ///
+  /// Returns the _daf_ (page) number of the Daf Yomi.
+  ///@return the _daf_ (page) number of the Daf Yomi.
+  int getDaf() {
+    return _getDaf(reference.pointer, _id_getDaf as jni$_.JMethodIDPtr).integer;
+  }
+
+  static final _id_setDaf = _class.instanceMethodId(
+    r'setDaf',
+    r'(I)V',
+  );
+
+  static final _setDaf = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setDaf(int daf)`
+  ///
+  /// Sets the _daf_ (page) number of the Daf Yomi.
+  ///@param daf the _daf_ (page) number.
+  void setDaf(
+    int daf,
+  ) {
+    _setDaf(reference.pointer, _id_setDaf as jni$_.JMethodIDPtr, daf).check();
+  }
+
+  static final _id_getMasechtaTransliterated = _class.instanceMethodId(
+    r'getMasechtaTransliterated',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _getMasechtaTransliterated = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.lang.String getMasechtaTransliterated()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the transliterated name of the _masechta_ (tractate) of the Daf Yomi. The list of _mashechtos_
+  /// is: Berachos, Shabbos, Eruvin, Pesachim, Shekalim, Yoma, Sukkah, Beitzah, Rosh Hashana, Taanis, Megillah, Moed Katan,
+  /// Chagigah, Yevamos, Kesubos, Nedarim, Nazir, Sotah, Gitin, Kiddushin, Bava Kamma, Bava Metzia, Bava Basra, Sanhedrin,
+  /// Makkos, Shevuos, Avodah Zarah, Horiyos, Zevachim, Menachos, Chullin, Bechoros, Arachin, Temurah, Kerisos, Meilah,
+  /// Kinnim, Tamid, Midos and Niddah.
+  ///@return the transliterated name of the _masechta_ (tractate) of the Daf Yomi such as Berachos.
+  ///@see \#setMasechtaTransliterated(String[])
+  jni$_.JString? getMasechtaTransliterated() {
+    return _getMasechtaTransliterated(reference.pointer,
+            _id_getMasechtaTransliterated as jni$_.JMethodIDPtr)
+        .object<jni$_.JString?>(const jni$_.$JString$NullableType$());
+  }
+
+  static final _id_setMasechtaTransliterated = _class.instanceMethodId(
+    r'setMasechtaTransliterated',
+    r'([Ljava/lang/String;)V',
+  );
+
+  static final _setMasechtaTransliterated = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JThrowablePtr Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public void setMasechtaTransliterated(java.lang.String[] masechtosBavliTransliterated)`
+  ///
+  /// Setter method to allow overriding of the default list of _masechtos_ transliterated into Latin chars.
+  /// The default values use Ashkenazi American English transliteration.
+  ///@param masechtosBavliTransliterated the list of transliterated Bavli _masechtos_ to set.
+  ///@see \#getMasechtaTransliterated()
+  void setMasechtaTransliterated(
+    jni$_.JArray<jni$_.JString?>? masechtosBavliTransliterated,
+  ) {
+    final _$masechtosBavliTransliterated =
+        masechtosBavliTransliterated?.reference ?? jni$_.jNullReference;
+    _setMasechtaTransliterated(
+            reference.pointer,
+            _id_setMasechtaTransliterated as jni$_.JMethodIDPtr,
+            _$masechtosBavliTransliterated.pointer)
+        .check();
+  }
+
+  static final _id_getMasechta = _class.instanceMethodId(
+    r'getMasechta',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _getMasechta = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.lang.String getMasechta()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the _masechta_ (tractate) of the Daf Yomi in Hebrew. The list is in the following format<br>
+  /// <code>["&\#x05D1;&\#x05E8;&\#x05DB;&\#x05D5;&\#x05EA;",
+  /// "&\#x05E9;&\#x05D1;&\#x05EA;", "&\#x05E2;&\#x05D9;&\#x05E8;&\#x05D5;&\#x05D1;&\#x05D9;&\#x05DF;",
+  /// "&\#x05E4;&\#x05E1;&\#x05D7;&\#x05D9;&\#x05DD;", "&\#x05E9;&\#x05E7;&\#x05DC;&\#x05D9;&\#x05DD;", "&\#x05D9;&\#x05D5;&\#x05DE;&\#x05D0;",
+  /// "&\#x05E1;&\#x05D5;&\#x05DB;&\#x05D4;", "&\#x05D1;&\#x05D9;&\#x05E6;&\#x05D4;", "&\#x05E8;&\#x05D0;&\#x05E9; &\#x05D4;&\#x05E9;&\#x05E0;&\#x05D4;",
+  /// "&\#x05EA;&\#x05E2;&\#x05E0;&\#x05D9;&\#x05EA;", "&\#x05DE;&\#x05D2;&\#x05D9;&\#x05DC;&\#x05D4;", "&\#x05DE;&\#x05D5;&\#x05E2;&\#x05D3;
+  /// &\#x05E7;&\#x05D8;&\#x05DF;", "&\#x05D7;&\#x05D2;&\#x05D9;&\#x05D2;&\#x05D4;", "&\#x05D9;&\#x05D1;&\#x05DE;&\#x05D5;&\#x05EA;",
+  /// "&\#x05DB;&\#x05EA;&\#x05D5;&\#x05D1;&\#x05D5;&\#x05EA;", "&\#x05E0;&\#x05D3;&\#x05E8;&\#x05D9;&\#x05DD;","&\#x05E0;&\#x05D6;&\#x05D9;&\#x05E8;",
+  /// "&\#x05E1;&\#x05D5;&\#x05D8;&\#x05D4;", "&\#x05D2;&\#x05D9;&\#x05D8;&\#x05D9;&\#x05DF;", "&\#x05E7;&\#x05D9;&\#x05D3;&\#x05D5;&\#x05E9;&\#x05D9;&\#x05DF;",
+  /// "&\#x05D1;&\#x05D1;&\#x05D0; &\#x05E7;&\#x05DE;&\#x05D0;", "&\#x05D1;&\#x05D1;&\#x05D0; &\#x05DE;&\#x05E6;&\#x05D9;&\#x05E2;&\#x05D0;",
+  /// "&\#x05D1;&\#x05D1;&\#x05D0; &\#x05D1;&\#x05EA;&\#x05E8;&\#x05D0;", "&\#x05E1;&\#x05E0;&\#x05D4;&\#x05D3;&\#x05E8;&\#x05D9;&\#x05DF;",
+  /// "&\#x05DE;&\#x05DB;&\#x05D5;&\#x05EA;", "&\#x05E9;&\#x05D1;&\#x05D5;&\#x05E2;&\#x05D5;&\#x05EA;", "&\#x05E2;&\#x05D1;&\#x05D5;&\#x05D3;&\#x05D4;
+  /// &\#x05D6;&\#x05E8;&\#x05D4;", "&\#x05D4;&\#x05D5;&\#x05E8;&\#x05D9;&\#x05D5;&\#x05EA;", "&\#x05D6;&\#x05D1;&\#x05D7;&\#x05D9;&\#x05DD;",
+  /// "&\#x05DE;&\#x05E0;&\#x05D7;&\#x05D5;&\#x05EA;", "&\#x05D7;&\#x05D5;&\#x05DC;&\#x05D9;&\#x05DF;", "&\#x05D1;&\#x05DB;&\#x05D5;&\#x05E8;&\#x05D5;&\#x05EA;",
+  /// "&\#x05E2;&\#x05E8;&\#x05DB;&\#x05D9;&\#x05DF;", "&\#x05EA;&\#x05DE;&\#x05D5;&\#x05E8;&\#x05D4;", "&\#x05DB;&\#x05E8;&\#x05D9;&\#x05EA;&\#x05D5;&\#x05EA;",
+  /// "&\#x05DE;&\#x05E2;&\#x05D9;&\#x05DC;&\#x05D4;", "&\#x05E7;&\#x05D9;&\#x05E0;&\#x05D9;&\#x05DD;", "&\#x05EA;&\#x05DE;&\#x05D9;&\#x05D3;",
+  /// "&\#x05DE;&\#x05D9;&\#x05D3;&\#x05D5;&\#x05EA;", "&\#x05E0;&\#x05D3;&\#x05D4;"]</code>.
+  ///@return the _masechta_ (tractate) of the Daf Yomi in Hebrew. As an example, it will return
+  ///         &\#x05D1;&\#x05E8;&\#x05DB;&\#x05D5;&\#x05EA; for Berachos.
+  jni$_.JString? getMasechta() {
+    return _getMasechta(
+            reference.pointer, _id_getMasechta as jni$_.JMethodIDPtr)
+        .object<jni$_.JString?>(const jni$_.$JString$NullableType$());
+  }
+
+  static final _id_getYerushalmiMasechtaTransliterated =
+      _class.instanceMethodId(
+    r'getYerushalmiMasechtaTransliterated',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _getYerushalmiMasechtaTransliterated =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallObjectMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `public java.lang.String getYerushalmiMasechtaTransliterated()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the transliterated name of the _masechta_ (tractate) of the Daf Yomi in Yerushalmi. The list of
+  /// _mashechtos_ is:
+  /// Berachos, Pe'ah, Demai, Kilayim, Shevi'is, Terumos, Ma'asros, Ma'aser Sheni, Chalah, Orlah, Bikurim,
+  /// Shabbos, Eruvin, Pesachim, Beitzah, Rosh Hashanah, Yoma, Sukah, Ta'anis, Shekalim, Megilah, Chagigah,
+  /// Moed Katan, Yevamos, Kesuvos, Sotah, Nedarim, Nazir, Gitin, Kidushin, Bava Kama, Bava Metzia,
+  /// Bava Basra, Shevuos, Makos, Sanhedrin, Avodah Zarah, Horayos, Nidah and No Daf Today.
+  ///@return the transliterated name of the _masechta_ (tractate) of the Daf Yomi such as Berachos.
+  jni$_.JString? getYerushalmiMasechtaTransliterated() {
+    return _getYerushalmiMasechtaTransliterated(reference.pointer,
+            _id_getYerushalmiMasechtaTransliterated as jni$_.JMethodIDPtr)
+        .object<jni$_.JString?>(const jni$_.$JString$NullableType$());
+  }
+
+  static final _id_getYerushlmiMasechtaTransliterated = _class.instanceMethodId(
+    r'getYerushlmiMasechtaTransliterated',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _getYerushlmiMasechtaTransliterated =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallObjectMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `public java.lang.String getYerushlmiMasechtaTransliterated()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// @see \#getYerushalmiMasechtaTransliterated()
+  ///@deprecated misspelled method name to be removed in 3.0.0.
+  ///@return the transliterated name of the _masechta_ (tractate) of the Daf Yomi such as Berachos.
+  jni$_.JString? getYerushlmiMasechtaTransliterated() {
+    return _getYerushlmiMasechtaTransliterated(reference.pointer,
+            _id_getYerushlmiMasechtaTransliterated as jni$_.JMethodIDPtr)
+        .object<jni$_.JString?>(const jni$_.$JString$NullableType$());
+  }
+
+  static final _id_setYerushalmiMasechtaTransliterated =
+      _class.instanceMethodId(
+    r'setYerushalmiMasechtaTransliterated',
+    r'([Ljava/lang/String;)V',
+  );
+
+  static final _setYerushalmiMasechtaTransliterated =
+      jni$_.ProtectedJniExtensions.lookup<
+                  jni$_.NativeFunction<
+                      jni$_.JThrowablePtr Function(
+                          jni$_.Pointer<jni$_.Void>,
+                          jni$_.JMethodIDPtr,
+                          jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+              'globalEnv_CallVoidMethod')
+          .asFunction<
+              jni$_.JThrowablePtr Function(jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public void setYerushalmiMasechtaTransliterated(java.lang.String[] masechtosYerushalmiTransliterated)`
+  ///
+  /// Setter method to allow overriding of the default list of Yerushalmi _masechtos_ transliterated into Latin chars.
+  /// The default uses Ashkenazi American English transliteration.
+  ///@param masechtosYerushalmiTransliterated the list of transliterated Yerushalmi _masechtos_ to set.
+  void setYerushalmiMasechtaTransliterated(
+    jni$_.JArray<jni$_.JString?>? masechtosYerushalmiTransliterated,
+  ) {
+    final _$masechtosYerushalmiTransliterated =
+        masechtosYerushalmiTransliterated?.reference ?? jni$_.jNullReference;
+    _setYerushalmiMasechtaTransliterated(
+            reference.pointer,
+            _id_setYerushalmiMasechtaTransliterated as jni$_.JMethodIDPtr,
+            _$masechtosYerushalmiTransliterated.pointer)
+        .check();
+  }
+
+  static final _id_setYerushlmiMasechtaTransliterated = _class.instanceMethodId(
+    r'setYerushlmiMasechtaTransliterated',
+    r'([Ljava/lang/String;)V',
+  );
+
+  static final _setYerushlmiMasechtaTransliterated =
+      jni$_.ProtectedJniExtensions.lookup<
+                  jni$_.NativeFunction<
+                      jni$_.JThrowablePtr Function(
+                          jni$_.Pointer<jni$_.Void>,
+                          jni$_.JMethodIDPtr,
+                          jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+              'globalEnv_CallVoidMethod')
+          .asFunction<
+              jni$_.JThrowablePtr Function(jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public void setYerushlmiMasechtaTransliterated(java.lang.String[] masechtosYerushalmiTransliterated)`
+  ///
+  /// @see \#setYerushalmiMasechtaTransliterated(String[])
+  ///@deprecated misspelled method name to be removed in 3.0.0.
+  ///@param masechtosYerushalmiTransliterated the list of transliterated Yerushalmi _masechtos_ to set.
+  void setYerushlmiMasechtaTransliterated(
+    jni$_.JArray<jni$_.JString?>? masechtosYerushalmiTransliterated,
+  ) {
+    final _$masechtosYerushalmiTransliterated =
+        masechtosYerushalmiTransliterated?.reference ?? jni$_.jNullReference;
+    _setYerushlmiMasechtaTransliterated(
+            reference.pointer,
+            _id_setYerushlmiMasechtaTransliterated as jni$_.JMethodIDPtr,
+            _$masechtosYerushalmiTransliterated.pointer)
+        .check();
+  }
+
+  static final _id_getYerushalmiMasechtosTransliterated = _class.staticMethodId(
+    r'getYerushalmiMasechtosTransliterated',
+    r'()[Ljava/lang/String;',
+  );
+
+  static final _getYerushalmiMasechtosTransliterated =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `static public java.lang.String[] getYerushalmiMasechtosTransliterated()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Getter method to allow retrieving the list of Yerushalmi _masechtos_ transliterated into Latin chars.
+  /// The default uses Ashkenazi American English transliteration.
+  ///@return the array of transliterated _masechta_ (tractate) names of the Daf Yomi Yerushalmi.
+  static jni$_.JArray<jni$_.JString?>? getYerushalmiMasechtosTransliterated() {
+    return _getYerushalmiMasechtosTransliterated(_class.reference.pointer,
+            _id_getYerushalmiMasechtosTransliterated as jni$_.JMethodIDPtr)
+        .object<jni$_.JArray<jni$_.JString?>?>(
+            const jni$_.$JArray$NullableType$<jni$_.JString?>(
+                jni$_.$JString$NullableType$()));
+  }
+
+  static final _id_getYerushlmiMasechtosTransliterated = _class.staticMethodId(
+    r'getYerushlmiMasechtosTransliterated',
+    r'()[Ljava/lang/String;',
+  );
+
+  static final _getYerushlmiMasechtosTransliterated =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `static public java.lang.String[] getYerushlmiMasechtosTransliterated()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// @see \#getYerushalmiMasechtosTransliterated()
+  ///@deprecated misspelled method name to be removed in 3.0.0.
+  ///@return the array of transliterated _masechta_ (tractate) names of the Daf Yomi Yerushalmi.
+  static jni$_.JArray<jni$_.JString?>? getYerushlmiMasechtosTransliterated() {
+    return _getYerushlmiMasechtosTransliterated(_class.reference.pointer,
+            _id_getYerushlmiMasechtosTransliterated as jni$_.JMethodIDPtr)
+        .object<jni$_.JArray<jni$_.JString?>?>(
+            const jni$_.$JArray$NullableType$<jni$_.JString?>(
+                jni$_.$JString$NullableType$()));
+  }
+
+  static final _id_getYerushalmiMasechtos = _class.staticMethodId(
+    r'getYerushalmiMasechtos',
+    r'()[Ljava/lang/String;',
+  );
+
+  static final _getYerushalmiMasechtos = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `static public java.lang.String[] getYerushalmiMasechtos()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Getter method to allow retrieving the list of Yerushalmi _masechtos_.
+  ///@return the array of Hebrew _masechta_ (tractate) names of the Daf Yomi Yerushalmi.
+  static jni$_.JArray<jni$_.JString?>? getYerushalmiMasechtos() {
+    return _getYerushalmiMasechtos(_class.reference.pointer,
+            _id_getYerushalmiMasechtos as jni$_.JMethodIDPtr)
+        .object<jni$_.JArray<jni$_.JString?>?>(
+            const jni$_.$JArray$NullableType$<jni$_.JString?>(
+                jni$_.$JString$NullableType$()));
+  }
+
+  static final _id_getYerushlmiMasechtos = _class.staticMethodId(
+    r'getYerushlmiMasechtos',
+    r'()[Ljava/lang/String;',
+  );
+
+  static final _getYerushlmiMasechtos = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallStaticObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `static public java.lang.String[] getYerushlmiMasechtos()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// @see \#getYerushalmiMasechtos()
+  ///@deprecated misspelled method name to be removed in 3.0.0.
+  ///@return the array of Hebrew _masechta_ (tractate) names of the Daf Yomi Yerushalmi.
+  static jni$_.JArray<jni$_.JString?>? getYerushlmiMasechtos() {
+    return _getYerushlmiMasechtos(_class.reference.pointer,
+            _id_getYerushlmiMasechtos as jni$_.JMethodIDPtr)
+        .object<jni$_.JArray<jni$_.JString?>?>(
+            const jni$_.$JArray$NullableType$<jni$_.JString?>(
+                jni$_.$JString$NullableType$()));
+  }
+
+  static final _id_getYerushalmiMasechta = _class.instanceMethodId(
+    r'getYerushalmiMasechta',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _getYerushalmiMasechta = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.lang.String getYerushalmiMasechta()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the Yerushalmi _masechta_ (tractate) of the Daf Yomi in Hebrew. As an example, it will return
+  /// &\#x05D1;&\#x05E8;&\#x05DB;&\#x05D5;&\#x05EA; for Berachos.
+  ///@return the Yerushalmi _masechta_ (tractate) of the Daf Yomi in Hebrew. As an example, it will return
+  ///         &\#x05D1;&\#x05E8;&\#x05DB;&\#x05D5;&\#x05EA; for Berachos.
+  jni$_.JString? getYerushalmiMasechta() {
+    return _getYerushalmiMasechta(
+            reference.pointer, _id_getYerushalmiMasechta as jni$_.JMethodIDPtr)
+        .object<jni$_.JString?>(const jni$_.$JString$NullableType$());
+  }
+}
+
+final class $Daf$NullableType$ extends jni$_.JType<Daf?> {
+  @jni$_.internal
+  const $Daf$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Lcom/kosherjava/zmanim/hebrewcalendar/Daf;';
+
+  @jni$_.internal
+  @core$_.override
+  Daf? fromReference(jni$_.JReference reference) => reference.isNull
+      ? null
+      : Daf.fromReference(
+          reference,
+        );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const jni$_.$JObject$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<Daf?> get nullableType => this;
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 1;
+
+  @core$_.override
+  int get hashCode => ($Daf$NullableType$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($Daf$NullableType$) &&
+        other is $Daf$NullableType$;
+  }
+}
+
+final class $Daf$Type$ extends jni$_.JType<Daf> {
+  @jni$_.internal
+  const $Daf$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Lcom/kosherjava/zmanim/hebrewcalendar/Daf;';
+
+  @jni$_.internal
+  @core$_.override
+  Daf fromReference(jni$_.JReference reference) => Daf.fromReference(
+        reference,
+      );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const jni$_.$JObject$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<Daf?> get nullableType => const $Daf$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 1;
+
+  @core$_.override
+  int get hashCode => ($Daf$Type$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($Daf$Type$) && other is $Daf$Type$;
   }
 }

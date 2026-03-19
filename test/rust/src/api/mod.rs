@@ -3,7 +3,7 @@ use std::str::FromStr;
 use chrono::{Duration, NaiveDate};
 use chrono_tz::{Tz, TZ_VARIANTS};
 use flutter_rust_bridge::frb;
-use hebrew_holiday_calendar::{HebrewHolidayCalendar, HebrewMonth};
+use hebrew_holiday_calendar::{HebrewHolidayCalendar, HebrewMonth, Holiday, Parsha};
 use icu_calendar::{
     cal::Hebrew,
     options::{DateAddOptions, Overflow},
@@ -164,4 +164,202 @@ pub fn add_years_to_jewish_date(
         date.hebrew_month().into(),
         date.day_of_month().0,
     ))
+}
+
+#[frb(sync)]
+pub fn test_jewish_calendar(
+    year: i32,
+    month: u8,
+    day: u8,
+    in_israel: bool,
+    is_mukaf_choma: bool,
+    use_modern_holidays: bool,
+    java: JavaJewishCalendarTestResults,
+) {
+    let hebrew_date = create_clamped_hebrew_date(year, month, day).unwrap();
+    assert_eq!(
+        hebrew_date.is_assur_bemelacha(in_israel),
+        java.isAssurBemelacha
+    );
+    assert_eq!(
+        hebrew_date.has_candle_lighting(in_israel),
+        java.hasCandleLighting
+    );
+    assert_eq!(
+        hebrew_date.is_aseres_yemei_teshuva(),
+        java.isAseresYemeiTeshuva
+    );
+    assert_eq!(
+        hebrew_date
+            .todays_parsha(in_israel)
+            .map(|parsha| parsha as i32),
+        java.getParshah
+    );
+    assert_eq!(
+        hebrew_date
+            .special_parsha(in_israel)
+            .map(|parsha| parsha as i32),
+        java.getSpecialShabbos
+    );
+    assert_eq!(
+        hebrew_date.upcoming_parsha(in_israel) as i32,
+        java.getUpcomingParshah
+    );
+    assert_eq!(hebrew_date.day_of_chanukah(), java.getDayOfChanukah);
+    assert_eq!(hebrew_date.day_of_the_omer(), java.getDayOfOmer);
+}
+
+#[allow(non_snake_case)]
+pub struct JavaJewishCalendarTestResults {
+    pub isUseModernHolidays: bool,
+    pub getInIsrael: bool,
+    pub getIsMukafChoma: bool,
+    pub isBirkasHachamah: bool,
+    pub getParshah: Option<i32>,
+    pub getUpcomingParshah: i32,
+    pub getSpecialShabbos: Option<i32>,
+    pub getYomTovIndex: i32,
+    pub isYomTov: bool,
+    pub isYomTovAssurBemelacha: bool,
+    pub isAssurBemelacha: bool,
+    pub hasCandleLighting: bool,
+    pub isTomorrowShabbosOrYomTov: bool,
+    pub isErevYomTovSheni: bool,
+    pub isAseresYemeiTeshuva: bool,
+    pub isPesach: bool,
+    pub isCholHamoedPesach: bool,
+    pub isShavuos: bool,
+    pub isRoshHashana: bool,
+    pub isYomKippur: bool,
+    pub isSuccos: bool,
+    pub isHoshanaRabba: bool,
+    pub isShminiAtzeres: bool,
+    pub isSimchasTorah: bool,
+    pub isCholHamoedSuccos: bool,
+    pub isCholHamoed: bool,
+    pub isErevYomTov: bool,
+    pub isErevRoshChodesh: bool,
+    pub isYomKippurKatan: bool,
+    pub isBeHaB: bool,
+    pub isTaanis: bool,
+    pub isTaanisBechoros: bool,
+    pub getDayOfChanukah: Option<u8>,
+    pub isChanukah: bool,
+    pub isPurim: bool,
+    pub isRoshChodesh: bool,
+    pub isMacharChodesh: bool,
+    pub isShabbosMevorchim: bool,
+    pub getDayOfOmer: Option<u8>,
+    pub isTishaBav: bool,
+    pub getMoladAsInstant: i64,
+    pub getTchilasZmanKidushLevana3Days: i64,
+    pub getTchilasZmanKidushLevana7Days: i64,
+    pub getSofZmanKidushLevanaBetweenMoldos: i64,
+    pub getSofZmanKidushLevana15Days: i64,
+    pub getTekufasTishreiElapsedDays: i32,
+    pub isIsruChag: bool,
+}
+impl JavaJewishCalendarTestResults {
+    #[allow(non_snake_case)]
+    #[frb(sync)]
+    pub fn new(
+        isUseModernHolidays: bool,
+        getInIsrael: bool,
+        getIsMukafChoma: bool,
+        isBirkasHachamah: bool,
+        getParshah: Option<i32>,
+        getUpcomingParshah: i32,
+        getSpecialShabbos: Option<i32>,
+        getYomTovIndex: i32,
+        isYomTov: bool,
+        isYomTovAssurBemelacha: bool,
+        isAssurBemelacha: bool,
+        hasCandleLighting: bool,
+        isTomorrowShabbosOrYomTov: bool,
+        isErevYomTovSheni: bool,
+        isAseresYemeiTeshuva: bool,
+        isPesach: bool,
+        isCholHamoedPesach: bool,
+        isShavuos: bool,
+        isRoshHashana: bool,
+        isYomKippur: bool,
+        isSuccos: bool,
+        isHoshanaRabba: bool,
+        isShminiAtzeres: bool,
+        isSimchasTorah: bool,
+        isCholHamoedSuccos: bool,
+        isCholHamoed: bool,
+        isErevYomTov: bool,
+        isErevRoshChodesh: bool,
+        isYomKippurKatan: bool,
+        isBeHaB: bool,
+        isTaanis: bool,
+        isTaanisBechoros: bool,
+        getDayOfChanukah: Option<u8>,
+        isChanukah: bool,
+        isPurim: bool,
+        isRoshChodesh: bool,
+        isMacharChodesh: bool,
+        isShabbosMevorchim: bool,
+        getDayOfOmer: Option<u8>,
+        isTishaBav: bool,
+        getMoladAsInstant: i64,
+        getTchilasZmanKidushLevana3Days: i64,
+        getTchilasZmanKidushLevana7Days: i64,
+        getSofZmanKidushLevanaBetweenMoldos: i64,
+        getSofZmanKidushLevana15Days: i64,
+        getTekufasTishreiElapsedDays: i32,
+        isIsruChag: bool,
+    ) -> Self {
+        Self {
+            isUseModernHolidays,
+            getInIsrael,
+            getIsMukafChoma,
+            isBirkasHachamah,
+            getParshah,
+            getUpcomingParshah,
+            getSpecialShabbos,
+            getYomTovIndex,
+            isYomTov,
+            isYomTovAssurBemelacha,
+            isAssurBemelacha,
+            hasCandleLighting,
+            isTomorrowShabbosOrYomTov,
+            isErevYomTovSheni,
+            isAseresYemeiTeshuva,
+            isPesach,
+            isCholHamoedPesach,
+            isShavuos,
+            isRoshHashana,
+            isYomKippur,
+
+            isSuccos,
+            isHoshanaRabba,
+            isShminiAtzeres,
+            isSimchasTorah,
+            isCholHamoedSuccos,
+            isCholHamoed,
+            isErevYomTov,
+            isErevRoshChodesh,
+            isYomKippurKatan,
+            isBeHaB,
+            isTaanis,
+            isTaanisBechoros,
+            getDayOfChanukah,
+            isChanukah,
+            isPurim,
+            isRoshChodesh,
+            isMacharChodesh,
+            isShabbosMevorchim,
+            getDayOfOmer,
+            isTishaBav,
+            getMoladAsInstant,
+            getTchilasZmanKidushLevana3Days,
+            getTchilasZmanKidushLevana7Days,
+            getSofZmanKidushLevanaBetweenMoldos,
+            getSofZmanKidushLevana15Days,
+            getTekufasTishreiElapsedDays,
+            isIsruChag,
+        }
+    }
 }

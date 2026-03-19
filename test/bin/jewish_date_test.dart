@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:jni/_internal.dart';
 import 'package:test_with_java/src/java/kosher_java.g.dart';
 import 'package:test_with_java/src/rnd.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
@@ -81,12 +82,14 @@ Future<void> main(List<String> args) async {
   Jni.spawn(classPath: ["./java/target/zmanim-2.6.0-SNAPSHOT.jar"]);
 
   for (var iteration = 0; iteration < iterations; iteration++) {
-    testGregorianDateToJewishDate();
-    testJewishDateToGregorianDate();
-    testAddDaysToJewishDate();
-    testAddMonthsToJewishDate();
-    testAddYearsToJewishDate();
-    testMinusDaysToJewishDate();
+    // testGregorianDateToJewishDate();
+    // testJewishDateToGregorianDate();
+    // testAddDaysToJewishDate();
+    // testAddMonthsToJewishDate();
+    // testAddYearsToJewishDate();
+    // testMinusDaysToJewishDate();
+    final test = JewishCalendarTest.random();
+    test.test();
   }
   print("All tests passed");
   exit(0);
@@ -330,4 +333,101 @@ void testAddYearsToJewishDate() {
     } catch (_) {}
   }
   return null;
+}
+
+class JewishCalendarTest {
+  final (int, int, int) date;
+  final bool inIsrael;
+  final bool isMukafChoma;
+  final bool useModernHolidays;
+
+  JewishCalendarTest._(
+      this.date, this.inIsrael, this.isMukafChoma, this.useModernHolidays);
+  factory JewishCalendarTest.random() {
+    final date = randomJewishDate();
+    return JewishCalendarTest._(
+        date, random.nextBool(), random.nextBool(), random.nextBool());
+  }
+
+  void test() {
+    final (year, month, day) = date;
+    final calendar = JewishCalendar.new$5(year, month, day, inIsrael);
+    calendar.setIsMukafChoma(isMukafChoma);
+    calendar.setUseModernHolidays(useModernHolidays);
+    int? dayOfChanukah = calendar.getDayOfChanukah();
+    if (dayOfChanukah == -1) {
+      dayOfChanukah = null;
+    }
+    int? dayOfOmer = calendar.getDayOfOmer();
+    if (dayOfOmer == -1) {
+      dayOfOmer = null;
+    }
+
+    final parsha = calendar.getUpcomingParshah();
+    if (parsha == null) {
+      return;
+    }
+    print(parsha);
+    final parshaClass = JClass.forName(
+        r'com/kosherjava/zmanim/hebrewcalendar/JewishCalendar$Parsha');
+    final method = parshaClass
+        .instanceMethodId("ordinal", "()I")
+        .call(parsha, $JInteger$Type$(), []);
+
+    print(method);
+    exit(0);
+    // invok
+
+    // JavaJewishCalendarTestResults(
+    //     getUpcomingParshah: calendar.getUpcomingParshah(). as int,
+    //     getSpecialShabbos: calendar.getSpecialShabbos() as int,
+    //     isUseModernHolidays: calendar.isUseModernHolidays(),
+    //     getInIsrael: calendar.getInIsrael(),
+    //     getIsMukafChoma: calendar.getIsMukafChoma(),
+    //     isBirkasHachamah: calendar.isBirkasHachamah(),
+    //     getYomTovIndex: calendar.getYomTovIndex(),
+    //     isYomTov: calendar.isYomTov(),
+    //     isYomTovAssurBemelacha: calendar.isYomTovAssurBemelacha(),
+    //     isAssurBemelacha: calendar.isAssurBemelacha(),
+    //     hasCandleLighting: calendar.hasCandleLighting(),
+    //     isTomorrowShabbosOrYomTov: calendar.isTomorrowShabbosOrYomTov(),
+    //     isErevYomTovSheni: calendar.isErevYomTovSheni(),
+    //     isAseresYemeiTeshuva: calendar.isAseresYemeiTeshuva(),
+    //     isPesach: calendar.isPesach(),
+    //     isCholHamoedPesach: calendar.isCholHamoedPesach(),
+    //     isShavuos: calendar.isShavuos(),
+    //     isRoshHashana: calendar.isRoshHashana(),
+    //     isYomKippur: calendar.isYomKippur(),
+    //     isSuccos: calendar.isSuccos(),
+    //     isHoshanaRabba: calendar.isHoshanaRabba(),
+    //     isShminiAtzeres: calendar.isShminiAtzeres(),
+    //     isSimchasTorah: calendar.isSimchasTorah(),
+    //     isCholHamoedSuccos: calendar.isCholHamoedSuccos(),
+    //     isCholHamoed: calendar.isCholHamoed(),
+    //     isErevYomTov: calendar.isErevYomTov(),
+    //     isErevRoshChodesh: calendar.isErevRoshChodesh(),
+    //     isYomKippurKatan: calendar.isYomKippurKatan(),
+    //     isBeHaB: calendar.isBeHaB(),
+    //     isTaanis: calendar.isTaanis(),
+    //     isTaanisBechoros: calendar.isTaanisBechoros(),
+    //     getDayOfChanukah: dayOfChanukah,
+    //     isChanukah: calendar.isChanukah(),
+    //     isPurim: calendar.isPurim(),
+    //     isRoshChodesh: calendar.isRoshChodesh(),
+    //     isMacharChodesh: calendar.isMacharChodesh(),
+    //     isShabbosMevorchim: calendar.isShabbosMevorchim(),
+    //     getDayOfOmer: dayOfOmer,
+    //     isTishaBav: calendar.isTishaBav(),
+    //     getMoladAsInstant: calendar.getMoladAsInstant()!.toEpochMilli(),
+    //     getTchilasZmanKidushLevana3Days:
+    //         calendar.getTchilasZmanKidushLevana3Days()!.toEpochMilli(),
+    //     getTchilasZmanKidushLevana7Days:
+    //         calendar.getTchilasZmanKidushLevana7Days()!.toEpochMilli(),
+    //     getSofZmanKidushLevanaBetweenMoldos:
+    //         calendar.getSofZmanKidushLevanaBetweenMoldos()!.toEpochMilli(),
+    //     getSofZmanKidushLevana15Days:
+    //         calendar.getSofZmanKidushLevana15Days()!.toEpochMilli(),
+    //     getTekufasTishreiElapsedDays: calendar.getTekufasTishreiElapsedDays(),
+    //     isIsruChag: calendar.isIsruChag());
+  }
 }

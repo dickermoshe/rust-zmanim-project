@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1762524272;
+  int get rustContentHash => -1805115147;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -119,10 +119,68 @@ abstract class RustLibApi extends BaseApi {
   (int, int, int)? crateApiGregorianDateToJewishDate(
       {required int year, required int month, required int day});
 
+  JavaJewishCalendarTestResults crateApiJavaJewishCalendarTestResultsNew(
+      {required bool isUseModernHolidays,
+      required bool getInIsrael,
+      required bool getIsMukafChoma,
+      required bool isBirkasHachamah,
+      int? getParshah,
+      required int getUpcomingParshah,
+      int? getSpecialShabbos,
+      required int getYomTovIndex,
+      required bool isYomTov,
+      required bool isYomTovAssurBemelacha,
+      required bool isAssurBemelacha,
+      required bool hasCandleLighting,
+      required bool isTomorrowShabbosOrYomTov,
+      required bool isErevYomTovSheni,
+      required bool isAseresYemeiTeshuva,
+      required bool isPesach,
+      required bool isCholHamoedPesach,
+      required bool isShavuos,
+      required bool isRoshHashana,
+      required bool isYomKippur,
+      required bool isSuccos,
+      required bool isHoshanaRabba,
+      required bool isShminiAtzeres,
+      required bool isSimchasTorah,
+      required bool isCholHamoedSuccos,
+      required bool isCholHamoed,
+      required bool isErevYomTov,
+      required bool isErevRoshChodesh,
+      required bool isYomKippurKatan,
+      required bool isBeHaB,
+      required bool isTaanis,
+      required bool isTaanisBechoros,
+      int? getDayOfChanukah,
+      required bool isChanukah,
+      required bool isPurim,
+      required bool isRoshChodesh,
+      required bool isMacharChodesh,
+      required bool isShabbosMevorchim,
+      int? getDayOfOmer,
+      required bool isTishaBav,
+      required PlatformInt64 getMoladAsInstant,
+      required PlatformInt64 getTchilasZmanKidushLevana3Days,
+      required PlatformInt64 getTchilasZmanKidushLevana7Days,
+      required PlatformInt64 getSofZmanKidushLevanaBetweenMoldos,
+      required PlatformInt64 getSofZmanKidushLevana15Days,
+      required int getTekufasTishreiElapsedDays,
+      required bool isIsruChag});
+
   (int, int, int)? crateApiJewishDateToGregorianDate(
       {required int year, required int month, required int day});
 
   List<ZmanimPreset> crateApiPresets();
+
+  void crateApiTestJewishCalendar(
+      {required int year,
+      required int month,
+      required int day,
+      required bool inIsrael,
+      required bool isMukafChoma,
+      required bool useModernHolidays,
+      required JavaJewishCalendarTestResults java});
 
   List<String> crateApiTimezones();
 
@@ -386,6 +444,219 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  JavaJewishCalendarTestResults crateApiJavaJewishCalendarTestResultsNew(
+      {required bool isUseModernHolidays,
+      required bool getInIsrael,
+      required bool getIsMukafChoma,
+      required bool isBirkasHachamah,
+      int? getParshah,
+      required int getUpcomingParshah,
+      int? getSpecialShabbos,
+      required int getYomTovIndex,
+      required bool isYomTov,
+      required bool isYomTovAssurBemelacha,
+      required bool isAssurBemelacha,
+      required bool hasCandleLighting,
+      required bool isTomorrowShabbosOrYomTov,
+      required bool isErevYomTovSheni,
+      required bool isAseresYemeiTeshuva,
+      required bool isPesach,
+      required bool isCholHamoedPesach,
+      required bool isShavuos,
+      required bool isRoshHashana,
+      required bool isYomKippur,
+      required bool isSuccos,
+      required bool isHoshanaRabba,
+      required bool isShminiAtzeres,
+      required bool isSimchasTorah,
+      required bool isCholHamoedSuccos,
+      required bool isCholHamoed,
+      required bool isErevYomTov,
+      required bool isErevRoshChodesh,
+      required bool isYomKippurKatan,
+      required bool isBeHaB,
+      required bool isTaanis,
+      required bool isTaanisBechoros,
+      int? getDayOfChanukah,
+      required bool isChanukah,
+      required bool isPurim,
+      required bool isRoshChodesh,
+      required bool isMacharChodesh,
+      required bool isShabbosMevorchim,
+      int? getDayOfOmer,
+      required bool isTishaBav,
+      required PlatformInt64 getMoladAsInstant,
+      required PlatformInt64 getTchilasZmanKidushLevana3Days,
+      required PlatformInt64 getTchilasZmanKidushLevana7Days,
+      required PlatformInt64 getSofZmanKidushLevanaBetweenMoldos,
+      required PlatformInt64 getSofZmanKidushLevana15Days,
+      required int getTekufasTishreiElapsedDays,
+      required bool isIsruChag}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_bool(isUseModernHolidays, serializer);
+        sse_encode_bool(getInIsrael, serializer);
+        sse_encode_bool(getIsMukafChoma, serializer);
+        sse_encode_bool(isBirkasHachamah, serializer);
+        sse_encode_opt_box_autoadd_i_32(getParshah, serializer);
+        sse_encode_i_32(getUpcomingParshah, serializer);
+        sse_encode_opt_box_autoadd_i_32(getSpecialShabbos, serializer);
+        sse_encode_i_32(getYomTovIndex, serializer);
+        sse_encode_bool(isYomTov, serializer);
+        sse_encode_bool(isYomTovAssurBemelacha, serializer);
+        sse_encode_bool(isAssurBemelacha, serializer);
+        sse_encode_bool(hasCandleLighting, serializer);
+        sse_encode_bool(isTomorrowShabbosOrYomTov, serializer);
+        sse_encode_bool(isErevYomTovSheni, serializer);
+        sse_encode_bool(isAseresYemeiTeshuva, serializer);
+        sse_encode_bool(isPesach, serializer);
+        sse_encode_bool(isCholHamoedPesach, serializer);
+        sse_encode_bool(isShavuos, serializer);
+        sse_encode_bool(isRoshHashana, serializer);
+        sse_encode_bool(isYomKippur, serializer);
+        sse_encode_bool(isSuccos, serializer);
+        sse_encode_bool(isHoshanaRabba, serializer);
+        sse_encode_bool(isShminiAtzeres, serializer);
+        sse_encode_bool(isSimchasTorah, serializer);
+        sse_encode_bool(isCholHamoedSuccos, serializer);
+        sse_encode_bool(isCholHamoed, serializer);
+        sse_encode_bool(isErevYomTov, serializer);
+        sse_encode_bool(isErevRoshChodesh, serializer);
+        sse_encode_bool(isYomKippurKatan, serializer);
+        sse_encode_bool(isBeHaB, serializer);
+        sse_encode_bool(isTaanis, serializer);
+        sse_encode_bool(isTaanisBechoros, serializer);
+        sse_encode_opt_box_autoadd_u_8(getDayOfChanukah, serializer);
+        sse_encode_bool(isChanukah, serializer);
+        sse_encode_bool(isPurim, serializer);
+        sse_encode_bool(isRoshChodesh, serializer);
+        sse_encode_bool(isMacharChodesh, serializer);
+        sse_encode_bool(isShabbosMevorchim, serializer);
+        sse_encode_opt_box_autoadd_u_8(getDayOfOmer, serializer);
+        sse_encode_bool(isTishaBav, serializer);
+        sse_encode_i_64(getMoladAsInstant, serializer);
+        sse_encode_i_64(getTchilasZmanKidushLevana3Days, serializer);
+        sse_encode_i_64(getTchilasZmanKidushLevana7Days, serializer);
+        sse_encode_i_64(getSofZmanKidushLevanaBetweenMoldos, serializer);
+        sse_encode_i_64(getSofZmanKidushLevana15Days, serializer);
+        sse_encode_i_32(getTekufasTishreiElapsedDays, serializer);
+        sse_encode_bool(isIsruChag, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_java_jewish_calendar_test_results,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiJavaJewishCalendarTestResultsNewConstMeta,
+      argValues: [
+        isUseModernHolidays,
+        getInIsrael,
+        getIsMukafChoma,
+        isBirkasHachamah,
+        getParshah,
+        getUpcomingParshah,
+        getSpecialShabbos,
+        getYomTovIndex,
+        isYomTov,
+        isYomTovAssurBemelacha,
+        isAssurBemelacha,
+        hasCandleLighting,
+        isTomorrowShabbosOrYomTov,
+        isErevYomTovSheni,
+        isAseresYemeiTeshuva,
+        isPesach,
+        isCholHamoedPesach,
+        isShavuos,
+        isRoshHashana,
+        isYomKippur,
+        isSuccos,
+        isHoshanaRabba,
+        isShminiAtzeres,
+        isSimchasTorah,
+        isCholHamoedSuccos,
+        isCholHamoed,
+        isErevYomTov,
+        isErevRoshChodesh,
+        isYomKippurKatan,
+        isBeHaB,
+        isTaanis,
+        isTaanisBechoros,
+        getDayOfChanukah,
+        isChanukah,
+        isPurim,
+        isRoshChodesh,
+        isMacharChodesh,
+        isShabbosMevorchim,
+        getDayOfOmer,
+        isTishaBav,
+        getMoladAsInstant,
+        getTchilasZmanKidushLevana3Days,
+        getTchilasZmanKidushLevana7Days,
+        getSofZmanKidushLevanaBetweenMoldos,
+        getSofZmanKidushLevana15Days,
+        getTekufasTishreiElapsedDays,
+        isIsruChag
+      ],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiJavaJewishCalendarTestResultsNewConstMeta =>
+      const TaskConstMeta(
+        debugName: "java_jewish_calendar_test_results_new",
+        argNames: [
+          "isUseModernHolidays",
+          "getInIsrael",
+          "getIsMukafChoma",
+          "isBirkasHachamah",
+          "getParshah",
+          "getUpcomingParshah",
+          "getSpecialShabbos",
+          "getYomTovIndex",
+          "isYomTov",
+          "isYomTovAssurBemelacha",
+          "isAssurBemelacha",
+          "hasCandleLighting",
+          "isTomorrowShabbosOrYomTov",
+          "isErevYomTovSheni",
+          "isAseresYemeiTeshuva",
+          "isPesach",
+          "isCholHamoedPesach",
+          "isShavuos",
+          "isRoshHashana",
+          "isYomKippur",
+          "isSuccos",
+          "isHoshanaRabba",
+          "isShminiAtzeres",
+          "isSimchasTorah",
+          "isCholHamoedSuccos",
+          "isCholHamoed",
+          "isErevYomTov",
+          "isErevRoshChodesh",
+          "isYomKippurKatan",
+          "isBeHaB",
+          "isTaanis",
+          "isTaanisBechoros",
+          "getDayOfChanukah",
+          "isChanukah",
+          "isPurim",
+          "isRoshChodesh",
+          "isMacharChodesh",
+          "isShabbosMevorchim",
+          "getDayOfOmer",
+          "isTishaBav",
+          "getMoladAsInstant",
+          "getTchilasZmanKidushLevana3Days",
+          "getTchilasZmanKidushLevana7Days",
+          "getSofZmanKidushLevanaBetweenMoldos",
+          "getSofZmanKidushLevana15Days",
+          "getTekufasTishreiElapsedDays",
+          "isIsruChag"
+        ],
+      );
+
+  @override
   (int, int, int)? crateApiJewishDateToGregorianDate(
       {required int year, required int month, required int day}) {
     return handler.executeSync(SyncTask(
@@ -394,7 +665,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_i_32(year, serializer);
         sse_encode_u_8(month, serializer);
         sse_encode_u_8(day, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_opt_box_autoadd_record_i_32_u_8_u_8,
@@ -417,7 +688,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -436,11 +707,64 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  void crateApiTestJewishCalendar(
+      {required int year,
+      required int month,
+      required int day,
+      required bool inIsrael,
+      required bool isMukafChoma,
+      required bool useModernHolidays,
+      required JavaJewishCalendarTestResults java}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_32(year, serializer);
+        sse_encode_u_8(month, serializer);
+        sse_encode_u_8(day, serializer);
+        sse_encode_bool(inIsrael, serializer);
+        sse_encode_bool(isMukafChoma, serializer);
+        sse_encode_bool(useModernHolidays, serializer);
+        sse_encode_box_autoadd_java_jewish_calendar_test_results(
+            java, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiTestJewishCalendarConstMeta,
+      argValues: [
+        year,
+        month,
+        day,
+        inIsrael,
+        isMukafChoma,
+        useModernHolidays,
+        java
+      ],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiTestJewishCalendarConstMeta => const TaskConstMeta(
+        debugName: "test_jewish_calendar",
+        argNames: [
+          "year",
+          "month",
+          "day",
+          "inIsrael",
+          "isMukafChoma",
+          "useModernHolidays",
+          "java"
+        ],
+      );
+
+  @override
   List<String> crateApiTimezones() {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_String,
@@ -502,6 +826,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int dco_decode_box_autoadd_i_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
+  JavaJewishCalendarTestResults
+      dco_decode_box_autoadd_java_jewish_calendar_test_results(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_java_jewish_calendar_test_results(raw);
+  }
+
+  @protected
   (int, int, int) dco_decode_box_autoadd_record_i_32_u_8_u_8(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as (int, int, int);
@@ -512,6 +849,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as (String, PlatformInt64);
+  }
+
+  @protected
+  int dco_decode_box_autoadd_u_8(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
   }
 
   @protected
@@ -530,6 +873,64 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PlatformInt64 dco_decode_i_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dcoDecodeI64(raw);
+  }
+
+  @protected
+  JavaJewishCalendarTestResults dco_decode_java_jewish_calendar_test_results(
+      dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 47)
+      throw Exception('unexpected arr length: expect 47 but see ${arr.length}');
+    return JavaJewishCalendarTestResults.raw(
+      isUseModernHolidays: dco_decode_bool(arr[0]),
+      getInIsrael: dco_decode_bool(arr[1]),
+      getIsMukafChoma: dco_decode_bool(arr[2]),
+      isBirkasHachamah: dco_decode_bool(arr[3]),
+      getParshah: dco_decode_opt_box_autoadd_i_32(arr[4]),
+      getUpcomingParshah: dco_decode_i_32(arr[5]),
+      getSpecialShabbos: dco_decode_opt_box_autoadd_i_32(arr[6]),
+      getYomTovIndex: dco_decode_i_32(arr[7]),
+      isYomTov: dco_decode_bool(arr[8]),
+      isYomTovAssurBemelacha: dco_decode_bool(arr[9]),
+      isAssurBemelacha: dco_decode_bool(arr[10]),
+      hasCandleLighting: dco_decode_bool(arr[11]),
+      isTomorrowShabbosOrYomTov: dco_decode_bool(arr[12]),
+      isErevYomTovSheni: dco_decode_bool(arr[13]),
+      isAseresYemeiTeshuva: dco_decode_bool(arr[14]),
+      isPesach: dco_decode_bool(arr[15]),
+      isCholHamoedPesach: dco_decode_bool(arr[16]),
+      isShavuos: dco_decode_bool(arr[17]),
+      isRoshHashana: dco_decode_bool(arr[18]),
+      isYomKippur: dco_decode_bool(arr[19]),
+      isSuccos: dco_decode_bool(arr[20]),
+      isHoshanaRabba: dco_decode_bool(arr[21]),
+      isShminiAtzeres: dco_decode_bool(arr[22]),
+      isSimchasTorah: dco_decode_bool(arr[23]),
+      isCholHamoedSuccos: dco_decode_bool(arr[24]),
+      isCholHamoed: dco_decode_bool(arr[25]),
+      isErevYomTov: dco_decode_bool(arr[26]),
+      isErevRoshChodesh: dco_decode_bool(arr[27]),
+      isYomKippurKatan: dco_decode_bool(arr[28]),
+      isBeHaB: dco_decode_bool(arr[29]),
+      isTaanis: dco_decode_bool(arr[30]),
+      isTaanisBechoros: dco_decode_bool(arr[31]),
+      getDayOfChanukah: dco_decode_opt_box_autoadd_u_8(arr[32]),
+      isChanukah: dco_decode_bool(arr[33]),
+      isPurim: dco_decode_bool(arr[34]),
+      isRoshChodesh: dco_decode_bool(arr[35]),
+      isMacharChodesh: dco_decode_bool(arr[36]),
+      isShabbosMevorchim: dco_decode_bool(arr[37]),
+      getDayOfOmer: dco_decode_opt_box_autoadd_u_8(arr[38]),
+      isTishaBav: dco_decode_bool(arr[39]),
+      getMoladAsInstant: dco_decode_i_64(arr[40]),
+      getTchilasZmanKidushLevana3Days: dco_decode_i_64(arr[41]),
+      getTchilasZmanKidushLevana7Days: dco_decode_i_64(arr[42]),
+      getSofZmanKidushLevanaBetweenMoldos: dco_decode_i_64(arr[43]),
+      getSofZmanKidushLevana15Days: dco_decode_i_64(arr[44]),
+      getTekufasTishreiElapsedDays: dco_decode_i_32(arr[45]),
+      isIsruChag: dco_decode_bool(arr[46]),
+    );
   }
 
   @protected
@@ -556,6 +957,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int? dco_decode_opt_box_autoadd_i_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_i_32(raw);
+  }
+
+  @protected
   (int, int, int)? dco_decode_opt_box_autoadd_record_i_32_u_8_u_8(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_record_i_32_u_8_u_8(raw);
@@ -566,6 +973,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_record_string_i_64(raw);
+  }
+
+  @protected
+  int? dco_decode_opt_box_autoadd_u_8(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_u_8(raw);
   }
 
   @protected
@@ -654,6 +1067,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int sse_decode_box_autoadd_i_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_i_32(deserializer));
+  }
+
+  @protected
+  JavaJewishCalendarTestResults
+      sse_decode_box_autoadd_java_jewish_calendar_test_results(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_java_jewish_calendar_test_results(deserializer));
+  }
+
+  @protected
   (int, int, int) sse_decode_box_autoadd_record_i_32_u_8_u_8(
       SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -665,6 +1092,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_record_string_i_64(deserializer));
+  }
+
+  @protected
+  int sse_decode_box_autoadd_u_8(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_u_8(deserializer));
   }
 
   @protected
@@ -683,6 +1116,108 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getPlatformInt64();
+  }
+
+  @protected
+  JavaJewishCalendarTestResults sse_decode_java_jewish_calendar_test_results(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_isUseModernHolidays = sse_decode_bool(deserializer);
+    var var_getInIsrael = sse_decode_bool(deserializer);
+    var var_getIsMukafChoma = sse_decode_bool(deserializer);
+    var var_isBirkasHachamah = sse_decode_bool(deserializer);
+    var var_getParshah = sse_decode_opt_box_autoadd_i_32(deserializer);
+    var var_getUpcomingParshah = sse_decode_i_32(deserializer);
+    var var_getSpecialShabbos = sse_decode_opt_box_autoadd_i_32(deserializer);
+    var var_getYomTovIndex = sse_decode_i_32(deserializer);
+    var var_isYomTov = sse_decode_bool(deserializer);
+    var var_isYomTovAssurBemelacha = sse_decode_bool(deserializer);
+    var var_isAssurBemelacha = sse_decode_bool(deserializer);
+    var var_hasCandleLighting = sse_decode_bool(deserializer);
+    var var_isTomorrowShabbosOrYomTov = sse_decode_bool(deserializer);
+    var var_isErevYomTovSheni = sse_decode_bool(deserializer);
+    var var_isAseresYemeiTeshuva = sse_decode_bool(deserializer);
+    var var_isPesach = sse_decode_bool(deserializer);
+    var var_isCholHamoedPesach = sse_decode_bool(deserializer);
+    var var_isShavuos = sse_decode_bool(deserializer);
+    var var_isRoshHashana = sse_decode_bool(deserializer);
+    var var_isYomKippur = sse_decode_bool(deserializer);
+    var var_isSuccos = sse_decode_bool(deserializer);
+    var var_isHoshanaRabba = sse_decode_bool(deserializer);
+    var var_isShminiAtzeres = sse_decode_bool(deserializer);
+    var var_isSimchasTorah = sse_decode_bool(deserializer);
+    var var_isCholHamoedSuccos = sse_decode_bool(deserializer);
+    var var_isCholHamoed = sse_decode_bool(deserializer);
+    var var_isErevYomTov = sse_decode_bool(deserializer);
+    var var_isErevRoshChodesh = sse_decode_bool(deserializer);
+    var var_isYomKippurKatan = sse_decode_bool(deserializer);
+    var var_isBeHaB = sse_decode_bool(deserializer);
+    var var_isTaanis = sse_decode_bool(deserializer);
+    var var_isTaanisBechoros = sse_decode_bool(deserializer);
+    var var_getDayOfChanukah = sse_decode_opt_box_autoadd_u_8(deserializer);
+    var var_isChanukah = sse_decode_bool(deserializer);
+    var var_isPurim = sse_decode_bool(deserializer);
+    var var_isRoshChodesh = sse_decode_bool(deserializer);
+    var var_isMacharChodesh = sse_decode_bool(deserializer);
+    var var_isShabbosMevorchim = sse_decode_bool(deserializer);
+    var var_getDayOfOmer = sse_decode_opt_box_autoadd_u_8(deserializer);
+    var var_isTishaBav = sse_decode_bool(deserializer);
+    var var_getMoladAsInstant = sse_decode_i_64(deserializer);
+    var var_getTchilasZmanKidushLevana3Days = sse_decode_i_64(deserializer);
+    var var_getTchilasZmanKidushLevana7Days = sse_decode_i_64(deserializer);
+    var var_getSofZmanKidushLevanaBetweenMoldos = sse_decode_i_64(deserializer);
+    var var_getSofZmanKidushLevana15Days = sse_decode_i_64(deserializer);
+    var var_getTekufasTishreiElapsedDays = sse_decode_i_32(deserializer);
+    var var_isIsruChag = sse_decode_bool(deserializer);
+    return JavaJewishCalendarTestResults.raw(
+        isUseModernHolidays: var_isUseModernHolidays,
+        getInIsrael: var_getInIsrael,
+        getIsMukafChoma: var_getIsMukafChoma,
+        isBirkasHachamah: var_isBirkasHachamah,
+        getParshah: var_getParshah,
+        getUpcomingParshah: var_getUpcomingParshah,
+        getSpecialShabbos: var_getSpecialShabbos,
+        getYomTovIndex: var_getYomTovIndex,
+        isYomTov: var_isYomTov,
+        isYomTovAssurBemelacha: var_isYomTovAssurBemelacha,
+        isAssurBemelacha: var_isAssurBemelacha,
+        hasCandleLighting: var_hasCandleLighting,
+        isTomorrowShabbosOrYomTov: var_isTomorrowShabbosOrYomTov,
+        isErevYomTovSheni: var_isErevYomTovSheni,
+        isAseresYemeiTeshuva: var_isAseresYemeiTeshuva,
+        isPesach: var_isPesach,
+        isCholHamoedPesach: var_isCholHamoedPesach,
+        isShavuos: var_isShavuos,
+        isRoshHashana: var_isRoshHashana,
+        isYomKippur: var_isYomKippur,
+        isSuccos: var_isSuccos,
+        isHoshanaRabba: var_isHoshanaRabba,
+        isShminiAtzeres: var_isShminiAtzeres,
+        isSimchasTorah: var_isSimchasTorah,
+        isCholHamoedSuccos: var_isCholHamoedSuccos,
+        isCholHamoed: var_isCholHamoed,
+        isErevYomTov: var_isErevYomTov,
+        isErevRoshChodesh: var_isErevRoshChodesh,
+        isYomKippurKatan: var_isYomKippurKatan,
+        isBeHaB: var_isBeHaB,
+        isTaanis: var_isTaanis,
+        isTaanisBechoros: var_isTaanisBechoros,
+        getDayOfChanukah: var_getDayOfChanukah,
+        isChanukah: var_isChanukah,
+        isPurim: var_isPurim,
+        isRoshChodesh: var_isRoshChodesh,
+        isMacharChodesh: var_isMacharChodesh,
+        isShabbosMevorchim: var_isShabbosMevorchim,
+        getDayOfOmer: var_getDayOfOmer,
+        isTishaBav: var_isTishaBav,
+        getMoladAsInstant: var_getMoladAsInstant,
+        getTchilasZmanKidushLevana3Days: var_getTchilasZmanKidushLevana3Days,
+        getTchilasZmanKidushLevana7Days: var_getTchilasZmanKidushLevana7Days,
+        getSofZmanKidushLevanaBetweenMoldos:
+            var_getSofZmanKidushLevanaBetweenMoldos,
+        getSofZmanKidushLevana15Days: var_getSofZmanKidushLevana15Days,
+        getTekufasTishreiElapsedDays: var_getTekufasTishreiElapsedDays,
+        isIsruChag: var_isIsruChag);
   }
 
   @protected
@@ -721,6 +1256,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int? sse_decode_opt_box_autoadd_i_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_i_32(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   (int, int, int)? sse_decode_opt_box_autoadd_record_i_32_u_8_u_8(
       SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -739,6 +1285,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_box_autoadd_record_string_i_64(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  int? sse_decode_opt_box_autoadd_u_8(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_u_8(deserializer));
     } else {
       return null;
     }
@@ -822,6 +1379,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_i_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_java_jewish_calendar_test_results(
+      JavaJewishCalendarTestResults self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_java_jewish_calendar_test_results(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_record_i_32_u_8_u_8(
       (int, int, int) self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -833,6 +1403,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       (String, PlatformInt64) self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_record_string_i_64(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_u_8(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_8(self, serializer);
   }
 
   @protected
@@ -851,6 +1427,59 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putPlatformInt64(self);
+  }
+
+  @protected
+  void sse_encode_java_jewish_calendar_test_results(
+      JavaJewishCalendarTestResults self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_bool(self.isUseModernHolidays, serializer);
+    sse_encode_bool(self.getInIsrael, serializer);
+    sse_encode_bool(self.getIsMukafChoma, serializer);
+    sse_encode_bool(self.isBirkasHachamah, serializer);
+    sse_encode_opt_box_autoadd_i_32(self.getParshah, serializer);
+    sse_encode_i_32(self.getUpcomingParshah, serializer);
+    sse_encode_opt_box_autoadd_i_32(self.getSpecialShabbos, serializer);
+    sse_encode_i_32(self.getYomTovIndex, serializer);
+    sse_encode_bool(self.isYomTov, serializer);
+    sse_encode_bool(self.isYomTovAssurBemelacha, serializer);
+    sse_encode_bool(self.isAssurBemelacha, serializer);
+    sse_encode_bool(self.hasCandleLighting, serializer);
+    sse_encode_bool(self.isTomorrowShabbosOrYomTov, serializer);
+    sse_encode_bool(self.isErevYomTovSheni, serializer);
+    sse_encode_bool(self.isAseresYemeiTeshuva, serializer);
+    sse_encode_bool(self.isPesach, serializer);
+    sse_encode_bool(self.isCholHamoedPesach, serializer);
+    sse_encode_bool(self.isShavuos, serializer);
+    sse_encode_bool(self.isRoshHashana, serializer);
+    sse_encode_bool(self.isYomKippur, serializer);
+    sse_encode_bool(self.isSuccos, serializer);
+    sse_encode_bool(self.isHoshanaRabba, serializer);
+    sse_encode_bool(self.isShminiAtzeres, serializer);
+    sse_encode_bool(self.isSimchasTorah, serializer);
+    sse_encode_bool(self.isCholHamoedSuccos, serializer);
+    sse_encode_bool(self.isCholHamoed, serializer);
+    sse_encode_bool(self.isErevYomTov, serializer);
+    sse_encode_bool(self.isErevRoshChodesh, serializer);
+    sse_encode_bool(self.isYomKippurKatan, serializer);
+    sse_encode_bool(self.isBeHaB, serializer);
+    sse_encode_bool(self.isTaanis, serializer);
+    sse_encode_bool(self.isTaanisBechoros, serializer);
+    sse_encode_opt_box_autoadd_u_8(self.getDayOfChanukah, serializer);
+    sse_encode_bool(self.isChanukah, serializer);
+    sse_encode_bool(self.isPurim, serializer);
+    sse_encode_bool(self.isRoshChodesh, serializer);
+    sse_encode_bool(self.isMacharChodesh, serializer);
+    sse_encode_bool(self.isShabbosMevorchim, serializer);
+    sse_encode_opt_box_autoadd_u_8(self.getDayOfOmer, serializer);
+    sse_encode_bool(self.isTishaBav, serializer);
+    sse_encode_i_64(self.getMoladAsInstant, serializer);
+    sse_encode_i_64(self.getTchilasZmanKidushLevana3Days, serializer);
+    sse_encode_i_64(self.getTchilasZmanKidushLevana7Days, serializer);
+    sse_encode_i_64(self.getSofZmanKidushLevanaBetweenMoldos, serializer);
+    sse_encode_i_64(self.getSofZmanKidushLevana15Days, serializer);
+    sse_encode_i_32(self.getTekufasTishreiElapsedDays, serializer);
+    sse_encode_bool(self.isIsruChag, serializer);
   }
 
   @protected
@@ -883,6 +1512,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_i_32(int? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_i_32(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_box_autoadd_record_i_32_u_8_u_8(
       (int, int, int)? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -901,6 +1540,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_box_autoadd_record_string_i_64(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_8(int? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_u_8(self, serializer);
     }
   }
 

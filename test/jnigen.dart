@@ -26,6 +26,8 @@ void main(List<String> args) {
         'com.kosherjava.zmanim.util.AstronomicalCalculator',
         'com.kosherjava.zmanim.util.GeoLocation',
         'com.kosherjava.zmanim.hebrewcalendar.JewishDate',
+        'com.kosherjava.zmanim.hebrewcalendar.JewishCalendar',
+        'com.kosherjava.zmanim.hebrewcalendar.Daf',
         // Java Time
         'java.time.ZonedDateTime',
         'java.time.LocalDateTime',
