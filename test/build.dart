@@ -5,7 +5,8 @@ void main(List<String> args) async {
   final rustCrateDir = Platform.script.resolve('rust');
   final rustflags = Platform.environment['RUSTFLAGS'];
 
-  final rustResult = await Process.run(
+  stderr.writeln("Building Rust crate...");
+  final rustProcess = await Process.start(
     'cargo',
     [
       'build',
@@ -17,15 +18,19 @@ void main(List<String> args) async {
       // we do this to explicitly show this important flag
       if (rustflags != null) 'RUSTFLAGS': rustflags,
     },
+    mode: ProcessStartMode.inheritStdio,
   );
-  if (rustResult.exitCode != 0) {
-    stderr.writeln(rustResult.stderr);
-    exit(rustResult.exitCode);
+  final rustExitCode = await rustProcess.exitCode;
+  if (rustExitCode != 0) {
+    stderr.writeln("Rust build failed with exit code $rustExitCode");
+    exit(rustExitCode);
   }
 
   // Build the Java library
   final javaDir = Platform.script.resolve('java');
-  final javaResult = await Process.run(
+
+  stderr.writeln("Building Java library...");
+  final javaProcess = await Process.start(
     'mvn',
     [
       '-q',
@@ -38,10 +43,13 @@ void main(List<String> args) async {
     includeParentEnvironment: true,
     runInShell: true,
     workingDirectory: javaDir.toFilePath(),
+    mode: ProcessStartMode.inheritStdio,
   );
-  if (javaResult.exitCode != 0) {
-    stderr.writeln(javaResult.stderr);
-    exit(javaResult.exitCode);
+  final javaExitCode = await javaProcess.exitCode;
+
+  if (javaExitCode != 0) {
+    stderr.writeln("Java build failed with exit code $javaExitCode");
+    exit(javaExitCode);
   }
   stderr.writeln("Build complete");
 }

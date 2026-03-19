@@ -8,7 +8,6 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:test_with_java/src/rust/api.dart';
 import 'package:test_with_java/src/rust/frb_generated.dart';
 import 'package:jni/jni.dart';
-import 'package:test_with_java/src/test_case.dart';
 
 import 'package:config/config.dart';
 
@@ -20,8 +19,11 @@ const SECONDS_MS = 1000;
 /// Default max difference in milliseconds
 const DEFAULT_MAX_DIFF_MS = 30000;
 
-const MAX_YEAR = 2040;
-const MIN_YEAR = 1900;
+const MAX_GREGORIAN_YEAR = 2040;
+const MIN_GREGORIAN_YEAR = 1900;
+
+const MAX_JEWISH_YEAR = MAX_GREGORIAN_YEAR + 3760;
+const MIN_JEWISH_YEAR = MIN_GREGORIAN_YEAR + 3760;
 
 /// Global random instance
 late Random random;
@@ -77,6 +79,16 @@ Future<void> main(List<String> args) async {
 
   // Initialize Java runtime
   Jni.spawn(classPath: ["./java/target/zmanim-2.6.0-SNAPSHOT.jar"]);
+
+  for (var iteration = 0; iteration < iterations; iteration++) {
+    testGregorianDateToJewishDate();
+    testJewishDateToGregorianDate();
+    testAddDaysToJewishDate();
+    testAddMonthsToJewishDate();
+    testAddYearsToJewishDate();
+  }
+  print("All tests passed");
+  exit(0);
 }
 
 /// Convert a year to a timestamp in seconds
@@ -87,28 +99,31 @@ double yearToTimestamp(int year) {
 /// Return a random Jewish date between MIN_YEAR and MAX_YEAR
 /// The returned date is not guaranteed to be valid, but it will be between MIN_YEAR and MAX_YEAR
 (int, int, int) randomJewishDate() {
-  final year = random.nextInt(MAX_YEAR - MIN_YEAR + 1) + MIN_YEAR;
+  final year =
+      random.nextInt(MAX_JEWISH_YEAR - MIN_JEWISH_YEAR + 1) + MIN_JEWISH_YEAR;
   final month = random.nextInt(12) + 1;
-  final day = random.nextInt(30);
+  final day = random.nextInt(30) + 1;
   return (year, month, day);
 }
 
 /// Return a random Gregorian date between MIN_YEAR and MAX_YEAR
 /// The returned date IS guaranteed to be valid
 (int, int, int) randomGregorianDate() {
-  final timestamp =
-      random.getDouble(yearToTimestamp(MIN_YEAR), yearToTimestamp(MAX_YEAR));
+  final timestamp = random.getDouble(
+      yearToTimestamp(MIN_GREGORIAN_YEAR), yearToTimestamp(MAX_GREGORIAN_YEAR));
   final randomDateTime =
       DateTime.fromMillisecondsSinceEpoch((timestamp * 1000).toInt());
   return (randomDateTime.year, randomDateTime.month, randomDateTime.day);
 }
 
-void testJewishDateToGregorianDate() {
-  final (year, month, day) = randomJewishDate();
-  final rustResult =
-      gregorianDateToJewishDate(year: year, month: month, day: day);
-  final javaResult = javaJewishDateToGregorianDate(year, month, day);
-  switch ((rustResult, javaResult)) {
+/// Compare the results of the Rust and Java libraries for a given date
+testDates(
+    {required (int, int, int) date,
+    required String targetDateType,
+    (int, int, int)? javaDate,
+    (int, int, int)? rustDate}) {
+  final (year, month, day) = date;
+  switch ((javaDate, rustDate)) {
     case (null, null):
       return;
     case (null, (int _, int _, int _)):
@@ -116,26 +131,89 @@ void testJewishDateToGregorianDate() {
         year,
         month,
         day
-      )} to Gregorian date failed. Rust result: $rustResult, Java result: $javaResult");
+      )} to $targetDateType date failed. Rust result: $rustDate, Java result: $javaDate");
     case ((int _, int _, int _), null):
       throw Exception("Converting ${(
         year,
         month,
         day
-      )} to Gregorian date failed. Rust result: $rustResult, Java result: $javaResult");
+      )} to $targetDateType date failed. Rust result: $rustDate, Java result: $javaDate");
     case ((int _, int _, int _), (int _, int _, int _)):
-      if (rustResult != javaResult) {
+      if (rustDate != javaDate) {
         throw Exception("Converting ${(
           year,
           month,
           day
-        )} to Gregorian date failed. Rust result: $rustResult, Java result: $javaResult");
+        )} to $targetDateType date failed. Rust result: $rustDate, Java result: $javaDate");
       }
       return;
   }
 }
 
-(int, int, int)? javaJewishDateToGregorianDate(int year, int month, int day) {
+void testGregorianDateToJewishDate() {
+  final (year, month, day) = randomGregorianDate();
+  final rustResult =
+      gregorianDateToJewishDate(year: year, month: month, day: day);
+  final javaResult = javaGregorianDateToJewishDate(year, month, day);
+  testDates(
+      date: (year, month, day),
+      targetDateType: "Jewish",
+      javaDate: javaResult,
+      rustDate: rustResult);
+}
+
+void testJewishDateToGregorianDate() {
+  final (year, month, day) = randomJewishDate();
+  final rustResult =
+      jewishDateToGregorianDate(year: year, month: month, day: day);
+  final javaResult = javaJewishDateToGregorianDate(year, month, day);
+  testDates(
+      date: (year, month, day),
+      targetDateType: "Gregorian",
+      javaDate: javaResult,
+      rustDate: rustResult);
+}
+
+void testAddDaysToJewishDate() {
+  final (year, month, day) = randomJewishDate();
+  final daysToAdd = random.nextInt(365) + 1;
+  final rustResult = addDaysToJewishDate(
+      year: year, month: month, day: day, daysToAdd: daysToAdd);
+  final javaResult = javaAddDaysToJewishDate(year, month, day, daysToAdd);
+  testDates(
+      date: (year, month, day),
+      targetDateType: "Jewish after adding $daysToAdd days",
+      javaDate: javaResult,
+      rustDate: rustResult);
+}
+
+void testAddMonthsToJewishDate() {
+  final (year, month, day) = randomJewishDate();
+  final monthsToAdd = random.nextInt(120) + 1;
+  final rustResult = addMonthsToJewishDate(
+      year: year, month: month, day: day, monthsToAdd: monthsToAdd);
+  final javaResult = javaAddMonthsToJewishDate(year, month, day, monthsToAdd);
+  testDates(
+      date: (year, month, day),
+      targetDateType: "Jewish after adding $monthsToAdd months",
+      javaDate: javaResult,
+      rustDate: rustResult);
+}
+
+void testAddYearsToJewishDate() {
+  final (year, month, day) = randomJewishDate();
+  final yearsToAdd = random.nextInt(60) + 1;
+  final rustResult = addYearsToJewishDate(
+      year: year, month: month, day: day, yearsToAdd: yearsToAdd);
+  final javaResult = javaAddYearsToJewishDate(year, month, day, yearsToAdd);
+  testDates(
+      date: (year, month, day),
+      targetDateType: "Jewish after adding $yearsToAdd years",
+      javaDate: javaResult,
+      rustDate: rustResult);
+}
+
+(int, int, int)? javaGregorianDateToJewishDate(int year, int month, int day) {
   // Try up to 3 times to get the result
   for (final _ in Iterable.generate(3)) {
     try {
@@ -146,9 +224,74 @@ void testJewishDateToGregorianDate() {
         gregorianDate.getJewishMonth(),
         gregorianDate.getJewishDayOfMonth()
       );
-    } catch (e) {
-      print("Error: $e");
-    }
+    } catch (_) {}
+  }
+  return null;
+}
+
+(int, int, int)? javaAddDaysToJewishDate(
+    int year, int month, int day, int daysToAdd) {
+  for (final _ in Iterable.generate(3)) {
+    try {
+      final jewishDate = JewishDate.new$1(year, month, day);
+      jewishDate.addDays(daysToAdd);
+      return (
+        jewishDate.getJewishYear(),
+        jewishDate.getJewishMonth(),
+        jewishDate.getJewishDayOfMonth()
+      );
+    } catch (_) {}
+  }
+  return null;
+}
+
+(int, int, int)? javaAddMonthsToJewishDate(
+    int year, int month, int day, int monthsToAdd) {
+  for (final _ in Iterable.generate(3)) {
+    try {
+      final jewishDate = JewishDate.new$1(year, month, day);
+      jewishDate.addMonths(monthsToAdd);
+      return (
+        jewishDate.getJewishYear(),
+        jewishDate.getJewishMonth(),
+        jewishDate.getJewishDayOfMonth()
+      );
+    } catch (_) {}
+  }
+  return null;
+}
+
+(int, int, int)? javaAddYearsToJewishDate(
+    int year, int month, int day, int yearsToAdd) {
+  for (final _ in Iterable.generate(3)) {
+    try {
+      final jewishDate = JewishDate.new$1(year, month, day);
+      jewishDate.addYears(yearsToAdd);
+      return (
+        jewishDate.getJewishYear(),
+        jewishDate.getJewishMonth(),
+        jewishDate.getJewishDayOfMonth()
+      );
+    } catch (_) {}
+  }
+  return null;
+}
+
+(int, int, int)? javaJewishDateToGregorianDate(int year, int month, int day) {
+  // Try up to 3 times to get the result
+  for (final _ in Iterable.generate(3)) {
+    try {
+      final jewishDate = JewishDate.new$1(year, month, day);
+      final localDate = jewishDate.getLocalDate();
+      if (localDate == null) {
+        continue;
+      }
+      return (
+        localDate.getYear(),
+        localDate.getMonthValue(),
+        localDate.getDayOfMonth()
+      );
+    } catch (_) {}
   }
   return null;
 }

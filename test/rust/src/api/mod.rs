@@ -4,7 +4,12 @@ use chrono::{Duration, NaiveDate};
 use chrono_tz::{Tz, TZ_VARIANTS};
 use flutter_rust_bridge::frb;
 use hebrew_holiday_calendar::{HebrewHolidayCalendar, HebrewMonth};
-use icu_calendar::{cal::Hebrew, options::DateAddOptions, types::DateDuration, Date, Gregorian};
+use icu_calendar::{
+    cal::Hebrew,
+    options::{DateAddOptions, Overflow},
+    types::{DateDuration, MonthCode},
+    Date, Gregorian,
+};
 use lazy_static::lazy_static;
 use zmanim_calculator::{prelude::*, presets::ALL};
 
@@ -73,11 +78,21 @@ pub fn calculate_zman(
 pub fn presets() -> Vec<ZmanimPreset> {
     ALL.iter().map(|zman| ZmanimPreset { zman }).collect()
 }
+/// Creates dates similar to Javas constructor which will clamp a day that is too high
+/// instead of failing outright
+fn create_clamped_hebrew_date(year: i32, month: u8, day: u8) -> Option<Date<Hebrew>> {
+    if let Some(date) =
+        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day)
+    {
+        Some(date)
+    } else {
+        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day - 1)
+    }
+}
 
 #[frb(sync)]
 pub fn jewish_date_to_gregorian_date(year: i32, month: u8, day: u8) -> Option<(i32, u8, u8)> {
-    let date =
-        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day).unwrap();
+    let date = create_clamped_hebrew_date(year, month, day)?;
     let gregorian_date = date.to_calendar(Gregorian);
     Some((
         gregorian_date.extended_year(),
@@ -91,7 +106,7 @@ pub fn gregorian_date_to_jewish_date(year: i32, month: u8, day: u8) -> Option<(i
     let hebrew_date = date.to_calendar(Hebrew);
     Some((
         hebrew_date.extended_year(),
-        hebrew_date.month().month_number(),
+        hebrew_date.hebrew_month().into(),
         hebrew_date.day_of_month().0,
     ))
 }
@@ -102,16 +117,14 @@ pub fn add_days_to_jewish_date(
     day: u8,
     days_to_add: i64,
 ) -> Option<(i32, u8, u8)> {
-    let mut date =
-        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day).unwrap();
-    date.try_add_with_options(
-        DateDuration::for_days(days_to_add),
-        DateAddOptions::default(),
-    )
-    .ok()?;
+    let mut date = create_clamped_hebrew_date(year, month, day)?;
+    let mut options = DateAddOptions::default();
+    options.overflow = Some(Overflow::Constrain);
+    date.try_add_with_options(DateDuration::for_days(days_to_add), options)
+        .unwrap();
     Some((
         date.extended_year(),
-        date.month().month_number(),
+        date.hebrew_month().into(),
         date.day_of_month().0,
     ))
 }
@@ -122,16 +135,14 @@ pub fn add_months_to_jewish_date(
     day: u8,
     months_to_add: i32,
 ) -> Option<(i32, u8, u8)> {
-    let mut date =
-        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day).unwrap();
-    date.try_add_with_options(
-        DateDuration::for_months(months_to_add),
-        DateAddOptions::default(),
-    )
-    .ok()?;
+    let mut date = create_clamped_hebrew_date(year, month, day)?;
+    let mut options = DateAddOptions::default();
+    options.overflow = Some(Overflow::Constrain);
+    date.try_add_with_options(DateDuration::for_months(months_to_add), options)
+        .unwrap();
     Some((
         date.extended_year(),
-        date.month().month_number(),
+        date.hebrew_month().into(),
         date.day_of_month().0,
     ))
 }
@@ -142,16 +153,15 @@ pub fn add_years_to_jewish_date(
     day: u8,
     years_to_add: i32,
 ) -> Option<(i32, u8, u8)> {
-    let mut date =
-        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day).unwrap();
-    date.try_add_with_options(
-        DateDuration::for_years(years_to_add),
-        DateAddOptions::default(),
-    )
-    .ok()?;
+    let mut date = create_clamped_hebrew_date(year, month, day)?;
+    let mut options = DateAddOptions::default();
+    options.overflow = Some(Overflow::Constrain);
+    date.try_add_with_options(DateDuration::for_years(years_to_add), options)
+        .unwrap();
+
     Some((
         date.extended_year(),
-        date.month().month_number(),
+        date.hebrew_month().into(),
         date.day_of_month().0,
     ))
 }
