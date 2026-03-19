@@ -86,6 +86,7 @@ Future<void> main(List<String> args) async {
     testAddDaysToJewishDate();
     testAddMonthsToJewishDate();
     testAddYearsToJewishDate();
+    testMinusDaysToJewishDate();
   }
   print("All tests passed");
   exit(0);
@@ -176,13 +177,31 @@ void testJewishDateToGregorianDate() {
 
 void testAddDaysToJewishDate() {
   final (year, month, day) = randomJewishDate();
-  final daysToAdd = random.nextInt(365) + 1;
+  final daysToAdd = random.nextInt(600) + 1;
   final rustResult = addDaysToJewishDate(
       year: year, month: month, day: day, daysToAdd: daysToAdd);
   final javaResult = javaAddDaysToJewishDate(year, month, day, daysToAdd);
   testDates(
       date: (year, month, day),
       targetDateType: "Jewish after adding $daysToAdd days",
+      javaDate: javaResult,
+      rustDate: rustResult);
+}
+
+void testMinusDaysToJewishDate() {
+  final (year, month, day) = randomJewishDate();
+  final daysToAdd = random.nextInt(600) + 1;
+
+  final rustResult = addDaysToJewishDate(
+    year: year,
+    month: month,
+    day: day,
+    daysToAdd: -daysToAdd, // We subtract in rust by adding a negative number
+  );
+  final javaResult = javaMinusDaysToJewishDate(year, month, day, daysToAdd);
+  testDates(
+      date: (year, month, day),
+      targetDateType: "Jewish after subtracting $daysToAdd days",
       javaDate: javaResult,
       rustDate: rustResult);
 }
@@ -245,6 +264,22 @@ void testAddYearsToJewishDate() {
   return null;
 }
 
+(int, int, int)? javaMinusDaysToJewishDate(
+    int year, int month, int day, int daysToSubtract) {
+  for (final _ in Iterable.generate(3)) {
+    try {
+      final jewishDate = JewishDate.new$1(year, month, day);
+      jewishDate.minusDays(daysToSubtract);
+      return (
+        jewishDate.getJewishYear(),
+        jewishDate.getJewishMonth(),
+        jewishDate.getJewishDayOfMonth()
+      );
+    } catch (_) {}
+  }
+  return null;
+}
+
 (int, int, int)? javaAddMonthsToJewishDate(
     int year, int month, int day, int monthsToAdd) {
   for (final _ in Iterable.generate(3)) {
@@ -266,7 +301,8 @@ void testAddYearsToJewishDate() {
   for (final _ in Iterable.generate(3)) {
     try {
       final jewishDate = JewishDate.new$1(year, month, day);
-      jewishDate.addYears(yearsToAdd);
+      // Skips to Adar II in a leap year
+      jewishDate.addYears(yearsToAdd, false);
       return (
         jewishDate.getJewishYear(),
         jewishDate.getJewishMonth(),

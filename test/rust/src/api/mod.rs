@@ -7,7 +7,7 @@ use hebrew_holiday_calendar::{HebrewHolidayCalendar, HebrewMonth};
 use icu_calendar::{
     cal::Hebrew,
     options::{DateAddOptions, Overflow},
-    types::{DateDuration, MonthCode},
+    types::DateDuration,
     Date, Gregorian,
 };
 use lazy_static::lazy_static;

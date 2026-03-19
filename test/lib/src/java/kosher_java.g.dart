@@ -21238,6 +21238,54 @@ class JewishDate extends jni$_.JObject {
         .check();
   }
 
+  static final _id_setJewishMonth = _class.instanceMethodId(
+    r'setJewishMonth',
+    r'(I)V',
+  );
+
+  static final _setJewishMonth = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setJewishMonth(int month)`
+  void setJewishMonth(
+    int month,
+  ) {
+    _setJewishMonth(
+            reference.pointer, _id_setJewishMonth as jni$_.JMethodIDPtr, month)
+        .check();
+  }
+
+  static final _id_setJewishYear = _class.instanceMethodId(
+    r'setJewishYear',
+    r'(I)V',
+  );
+
+  static final _setJewishYear = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setJewishYear(int year)`
+  void setJewishYear(
+    int year,
+  ) {
+    _setJewishYear(
+            reference.pointer, _id_setJewishYear as jni$_.JMethodIDPtr, year)
+        .check();
+  }
+
   static final _id_getLocalDate = _class.instanceMethodId(
     r'getLocalDate',
     r'()Ljava/time/LocalDate;',
@@ -21361,24 +21409,27 @@ class JewishDate extends jni$_.JObject {
 
   static final _id_addYears = _class.instanceMethodId(
     r'addYears',
-    r'(I)V',
+    r'(IZ)V',
   );
 
   static final _addYears = jni$_.ProtectedJniExtensions.lookup<
-          jni$_.NativeFunction<
-              jni$_.JThrowablePtr Function(
-                  jni$_.Pointer<jni$_.Void>,
-                  jni$_.JMethodIDPtr,
-                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+              jni$_.NativeFunction<
+                  jni$_.JThrowablePtr Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Int32, jni$_.Int32)>)>>(
+          'globalEnv_CallVoidMethod')
       .asFunction<
           jni$_.JThrowablePtr Function(
-              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int)>();
 
-  /// from: `public void addYears(int years)`
+  /// from: `public void addYears(int years, boolean useAdarAlephInLeapYear)`
   void addYears(
     int years,
+    bool useAdarAlephInLeapYear,
   ) {
-    _addYears(reference.pointer, _id_addYears as jni$_.JMethodIDPtr, years)
+    _addYears(reference.pointer, _id_addYears as jni$_.JMethodIDPtr, years,
+            useAdarAlephInLeapYear ? 1 : 0)
         .check();
   }
 
