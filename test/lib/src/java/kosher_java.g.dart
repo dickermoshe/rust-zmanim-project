@@ -7962,7 +7962,7 @@ final class $ZoneId$Type$ extends jni$_.JType<ZoneId> {
 /// API. The real power of this API is the ease in calculating _zmanim_ that are not part of the library. The methods for
 /// _zmanim_ calculations not present in this class or it's superclass  ZmanimCalendar are contained in the
 /// AstronomicalCalendar, the base class of the calendars in our API since they are generic methods for calculating
-/// time based on degrees or time before or after \#getSunrise() sunrise and \#getSunset() sunset and are of interest
+/// time based on degrees or time before or after \#getSunriseWithElevation() sunrise and \#getSunsetWithElevation() sunset and are of interest
 /// for calculation beyond _zmanim_ calculations. Here are some examples.
 /// First create the Calendar for the location you would like to calculate:
 ///
@@ -8358,11 +8358,11 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// from: `public long getShaahZmanis72MinutesZmanis()`
   ///
   /// Method to return a _shaah zmanis_ (temporal hour) according to the opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_ being
-  /// \#getAlos72Zmanis() 72 minutes _zmaniyos_ before \#getSunrise() sunrise. This calculation
+  /// \#getAlos72Zmanis() 72 minutes _zmaniyos_ before \#getSunriseWithElevation() sunrise. This calculation
   /// divides the day based on the opinion of the MGA that the day runs from dawn to dusk. Dawn for this calculation
   /// is 72 minutes _zmaniyos_ before sunrise and dusk is 72 minutes _zmaniyos_ after sunset. This day
   /// is split into 12 equal parts with each part being a _shaah zmanis_. This is identical to 1/10th of the day
-  /// from \#getSunrise() sunrise to \#getSunset() sunset.
+  /// from \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset.
   ///@return the <code>long</code> millisecond length of a _shaah zmanis_. If the calculation can't be computed
   ///         such as in the Arctic Circle where there is at least one day a year where the sun does not rise, and one
   ///         where it does not set, a Long\#MIN_VALUE will be returned. See detailed explanation on top of the
@@ -8429,11 +8429,11 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// from: `public long getShaahZmanis90MinutesZmanis()`
   ///
   /// Method to return a _shaah zmanis_ (temporal hour) according to the opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_ being
-  /// \#getAlos90Zmanis() 90 minutes _zmaniyos_ before \#getSunrise() sunrise. This calculation divides
+  /// \#getAlos90Zmanis() 90 minutes _zmaniyos_ before \#getSunriseWithElevation() sunrise. This calculation divides
   /// the day based on the opinion of the MGA that the day runs from dawn to dusk. Dawn for this calculation is 90 minutes
   /// _zmaniyos_ before sunrise and dusk is 90 minutes _zmaniyos_ after sunset. This day is split into 12 equal
-  /// parts with each part being a _shaah zmanis_. This is 1/8th of the day from \#getSunrise() sunrise to
-  /// \#getSunset() sunset.
+  /// parts with each part being a _shaah zmanis_. This is 1/8th of the day from \#getSunriseWithElevation() sunrise to
+  /// \#getSunsetWithElevation() sunset.
   ///@return the <code>long</code> millisecond length of a _shaah zmanis_. If the calculation can't be computed
   ///         such as in the Arctic Circle where there is at least one day a year where the sun does not rise, and one
   ///         where it does not set, a Long\#MIN_VALUE will be returned. See detailed explanation on top of the
@@ -8466,11 +8466,11 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
 
   /// from: `public long getShaahZmanis96MinutesZmanis()`
   ///
-  /// Method to return a _shaah zmanis_ (temporal hour) according to the opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_ being \#getAlos96Zmanis() 96 minutes _zmaniyos_ before \#getSunrise() sunrise. This calculation divides the
+  /// Method to return a _shaah zmanis_ (temporal hour) according to the opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_ being \#getAlos96Zmanis() 96 minutes _zmaniyos_ before \#getSunriseWithElevation() sunrise. This calculation divides the
   /// day based on the opinion of the MGA that the day runs from dawn to dusk. Dawn for this calculation is 96 minutes
   /// _zmaniyos_ before sunrise and dusk is 96 minutes _zmaniyos_ after sunset. This day is split into 12
   /// equal parts with each part being a _shaah zmanis_. This is identical to 1/7.5th of the day from
-  /// \#getSunrise() sunrise to \#getSunset() sunset.
+  /// \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset.
   ///@return the <code>long</code> millisecond length of a _shaah zmanis_. If the calculation can't be computed
   ///         such as in the Arctic Circle where there is at least one day a year where the sun does not rise, and one
   ///         where it does not set, a Long\#MIN_VALUE will be returned. See detailed explanation on top of the
@@ -8505,8 +8505,8 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// Method to return a _shaah zmanis_ (temporal hour) according to the opinion of the
   /// _Chacham_ Yosef Harari-Raful of Yeshivat Ateret Torah calculated with _alos_ being 1/10th
   /// of sunrise to sunset day, or \#getAlos72Zmanis() 72 minutes _zmaniyos_ of such a day before
-  /// \#getSunrise() sunrise, and _tzais_ is usually calculated as \#getTzaisAteretTorah() 40
-  /// minutes (configurable to any offset via \#setAteretTorahSunsetOffset(double)) after \#getSunset() sunset. This day is split into 12 equal parts with each part being a _shaah zmanis_. Note that with this
+  /// \#getSunriseWithElevation() sunrise, and _tzais_ is usually calculated as \#getTzaisAteretTorah() 40
+  /// minutes (configurable to any offset via \#setAteretTorahSunsetOffset(double)) after \#getSunsetWithElevation() sunset. This day is split into 12 equal parts with each part being a _shaah zmanis_. Note that with this
   /// system, _chatzos_ (midday) will not be the point that the sun is \#getSunTransit() halfway across
   /// the sky.
   ///@return the <code>long</code> millisecond length of a _shaah zmanis_. If the calculation can't be computed
@@ -8696,11 +8696,11 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
 
   /// from: `public long getShaahZmanis120MinutesZmanis()`
   ///
-  /// Method to return a _shaah zmanis_ (temporal hour) according to the opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_ being \#getAlos120Zmanis() 120 minutes _zmaniyos_ before \#getSunrise() sunrise. This calculation divides
+  /// Method to return a _shaah zmanis_ (temporal hour) according to the opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_ being \#getAlos120Zmanis() 120 minutes _zmaniyos_ before \#getSunriseWithElevation() sunrise. This calculation divides
   /// the day based on the opinion of the MGA that the day runs from dawn to dusk. Dawn for this calculation is
   /// 120 minutes _zmaniyos_ before sunrise and dusk is 120 minutes _zmaniyos_ after sunset. This day is
   /// split into 12 equal parts with each part being a _shaah zmanis_. This is identical to 1/6th of the day from
-  /// \#getSunrise() sunrise to \#getSunset() sunset. Since _zmanim_ that use this method are
+  /// \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset. Since _zmanim_ that use this method are
   /// extremely late or early and at a point when the sky is a long time past the 18&deg; point where the darkest point
   /// is reached, _zmanim_ that use this should only be used _lechumra_ such as delaying the start of
   /// nighttime _mitzvos_.
@@ -8821,7 +8821,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// from: `public java.time.Instant getAlos60()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// Method to return _alos_ (dawn) calculated as 60 minutes before \#getSunrise() sunrise or
+  /// Method to return _alos_ (dawn) calculated as 60 minutes before \#getSunriseWithElevation() sunrise or
   /// \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting). This is the
   /// time to walk the distance of 4 <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> at 15 minutes a mil. This seems to be the opinion of the
   /// <a href="https://en.wikipedia.org/wiki/Yair_Bacharach">Chavas Yair</a> in the Mekor Chaim, Orach Chaim Ch. 90,
@@ -8871,7 +8871,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// Method to return _alos_ (dawn) calculated using 72 minutes _zmaniyos_ or 1/10th of the day before
   /// sunrise. This is based on an 18-minute <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> so the time for 4 mil is
   /// 72 minutes which is 1/10th of a day (12 * 60 = 720) based on the day being from \#getSeaLevelSunrise() sea
-  /// level sunrise to \#getSeaLevelSunset() sea level sunset or \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation() setting). The actual calculation is \#getElevationAdjustedSunrise() - (\#getShaahZmanisGra() * 1.2). This calculation is used in the calendars
+  /// level sunrise to \#getSeaLevelSunset() sea level sunset or \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation() setting). The actual calculation is \#getSunriseBasedOnElevationSetting() - (\#getShaahZmanisGra() * 1.2). This calculation is used in the calendars
   /// published by the <a href="https://en.wikipedia.org/wiki/Central_Rabbinical_Congress">Hisachdus Harabanim D'Artzos Habris
   /// Ve'Canada</a>.
   ///@return the <code>Instant</code> representing the time. If the calculation can't be computed such as in the Arctic
@@ -8905,7 +8905,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// from: `public java.time.Instant getAlos96()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// Method to return _alos_ (dawn) calculated using 96 minutes before \#getSunrise() sunrise or
+  /// Method to return _alos_ (dawn) calculated using 96 minutes before \#getSunriseWithElevation() sunrise or
   /// \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting) that is based
   /// on the time to walk the distance of 4 <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> at 24 minutes a mil.
   /// Time based offset calculations for _alos_ are based on the opinion of the _<a href="https://en.wikipedia.org/wiki/Rishonim">Rishonim</a>_ who stated that the time of the _Neshef_ (time between
@@ -8941,9 +8941,9 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Method to return _alos_ (dawn) calculated using 90 minutes _zmaniyos_ or 1/8th of the day before
-  /// \#getSunrise() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting). This is based on a 22.5-minute <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> so the time for 4
-  /// mil is 90 minutes which is 1/8th of a day (12 * 60) / 8 = 90. The day is calculated from \#getSeaLevelSunrise() sea level sunrise to \#getSeaLevelSunset() sea level sunset or \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation(). The actual calculation used
-  /// is \#getElevationAdjustedSunrise() - (\#getShaahZmanisGra() * 1.5).
+  /// \#getSunriseWithElevation() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting). This is based on a 22.5-minute <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> so the time for 4
+  /// mil is 90 minutes which is 1/8th of a day (12 * 60) / 8 = 90. The day is calculated from \#getSeaLevelSunrise() sea level sunrise to \#getSeaLevelSunset() sea level sunset or \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation(). The actual calculation used
+  /// is \#getSunriseBasedOnElevationSetting() - (\#getShaahZmanisGra() * 1.5).
   ///@return the <code>Instant</code> representing the time. If the calculation can't be computed such as in the Arctic
   ///         Circle where there is at least one day a year where the sun does not rise, and one where it does not set,
   ///         a <code>null</code> will be returned. See detailed explanation on top of the AstronomicalCalendar
@@ -8976,9 +8976,9 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// This method returns _alos_ (dawn) calculated using 96 minutes _zmaniyos_ or 1/7.5th of the day before
-  /// \#getSunrise() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting). This is based on a 24-minute <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> so the time for 4 mil is 96
+  /// \#getSunriseWithElevation() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting). This is based on a 24-minute <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> so the time for 4 mil is 96
   /// minutes which is 1/7.5th of a day (12 * 60 / 7.5 = 96). The day is calculated from \#getSeaLevelSunrise() sea
-  /// level sunrise to \#getSeaLevelSunset() sea level sunset or \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation(). The actual calculation used is \#getElevationAdjustedSunrise()
+  /// level sunrise to \#getSeaLevelSunset() sea level sunset or \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation(). The actual calculation used is \#getSunriseBasedOnElevationSetting()
   /// - (\#getShaahZmanisGra() * 1.6).
   ///@return the <code>Instant</code> representing the time. If the calculation can't be computed such as in the Arctic
   ///         Circle where there is at least one day a year where the sun does not rise, and one where it does not set,
@@ -9011,7 +9011,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// from: `public java.time.Instant getAlos90()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// Method to return _alos_ (dawn) calculated using 90 minutes before \#getSunrise() sunrise or
+  /// Method to return _alos_ (dawn) calculated using 90 minutes before \#getSunriseWithElevation() sunrise or
   /// \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting) based
   /// on the time to walk the distance of 4 <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> at 22.5 minutes a
   /// mil. Time-based offset calculations for _alos_ are based on the opinion of the _<a href="https://en.wikipedia.org/wiki/Rishonim">Rishonim</a>_ who stated that the time of the _Neshef_
@@ -9047,7 +9047,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// This method should be used _lechumra_ only and returns _alos_ (dawn) calculated using 120 minutes
-  /// before \#getSunrise() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting) based on the time to walk the distance of 5 <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> (_Ula_) at 24 minutes a
+  /// before \#getSunriseWithElevation() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting) based on the time to walk the distance of 5 <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> (_Ula_) at 24 minutes a
   /// mil. Time based offset calculations for _alos_ are based on the* opinion of the _<a href="https://en.wikipedia.org/wiki/Rishonim">Rishonim</a>_ who stated that the time of the _neshef_ (time
   /// between dawn and sunrise) does not vary by the time of year or location but purely depends on the time it takes to
   /// walk the distance of 5 mil (_Ula_). Since this time is extremely early, it should only be used _lechumra_,
@@ -9089,12 +9089,12 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// This method should be used _lechumra_ only and  method returns _alos_ (dawn) calculated using
-  /// 120 minutes _zmaniyos_ or 1/6th of the day before \#getSunrise() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting). This is based
+  /// 120 minutes _zmaniyos_ or 1/6th of the day before \#getSunriseWithElevation() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting). This is based
   /// on a 24-minute <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> so
   /// the time for 5 mil is 120 minutes which is 1/6th of a day (12 * 60 / 6 = 120). The day is calculated
   /// from \#getSeaLevelSunrise() sea level sunrise to \#getSeaLevelSunset() sea level sunset or
-  /// \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation(). The
-  /// actual calculation used is \#getSunrise() - (\#getShaahZmanisGra() * 2). Since this time is
+  /// \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation(). The
+  /// actual calculation used is \#getSunriseWithElevation() - (\#getShaahZmanisGra() * 2). Since this time is
   /// extremely early, it should only be used _lechumra_, such
   /// as not eating after this time on a fast day, and not as the start time for _mitzvos_ that can only be
   /// performed during the day.
@@ -9322,7 +9322,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns _misheyakir_ based on the position of the sun \#ZENITH_12_POINT_85 12.85&deg;
   /// below \#GEOMETRIC_ZENITH geometric zenith (90&deg;). This is based on the position of the sun slightly
-  /// later than 57 minutes before \#getSunrise() sunrise in Jerusalem <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox / equilux</a>. This
+  /// later than 57 minutes before \#getSunriseWithElevation() sunrise in Jerusalem <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox / equilux</a>. This
   /// _zman_ is mentioned for use ___bish'as hadchak___ in the Birur Halacha <a href="https://hebrewbooks.org/pdfpager.aspx?req=50535&st=&pgnum=88">Tinyana</a> and <a href="https://hebrewbooks.org/pdfpager.aspx?req=50537&st=&pgnum=31">Tlisa'ah</a> in  Orach Chaim siman 18 as 12.85&deg;.
   /// Actual calculations show it to be slightly more than 12.9&deg;, but the Birur Halacha indicates that 12.85&deg; is a
   /// slight _chumra_ (on a _bedieved_ time) VS the 12.9&deg; that 57 minutes calculates as (a difference of
@@ -9381,7 +9381,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns _misheyakir_ based on the position of the sun when it is \#ZENITH_11_DEGREES 11.5&deg; below \#GEOMETRIC_ZENITH geometric zenith (90&deg;). This calculation is used for calculating
   /// _misheyakir_ according to some opinions. This calculation is based on the position of the sun 52 minutes
-  /// before \#getSunrise() sunrise in Jerusalem <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox / equilux</a>,
+  /// before \#getSunriseWithElevation() sunrise in Jerusalem <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox / equilux</a>,
   /// which calculates to 11.5&deg; below \#GEOMETRIC_ZENITH geometric zenith.
   ///@todo recalculate.
   ///@return the <code>Instant</code> of _misheyakir_. If the calculation can't be computed such as northern and
@@ -9417,7 +9417,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns _misheyakir_ based on the position of the sun when it is \#ZENITH_11_DEGREES 11&deg; below \#GEOMETRIC_ZENITH geometric zenith (90&deg;). This calculation is used for calculating
   /// _misheyakir_ according to some opinions. This calculation is based on the position of the sun 48 minutes
-  /// before \#getSunrise() sunrise in Jerusalem <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox / equilux</a>,
+  /// before \#getSunriseWithElevation() sunrise in Jerusalem <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox / equilux</a>,
   /// which calculates to 11&deg; below \#GEOMETRIC_ZENITH geometric zenith.
   ///@return If the calculation can't be computed such as northern and southern locations even south of the Arctic
   ///         Circle and north of the Antarctic Circle where the sun may not reach low enough below the horizon for
@@ -9453,7 +9453,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns _misheyakir_ based on the position of the sun when it is \#ZENITH_10_POINT_2 10.2&deg; below \#GEOMETRIC_ZENITH geometric zenith (90&deg;). This calculation is used for calculating
   /// _misheyakir_ according to some opinions. This calculation is based on the position of the sun 45 minutes
-  /// before \#getSunrise() sunrise in Jerusalem <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox</a> which calculates
+  /// before \#getSunriseWithElevation() sunrise in Jerusalem <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox</a> which calculates
   /// to 10.2&deg; below \#GEOMETRIC_ZENITH geometric zenith.
   ///@return the <code>Instant</code> of _misheyakir_. If the calculation can't be computed such as
   ///         northern and southern locations even south of the Arctic Circle and north of the Antarctic Circle where
@@ -9576,7 +9576,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman krias shema_ (time to recite Shema in the morning) according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos19Point8Degrees() 19.8&deg; before \#getSunrise() sunrise. This
+  /// _alos_ being \#getAlos19Point8Degrees() 19.8&deg; before \#getSunriseWithElevation() sunrise. This
   /// time is 3 \#getShaahZmanis19Point8Degrees() _shaos zmaniyos_ (solar hours) after \#getAlos19Point8Degrees() dawn based on the opinion of the MGA that the day is calculated from dawn to nightfall
   /// with both being 19.8&deg; below sunrise or sunset. This returns the time of 3 *
   /// \#getShaahZmanis19Point8Degrees() after \#getAlos19Point8Degrees() dawn.
@@ -9615,7 +9615,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman krias shema_ (time to recite Shema in the morning) according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based
-  /// on _alos_ being \#getAlos16Point1Degrees() 16.1&deg; before \#getSunrise() sunrise. This time
+  /// on _alos_ being \#getAlos16Point1Degrees() 16.1&deg; before \#getSunriseWithElevation() sunrise. This time
   /// is 3 \#getShaahZmanis16Point1Degrees() _shaos zmaniyos_ (solar hours) after
   /// \#getAlos16Point1Degrees() dawn based on the opinion of the MGA that the day is calculated from
   /// dawn to nightfall with both being 16.1&deg; below sunrise or sunset. This returns the time of
@@ -9655,7 +9655,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman krias shema_ (time to recite Shema in the morning) according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based
-  /// on _alos_ being \#getAlos18Degrees() 18&deg; before \#getSunrise() sunrise. This time is 3
+  /// on _alos_ being \#getAlos18Degrees() 18&deg; before \#getSunriseWithElevation() sunrise. This time is 3
   /// \#getShaahZmanis18Degrees() _shaos zmaniyos_ (solar hours) after \#getAlos18Degrees() dawn
   /// based on the opinion of the MGA that the day is calculated from dawn to nightfall with both being 18&deg;
   /// below sunrise or sunset. This returns the time of 3 * \#getShaahZmanis18Degrees() after
@@ -9695,7 +9695,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman krias shema_ (time to recite Shema in the morning) according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos72() 72 minutes before \#getSunrise() sunrise. This time is 3 \#getShaahZmanis72Minutes() _shaos zmaniyos_ (solar hours) after \#getAlos72() dawn based on the opinion
+  /// _alos_ being \#getAlos72() 72 minutes before \#getSunriseWithElevation() sunrise. This time is 3 \#getShaahZmanis72Minutes() _shaos zmaniyos_ (solar hours) after \#getAlos72() dawn based on the opinion
   /// of the MGA that the day is calculated from a \#getAlos72() dawn of 72 minutes before sunrise to
   /// \#getTzais72() nightfall of 72 minutes after sunset. This returns the time of 3 * \#getShaahZmanis72Minutes() after \#getAlos72() dawn. This class returns an identical time to \#getSofZmanShmaMGA() and is repeated here for clarity.
   ///@return the <code>Instant</code> of the latest _zman krias shema_. If the calculation can't be computed such
@@ -9736,7 +9736,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// This method returns the latest _zman krias shema_ (time to recite _Shema_ in the morning) according
   /// to the opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based
   /// on _alos_ being \#getAlos72Zmanis() 72 minutes _zmaniyos_, or 1/10th of the day before
-  /// \#getSunrise() sunrise. This time is 3 \#getShaahZmanis90MinutesZmanis() _shaos zmaniyos_
+  /// \#getSunriseWithElevation() sunrise. This time is 3 \#getShaahZmanis90MinutesZmanis() _shaos zmaniyos_
   /// (solar hours) after \#getAlos72Zmanis() dawn based on the opinion of the MGA that the day is calculated
   /// from a \#getAlos72Zmanis() dawn of 72 minutes _zmaniyos_, or 1/10th of the day before
   /// \#getSeaLevelSunrise() sea level sunrise to \#getTzais72Zmanis() nightfall of 72 minutes
@@ -9778,7 +9778,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman krias shema_ (time to recite _Shema_ in the morning) according
   /// to the opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos90() 90 minutes before \#getSunrise() sunrise. This time is 3
+  /// _alos_ being \#getAlos90() 90 minutes before \#getSunriseWithElevation() sunrise. This time is 3
   /// \#getShaahZmanis90Minutes() _shaos zmaniyos_ (solar hours) after \#getAlos90() dawn based on
   /// the opinion of the MGA that the day is calculated from a \#getAlos90() dawn of 90 minutes before sunrise to
   /// \#getTzais90() nightfall of 90 minutes after sunset. This returns the time of 3 *
@@ -9819,7 +9819,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman krias shema_ (time to recite Shema in the morning) according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based
-  /// on _alos_ being \#getAlos90Zmanis() 90 minutes _zmaniyos_ before \#getSunrise() sunrise. This time is 3 \#getShaahZmanis90MinutesZmanis() _shaos zmaniyos_ (solar hours) after
+  /// on _alos_ being \#getAlos90Zmanis() 90 minutes _zmaniyos_ before \#getSunriseWithElevation() sunrise. This time is 3 \#getShaahZmanis90MinutesZmanis() _shaos zmaniyos_ (solar hours) after
   /// \#getAlos90Zmanis() dawn based on the opinion of the MGA that the day is calculated from a \#getAlos90Zmanis() dawn of 90 minutes _zmaniyos_ before sunrise to \#getTzais90Zmanis() nightfall
   /// of 90 minutes _zmaniyos_ after sunset. This returns the time of 3 * \#getShaahZmanis90MinutesZmanis()
   /// after \#getAlos90Zmanis() dawn.
@@ -9859,7 +9859,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman krias shema_ (time to recite Shema in the morning) according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based
-  /// on _alos_ being \#getAlos96() 96 minutes before \#getSunrise() sunrise. This time is 3
+  /// on _alos_ being \#getAlos96() 96 minutes before \#getSunriseWithElevation() sunrise. This time is 3
   /// \#getShaahZmanis96Minutes() _shaos zmaniyos_ (solar hours) after \#getAlos96() dawn based on
   /// the opinion of the MGA that the day is calculated from a \#getAlos96() dawn of 96 minutes before
   /// sunrise to \#getTzais96() nightfall of 96 minutes after sunset. This returns the time of 3 * \#getShaahZmanis96Minutes() after \#getAlos96() dawn.
@@ -9899,7 +9899,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman krias shema_ (time to recite Shema in the morning) according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based
-  /// on _alos_ being \#getAlos90Zmanis() 96 minutes _zmaniyos_ before \#getSunrise() sunrise. This time is 3 \#getShaahZmanis96MinutesZmanis() _shaos zmaniyos_ (solar hours) after
+  /// on _alos_ being \#getAlos90Zmanis() 96 minutes _zmaniyos_ before \#getSunriseWithElevation() sunrise. This time is 3 \#getShaahZmanis96MinutesZmanis() _shaos zmaniyos_ (solar hours) after
   /// \#getAlos96Zmanis() dawn based on the opinion of the MGA that the day is calculated from a \#getAlos96Zmanis() dawn of 96 minutes _zmaniyos_ before sunrise to \#getTzais90Zmanis() nightfall
   /// of 96 minutes _zmaniyos_ after sunset. This returns the time of 3 * \#getShaahZmanis96MinutesZmanis()
   /// after \#getAlos96Zmanis() dawn.
@@ -9986,7 +9986,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman krias shema_ (time to recite Shema in the morning) according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based
-  /// on _alos_ being \#getAlos120() 120 minutes or 1/6th of the day before \#getSunrise() sunrise.
+  /// on _alos_ being \#getAlos120() 120 minutes or 1/6th of the day before \#getSunriseWithElevation() sunrise.
   /// This time is 3 \#getShaahZmanis120Minutes() _shaos zmaniyos_ (solar hours) after \#getAlos120() dawn based on the opinion of the MGA that the day is calculated from a \#getAlos120() dawn of 120 minutes
   /// before sunrise to \#getTzais120() nightfall of 120 minutes after sunset. This returns the time of 3
   /// \#getShaahZmanis120Minutes() after \#getAlos120() dawn. This is an extremely early _zman_ that
@@ -10113,7 +10113,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to recite the morning prayers) according to the opinion
   /// of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos19Point8Degrees() 19.8&deg; before \#getSunrise() sunrise. This time
+  /// _alos_ being \#getAlos19Point8Degrees() 19.8&deg; before \#getSunriseWithElevation() sunrise. This time
   /// is 4 \#getShaahZmanis19Point8Degrees() _shaos zmaniyos_ (solar hours) after \#getAlos19Point8Degrees() dawn based on the opinion of the MGA that the day is calculated from dawn to
   /// nightfall with both being 19.8&deg; below sunrise or sunset. This returns the time of 4 * \#getShaahZmanis19Point8Degrees() after \#getAlos19Point8Degrees() dawn.
   ///@return the <code>Instant</code> of the latest _zman krias shema_. If the calculation can't be computed such
@@ -10152,7 +10152,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to recite the morning prayers) according to the opinion
   /// of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos16Point1Degrees() 16.1&deg; before \#getSunrise() sunrise. This time
+  /// _alos_ being \#getAlos16Point1Degrees() 16.1&deg; before \#getSunriseWithElevation() sunrise. This time
   /// is 4 \#getShaahZmanis16Point1Degrees() _shaos zmaniyos_ (solar hours) after \#getAlos16Point1Degrees() dawn based on the opinion of the MGA that the day is calculated from dawn to
   /// nightfall with both being 16.1&deg; below sunrise or sunset. This returns the time of 4 * \#getShaahZmanis16Point1Degrees() after \#getAlos16Point1Degrees() dawn.
   ///@return the <code>Instant</code> of the latest _zman krias shema_. If the calculation can't be computed such
@@ -10190,7 +10190,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to recite the morning prayers) according to the opinion
   /// of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos18Degrees() 18&deg; before \#getSunrise() sunrise. This time is 4
+  /// _alos_ being \#getAlos18Degrees() 18&deg; before \#getSunriseWithElevation() sunrise. This time is 4
   /// \#getShaahZmanis18Degrees() _shaos zmaniyos_ (solar hours) after \#getAlos18Degrees() dawn
   /// based on the opinion of the MGA that the day is calculated from dawn to nightfall with both being 18&deg;
   /// below sunrise or sunset. This returns the time of 4 * \#getShaahZmanis18Degrees() after
@@ -10230,7 +10230,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to recite the morning prayers) according to the opinion
   /// of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos72() 72 minutes before \#getSunrise() sunrise. This time is 4
+  /// _alos_ being \#getAlos72() 72 minutes before \#getSunriseWithElevation() sunrise. This time is 4
   /// \#getShaahZmanis72Minutes() _shaos zmaniyos_ (solar hours) after \#getAlos72() dawn based on
   /// the opinion of the MGA that the day is calculated from a \#getAlos72() dawn of 72 minutes before
   /// sunrise to \#getTzais72() nightfall of 72 minutes after sunset. This returns the time of 4 *
@@ -10272,7 +10272,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to the morning prayers) according to the opinion of the
   /// <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_
-  /// being \#getAlos72Zmanis() 72 minutes _zmaniyos_ before \#getSunrise() sunrise. This time is 4
+  /// being \#getAlos72Zmanis() 72 minutes _zmaniyos_ before \#getSunriseWithElevation() sunrise. This time is 4
   /// \#getShaahZmanis72MinutesZmanis() _shaos zmaniyos_ (solar hours) after \#getAlos72Zmanis() dawn
   /// based on the opinion of the MGA that the day is calculated from a \#getAlos72Zmanis() dawn of 72
   /// minutes _zmaniyos_ before sunrise to \#getTzais72Zmanis() nightfall of 72 minutes _zmaniyos_
@@ -10312,7 +10312,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to recite the morning prayers) according to the opinion
   /// of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos90() 90 minutes before \#getSunrise() sunrise. This time is 4
+  /// _alos_ being \#getAlos90() 90 minutes before \#getSunriseWithElevation() sunrise. This time is 4
   /// \#getShaahZmanis90Minutes() _shaos zmaniyos_ (solar hours) after \#getAlos90() dawn based on
   /// the opinion of the MGA that the day is calculated from a \#getAlos90() dawn of 90 minutes before sunrise to
   /// \#getTzais90() nightfall of 90 minutes after sunset. This returns the time of 4 *
@@ -10352,7 +10352,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to the morning prayers) according to the opinion of the
   /// <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_
-  /// being \#getAlos90Zmanis() 90 minutes _zmaniyos_ before \#getSunrise() sunrise. This time is
+  /// being \#getAlos90Zmanis() 90 minutes _zmaniyos_ before \#getSunriseWithElevation() sunrise. This time is
   /// 4 \#getShaahZmanis90MinutesZmanis() _shaos zmaniyos_ (solar hours) after \#getAlos90Zmanis() dawn based on the opinion of the MGA that the day is calculated from a \#getAlos90Zmanis() dawn
   /// of 90 minutes _zmaniyos_ before sunrise to \#getTzais90Zmanis() nightfall of 90 minutes
   /// _zmaniyos_ after sunset. This returns the time of 4 * \#getShaahZmanis90MinutesZmanis() after
@@ -10392,7 +10392,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to recite the morning prayers) according to the opinion
   /// of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos96() 96 minutes before \#getSunrise() sunrise. This time is 4
+  /// _alos_ being \#getAlos96() 96 minutes before \#getSunriseWithElevation() sunrise. This time is 4
   /// \#getShaahZmanis96Minutes() _shaos zmaniyos_ (solar hours) after \#getAlos96() dawn based on
   /// the opinion of the MGA that the day is calculated from a \#getAlos96() dawn of 96 minutes before
   /// sunrise to \#getTzais96() nightfall of 96 minutes after sunset. This returns the time of 4 *
@@ -10432,7 +10432,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to the morning prayers) according to the opinion of the
   /// <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_
-  /// being \#getAlos96Zmanis() 96 minutes _zmaniyos_ before \#getSunrise() sunrise. This time is
+  /// being \#getAlos96Zmanis() 96 minutes _zmaniyos_ before \#getSunriseWithElevation() sunrise. This time is
   /// 4 \#getShaahZmanis96MinutesZmanis() _shaos zmaniyos_ (solar hours) after \#getAlos96Zmanis() dawn based on the opinion of the MGA that the day is calculated from a \#getAlos96Zmanis() dawn
   /// of 96 minutes _zmaniyos_ before sunrise to \#getTzais96Zmanis() nightfall of 96 minutes
   /// _zmaniyos_ after sunset. This returns the time of 4 * \#getShaahZmanis96MinutesZmanis() after
@@ -10472,7 +10472,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest _zman tfila_ (time to recite the morning prayers) according to the opinion
   /// of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on
-  /// _alos_ being \#getAlos120() 120 minutes before \#getSunrise() sunrise . This time is 4
+  /// _alos_ being \#getAlos120() 120 minutes before \#getSunriseWithElevation() sunrise . This time is 4
   /// \#getShaahZmanis120Minutes() _shaos zmaniyos_ (solar hours) after \#getAlos120() dawn
   /// based on the opinion of the MGA that the day is calculated from a \#getAlos120() dawn of 120
   /// minutes before sunrise to \#getTzais120() nightfall of 120 minutes after sunset. This returns the time of
@@ -11312,7 +11312,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// This method should be used _lechumra_ only and returns the time of _plag hamincha_ based on the opinion
-  /// that the day starts at \#getAlos16Point1Degrees() _alos_ 16.1&deg; and ends at \#getSunset() sunset.
+  /// that the day starts at \#getAlos16Point1Degrees() _alos_ 16.1&deg; and ends at \#getSunsetWithElevation() sunset.
   /// 10.75 _shaos zmaniyos_ are calculated based on this day and added to \#getAlos16Point1Degrees() _alos_ to reach this time. This time is 10.75 _shaos zmaniyos_ (temporal hours) after \#getAlos16Point1Degrees() dawn based on the opinion that the day is calculated from a \#getAlos16Point1Degrees() dawn of 16.1 degrees before sunrise to \#getSeaLevelSunset() sea level sunset. This returns the time of 10.75 *
   /// the calculated _shaah zmanis_ after \#getAlos16Point1Degrees() dawn. Since _plag_ by this
   /// calculation can occur after sunset, it should only be used _lechumra_.
@@ -12317,7 +12317,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// This method returns the _tzais_ (nightfall) based on the opinion of the <a href="https://en.wikipedia.org/wiki/Yair_Bacharach">Chavas Yair</a> and <a href="https://he.wikipedia.org/wiki/%D7%9E%D7%9C%D7%9B%D7%99%D7%90%D7%9C_%D7%A6%D7%91%D7%99_%D7%98%D7%A0%D7%A0%D7%91%D7%95%D7%99%D7%9D">Divrei Malkiel</a> that the time to walk the distance of a <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> is 15 minutes, for a total of 60 minutes
-  /// for 4 mil after \#getSunset() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting). See detailed documentation explaining the 60 minute concept at \#getAlos60().
+  /// for 4 mil after \#getSunsetWithElevation() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting). See detailed documentation explaining the 60 minute concept at \#getAlos60().
   ///@return the <code>Instant</code> representing 60 minutes after sea level sunset. If the calculation can't be
   ///         computed such as in the Arctic Circle where there is at least one day a year where the sun does not rise,
   ///         and one where it does not set, a <code>null</code> will be returned. See detailed explanation on top of the
@@ -12777,7 +12777,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// from: `public java.time.Instant getTzais90()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// Method to return _tzais_ (dusk) calculated as 90 minutes after \#getSunset() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting). This method returns
+  /// Method to return _tzais_ (dusk) calculated as 90 minutes after \#getSunsetWithElevation() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting). This method returns
   /// _tzais_ (nightfall) based on the opinion of the Magen Avraham that the time to walk the distance of a <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> according to the <a href="https://en.wikipedia.org/wiki/Maimonides">Rambam</a>'s opinion is 18 minutes, for a total of 90 minutes based on the
   /// opinion of Ula who calculated _tzais_ as 5 mil after elevation adjusted _shkiah_ (sunset). A similar
   /// calculation \#getTzais19Point8Degrees() uses solar position* calculations based on this time.
@@ -12816,7 +12816,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// of <a href="https://en.wikipedia.org/wiki/Avraham_Chaim_Naeh">Rav Chaim Naeh</a> that the time to walk the
   /// distance of a <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a>
   /// according to the <a href="https://en.wikipedia.org/wiki/Maimonides">Rambam</a>'s opinion is 2/5 of an hour (24 minutes)
-  /// for a total of 120 minutes based on the opinion of _Ula_ who calculated _tzais_ as 5 mil after \#getSunset() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting).
+  /// for a total of 120 minutes based on the opinion of _Ula_ who calculated _tzais_ as 5 mil after \#getSunsetWithElevation() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting).
   /// A similar calculation \#getTzais26Degrees() uses degree-based calculations based on this 120 minute calculation.
   /// Since the _zman_ is extremely late and at a point that is long past the 18&deg; point where the darkest point is
   /// reached, it should only be used _lechumra_, such as delaying the start of nighttime _mitzvos_.
@@ -13041,7 +13041,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// from: `public java.time.Instant getTzais96()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// A method to return _tzais_ (dusk) calculated as 96 minutes after \#getSunset() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting). For information on how
+  /// A method to return _tzais_ (dusk) calculated as 96 minutes after \#getSunsetWithElevation() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting). For information on how
   /// this is calculated see the comments on \#getAlos96().
   ///@return the <code>Instant</code> representing the time. If the calculation can't be computed such as in the Arctic
   ///         Circle where there is at least one day a year where the sun does not rise, and one where it does not set,
@@ -13566,7 +13566,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest time one is allowed eating _chametz_ on _Erev Pesach_ according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_
-  /// being \#getAlos72() 72 minutes before \#getSunrise() sunrise. This time is identical to the
+  /// being \#getAlos72() 72 minutes before \#getSunriseWithElevation() sunrise. This time is identical to the
   /// \#getSofZmanTfilaMGA72Minutes() _Sof zman tfilah_ MGA 72 minutes. This time is 4 \#getShaahZmanisMGA() _shaos zmaniyos_ (temporal hours) after \#getAlos72() dawn based on the opinion of the MGA that the day is
   /// calculated from a \#getAlos72() dawn of 72 minutes before sunrise to \#getTzais72() nightfall of 72 minutes
   /// after sunset. This returns the time of 4 * \#getShaahZmanisMGA() after \#getAlos72() dawn. If it is not
@@ -13608,7 +13608,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest time one is allowed eating _chametz_ on _Erev Pesach_ according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_
-  /// being \#getAlos72Zmanis() 72 zmaniyos minutes before \#getSunrise() sunrise. This time is identical to the
+  /// being \#getAlos72Zmanis() 72 zmaniyos minutes before \#getSunriseWithElevation() sunrise. This time is identical to the
   /// \#getSofZmanTfilaMGA72MinutesZmanis() _Sof zman tfilah_ MGA 72 minutes zmanis. This time is 4 \#getShaahZmanis72MinutesZmanis() _shaos zmaniyos_ (temporal hours) after \#getAlos72() dawn based on the opinion of the MGA that the day is
   /// calculated from a \#getAlos72Zmanis() dawn of 72 minutes zmanis before sunrise to \#getTzais72Zmanis() nightfall of 72 minutes zmanis
   /// after sunset. This returns the time of 4 * \#getShaahZmanis72MinutesZmanis() after \#getAlos72Zmanis() dawn. If it is not
@@ -13652,7 +13652,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// This method returns the latest time one is allowed eating _chametz_ on _Erev Pesach_ according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_
-  /// being \#getAlos16Point1Degrees() 16.1&deg; before \#getSunrise() sunrise. This time is 4 \#getShaahZmanis16Point1Degrees() _shaos zmaniyos_ (solar hours) after \#getAlos16Point1Degrees() dawn
+  /// being \#getAlos16Point1Degrees() 16.1&deg; before \#getSunriseWithElevation() sunrise. This time is 4 \#getShaahZmanis16Point1Degrees() _shaos zmaniyos_ (solar hours) after \#getAlos16Point1Degrees() dawn
   /// based on the opinion of the MGA that the day is calculated from dawn to nightfall with both being 16.1&deg;
   /// below sunrise or sunset. This returns the time of 4 \#getShaahZmanis16Point1Degrees() after
   /// \#getAlos16Point1Degrees() dawn. If it is not _erev Pesach_, a null will be returned.
@@ -13732,7 +13732,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// FIXME adjust for synchronous
   /// This method returns the latest time for burning _chametz_ on _Erev Pesach_ according to the opinion of
   /// the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_
-  /// being \#getAlos72() 72 minutes before \#getSunrise() sunrise. This time is 5 \#getShaahZmanisMGA() _shaos zmaniyos_ (temporal hours) after \#getAlos72() dawn based on the opinion of
+  /// being \#getAlos72() 72 minutes before \#getSunriseWithElevation() sunrise. This time is 5 \#getShaahZmanisMGA() _shaos zmaniyos_ (temporal hours) after \#getAlos72() dawn based on the opinion of
   /// the MGA that the day is calculated from a \#getAlos72() dawn of 72 minutes before sunrise to \#getTzais72() nightfall of 72 minutes after sunset. This returns the time of 5 * \#getShaahZmanisMGA() after
   /// \#getAlos72() dawn. If it is not  _erev Pesach_, a null will be returned.
   ///@return the <code>Instant</code> of the latest time for burning _chametz_ on _Erev Pesach_. If it is not
@@ -13772,7 +13772,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// FIXME adjust for synchronous
   /// This method returns the latest time for burning _chametz_ on _Erev Pesach_ according to the opinion of
   /// the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_
-  /// being \#getAlos72Zmanis() 72 minutes zmanis before \#getSunrise() sunrise. This time is 5 \#getShaahZmanis72MinutesZmanis() _shaos zmaniyos_ (temporal hours) after \#getAlos72Zmanis() dawn based on the opinion of
+  /// being \#getAlos72Zmanis() 72 minutes zmanis before \#getSunriseWithElevation() sunrise. This time is 5 \#getShaahZmanis72MinutesZmanis() _shaos zmaniyos_ (temporal hours) after \#getAlos72Zmanis() dawn based on the opinion of
   /// the MGA that the day is calculated from a \#getAlos72Zmanis() dawn of 72 minutes zmanis before sunrise to \#getTzais72Zmanis() nightfall of 72 minutes zmanis after sunset. This returns the time of 5 * \#getShaahZmanis72MinutesZmanis() after
   /// \#getAlos72Zmanis() dawn. If it is not  _erev Pesach_, a null will be returned.
   ///@return the <code>Instant</code> of the latest time for burning _chametz_ on _Erev Pesach_. If it is not
@@ -13812,7 +13812,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// FIXME adjust for synchronous
   /// This method returns the latest time for burning _chametz_ on _Erev Pesach_ according to the opinion
   /// of the <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a> based on _alos_
-  /// being \#getAlos16Point1Degrees() 16.1&deg; before \#getSunrise() sunrise. This time is 5
+  /// being \#getAlos16Point1Degrees() 16.1&deg; before \#getSunriseWithElevation() sunrise. This time is 5
   /// \#getShaahZmanis16Point1Degrees() _shaos zmaniyos_ (solar hours) after \#getAlos16Point1Degrees() dawn based on the opinion of the MGA that the day is calculated from dawn to nightfall with both being 16.1&deg;
   /// below sunrise or sunset. This returns the time of 5 \#getShaahZmanis16Point1Degrees() after
   /// \#getAlos16Point1Degrees() dawn. If it is not  _erev Pesach_, a null will be returned.
@@ -13897,7 +13897,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   ///
   /// Returns the <a href="https://en.wikipedia.org/wiki/Shneur_Zalman_of_Liadi">Baal Hatanya</a>'s _alos_
   /// (dawn) calculated as the time when the sun is 16.9&deg; below the eastern \#GEOMETRIC_ZENITH geometric horizon
-  /// before \#getSunrise() sunrise. For more information the source of 16.9&deg; see \#ZENITH_16_POINT_9.
+  /// before \#getSunriseWithElevation() sunrise. For more information the source of 16.9&deg; see \#ZENITH_16_POINT_9.
   ///@see \#ZENITH_16_POINT_9
   ///@return The <code>Instant</code> of dawn. If the calculation can't be computed such as northern and southern
   ///         locations even south of the Arctic Circle and north of the Antarctic Circle where the sun may not reach
@@ -14235,7 +14235,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// A method that returns _tzais_ (nightfall) when the sun is 6&deg; below the western geometric horizon
-  /// (90&deg;) after \#getSunset() sunset. For information on the source of this calculation see
+  /// (90&deg;) after \#getSunsetWithElevation() sunset. For information on the source of this calculation see
   /// \#ZENITH_6_DEGREES.
   ///@return The <code>Instant</code> of nightfall. If the calculation can't be computed such as northern and southern
   ///         locations even south of the Arctic Circle and north of the Antarctic Circle where the sun may not reach
@@ -14445,13 +14445,13 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// This method returns <a href="https://en.wikipedia.org/wiki/Moshe_Feinstein">Rav Moshe Feinstein's</a> opinion of the
   /// calculation of _sof zman krias shema_ (latest time to recite _Shema_ in the morning) according to the
   /// opinion of the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a> that the day is calculated from
-  /// sunrise to sunset, but calculated using the first half of the day only. The half a day starts at \#getSunrise() sunrise and ends at \#getFixedLocalChatzos() fixed local chatzos. _Sof zman Shema_ is 3 _shaos
+  /// sunrise to sunset, but calculated using the first half of the day only. The half a day starts at \#getSunriseWithElevation() sunrise and ends at \#getFixedLocalChatzos() fixed local chatzos. _Sof zman Shema_ is 3 _shaos
   /// zmaniyos_ (solar hours) after sunrise or half of this half-day.
   ///@return the <code>Instant</code> of the latest _zman krias shema_. If the calculation can't be computed such
   ///         as northern and southern locations even south of the Arctic Circle and north of the Antarctic Circle
   ///         where the sun may not reach low enough below the horizon for this calculation, a <code>null</code> will be
   ///         returned. See detailed explanation on top of the AstronomicalCalendar documentation.
-  ///@see \#getSunrise()
+  ///@see \#getSunriseWithElevation()
   ///@see \#getFixedLocalChatzos()
   ///@see \#getHalfDayBasedZman(Instant, Instant, double)
   Instant? getSofZmanShmaGRASunriseToFixedLocalChatzos() {
@@ -14488,13 +14488,13 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// calculation of _sof zman tfila_ (_zman tfilah_ (the latest time to recite the morning prayers))
   /// according to the opinion of the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a> that the day is
   /// calculated from sunrise to sunset, but calculated using the first half of the day only. The half a day starts at
-  /// \#getSunrise() sunrise and ends at \#getFixedLocalChatzos() fixed local chatzos. _Sof zman tefila_
+  /// \#getSunriseWithElevation() sunrise and ends at \#getFixedLocalChatzos() fixed local chatzos. _Sof zman tefila_
   /// is 4 _shaos zmaniyos_ (solar hours) after sunrise or 2/3 of this half-day.
   ///@return the <code>Instant</code> of the latest _zman krias shema_. If the calculation can't be computed such
   ///         as northern and southern locations even south of the Arctic Circle and north of the Antarctic Circle
   ///         where the sun may not reach low enough below the horizon for this calculation, a <code>null</code> will be
   ///         returned. See detailed explanation on top of the AstronomicalCalendar documentation.
-  ///@see \#getSunrise()
+  ///@see \#getSunriseWithElevation()
   ///@see \#getFixedLocalChatzos()
   ///@see \#getHalfDayBasedZman(Instant, Instant, double)
   Instant? getSofZmanTfilaGRASunriseToFixedLocalChatzos() {
@@ -14651,7 +14651,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// from: `public java.time.Instant getTzais50()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// Method to return _tzais_ (dusk) calculated as 50 minutes after \#getSunset() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting). This method returns
+  /// Method to return _tzais_ (dusk) calculated as 50 minutes after \#getSunsetWithElevation() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() setting). This method returns
   /// _tzais_ (nightfall) based on the opinion of Rabbi Moshe Feinstein for the New York area. This time should
   /// not be used for latitudes other than ones similar to the latitude of the NY area.
   ///@return the <code>Instant</code> representing the time. If the calculation can't be computed such as in the Arctic
@@ -14688,7 +14688,7 @@ class ComprehensiveZmanimCalendar extends ZmanimCalendar {
   /// \#getMinchaKetana() or is 9 * _shaos zmaniyos_ (solar hours) after the start of
   /// the day, calculated according to the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a> using a day starting at
   /// sunrise and ending at sunset. This is the time that eating or other activity can't begin prior to praying _mincha_.
-  /// The calculation used is 9 * \#getShaahZmanisGra() after \#getSunrise() sunrise or \#getElevationAdjustedSunrise() elevation adjusted sunrise (depending on the \#isUseElevation() setting). See the
+  /// The calculation used is 9 * \#getShaahZmanisGra() after \#getSunriseWithElevation() sunrise or \#getSunriseBasedOnElevationSetting() elevation adjusted sunrise (depending on the \#isUseElevation() setting). See the
   /// <a href="https://hebrewbooks.org/pdfpager.aspx?req=60387&st=&pgnum=294">Mechaber and Mishna Berurah 232</a> and <a href="https://hebrewbooks.org/pdfpager.aspx?req=60388&pgnum=34">249:2</a>.
   ///@see \#getShaahZmanisGra()
   ///@see \#getSamuchLeMinchaKetana(Instant, Instant, boolean)
@@ -14876,8 +14876,8 @@ final class $ComprehensiveZmanimCalendar$Type$
 /// <a href="https://hebrewbooks.org/pdfpager.aspx?req=51654&amp;pgnum=50">42</a> is of the opinion that elevation should be
 /// accounted for in _zmanim_ calculations. Related to this, Rabbi Yaakov Karp in <a href="https://www.worldcat.org/oclc/919472094">Shimush Zekeinim</a>, Ch. 1, page 17 states that obstructing horizons should
 /// be factored into _zmanim_ calculations. The setting defaults to false (elevation will not be used for
-/// _zmanim_ calculations besides sunrise and sunset), unless the setting is changed to true in \#setUseElevation(boolean). This will impact sunrise and sunset-based _zmanim_ such as \#getSunrise(),
-/// \#getSunset(), \#getSofZmanShmaGRA(), _alos_-based _zmanim_ such as \#getSofZmanShmaMGA()
+/// _zmanim_ calculations besides sunrise and sunset), unless the setting is changed to true in \#setUseElevation(boolean). This will impact sunrise and sunset-based _zmanim_ such as \#getSunriseWithElevation(),
+/// \#getSunsetWithElevation(), \#getSofZmanShmaGRA(), _alos_-based _zmanim_ such as \#getSofZmanShmaMGA()
 /// that are based on a fixed offset of sunrise or sunset and _zmanim_ based on a percentage of the day such as
 /// ComprehensiveZmanimCalendar\#getSofZmanShmaMGA90MinutesZmanis() that are based on sunrise and sunset. Even when set to
 /// true it will not impact _zmanim_ that are a degree-based offset of sunrise and sunset, such as ComprehensiveZmanimCalendar\#getSofZmanShmaMGA16Point1Degrees() or ComprehensiveZmanimCalendar\#getSofZmanShmaBaalHatanya() since
@@ -14948,8 +14948,8 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// accounted for in _zmanim_ calculations. Related to this, Rabbi Yaakov Karp in <a href="https://www.worldcat.org/oclc/919472094">Shimush Zekeinim</a>, Ch. 1, page 17 states that obstructing horizons
   /// should be factored into _zmanim_ calculations.The setting defaults to false (elevation will not be used for
   /// _zmanim_ calculations), unless the setting is changed to true in \#setUseElevation(boolean). This will
-  /// impact sunrise and sunset based _zmanim_ such as \#getSunrise(), \#getSunset(),
-  /// \#getSofZmanShmaGRA(), alos based _zmanim_ such as \#getSofZmanShmaMGA() that are based on a
+  /// impact sunrise and sunset based _zmanim_ such as  \#getSofZmanShmaGRA(),
+  /// alos based _zmanim_ such as \#getSofZmanShmaMGA() that are based on a
   /// fixed offset of sunrise or sunset and _zmanim_ based on a percentage of the day such as ComprehensiveZmanimCalendar\#getSofZmanShmaMGA90MinutesZmanis() that are based on sunrise and sunset. It will not impact
   /// _zmanim_ that are a degree based offset of sunrise and sunset, such as
   /// ComprehensiveZmanimCalendar\#getSofZmanShmaMGA16Point1Degrees() or ComprehensiveZmanimCalendar\#getSofZmanShmaBaalHatanya().
@@ -15163,7 +15163,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// A method that returns _tzais_ (nightfall) when the sun is \#ZENITH_8_POINT_5 8.5&deg; below the
-  /// \#GEOMETRIC_ZENITH geometric horizon (90&deg;) after \#getSunset() sunset, a time that Rabbi Meir
+  /// \#GEOMETRIC_ZENITH geometric horizon (90&deg;) after \#getSunsetWithElevation() sunset, a time that Rabbi Meir
   /// Posen in his the _<a href="https://www.worldcat.org/oclc/29283612">Ohr Meir</a>_ calculated that 3 small
   /// stars are visible, which is later than the required 3 medium stars. See the \#ZENITH_8_POINT_5 constant.
   ///@see \#ZENITH_8_POINT_5
@@ -15198,11 +15198,11 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Returns _alos_ (dawn) based on the time when the sun is \#ZENITH_16_POINT_1 16.1&deg; below the
-  /// eastern \#GEOMETRIC_ZENITH geometric horizon before \#getSunrise() sunrise. This is based on the
+  /// eastern \#GEOMETRIC_ZENITH geometric horizon before \#getSunriseWithElevation() sunrise. This is based on the
   /// calculation that the time between dawn and sunrise (and sunset to nightfall) is 72 minutes, the time that is
   /// takes to walk 4 <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> at
   /// 18 minutes a mil (<a href="https://en.wikipedia.org/wiki/Maimonides">Rambam</a> and others). The sun's position
-  /// below the horizon 72 minutes before \#getSunrise() sunrise in Jerusalem on the <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox / equilux</a> is
+  /// below the horizon 72 minutes before \#getSunriseWithElevation() sunrise in Jerusalem on the <a href="https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/">around the equinox / equilux</a> is
   /// 16.1&deg; below \#GEOMETRIC_ZENITH.
   ///@see \#ZENITH_16_POINT_1
   ///@see ComprehensiveZmanimCalendar\#getAlos16Point1Degrees()
@@ -15236,7 +15236,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// from: `public java.time.Instant getAlos72()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// Method to return _alos_ (dawn) calculated as 72 minutes before \#getSunrise() sunrise or
+  /// Method to return _alos_ (dawn) calculated as 72 minutes before \#getSunriseWithElevation() sunrise or
   /// \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting). This time
   /// is based on the time to walk the distance of 4 <a href="https://en.wikipedia.org/wiki/Biblical_and_Talmudic_units_of_measurement">mil</a> at 18 minutes a mil. The
   /// 72-minute time (but not the concept of fixed minutes) is based on the opinion that the time of the _Neshef_
@@ -15377,7 +15377,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// hours), and the latest _zman krias shema_ is calculated as 3 of those _shaos zmaniyos_ after the beginning of
   /// the day. If \#isUseAstronomicalChatzosForOtherZmanim() is <code>true</code>, the 3 _shaos zmaniyos_ will be
   /// based on 1/6 of the time between sunrise and \#getSunTransit() astronomical _chatzos_. As an example, passing
-  /// \#getSunrise() sunrise and \#getSunset() sunset or \#getSeaLevelSunrise() sea level sunrise and \#getSeaLevelSunset() sea level sunset to this method (or \#getElevationAdjustedSunrise() and \#getElevationAdjustedSunset() that is driven off the \#isUseElevation() setting) will return _sof zman krias
+  /// \#getSunriseWithElevation() sunrise and \#getSunsetWithElevation() sunset or \#getSeaLevelSunrise() sea level sunrise and \#getSeaLevelSunset() sea level sunset to this method (or \#getSunriseBasedOnElevationSetting() and \#getSunsetBasedOnElevationSetting() that is driven off the \#isUseElevation() setting) will return _sof zman krias
   /// shema_ according to the opinion of the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. In cases
   /// where the start and end dates are not synchronous such as in ComprehensiveZmanimCalendar \#getSofZmanShmaAlos16Point1ToTzaisGeonim7Point083Degrees() <code>false</code> should be passed to the synchronous parameter
   /// to ensure that \#isUseAstronomicalChatzosForOtherZmanim() will not be used.
@@ -15480,11 +15480,11 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// This method returns the latest _zman krias shema_ (time to recite shema in the morning) that is 3 *
-  /// \#getShaahZmanisGra() _shaos zmaniyos_ (solar hours) after \#getSunrise() sunrise or
+  /// \#getShaahZmanisGra() _shaos zmaniyos_ (solar hours) after \#getSunriseWithElevation() sunrise or
   /// \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting), according
   /// to the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>.
   ///  The day is calculated from \#getSeaLevelSunrise() sea level sunrise to \#getSeaLevelSunset() sea level
-  ///  sunset or from \#getSunrise() sunrise to \#getSunset() sunset (depending on the
+  ///  sunset or from \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the
   ///  \#isUseElevation() setting).
   ///@see \#getSofZmanShma(Instant, Instant)
   ///@see \#getShaahZmanisGra()
@@ -15523,7 +15523,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// This method returns the latest _zman krias shema_ (time to recite shema in the morning) that is 3 *
   /// \#getShaahZmanisMGA() _shaos zmaniyos_ (solar hours) after \#getAlos72(), according to the
   /// <a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a>. The day is calculated
-  /// from 72 minutes before \#getSeaLevelSunrise() sea level sunrise to 72 minutes after \#getSeaLevelSunset() sea level sunset or from 72 minutes before \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation() setting).
+  /// from 72 minutes before \#getSeaLevelSunrise() sea level sunrise to 72 minutes after \#getSeaLevelSunset() sea level sunset or from 72 minutes before \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation() setting).
   ///@return the <code>Instant</code> of the latest _zman shema_. If the calculation can't be computed such as in
   ///         the Arctic Circle where there is at least one day a year where the sun does not rise, and one where it
   ///         does not set, a <code>null</code> will be returned. See detailed explanation on top of the
@@ -15564,7 +15564,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// 235:3, the <a href="https://en.wikipedia.org/wiki/Joseph_ben_Meir_Teomim">Pri Megadim</a> in Orach
   /// Chaim 261:2 (see the Biur Halacha) and others (see Hazmanim Bahalacha 17:3 and 17:5) the 72 minutes are standard
   /// clock minutes any time of the year in any location. Depending on the \#isUseElevation() setting, a 72-minute
-  /// offset from  either \#getSunset() sunset or \#getSeaLevelSunset() sea level sunset is used.
+  /// offset from  either \#getSunsetWithElevation() sunset or \#getSeaLevelSunset() sea level sunset is used.
   ///@see ComprehensiveZmanimCalendar\#getTzais16Point1Degrees()
   ///@return the <code>Instant</code> representing 72 minutes after sunset. If the calculation can't be
   ///         computed such as in the Arctic Circle where there is at least one day a year where the sun does not rise,
@@ -15644,7 +15644,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// end of the day passed to this method.
   /// The time from the start of day to the end of day are divided into 12 _shaos zmaniyos_ (temporal hours),
   /// and _sof zman tfila_ is calculated as 4 of those _shaos zmaniyos_ after the beginning of the day.
-  /// As an example, passing \#getSunrise() sunrise and \#getSunset() sunset or \#getSeaLevelSunrise() sea level sunrise and \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation()
+  /// As an example, passing \#getSunriseWithElevation() sunrise and \#getSunsetWithElevation() sunset or \#getSeaLevelSunrise() sea level sunrise and \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation()
   /// elevation setting) to this method will return _zman tfilah_ according to the opinion of the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. This method's synchronous parameter indicates if the start
   /// and end of day for the calculation are synchronous, having the same offset. This is typically the case, but some
   /// _zmanim_ calculations are based on a start and end at different offsets from the real start and end of the day,
@@ -15750,11 +15750,11 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// This method returns the latest _zman tfila_ (time to recite shema in the morning) that is 4 *
-  /// \#getShaahZmanisGra() _shaos zmaniyos_ (solar hours) after \#getSunrise() sunrise or
+  /// \#getShaahZmanisGra() _shaos zmaniyos_ (solar hours) after \#getSunriseWithElevation() sunrise or
   /// \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting), according
   /// to the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>.
   /// The day is calculated from \#getSeaLevelSunrise() sea level sunrise to \#getSeaLevelSunset() sea level
-  /// sunset or from \#getSunrise() sunrise to \#getSunset() sunset (depending on the
+  /// sunset or from \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the
   /// \#isUseElevation() setting).
   ///@see \#getSofZmanTfila(Instant, Instant)
   ///@see \#getShaahZmanisGra()
@@ -15792,7 +15792,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// This method returns the latest _zman tfila_ (time to recite shema in the morning) that is 4 *
   /// \#getShaahZmanisMGA() _shaos zmaniyos_ (solar hours) after \#getAlos72(), according to the
   /// _<a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a>_. The day is calculated
-  /// from 72 minutes before \#getSeaLevelSunrise() sea level sunrise to 72 minutes after \#getSeaLevelSunset() sea level sunset or from 72 minutes before \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation() setting).
+  /// from 72 minutes before \#getSeaLevelSunrise() sea level sunrise to 72 minutes after \#getSeaLevelSunset() sea level sunset or from 72 minutes before \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation() setting).
   ///@return the <code>Instant</code> of the latest _zman tfila_. If the calculation can't be computed such as in
   ///         the Arctic Circle where there is at least one day a year where the sun does not rise, and one where it
   ///         does not set, a <code>null</code> will be returned. See detailed explanation on top of the
@@ -15837,7 +15837,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// is 6.5 * _shaos zmaniyos_ (temporal hours) after the start of the day, calculated using the start and end of the
   /// day passed to this method. The time from the start of day to the end of day are divided into 12 _shaos zmaniyos_
   /// (temporal hours), and _mincha gedola_ is calculated as 6.5 of those _shaos zmaniyos_ after the beginning
-  /// of the day. As an example, passing \#getSunrise() sunrise and \#getSunset() sunset or \#getSeaLevelSunrise() sea level sunrise and \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() elevation setting) to this method will return _mincha gedola_ according to the opinion of the
+  /// of the day. As an example, passing \#getSunriseWithElevation() sunrise and \#getSunsetWithElevation() sunset or \#getSeaLevelSunrise() sea level sunrise and \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() elevation setting) to this method will return _mincha gedola_ according to the opinion of the
   /// <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. Alternatively, this method uses \#isUseAstronomicalChatzosForOtherZmanim() to control if the time is based on 6.5 _shaos zmaniyos_ into the day
   /// mentioned above, or as half an hour _zmaniyos_ based on the second half of the day after _chatzos_ (\#getSunTransit() astronomical _chatzos_ if supported by the AstronomicalCalculator calculator and \#isUseAstronomicalChatzos() configured or \#getChatzosAsHalfDay() _chatzos_ as half a day if not. This
   /// method's synchronous parameter indicates if the start and end of day for the calculation are synchronous, having the same
@@ -15950,14 +15950,14 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// This method returns the latest _mincha gedola_,the earliest time one can pray _mincha_ that is 6.5 *
-  /// \#getShaahZmanisGra() _shaos zmaniyos_ (solar hours) after \#getSunrise() sunrise or
+  /// \#getShaahZmanisGra() _shaos zmaniyos_ (solar hours) after \#getSunriseWithElevation() sunrise or
   /// \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting), according
   /// to the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. _Mincha gedola_ is the earliest
   /// time one can pray _mincha_. The Ramba"m is of the opinion that it is better to delay _mincha_ until
   /// \#getMinchaKetana() _mincha ketana_ while the Ra"sh, Tur, GRA and others are of the
   /// opinion that _mincha_ can be prayed _lechatchila_ starting at _mincha gedola_.
   /// The day is calculated from \#getSeaLevelSunrise() sea level sunrise to \#getSeaLevelSunset() sea level
-  /// sunset or \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation()
+  /// sunset or \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation()
   /// setting).
   ///@todo Consider adjusting this to calculate the time as half an hour _zmaniyos_ after either \#getSunTransit() astronomical _chatzos_ or \#getChatzosAsHalfDay() _chatzos_ as half a day
   ///         for AstronomicalCalculator calculators that support it, based on \#isUseAstronomicalChatzos().
@@ -16007,7 +16007,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// start of the day, calculated using the start and end of the day passed to this method.
   /// The time from the start of day to the end of day are divided into 12 _shaos zmaniyos_ (temporal hours), and
   /// _samuch lemincha ketana_ is calculated as 9 of those _shaos zmaniyos_ after the beginning of the day.
-  /// For example, passing \#getSunrise() sunrise and \#getSunset() sunset or \#getSeaLevelSunrise() sea
+  /// For example, passing \#getSunriseWithElevation() sunrise and \#getSunsetWithElevation() sunset or \#getSeaLevelSunrise() sea
   /// level sunrise and \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() elevation
   /// setting) to this method will return _samuch lemincha ketana_ according to the opinion of the
   /// <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. See the <a href="https://hebrewbooks.org/pdfpager.aspx?req=60387&st=&pgnum=294">Mechaber and Mishna Berurah 232</a> and <a href="https://hebrewbooks.org/pdfpager.aspx?req=60388&pgnum=34">249:2</a>.
@@ -16124,7 +16124,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// of the day passed to this method.
   /// The time from the start of day to the end of day are divided into 12 _shaos zmaniyos_ (temporal hours), and
   /// _mincha ketana_ is calculated as 9.5 of those _shaos zmaniyos_ after the beginning of the day. As an
-  /// example, passing \#getSunrise() sunrise and \#getSunset() sunset or \#getSeaLevelSunrise() sea
+  /// example, passing \#getSunriseWithElevation() sunrise and \#getSunsetWithElevation() sunset or \#getSeaLevelSunrise() sea
   /// level sunrise and \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation()
   /// elevation setting) to this method will return _mincha ketana_ according to the opinion of the
   /// <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. This method's synchronous parameter indicates if the start
@@ -16233,12 +16233,12 @@ class ZmanimCalendar extends AstronomicalCalendar {
   ///
   /// This method returns _mincha ketana_,the preferred earliest time to pray _mincha_ in the
   /// opinion of the _<a href="https://en.wikipedia.org/wiki/Maimonides">Rambam</a>_ and others, that is 9.5
-  /// * \#getShaahZmanisGra() _shaos zmaniyos_ (solar hours) after \#getSunrise() sunrise or
+  /// * \#getShaahZmanisGra() _shaos zmaniyos_ (solar hours) after \#getSunriseWithElevation() sunrise or
   /// \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() setting), according
   /// to the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. For more information on this see the
   /// documentation on \#getMinchaGedola() _mincha gedola_.
   /// The day is calculated from \#getSeaLevelSunrise() sea level sunrise to \#getSeaLevelSunset() sea level
-  /// sunset or from \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation()
+  /// sunset or from \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation()
   /// setting.
   ///@see \#getMinchaKetana(Instant, Instant)
   ///@see \#getShaahZmanisGra()
@@ -16286,7 +16286,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// the day passed to the method.
   /// The time from the start of day to the end of day are divided into 12 _shaos zmaniyos_ (temporal hours), and
   /// _plag hamincha_ is calculated as 10.75 of those _shaos zmaniyos_ after the beginning of the day. As an
-  /// example, passing \#getSunrise() sunrise and \#getSunset() sunset or \#getSeaLevelSunrise() sea level
+  /// example, passing \#getSunriseWithElevation() sunrise and \#getSunsetWithElevation() sunset or \#getSeaLevelSunrise() sea level
   /// sunrise and \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() elevation
   /// setting) to this method will return _plag mincha_ according to the opinion of the
   /// <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. This method's synchronous parameter indicates if the start
@@ -16392,10 +16392,10 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// This method returns _plag hamincha_, that is 10.75 * \#getShaahZmanisGra() _shaos zmaniyos_
-  /// (solar hours) after \#getSunrise() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on
+  /// (solar hours) after \#getSunriseWithElevation() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on
   /// the \#isUseElevation() setting), according to the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. _Plag hamincha_ is the earliest time that _Shabbos_ can be started.
   /// The day is calculated from \#getSeaLevelSunrise() sea level sunrise to \#getSeaLevelSunset() sea level
-  /// sunset or \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation()
+  /// sunset or \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation()
   ///@see \#getPlagHamincha(Instant, Instant, boolean)
   ///@see \#getPlagHamincha(Instant, Instant)
   ///@see ComprehensiveZmanimCalendar\#getPlagHaminchaBaalHatanya()
@@ -16431,7 +16431,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// A method that returns a _shaah zmanis_ (\#getTemporalHour(Instant, Instant) temporal hour) according to
   /// the opinion of the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>. This calculation divides the day
   /// based on the opinion of the _GRA_ that the day runs from from \#getSeaLevelSunrise() sea level
-  /// sunrise to \#getSeaLevelSunset() sea level sunset or \#getSunrise() sunrise to \#getSunset() sunset (depending on the \#isUseElevation() setting). The day is split into 12 equal parts with each one
+  /// sunrise to \#getSeaLevelSunset() sea level sunset or \#getSunriseWithElevation() sunrise to \#getSunsetWithElevation() sunset (depending on the \#isUseElevation() setting). The day is split into 12 equal parts with each one
   /// being a _shaah zmanis_. This method is similar to \#getTemporalHour(), but can account for elevation.
   ///@return the <code>long</code> millisecond length of a _shaah zmanis_ calculated from sunrise to sunset.
   ///         If the calculation can't be computed such as in the Arctic Circle where there is at least one day a year
@@ -16468,7 +16468,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   ///
   /// A method that returns a _shaah zmanis_ (temporal hour) according to the opinion of the _<a href="https://en.wikipedia.org/wiki/Avraham_Gombiner">Magen Avraham (MGA)</a>_ based on a 72-minute _alos_
   /// and _tzais_. This calculation divides the day that runs from dawn to dusk (for _sof zman krias shema_ and
-  /// _tfila_). Dawn for this calculation is 72 minutes before \#getSunrise() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() elevation setting) and dusk is 72 minutes after \#getSunset() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() elevation
+  /// _tfila_). Dawn for this calculation is 72 minutes before \#getSunriseWithElevation() sunrise or \#getSeaLevelSunrise() sea level sunrise (depending on the \#isUseElevation() elevation setting) and dusk is 72 minutes after \#getSunsetWithElevation() sunset or \#getSeaLevelSunset() sea level sunset (depending on the \#isUseElevation() elevation
   /// setting). This day is split into 12 equal parts with each part being a _shaah zmanis_. Alternate methods of calculating
   /// a _shaah zmanis_ according to the Magen Avraham (MGA) are available in the subclass ComprehensiveZmanimCalendar.
   ///@return the <code>long</code> millisecond length of a _shaah zmanis_. If the calculation can't be computed
@@ -16631,7 +16631,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   ///
   /// This is a utility method to determine if the current Instant passed in has a _melacha_ (work) prohibition.
   /// Since there are many opinions on the time of _tzais_, the _tzais_ for the current day has to be passed to this
-  /// class. Sunset is the classes current day's \#getElevationAdjustedSunset() elevation adjusted sunset that observes the
+  /// class. Sunset is the classes current day's \#getSunsetBasedOnElevationSetting() elevation adjusted sunset that observes the
   /// \#isUseElevation() settings. The JewishCalendar\#getInIsrael() will be set by the inIsrael parameter.
   ///@param currentTime the current time
   ///@param tzais the time of tzais
@@ -16686,7 +16686,7 @@ class ZmanimCalendar extends AstronomicalCalendar {
   /// A generic utility method for calculating any _shaah zmanis_ (temporal hour) based _zman_ with the
   /// day defined as the start and end of day (or night) and the number of _shaos zmaniyos_ passed to the
   /// method. This simplifies the code in other methods such as \#getPlagHamincha(Instant, Instant) and cuts down on
-  /// code replication. As an example, passing \#getSunrise() sunrise and \#getSunset() sunset or \#getSeaLevelSunrise() sea level sunrise and \#getSeaLevelSunset() sea level sunset (depending on the
+  /// code replication. As an example, passing \#getSunriseWithElevation() sunrise and \#getSunsetWithElevation() sunset or \#getSeaLevelSunrise() sea level sunrise and \#getSeaLevelSunset() sea level sunset (depending on the
   /// \#isUseElevation() elevation setting) and 10.75 hours to this method will return _plag mincha_
   /// according to the opinion of the <a href="https://en.wikipedia.org/wiki/Vilna_Gaon">GRA</a>.
   ///@param startOfDay the start of day for calculating the _zman_. This can be sunrise or any _alos_ passed
@@ -16951,7 +16951,7 @@ final class $ZmanimCalendar$Type$ extends jni$_.JType<ZmanimCalendar> {
 
 /// from: `com.kosherjava.zmanim.AstronomicalCalendar`
 ///
-/// A Java calendar that calculates astronomical times such as \#getSunrise() sunrise, \#getSunset() sunset and twilight times. This class contains a \#getLocalDate() zonedDateTime and can therefore use the standard
+/// A Java calendar that calculates astronomical times such as \#getSunriseWithElevation() sunrise, \#getSunsetWithElevation() sunset and twilight times. This class contains a \#getLocalDate() LocalDate and can therefore use the standard
 /// Calendar functionality to change dates etc. The calculation engine used to calculate the astronomical times can be
 /// changed to a different implementation by implementing the abstract AstronomicalCalculator and setting it with
 /// the \#setAstronomicalCalculator(AstronomicalCalculator). A number of different calculation engine
@@ -16982,8 +16982,8 @@ final class $ZmanimCalendar$Type$ extends jni$_.JType<ZmanimCalendar> {
 /// To get the time of sunrise, first set the date you want (if not set, the date will default to today):
 ///
 /// <pre>
-/// ZonedDateTime dateTime = ZonedDateTime.of(1969, Month.FEBRUARY.getValue(), 8, 0, 0, 0, 0, location.getZoneId());
-/// ac.setZonedDateTime(dateTime);
+/// LocalDate localDate = LocalDate.of(1969, Month.FEBRUARY, 8);
+/// ac.setLocalDate(localDate);
 /// Instant sunrise = ac.getSunrise();
 /// </pre>
 ///@author &copy; Eliyahu Hershfeld 2004 - 2026
@@ -17041,6 +17041,45 @@ class AstronomicalCalendar extends jni$_.JObject {
   ///
   /// constant for milliseconds in an hour (3,600,000)
   static const HOUR_MILLIS = 3600000;
+  static final _id_getSunriseWithElevation = _class.instanceMethodId(
+    r'getSunriseWithElevation',
+    r'()Ljava/time/Instant;',
+  );
+
+  static final _getSunriseWithElevation = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.time.Instant getSunriseWithElevation()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The getSunriseWithElevation method returns a <code>Instant</code> representing the
+  /// AstronomicalCalculator\#getElevationAdjustment(double) elevation adjusted sunrise time. The zenith used
+  /// for the calculation uses \#GEOMETRIC_ZENITH geometric zenith of 90&deg; plus
+  /// AstronomicalCalculator\#getElevationAdjustment(double). This is adjusted by the
+  /// AstronomicalCalculator to add approximately 50/60 of a degree to account for 34 archminutes of refraction
+  /// and 16 archminutes for the sun's radius for a total of AstronomicalCalculator\#adjustZenith 90.83333&deg;.
+  /// See documentation for the specific implementation of the AstronomicalCalculator that you are using.
+  ///@return the <code>Instant</code> representing the exact sunrise time. If the calculation can't be computed such as
+  ///         in the Arctic Circle where there is at least one day a year where the sun does not rise, and one where it
+  ///         does not set, a <code>null</code> will be returned. See detailed explanation on top of the page.
+  ///@see AstronomicalCalculator\#adjustZenith
+  ///@see \#getSeaLevelSunrise()
+  ///@see AstronomicalCalendar\#getUTCSunrise
+  Instant? getSunriseWithElevation() {
+    return _getSunriseWithElevation(reference.pointer,
+            _id_getSunriseWithElevation as jni$_.JMethodIDPtr)
+        .object<Instant?>(const $Instant$NullableType$());
+  }
+
   static final _id_getSunrise = _class.instanceMethodId(
     r'getSunrise',
     r'()Ljava/time/Instant;',
@@ -17061,13 +17100,10 @@ class AstronomicalCalendar extends jni$_.JObject {
   /// from: `public java.time.Instant getSunrise()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// The getSunrise method returns a <code>Instant</code> representing the
-  /// AstronomicalCalculator\#getElevationAdjustment(double) elevation adjusted sunrise time. The zenith used
-  /// for the calculation uses \#GEOMETRIC_ZENITH geometric zenith of 90&deg; plus
-  /// AstronomicalCalculator\#getElevationAdjustment(double). This is adjusted by the
-  /// AstronomicalCalculator to add approximately 50/60 of a degree to account for 34 archminutes of refraction
-  /// and 16 archminutes for the sun's radius for a total of AstronomicalCalculator\#adjustZenith 90.83333&deg;.
-  /// See documentation for the specific implementation of the AstronomicalCalculator that you are using.
+  /// @deprecated Use \#getSunriseWithElevation() instead.
+  /// This method already accounts for the observer's elevation, but the name
+  /// does not clearly indicate this behavior. The replacement method has a
+  /// clearer and more descriptive name.
   ///@return the <code>Instant</code> representing the exact sunrise time. If the calculation can't be computed such as
   ///         in the Arctic Circle where there is at least one day a year where the sun does not rise, and one where it
   ///         does not set, a <code>null</code> will be returned. See detailed explanation on top of the page.
@@ -17106,7 +17142,7 @@ class AstronomicalCalendar extends jni$_.JObject {
   ///@return the <code>Instant</code> representing the exact sea-level sunrise time. If the calculation can't be computed
   ///         such as in the Arctic Circle where there is at least one day a year where the sun does not rise, and one
   ///         where it does not set, a <code>null</code> will be returned. See detailed explanation on top of the page.
-  ///@see AstronomicalCalendar\#getSunrise
+  ///@see AstronomicalCalendar\#getSunriseWithElevation
   ///@see AstronomicalCalendar\#getUTCSeaLevelSunrise
   ///@see \#getSeaLevelSunset()
   Instant? getSeaLevelSunrise() {
@@ -17208,6 +17244,48 @@ class AstronomicalCalendar extends jni$_.JObject {
         .object<Instant?>(const $Instant$NullableType$());
   }
 
+  static final _id_getSunsetWithElevation = _class.instanceMethodId(
+    r'getSunsetWithElevation',
+    r'()Ljava/time/Instant;',
+  );
+
+  static final _getSunsetWithElevation = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.time.Instant getSunsetWithElevation()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The getSunsetWithElevation method returns an <code>Instant</code> representing the
+  /// AstronomicalCalculator\#getElevationAdjustment(double) elevation adjusted sunset time. The zenith used for
+  /// the calculation uses \#GEOMETRIC_ZENITH geometric zenith of 90&deg; plus
+  /// AstronomicalCalculator\#getElevationAdjustment(double). This is adjusted by the
+  /// AstronomicalCalculator to add approximately 50/60 of a degree to account for 34 archminutes of refraction
+  /// and 16 archminutes for the sun's radius for a total of AstronomicalCalculator\#adjustZenith 90.83333&deg;.
+  /// See documentation for the specific implementation of the AstronomicalCalculator that you are using. Note:
+  /// In certain cases the calculates sunset will occur before sunrise. This will typically happen when a timezone
+  /// other than the local timezone is used (calculating Los Angeles sunset using a GMT timezone for example). In this
+  /// case the sunset date will be incremented to the following date.
+  ///@return the <code>Instant</code> representing the exact sunset time. If the calculation can't be computed such as in
+  ///         the Arctic Circle where there is at least one day a year where the sun does not rise, and one where it
+  ///         does not set, a <code>null</code> will be returned. See detailed explanation on top of the page.
+  ///@see AstronomicalCalculator\#adjustZenith
+  ///@see \#getSeaLevelSunset()
+  ///@see AstronomicalCalendar\#getUTCSunset
+  Instant? getSunsetWithElevation() {
+    return _getSunsetWithElevation(
+            reference.pointer, _id_getSunsetWithElevation as jni$_.JMethodIDPtr)
+        .object<Instant?>(const $Instant$NullableType$());
+  }
+
   static final _id_getSunset = _class.instanceMethodId(
     r'getSunset',
     r'()Ljava/time/Instant;',
@@ -17228,16 +17306,10 @@ class AstronomicalCalendar extends jni$_.JObject {
   /// from: `public java.time.Instant getSunset()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// The getSunset method returns a <code>Instant</code> representing the
-  /// AstronomicalCalculator\#getElevationAdjustment(double) elevation adjusted sunset time. The zenith used for
-  /// the calculation uses \#GEOMETRIC_ZENITH geometric zenith of 90&deg; plus
-  /// AstronomicalCalculator\#getElevationAdjustment(double). This is adjusted by the
-  /// AstronomicalCalculator to add approximately 50/60 of a degree to account for 34 archminutes of refraction
-  /// and 16 archminutes for the sun's radius for a total of AstronomicalCalculator\#adjustZenith 90.83333&deg;.
-  /// See documentation for the specific implementation of the AstronomicalCalculator that you are using. Note:
-  /// In certain cases the calculates sunset will occur before sunrise. This will typically happen when a timezone
-  /// other than the local timezone is used (calculating Los Angeles sunset using a GMT timezone for example). In this
-  /// case the sunset date will be incremented to the following date.
+  /// @deprecated Use \#getSunsetWithElevation() instead.
+  /// This method already accounts for the observer's elevation, but its name
+  /// does not clearly reflect that behavior. The replacement method provides
+  /// a more accurate and descriptive name.
   ///@return the <code>Instant</code> representing the exact sunset time. If the calculation can't be computed such as in
   ///         the Arctic Circle where there is at least one day a year where the sun does not rise, and one where it
   ///         does not set, a <code>null</code> will be returned. See detailed explanation on top of the page.
@@ -17276,9 +17348,9 @@ class AstronomicalCalendar extends jni$_.JObject {
   ///@return the <code>Instant</code> representing the exact sea-level sunset time. If the calculation can't be computed
   ///         such as in the Arctic Circle where there is at least one day a year where the sun does not rise, and one
   ///         where it does not set, a <code>null</code> will be returned. See detailed explanation on top of the page.
-  ///@see AstronomicalCalendar\#getSunset
+  ///@see AstronomicalCalendar\#getSunsetWithElevation
   ///@see AstronomicalCalendar\#getUTCSeaLevelSunset
-  ///@see \#getSunset()
+  ///@see \#getSunsetWithElevation()
   Instant? getSeaLevelSunset() {
     return _getSeaLevelSunset(
             reference.pointer, _id_getSeaLevelSunset as jni$_.JMethodIDPtr)
@@ -17475,13 +17547,13 @@ class AstronomicalCalendar extends jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// A utility method that returns the time of an offset by degrees below or above the horizon of
-  /// \#getSunrise() sunrise. Note that the degree offset is from the vertical, so for a calculation of 14&deg;
+  /// \#getSunriseWithElevation() sunrise. Note that the degree offset is from the vertical, so for a calculation of 14&deg;
   /// before sunrise, an offset of 14 + \#GEOMETRIC_ZENITH = 104 would have to be passed as a parameter.
-  ///@param offsetZenith the degrees before \#getSunrise() to use in the calculation. For time after sunrise use
+  ///@param offsetZenith the degrees before \#getSunriseWithElevation() to use in the calculation. For time after sunrise use
   ///            negative numbers. Note that the degree offset is from the vertical, so for a calculation of 14&deg;
   ///            before sunrise, an offset of 14 + \#GEOMETRIC_ZENITH = 104 would have to be passed as a
   ///            parameter.
-  ///@return The java.time.Instant of the offset after (or before) \#getSunrise(). If the calculation
+  ///@return The java.time.Instant of the offset after (or before) \#getSunriseWithElevation(). If the calculation
   ///         can't be computed such as in the Arctic Circle where there is at least one day a year where the sun does
   ///         not rise, and one where it does not set, a <code>null</code> will be returned. See detailed explanation
   ///         on top of the page.
@@ -17512,12 +17584,12 @@ class AstronomicalCalendar extends jni$_.JObject {
   /// from: `public java.time.Instant getSunsetOffsetByDegrees(double offsetZenith)`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// A utility method that returns the time of an offset by degrees below or above the horizon of \#getSunset() sunset. Note that the degree offset is from the vertical, so for a calculation of 14&deg; after sunset, an
+  /// A utility method that returns the time of an offset by degrees below or above the horizon of \#getSunsetWithElevation() sunset. Note that the degree offset is from the vertical, so for a calculation of 14&deg; after sunset, an
   /// offset of 14 + \#GEOMETRIC_ZENITH = 104 would have to be passed as a parameter.
-  ///@param offsetZenith the degrees after \#getSunset() to use in the calculation. For time before sunset use negative
+  ///@param offsetZenith the degrees after \#getSunsetWithElevation() to use in the calculation. For time before sunset use negative
   ///            numbers. Note that the degree offset is from the vertical, so for a calculation of 14&deg; after
   ///            sunset, an offset of 14 + \#GEOMETRIC_ZENITH = 104 would have to be passed as a parameter.
-  ///@return The java.time.Instant of the offset after (or before) \#getSunset(). If the calculation can't
+  ///@return The java.time.Instant of the offset after (or before) \#getSunsetWithElevation(). If the calculation can't
   ///         be computed such as in the Arctic Circle where there is at least one day a year where the sun does not
   ///         rise, and one where it does not set, a <code>null</code> will be returned. See detailed explanation on
   ///         top of the page.
@@ -17549,7 +17621,7 @@ class AstronomicalCalendar extends jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Default constructor will set a default GeoLocation\#GeoLocation(), a default
-  /// AstronomicalCalculator\#getDefault() AstronomicalCalculator and default the ZonedDateTime to the current date.
+  /// AstronomicalCalculator\#getDefault() AstronomicalCalculator and default the LocalDate to the current date.
   factory AstronomicalCalendar() {
     return AstronomicalCalendar.fromReference(
         _new$(_class.reference.pointer, _id_new$ as jni$_.JMethodIDPtr)
@@ -17784,8 +17856,8 @@ class AstronomicalCalendar extends jni$_.JObject {
   ///
   /// A utility method that will allow the calculation of a temporal (solar) hour based on the sunrise and sunset
   /// passed as parameters to this method. An example of the use of this method would be the calculation of a
-  /// elevation adjusted temporal hour by passing in \#getSunrise() sunrise and
-  /// \#getSunset() sunset as parameters.
+  /// elevation adjusted temporal hour by passing in \#getSunriseWithElevation() sunrise and
+  /// \#getSunsetWithElevation() sunset as parameters.
   ///@param startOfDay The start of the day.
   ///@param endOfDay The end of the day.
   ///@return the <code>long</code> millisecond length of the temporal hour. If the calculation can't be computed a
@@ -18311,8 +18383,8 @@ class AstronomicalCalendar extends jni$_.JObject {
   /// from: `public java.time.LocalDate getLocalDate()`
   /// The returned object must be released after use, by calling the [release] method.
   ///
-  /// returns the <code>ZonedDateTime</code> object encapsulated in this class.
-  ///@return Returns the ZonedDateTime.
+  /// returns the <code>LocalDate</code> object encapsulated in this class.
+  ///@return Returns the <code>LocalDate</code>.
   LocalDate? getLocalDate() {
     return _getLocalDate(
             reference.pointer, _id_getLocalDate as jni$_.JMethodIDPtr)
@@ -18337,8 +18409,8 @@ class AstronomicalCalendar extends jni$_.JObject {
 
   /// from: `public void setLocalDate(java.time.LocalDate localDate)`
   ///
-  /// Sets the <code>ZonedDateTime</code>  object for us in this class.
-  ///@param localDate The <code>ZonedDateTime</code> to set.
+  /// Sets the <code>LocalDate</code>  object for us in this class.
+  ///@param localDate The <code>LocalDate</code> to set.
   void setLocalDate(
     LocalDate? localDate,
   ) {
@@ -20149,5 +20221,1505 @@ final class $GeoLocation$Type$ extends jni$_.JType<GeoLocation> {
   bool operator ==(Object other) {
     return other.runtimeType == ($GeoLocation$Type$) &&
         other is $GeoLocation$Type$;
+  }
+}
+
+/// from: `com.kosherjava.zmanim.hebrewcalendar.JewishDate`
+///
+/// The JewishDate is the base calendar class, that supports maintenance of a java.util.GregorianCalendar
+/// instance along with the corresponding Jewish date. This class can use the standard Java Date and Calendar
+/// classes for setting and maintaining the dates, but it does not subclass these classes or use them internally
+/// in any calculations. This class also does not have a concept of a time (which the Date class does). Please
+/// note that the calendar does not currently support dates prior to 1/1/1 Gregorian. Also keep in mind that the
+/// Gregorian calendar started on October 15, 1582, so any calculations prior to that are suspect (at least from
+/// a Gregorian perspective). While 1/1/1 Gregorian and forward are technically supported, any calculations prior to <a href="http://en.wikipedia.org/wiki/Hillel_II">Hillel II's (Hakatan's</a>) calendar (4119 in the Jewish Calendar / 359
+/// CE Julian as recorded by <a href="http://en.wikipedia.org/wiki/Hai_Gaon">Rav Hai Gaon</a>) would be just an
+/// approximation.
+///
+/// This open source Java code was written by <a href="http://www.facebook.com/avromf">Avrom Finkelstien</a> from his C++
+/// code. It was refactored to fit the KosherJava Zmanim API with simplification of the code, enhancements and some bug
+/// fixing.
+///
+/// Some of Avrom's original C++ code was translated from
+/// <a href="https://web.archive.org/web/20120124134148/http://emr.cs.uiuc.edu/~reingold/calendar.C">C/C++ code</a> in
+/// <a href="http://www.calendarists.com">Calendrical Calculations</a> by Nachum Dershowitz and Edward M.
+/// Reingold, Software-- Practice &amp; Experience, vol. 20, no. 9 (September, 1990), pp. 899- 928. Any method with the mark
+/// "ND+ER" indicates that the method was taken from this source with minor modifications.
+///
+/// If you are looking for a class that implements a Jewish calendar version of the Calendar class, one is available from
+/// the <a href="http://site.icu-project.org/">ICU (International Components for Unicode)</a> project, formerly part of
+/// IBM's DeveloperWorks.
+///@see JewishCalendar
+///@see HebrewDateFormatter
+///@see java.util.Date
+///@see java.util.Calendar
+///@author &copy; Avrom Finkelstien 2002
+///@author &copy; Eliyahu Hershfeld 2011 - 2026
+class JewishDate extends jni$_.JObject {
+  @jni$_.internal
+  @core$_.override
+  final jni$_.JType<JewishDate> $type;
+
+  @jni$_.internal
+  JewishDate.fromReference(
+    jni$_.JReference reference,
+  )   : $type = type,
+        super.fromReference(reference);
+
+  static final _class =
+      jni$_.JClass.forName(r'com/kosherjava/zmanim/hebrewcalendar/JewishDate');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<JewishDate?> nullableType =
+      $JewishDate$NullableType$();
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<JewishDate> type = $JewishDate$Type$();
+
+  /// from: `static public final int NISSAN`
+  ///
+  /// Value of the month field indicating Nissan, the first numeric month of the year in the Jewish calendar. With the
+  /// year starting at \#TISHREI, it would actually be the 7th (or 8th in a \#isJewishLeapYear() leap
+  /// year) month of the year.
+  static const NISSAN = 1;
+
+  /// from: `static public final int IYAR`
+  ///
+  /// Value of the month field indicating Iyar, the second numeric month of the year in the Jewish calendar. With the
+  /// year starting at \#TISHREI, it would actually be the 8th (or 9th in a \#isJewishLeapYear() leap
+  /// year) month of the year.
+  static const IYAR = 2;
+
+  /// from: `static public final int SIVAN`
+  ///
+  /// Value of the month field indicating Sivan, the third numeric month of the year in the Jewish calendar. With the
+  /// year starting at \#TISHREI, it would actually be the 9th (or 10th in a \#isJewishLeapYear() leap
+  /// year) month of the year.
+  static const SIVAN = 3;
+
+  /// from: `static public final int TAMMUZ`
+  ///
+  /// Value of the month field indicating Tammuz, the fourth numeric month of the year in the Jewish calendar. With the
+  /// year starting at \#TISHREI, it would actually be the 10th (or 11th in a \#isJewishLeapYear() leap
+  /// year) month of the year.
+  static const TAMMUZ = 4;
+
+  /// from: `static public final int AV`
+  ///
+  /// Value of the month field indicating Av, the fifth numeric month of the year in the Jewish calendar. With the year
+  /// starting at \#TISHREI, it would actually be the 11th (or 12th in a \#isJewishLeapYear() leap year)
+  /// month of the year.
+  static const AV = 5;
+
+  /// from: `static public final int ELUL`
+  ///
+  /// Value of the month field indicating Elul, the sixth numeric month of the year in the Jewish calendar. With the
+  /// year starting at \#TISHREI, it would actually be the 12th (or 13th in a \#isJewishLeapYear() leap
+  /// year) month of the year.
+  static const ELUL = 6;
+
+  /// from: `static public final int TISHREI`
+  ///
+  /// Value of the month field indicating Tishrei, the seventh numeric month of the year in the Jewish calendar. With
+  /// the year starting at this month, it would actually be the 1st month of the year.
+  static const TISHREI = 7;
+
+  /// from: `static public final int CHESHVAN`
+  ///
+  /// Value of the month field indicating Cheshvan/marcheshvan, the eighth numeric month of the year in the Jewish
+  /// calendar. With the year starting at \#TISHREI, it would actually be the 2nd month of the year.
+  static const CHESHVAN = 8;
+
+  /// from: `static public final int KISLEV`
+  ///
+  /// Value of the month field indicating Kislev, the ninth numeric month of the year in the Jewish calendar. With the
+  /// year starting at \#TISHREI, it would actually be the 3rd month of the year.
+  static const KISLEV = 9;
+
+  /// from: `static public final int TEVES`
+  ///
+  /// Value of the month field indicating Teves, the tenth numeric month of the year in the Jewish calendar. With the
+  /// year starting at \#TISHREI, it would actually be the 4th month of the year.
+  static const TEVES = 10;
+
+  /// from: `static public final int SHEVAT`
+  ///
+  /// Value of the month field indicating Shevat, the eleventh numeric month of the year in the Jewish calendar. With
+  /// the year starting at \#TISHREI, it would actually be the 5th month of the year.
+  static const SHEVAT = 11;
+
+  /// from: `static public final int ADAR`
+  ///
+  /// Value of the month field indicating Adar (or Adar I in a \#isJewishLeapYear() leap year), the twelfth
+  /// numeric month of the year in the Jewish calendar. With the year starting at \#TISHREI, it would actually
+  /// be the 6th month of the year.
+  static const ADAR = 12;
+
+  /// from: `static public final int ADAR_II`
+  ///
+  /// Value of the month field indicating Adar II, the leap (intercalary or embolismic) thirteenth (Undecimber) numeric
+  /// month of the year added in Jewish \#isJewishLeapYear() leap year). The leap years are years 3, 6, 8, 11,
+  /// 14, 17 and 19 of a 19-year cycle. With the year starting at \#TISHREI, it would actually be the 7th month
+  /// of the year.
+  static const ADAR_II = 13;
+
+  /// from: `static public final int CHASERIM`
+  ///
+  /// A short year where both \#CHESHVAN and \#KISLEV are 29 days.
+  ///@see \#getCheshvanKislevKviah()
+  ///@see HebrewDateFormatter\#getFormattedKviah(int)
+  static const CHASERIM = 0;
+
+  /// from: `static public final int KESIDRAN`
+  ///
+  /// An ordered year where \#CHESHVAN is 29 days and \#KISLEV is 30 days.
+  ///@see \#getCheshvanKislevKviah()
+  ///@see HebrewDateFormatter\#getFormattedKviah(int)
+  static const KESIDRAN = 1;
+
+  /// from: `static public final int SHELAIMIM`
+  ///
+  /// A long year where both \#CHESHVAN and \#KISLEV are 30 days.
+  ///@see \#getCheshvanKislevKviah()
+  ///@see HebrewDateFormatter\#getFormattedKviah(int)
+  static const SHELAIMIM = 2;
+  static final _id_getMoladHours = _class.instanceMethodId(
+    r'getMoladHours',
+    r'()I',
+  );
+
+  static final _getMoladHours = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getMoladHours()`
+  ///
+  /// Returns the _molad_ hours. Only a JewishDate object populated with \#getMolad(),
+  /// \#setJewishDate(int, int, int, int, int, int) or \#setMoladHours(int) will have this field
+  /// populated. A regular JewishDate object will have this field set to 0.
+  ///@return the _molad_ hours
+  ///@see \#setMoladHours(int)
+  ///@see \#getMolad()
+  ///@see \#setJewishDate(int, int, int, int, int, int)
+  int getMoladHours() {
+    return _getMoladHours(
+            reference.pointer, _id_getMoladHours as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_setMoladHours = _class.instanceMethodId(
+    r'setMoladHours',
+    r'(I)V',
+  );
+
+  static final _setMoladHours = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setMoladHours(int moladHours)`
+  ///
+  /// Sets the _molad_ hours.
+  ///@param moladHours the _molad_ hours to set
+  ///@see \#getMoladHours()
+  ///@see \#getMolad()
+  ///@see \#setJewishDate(int, int, int, int, int, int)
+  void setMoladHours(
+    int moladHours,
+  ) {
+    _setMoladHours(reference.pointer, _id_setMoladHours as jni$_.JMethodIDPtr,
+            moladHours)
+        .check();
+  }
+
+  static final _id_getMoladMinutes = _class.instanceMethodId(
+    r'getMoladMinutes',
+    r'()I',
+  );
+
+  static final _getMoladMinutes = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getMoladMinutes()`
+  ///
+  /// Returns the _molad_ minutes. Only an object populated with \#getMolad(),
+  /// \#setJewishDate(int, int, int, int, int, int) or or \#setMoladMinutes(int) will have these fields
+  /// populated. A regular JewishDate object will have this field set to 0.
+  ///@return the _molad_ minutes
+  ///@see \#setMoladMinutes(int)
+  ///@see \#getMolad()
+  ///@see \#setJewishDate(int, int, int, int, int, int)
+  int getMoladMinutes() {
+    return _getMoladMinutes(
+            reference.pointer, _id_getMoladMinutes as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_setMoladMinutes = _class.instanceMethodId(
+    r'setMoladMinutes',
+    r'(I)V',
+  );
+
+  static final _setMoladMinutes = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setMoladMinutes(int moladMinutes)`
+  ///
+  /// Sets the _molad_ minutes. The expectation is that the traditional minute-less _chalakim_ will be broken out to
+  /// minutes and \#setMoladChalakim(int) _chalakim_ / parts , so 793 (TaShTZaG) parts would have the minutes set to
+  /// 44 and _chalakim_ to 1.
+  ///@param moladMinutes the molad minutes to set
+  ///@see \#getMoladMinutes()
+  ///@see \#setMoladChalakim(int)
+  ///@see \#getMolad()
+  ///@see \#setJewishDate(int, int, int, int, int, int)
+  void setMoladMinutes(
+    int moladMinutes,
+  ) {
+    _setMoladMinutes(reference.pointer,
+            _id_setMoladMinutes as jni$_.JMethodIDPtr, moladMinutes)
+        .check();
+  }
+
+  static final _id_setMoladChalakim = _class.instanceMethodId(
+    r'setMoladChalakim',
+    r'(I)V',
+  );
+
+  static final _setMoladChalakim = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void setMoladChalakim(int moladChalakim)`
+  ///
+  /// Sets the _molad_ chalakim/parts. The expectation is that the traditional minute-less _chalakim_ will be broken
+  /// out to \#setMoladMinutes(int) minutes and chalakim, so 793 (TaShTZaG) parts would have the minutes set to 44 and
+  /// _chalakim_ to 1.
+  ///@param moladChalakim the _molad chalakim_ / parts to set
+  ///@see \#getMoladChalakim()
+  ///@see \#setMoladMinutes(int)
+  ///@see \#getMolad()
+  ///@see \#setJewishDate(int, int, int, int, int, int)
+  void setMoladChalakim(
+    int moladChalakim,
+  ) {
+    _setMoladChalakim(reference.pointer,
+            _id_setMoladChalakim as jni$_.JMethodIDPtr, moladChalakim)
+        .check();
+  }
+
+  static final _id_getMoladChalakim = _class.instanceMethodId(
+    r'getMoladChalakim',
+    r'()I',
+  );
+
+  static final _getMoladChalakim = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getMoladChalakim()`
+  ///
+  /// Returns the _molad chalakim_ / parts. Only an object populated with \#getMolad(),
+  /// \#setJewishDate(int, int, int, int, int, int) or or \#setMoladChalakim(int) will have these fields
+  /// populated. A regular JewishDate object will have this field set to 0.
+  ///@return the _molad chalakim_ / parts
+  ///@see \#setMoladChalakim(int)
+  ///@see \#getMolad()
+  ///@see \#setJewishDate(int, int, int, int, int, int)
+  int getMoladChalakim() {
+    return _getMoladChalakim(
+            reference.pointer, _id_getMoladChalakim as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getAbsDate = _class.instanceMethodId(
+    r'getAbsDate',
+    r'()I',
+  );
+
+  static final _getAbsDate = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getAbsDate()`
+  ///
+  /// Returns the absolute date (days since January 1, 0001 of the Gregorian calendar).
+  ///@return the number of days since January 1, 1
+  int getAbsDate() {
+    return _getAbsDate(reference.pointer, _id_getAbsDate as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_isJewishLeapYear = _class.instanceMethodId(
+    r'isJewishLeapYear',
+    r'()Z',
+  );
+
+  static final _isJewishLeapYear = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isJewishLeapYear()`
+  ///
+  /// Returns if the year the calendar is set to is a Jewish leap year. Years 3, 6, 8, 11, 14, 17 and 19 in the 19-year
+  /// cycle are leap years.
+  ///@return true if it is a leap year
+  ///@see \#isJewishLeapYear(int)
+  bool isJewishLeapYear() {
+    return _isJewishLeapYear(
+            reference.pointer, _id_isJewishLeapYear as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_getJewishCalendarElapsedDays = _class.staticMethodId(
+    r'getJewishCalendarElapsedDays',
+    r'(I)I',
+  );
+
+  static final _getJewishCalendarElapsedDays =
+      jni$_.ProtectedJniExtensions.lookup<
+                  jni$_.NativeFunction<
+                      jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+                          jni$_.JMethodIDPtr, jni$_.VarArgs<(jni$_.Int32,)>)>>(
+              'globalEnv_CallStaticIntMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `static public int getJewishCalendarElapsedDays(int year)`
+  ///
+  /// Returns the number of days elapsed from the Sunday prior to the start of the Jewish calendar to the mean
+  /// conjunction of Tishri of the Jewish year.
+  ///@param year the Jewish year
+  ///@return the number of days elapsed from prior to the _molad Tohu BaHaRaD_ (Be = Monday, _Ha_ = 5
+  ///         hours and _RaD_ = 204 _chalakim_ / parts) prior to the start of the Jewish calendar, to
+  ///         the mean conjunction of Tishri of the Jewish year. BeHaRaD is 23:11:20 on Sunday night(5 hours 204/1080
+  ///         _chalakim_ after sunset on Sunday evening).
+  static int getJewishCalendarElapsedDays(
+    int year,
+  ) {
+    return _getJewishCalendarElapsedDays(_class.reference.pointer,
+            _id_getJewishCalendarElapsedDays as jni$_.JMethodIDPtr, year)
+        .integer;
+  }
+
+  static final _id_getChalakimSinceMoladTohu = _class.instanceMethodId(
+    r'getChalakimSinceMoladTohu',
+    r'()J',
+  );
+
+  static final _getChalakimSinceMoladTohu = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallLongMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public long getChalakimSinceMoladTohu()`
+  ///
+  /// Returns the number of _chalakim_ (parts - 1080 to the hour) from the original hypothetical _Molad Tohu_
+  /// to the Jewish year and month that this Object is set to.
+  ///@return the number of _chalakim_ (parts - 1080 to the hour) from the original hypothetical _Molad Tohu_
+  int getChalakimSinceMoladTohu() {
+    return _getChalakimSinceMoladTohu(reference.pointer,
+            _id_getChalakimSinceMoladTohu as jni$_.JMethodIDPtr)
+        .long;
+  }
+
+  static final _id_getDaysInJewishYear = _class.staticMethodId(
+    r'getDaysInJewishYear',
+    r'(I)I',
+  );
+
+  static final _getDaysInJewishYear = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr, jni$_.VarArgs<(jni$_.Int32,)>)>>(
+          'globalEnv_CallStaticIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `static public int getDaysInJewishYear(int year)`
+  ///
+  /// Returns the number of days for a given Jewish year. ND+ER
+  ///@param year the Jewish year
+  ///@return the number of days for a given Jewish year.
+  ///@see \#isCheshvanLong()
+  ///@see \#isKislevShort()
+  static int getDaysInJewishYear(
+    int year,
+  ) {
+    return _getDaysInJewishYear(_class.reference.pointer,
+            _id_getDaysInJewishYear as jni$_.JMethodIDPtr, year)
+        .integer;
+  }
+
+  static final _id_getDaysInJewishYear$1 = _class.instanceMethodId(
+    r'getDaysInJewishYear',
+    r'()I',
+  );
+
+  static final _getDaysInJewishYear$1 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getDaysInJewishYear()`
+  ///
+  /// Returns the number of days for the current year that the calendar is set to.
+  ///@return the number of days for the Object's current Jewish year.
+  ///@see \#isCheshvanLong()
+  ///@see \#isKislevShort()
+  ///@see \#isJewishLeapYear()
+  int getDaysInJewishYear$1() {
+    return _getDaysInJewishYear$1(
+            reference.pointer, _id_getDaysInJewishYear$1 as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_isCheshvanLong = _class.instanceMethodId(
+    r'isCheshvanLong',
+    r'()Z',
+  );
+
+  static final _isCheshvanLong = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isCheshvanLong()`
+  ///
+  /// Returns if Cheshvan is long (30 days VS 29 days) for the current year that the calendar is set to. The method
+  /// name isLong is done since in a Kesidran (ordered) year Cheshvan is short.
+  ///@return true if Cheshvan is long for the current year that the calendar is set to
+  ///@see \#isCheshvanLong()
+  bool isCheshvanLong() {
+    return _isCheshvanLong(
+            reference.pointer, _id_isCheshvanLong as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_isKislevShort = _class.instanceMethodId(
+    r'isKislevShort',
+    r'()Z',
+  );
+
+  static final _isKislevShort = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public boolean isKislevShort()`
+  ///
+  /// Returns if the Kislev is short for the year that this class is set to. The method name isShort is done since in a
+  /// Kesidran (ordered) year Kislev is long.
+  ///@return true if Kislev is short for the year that this class is set to
+  bool isKislevShort() {
+    return _isKislevShort(
+            reference.pointer, _id_isKislevShort as jni$_.JMethodIDPtr)
+        .boolean;
+  }
+
+  static final _id_getCheshvanKislevKviah = _class.instanceMethodId(
+    r'getCheshvanKislevKviah',
+    r'()I',
+  );
+
+  static final _getCheshvanKislevKviah = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getCheshvanKislevKviah()`
+  ///
+  /// Returns the Cheshvan and Kislev kviah (whether a Jewish year is short, regular or long). It will return
+  /// \#SHELAIMIM if both cheshvan and kislev are 30 days, \#KESIDRAN if Cheshvan is 29 days and Kislev
+  /// is 30 days and \#CHASERIM if both are 29 days.
+  ///@return \#SHELAIMIM if both cheshvan and kislev are 30 days, \#KESIDRAN if Cheshvan is 29 days and
+  ///         Kislev is 30 days and \#CHASERIM if both are 29 days.
+  ///@see \#isCheshvanLong()
+  ///@see \#isKislevShort()
+  int getCheshvanKislevKviah() {
+    return _getCheshvanKislevKviah(
+            reference.pointer, _id_getCheshvanKislevKviah as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getDaysInJewishMonth = _class.instanceMethodId(
+    r'getDaysInJewishMonth',
+    r'()I',
+  );
+
+  static final _getDaysInJewishMonth = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getDaysInJewishMonth()`
+  ///
+  /// Returns the number of days of the Jewish month that the calendar is currently set to.
+  ///@return the number of days for the Jewish month that the calendar is currently set to.
+  int getDaysInJewishMonth() {
+    return _getDaysInJewishMonth(
+            reference.pointer, _id_getDaysInJewishMonth as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getMolad = _class.instanceMethodId(
+    r'getMolad',
+    r'()Lcom/kosherjava/zmanim/hebrewcalendar/JewishDate;',
+  );
+
+  static final _getMolad = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public com.kosherjava.zmanim.hebrewcalendar.JewishDate getMolad()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns the _molad_ for a given year and month. Returns a JewishDate Object set to the date of the _molad_
+  /// with the \#getMoladHours() hours, \#getMoladMinutes() minutes and \#getMoladChalakim() chalakim set. In the current implementation, it sets the _molad_ time based on a midnight date rollover. This
+  /// means that Rosh Chodesh Adar II, 5771 with a _molad_ of 7 _chalakim_ past midnight on Shabbos 29 Adar I / March 5,
+  /// 2011 12:00 AM and 7 chalakim, will have the following values: hours: 0, minutes: 0, Chalakim: 7.
+  ///@return a JewishDate Object set to the date of the _molad_ with the \#getMoladHours() hours,
+  ///         \#getMoladMinutes() minutes and \#getMoladChalakim() _chalakim_ set.
+  JewishDate? getMolad() {
+    return _getMolad(reference.pointer, _id_getMolad as jni$_.JMethodIDPtr)
+        .object<JewishDate?>(const $JewishDate$NullableType$());
+  }
+
+  static final _id_new$ = _class.constructorId(
+    r'(J)V',
+  );
+
+  static final _new$ = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int64,)>)>>('globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void <init>(long molad)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Constructor that creates a JewishDate based on a _molad_ passed in. The _molad_ would be the number of
+  /// _chalakim_ / parts starting at the beginning of Sunday prior to the _Molad Tohu BeHaRaD_ (_Be_ =
+  /// Monday, _Ha_ = 5 hours and _RaD_ = 204 _chalakim_ / parts) - prior to the start of the Jewish
+  /// calendar. _BeHaRaD_ is 23:11:20 on Sunday night(5 hours 204/1080 _chalakim_ after sunset on Sunday evening).
+  ///@param molad the number of _chalakim_ since the beginning of Sunday prior to BaHaRaD
+  factory JewishDate(
+    int molad,
+  ) {
+    return JewishDate.fromReference(
+        _new$(_class.reference.pointer, _id_new$ as jni$_.JMethodIDPtr, molad)
+            .reference);
+  }
+
+  static final _id_getDaysSinceStartOfJewishYear = _class.instanceMethodId(
+    r'getDaysSinceStartOfJewishYear',
+    r'()I',
+  );
+
+  static final _getDaysSinceStartOfJewishYear =
+      jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.JMethodIDPtr,
+                  )>>('globalEnv_CallIntMethod')
+          .asFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>();
+
+  /// from: `public int getDaysSinceStartOfJewishYear()`
+  ///
+  /// returns the number of days from Rosh Hashana of the date passed in, to the full date passed in.
+  ///@return the number of days
+  int getDaysSinceStartOfJewishYear() {
+    return _getDaysSinceStartOfJewishYear(reference.pointer,
+            _id_getDaysSinceStartOfJewishYear as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_new$1 = _class.constructorId(
+    r'(III)V',
+  );
+
+  static final _new$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Int32, jni$_.Int32, jni$_.Int32)>)>>(
+          'globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int, int)>();
+
+  /// from: `public void <init>(int jewishYear, int jewishMonth, int jewishDayOfMonth)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Creates a Jewish date based on a Jewish year, month and day of month.
+  ///@param jewishYear the Jewish year
+  ///@param jewishMonth the Jewish month. The method expects a 1 for Nissan ... 12 for Adar and 13 for Adar II. Use the
+  ///            constants \#NISSAN ... \#ADAR (or \#ADAR_II for a leap year Adar II) to avoid any
+  ///            confusion.
+  ///@param jewishDayOfMonth the Jewish day of month. If 30 is passed in for a month with only 29 days (for example \#IYAR,
+  ///            or \#KISLEV in a year that \#isKislevShort()), the 29th (last valid date of the month)
+  ///            will be set
+  ///@throws IllegalArgumentException if the day of month is &lt; 1 or &gt; 30, or a year of &lt; 0 is passed in.
+  factory JewishDate.new$1(
+    int jewishYear,
+    int jewishMonth,
+    int jewishDayOfMonth,
+  ) {
+    return JewishDate.fromReference(_new$1(
+            _class.reference.pointer,
+            _id_new$1 as jni$_.JMethodIDPtr,
+            jewishYear,
+            jewishMonth,
+            jewishDayOfMonth)
+        .reference);
+  }
+
+  static final _id_new$2 = _class.constructorId(
+    r'()V',
+  );
+
+  static final _new$2 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public void <init>()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Default constructor will set a default date to the current system date.
+  factory JewishDate.new$2() {
+    return JewishDate.fromReference(
+        _new$2(_class.reference.pointer, _id_new$2 as jni$_.JMethodIDPtr)
+            .reference);
+  }
+
+  static final _id_new$3 = _class.constructorId(
+    r'(Ljava/time/ZonedDateTime;)V',
+  );
+
+  static final _new$3 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public void <init>(java.time.ZonedDateTime zonedDateTime)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// A constructor that initializes the date to the java.util.Calendar Calendar parameter.
+  ///@param zonedDateTime the <code>ZonedDateTime</code> to set the calendar to
+  ///@throws IllegalArgumentException if the Calendar\#ERA is GregorianCalendar\#BC
+  factory JewishDate.new$3(
+    ZonedDateTime? zonedDateTime,
+  ) {
+    final _$zonedDateTime = zonedDateTime?.reference ?? jni$_.jNullReference;
+    return JewishDate.fromReference(_new$3(_class.reference.pointer,
+            _id_new$3 as jni$_.JMethodIDPtr, _$zonedDateTime.pointer)
+        .reference);
+  }
+
+  static final _id_new$4 = _class.constructorId(
+    r'(Ljava/time/LocalDate;)V',
+  );
+
+  static final _new$4 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_NewObject')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public void <init>(java.time.LocalDate localDate)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// A constructor that initializes the date to the java.time.LocalDate LocalDate parameter.
+  ///@param localDate the <code>LocalDate</code> to set the calendar to
+  ///@throws IllegalArgumentException if the Calendar\#ERA is GregorianCalendar\#BC
+  factory JewishDate.new$4(
+    LocalDate? localDate,
+  ) {
+    final _$localDate = localDate?.reference ?? jni$_.jNullReference;
+    return JewishDate.fromReference(_new$4(_class.reference.pointer,
+            _id_new$4 as jni$_.JMethodIDPtr, _$localDate.pointer)
+        .reference);
+  }
+
+  static final _id_setGregorianDate = _class.instanceMethodId(
+    r'setGregorianDate',
+    r'(Ljava/time/ZonedDateTime;)V',
+  );
+
+  static final _setGregorianDate = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JThrowablePtr Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public void setGregorianDate(java.time.ZonedDateTime zonedDateTime)`
+  ///
+  /// Sets the date based on a java.util.Calendar Calendar object. Modifies the Jewish date as well.
+  ///@param zonedDateTime the <code>ZonedDateTime</code> to set the calendar to
+  ///@throws IllegalArgumentException if the Calendar\#ERA is GregorianCalendar\#BC
+  void setGregorianDate(
+    ZonedDateTime? zonedDateTime,
+  ) {
+    final _$zonedDateTime = zonedDateTime?.reference ?? jni$_.jNullReference;
+    _setGregorianDate(reference.pointer,
+            _id_setGregorianDate as jni$_.JMethodIDPtr, _$zonedDateTime.pointer)
+        .check();
+  }
+
+  static final _id_setGregorianDate$1 = _class.instanceMethodId(
+    r'setGregorianDate',
+    r'(Ljava/time/LocalDate;)V',
+  );
+
+  static final _setGregorianDate$1 = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JThrowablePtr Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public void setGregorianDate(java.time.LocalDate localDate)`
+  ///
+  /// Sets the date based on a java.time.LocalDate LocalDate object. Modifies the Jewish date as well.
+  ///@param localDate the <code>LocalDate</code> to set the calendar to
+  ///@throws IllegalArgumentException if the date would fall prior to the year 1 AD
+  void setGregorianDate$1(
+    LocalDate? localDate,
+  ) {
+    final _$localDate = localDate?.reference ?? jni$_.jNullReference;
+    _setGregorianDate$1(reference.pointer,
+            _id_setGregorianDate$1 as jni$_.JMethodIDPtr, _$localDate.pointer)
+        .check();
+  }
+
+  static final _id_setJewishDate = _class.instanceMethodId(
+    r'setJewishDate',
+    r'(III)V',
+  );
+
+  static final _setJewishDate = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JThrowablePtr Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Int32, jni$_.Int32, jni$_.Int32)>)>>(
+          'globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int, int, int)>();
+
+  /// from: `public void setJewishDate(int year, int month, int dayOfMonth)`
+  ///
+  /// Sets the Jewish Date and updates the Gregorian date accordingly.
+  ///@param year the Jewish year. The year can't be negative
+  ///@param month the Jewish month starting with Nissan. A value of 1 is expected for Nissan ... 12 for Adar and 13 for
+  ///            Adar II. Use the constants \#NISSAN ... \#ADAR (or \#ADAR_II for a leap year Adar
+  ///            II) to avoid any confusion.
+  ///@param dayOfMonth the Jewish day of month. valid values are 1-30. If the day of month is set to 30 for a month that only
+  ///            has 29 days, the day will be set as 29.
+  ///@throws IllegalArgumentException if a Jewish date earlier than 18 Teves, 3761 (1/1/1 Gregorian), a month &lt; 1 or &gt; 12 (or 13 on a
+  ///             leap year) or the day of month is &lt; 1 or &gt; 30 is passed in
+  void setJewishDate(
+    int year,
+    int month,
+    int dayOfMonth,
+  ) {
+    _setJewishDate(reference.pointer, _id_setJewishDate as jni$_.JMethodIDPtr,
+            year, month, dayOfMonth)
+        .check();
+  }
+
+  static final _id_setJewishDate$1 = _class.instanceMethodId(
+    r'setJewishDate',
+    r'(IIIIII)V',
+  );
+
+  static final _setJewishDate$1 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<
+                      (
+                        jni$_.Int32,
+                        jni$_.Int32,
+                        jni$_.Int32,
+                        jni$_.Int32,
+                        jni$_.Int32,
+                        jni$_.Int32
+                      )>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, int, int, int, int, int, int)>();
+
+  /// from: `public void setJewishDate(int year, int month, int dayOfMonth, int hours, int minutes, int chalakim)`
+  ///
+  /// Sets the Jewish Date and updates the Gregorian date accordingly.
+  ///@param year the Jewish year. The year can't be negative
+  ///@param month the Jewish month starting with Nissan. A value of 1 is expected for Nissan ... 12 for Adar and 13 for
+  ///            Adar II. Use the constants \#NISSAN ... \#ADAR (or \#ADAR_II for a leap year Adar
+  ///            II) to avoid any confusion.
+  ///@param dayOfMonth the Jewish day of month. valid values are 1-30. If the day of month is set to 30 for a month that only
+  ///            has 29 days, the day will be set as 29.
+  ///@param hours the hour of the day. Used for _molad_ calculations
+  ///@param minutes the minutes. Used for _molad_ calculations
+  ///@param chalakim the _chalakim_ / parts. Used for _molad_ calculations. The _chalakim_ should not
+  ///            exceed 17. Minutes should be used for larger numbers.
+  ///@throws IllegalArgumentException if a Jewish date earlier than 18 Teves, 3761 (1/1/1 Gregorian), a month &lt; 1 or &gt; 12 (or 13 on a leap year), the day
+  ///             of month is &lt; 1 or &gt; 30, an hour &lt; 0 or &gt; 23, a minute &lt; 0 &gt; 59 or _chalakim_ &lt; 0 &gt; 17. For
+  ///             larger a larger number of _chalakim_ such as 793 (_TaShTzaG_) break the _chalakim_ into minutes (18
+  ///             _chalakim_ per minutes, so it would be 44 minutes and 1 _chelek_ in the case of 793 (_TaShTzaG_).
+  void setJewishDate$1(
+    int year,
+    int month,
+    int dayOfMonth,
+    int hours,
+    int minutes,
+    int chalakim,
+  ) {
+    _setJewishDate$1(
+            reference.pointer,
+            _id_setJewishDate$1 as jni$_.JMethodIDPtr,
+            year,
+            month,
+            dayOfMonth,
+            hours,
+            minutes,
+            chalakim)
+        .check();
+  }
+
+  static final _id_getLocalDate = _class.instanceMethodId(
+    r'getLocalDate',
+    r'()Ljava/time/LocalDate;',
+  );
+
+  static final _getLocalDate = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.time.LocalDate getLocalDate()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns this object's date as a java.time.LocalDate object.
+  ///@return The java.time.LocalDate
+  LocalDate? getLocalDate() {
+    return _getLocalDate(
+            reference.pointer, _id_getLocalDate as jni$_.JMethodIDPtr)
+        .object<LocalDate?>(const $LocalDate$NullableType$());
+  }
+
+  static final _id_resetDate = _class.instanceMethodId(
+    r'resetDate',
+    r'()V',
+  );
+
+  static final _resetDate = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public void resetDate()`
+  ///
+  /// Resets this date to the current system date.
+  void resetDate() {
+    _resetDate(reference.pointer, _id_resetDate as jni$_.JMethodIDPtr).check();
+  }
+
+  static final _id_minusDays = _class.instanceMethodId(
+    r'minusDays',
+    r'(I)V',
+  );
+
+  static final _minusDays = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void minusDays(int days)`
+  void minusDays(
+    int days,
+  ) {
+    _minusDays(reference.pointer, _id_minusDays as jni$_.JMethodIDPtr, days)
+        .check();
+  }
+
+  static final _id_addDays = _class.instanceMethodId(
+    r'addDays',
+    r'(I)V',
+  );
+
+  static final _addDays = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void addDays(int days)`
+  void addDays(
+    int days,
+  ) {
+    _addDays(reference.pointer, _id_addDays as jni$_.JMethodIDPtr, days)
+        .check();
+  }
+
+  static final _id_addMonths = _class.instanceMethodId(
+    r'addMonths',
+    r'(I)V',
+  );
+
+  static final _addMonths = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void addMonths(int months)`
+  void addMonths(
+    int months,
+  ) {
+    _addMonths(reference.pointer, _id_addMonths as jni$_.JMethodIDPtr, months)
+        .check();
+  }
+
+  static final _id_addYears = _class.instanceMethodId(
+    r'addYears',
+    r'(I)V',
+  );
+
+  static final _addYears = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                  jni$_.Pointer<jni$_.Void>,
+                  jni$_.JMethodIDPtr,
+                  jni$_.VarArgs<(jni$_.Int32,)>)>>('globalEnv_CallVoidMethod')
+      .asFunction<
+          jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>, jni$_.JMethodIDPtr, int)>();
+
+  /// from: `public void addYears(int years)`
+  void addYears(
+    int years,
+  ) {
+    _addYears(reference.pointer, _id_addYears as jni$_.JMethodIDPtr, years)
+        .check();
+  }
+
+  static final _id_toString$1 = _class.instanceMethodId(
+    r'toString',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _toString$1 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.lang.String toString()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns a string containing the Jewish date in the form, "day Month, year" e.g. "21 Shevat, 5729". For more
+  /// complex formatting, use the formatter classes.
+  ///@return the Jewish date in the form "day Month, year" e.g. "21 Shevat, 5729"
+  ///@see HebrewDateFormatter\#format(JewishDate)
+  jni$_.JString? toString$1() {
+    return _toString$1(reference.pointer, _id_toString$1 as jni$_.JMethodIDPtr)
+        .object<jni$_.JString?>(const jni$_.$JString$NullableType$());
+  }
+
+  static final _id_equals = _class.instanceMethodId(
+    r'equals',
+    r'(Ljava/lang/Object;)Z',
+  );
+
+  static final _equals = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallBooleanMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public boolean equals(java.lang.Object object)`
+  ///
+  /// Indicates whether some other object is "equal to" this one.
+  ///@see Object\#equals(Object)
+  bool equals(
+    jni$_.JObject? object,
+  ) {
+    final _$object = object?.reference ?? jni$_.jNullReference;
+    return _equals(reference.pointer, _id_equals as jni$_.JMethodIDPtr,
+            _$object.pointer)
+        .boolean;
+  }
+
+  static final _id_compareTo = _class.instanceMethodId(
+    r'compareTo',
+    r'(Lcom/kosherjava/zmanim/hebrewcalendar/JewishDate;)I',
+  );
+
+  static final _compareTo = jni$_.ProtectedJniExtensions.lookup<
+              jni$_.NativeFunction<
+                  jni$_.JniResult Function(
+                      jni$_.Pointer<jni$_.Void>,
+                      jni$_.JMethodIDPtr,
+                      jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>)>>(
+          'globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr, jni$_.Pointer<jni$_.Void>)>();
+
+  /// from: `public int compareTo(com.kosherjava.zmanim.hebrewcalendar.JewishDate jewishDate)`
+  ///
+  /// Compares two dates as per the compareTo() method in the Comparable interface. Returns a value less than 0 if this
+  /// date is "less than" (before) the date, greater than 0 if this date is "greater than" (after) the date, or 0 if
+  /// they are equal.
+  int compareTo(
+    JewishDate? jewishDate,
+  ) {
+    final _$jewishDate = jewishDate?.reference ?? jni$_.jNullReference;
+    return _compareTo(reference.pointer, _id_compareTo as jni$_.JMethodIDPtr,
+            _$jewishDate.pointer)
+        .integer;
+  }
+
+  static final _id_getJewishMonth = _class.instanceMethodId(
+    r'getJewishMonth',
+    r'()I',
+  );
+
+  static final _getJewishMonth = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getJewishMonth()`
+  ///
+  /// Returns the Jewish month 1-12 (or 13 years in a leap year). The month count starts with 1 for Nissan and goes to
+  /// 13 for Adar II
+  ///@return the Jewish month from 1 to 12 (or 13 years in a leap year). The month count starts with 1 for Nissan and
+  ///         goes to 13 for Adar II
+  int getJewishMonth() {
+    return _getJewishMonth(
+            reference.pointer, _id_getJewishMonth as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getJewishDayOfMonth = _class.instanceMethodId(
+    r'getJewishDayOfMonth',
+    r'()I',
+  );
+
+  static final _getJewishDayOfMonth = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getJewishDayOfMonth()`
+  ///
+  /// Returns the Jewish day of month.
+  ///@return the Jewish day of the month
+  int getJewishDayOfMonth() {
+    return _getJewishDayOfMonth(
+            reference.pointer, _id_getJewishDayOfMonth as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getJewishYear = _class.instanceMethodId(
+    r'getJewishYear',
+    r'()I',
+  );
+
+  static final _getJewishYear = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getJewishYear()`
+  ///
+  /// Returns the Jewish year.
+  ///@return the Jewish year
+  int getJewishYear() {
+    return _getJewishYear(
+            reference.pointer, _id_getJewishYear as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_getDayOfWeek = _class.instanceMethodId(
+    r'getDayOfWeek',
+    r'()I',
+  );
+
+  static final _getDayOfWeek = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int getDayOfWeek()`
+  ///
+  /// Returns the day of the week as a number between 1-7.
+  ///@return the day of the week as a number between 1-7.
+  int getDayOfWeek() {
+    return _getDayOfWeek(
+            reference.pointer, _id_getDayOfWeek as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  static final _id_clone = _class.instanceMethodId(
+    r'clone',
+    r'()Ljava/lang/Object;',
+  );
+
+  static final _clone = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallObjectMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public java.lang.Object clone()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// A method that creates a <a href="http://en.wikipedia.org/wiki/Object_copy\#Deep_copy">deep copy</a> of the object.
+  ///@see Object\#clone()
+  jni$_.JObject? clone() {
+    return _clone(reference.pointer, _id_clone as jni$_.JMethodIDPtr)
+        .object<jni$_.JObject?>(const jni$_.$JObject$NullableType$());
+  }
+
+  static final _id_hashCode$1 = _class.instanceMethodId(
+    r'hashCode',
+    r'()I',
+  );
+
+  static final _hashCode$1 = jni$_.ProtectedJniExtensions.lookup<
+          jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )>>('globalEnv_CallIntMethod')
+      .asFunction<
+          jni$_.JniResult Function(
+            jni$_.Pointer<jni$_.Void>,
+            jni$_.JMethodIDPtr,
+          )>();
+
+  /// from: `public int hashCode()`
+  ///
+  /// Overrides Object\#hashCode().
+  ///@see Object\#hashCode()
+  int hashCode$1() {
+    return _hashCode$1(reference.pointer, _id_hashCode$1 as jni$_.JMethodIDPtr)
+        .integer;
+  }
+
+  bool operator <(JewishDate? jewishDate) {
+    return compareTo(jewishDate) < 0;
+  }
+
+  bool operator <=(JewishDate? jewishDate) {
+    return compareTo(jewishDate) <= 0;
+  }
+
+  bool operator >(JewishDate? jewishDate) {
+    return compareTo(jewishDate) > 0;
+  }
+
+  bool operator >=(JewishDate? jewishDate) {
+    return compareTo(jewishDate) >= 0;
+  }
+}
+
+final class $JewishDate$NullableType$ extends jni$_.JType<JewishDate?> {
+  @jni$_.internal
+  const $JewishDate$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishDate;';
+
+  @jni$_.internal
+  @core$_.override
+  JewishDate? fromReference(jni$_.JReference reference) => reference.isNull
+      ? null
+      : JewishDate.fromReference(
+          reference,
+        );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const jni$_.$JObject$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<JewishDate?> get nullableType => this;
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 1;
+
+  @core$_.override
+  int get hashCode => ($JewishDate$NullableType$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($JewishDate$NullableType$) &&
+        other is $JewishDate$NullableType$;
+  }
+}
+
+final class $JewishDate$Type$ extends jni$_.JType<JewishDate> {
+  @jni$_.internal
+  const $JewishDate$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Lcom/kosherjava/zmanim/hebrewcalendar/JewishDate;';
+
+  @jni$_.internal
+  @core$_.override
+  JewishDate fromReference(jni$_.JReference reference) =>
+      JewishDate.fromReference(
+        reference,
+      );
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType get superType => const jni$_.$JObject$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  jni$_.JType<JewishDate?> get nullableType =>
+      const $JewishDate$NullableType$();
+
+  @jni$_.internal
+  @core$_.override
+  final superCount = 1;
+
+  @core$_.override
+  int get hashCode => ($JewishDate$Type$).hashCode;
+
+  @core$_.override
+  bool operator ==(Object other) {
+    return other.runtimeType == ($JewishDate$Type$) &&
+        other is $JewishDate$Type$;
   }
 }

@@ -49,6 +49,40 @@ List<String> timezones() => RustLib.instance.api.crateApiTimezones();
 /// Get all the ZmanimPresets supported by the library
 List<ZmanimPreset> presets() => RustLib.instance.api.crateApiPresets();
 
+(int, int, int)? jewishDateToGregorianDate(
+        {required int year, required int month, required int day}) =>
+    RustLib.instance.api
+        .crateApiJewishDateToGregorianDate(year: year, month: month, day: day);
+
+(int, int, int)? gregorianDateToJewishDate(
+        {required int year, required int month, required int day}) =>
+    RustLib.instance.api
+        .crateApiGregorianDateToJewishDate(year: year, month: month, day: day);
+
+(int, int, int)? addDaysToJewishDate(
+        {required int year,
+        required int month,
+        required int day,
+        required PlatformInt64 daysToAdd}) =>
+    RustLib.instance.api.crateApiAddDaysToJewishDate(
+        year: year, month: month, day: day, daysToAdd: daysToAdd);
+
+(int, int, int)? addMonthsToJewishDate(
+        {required int year,
+        required int month,
+        required int day,
+        required int monthsToAdd}) =>
+    RustLib.instance.api.crateApiAddMonthsToJewishDate(
+        year: year, month: month, day: day, monthsToAdd: monthsToAdd);
+
+(int, int, int)? addYearsToJewishDate(
+        {required int year,
+        required int month,
+        required int day,
+        required int yearsToAdd}) =>
+    RustLib.instance.api.crateApiAddYearsToJewishDate(
+        year: year, month: month, day: day, yearsToAdd: yearsToAdd);
+
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ZmanimPreset>>
 abstract class ZmanimPreset implements RustOpaqueInterface {
   /// Get the name of the ZmanimPreset

@@ -1907,6 +1907,8 @@ dependencies = [
  "chrono",
  "chrono-tz",
  "flutter_rust_bridge",
+ "hebrew_holiday_calendar",
+ "icu_calendar",
  "lazy_static",
  "tzf-rs",
  "zmanim-calculator",

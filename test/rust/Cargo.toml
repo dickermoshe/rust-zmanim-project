@@ -13,6 +13,8 @@ flutter_rust_bridge = { version = "=2.11.1", features = ["chrono"] }
 lazy_static.workspace = true
 tzf-rs = "1.1.5"
 zmanim-calculator = { features = ["_java_testing"], workspace = true }
+icu_calendar.workspace = true
+hebrew_holiday_calendar.workspace = true
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

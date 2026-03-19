@@ -3,6 +3,8 @@ use std::str::FromStr;
 use chrono::{Duration, NaiveDate};
 use chrono_tz::{Tz, TZ_VARIANTS};
 use flutter_rust_bridge::frb;
+use hebrew_holiday_calendar::{HebrewHolidayCalendar, HebrewMonth};
+use icu_calendar::{cal::Hebrew, options::DateAddOptions, types::DateDuration, Date, Gregorian};
 use lazy_static::lazy_static;
 use zmanim_calculator::{prelude::*, presets::ALL};
 
@@ -70,4 +72,86 @@ pub fn calculate_zman(
 #[frb(sync)]
 pub fn presets() -> Vec<ZmanimPreset> {
     ALL.iter().map(|zman| ZmanimPreset { zman }).collect()
+}
+
+#[frb(sync)]
+pub fn jewish_date_to_gregorian_date(year: i32, month: u8, day: u8) -> Option<(i32, u8, u8)> {
+    let date =
+        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day).unwrap();
+    let gregorian_date = date.to_calendar(Gregorian);
+    Some((
+        gregorian_date.extended_year(),
+        gregorian_date.month().month_number(),
+        gregorian_date.day_of_month().0,
+    ))
+}
+#[frb(sync)]
+pub fn gregorian_date_to_jewish_date(year: i32, month: u8, day: u8) -> Option<(i32, u8, u8)> {
+    let date = Date::<Gregorian>::try_new_gregorian(year, month, day).unwrap();
+    let hebrew_date = date.to_calendar(Hebrew);
+    Some((
+        hebrew_date.extended_year(),
+        hebrew_date.month().month_number(),
+        hebrew_date.day_of_month().0,
+    ))
+}
+#[frb(sync)]
+pub fn add_days_to_jewish_date(
+    year: i32,
+    month: u8,
+    day: u8,
+    days_to_add: i64,
+) -> Option<(i32, u8, u8)> {
+    let mut date =
+        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day).unwrap();
+    date.try_add_with_options(
+        DateDuration::for_days(days_to_add),
+        DateAddOptions::default(),
+    )
+    .ok()?;
+    Some((
+        date.extended_year(),
+        date.month().month_number(),
+        date.day_of_month().0,
+    ))
+}
+#[frb(sync)]
+pub fn add_months_to_jewish_date(
+    year: i32,
+    month: u8,
+    day: u8,
+    months_to_add: i32,
+) -> Option<(i32, u8, u8)> {
+    let mut date =
+        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day).unwrap();
+    date.try_add_with_options(
+        DateDuration::for_months(months_to_add),
+        DateAddOptions::default(),
+    )
+    .ok()?;
+    Some((
+        date.extended_year(),
+        date.month().month_number(),
+        date.day_of_month().0,
+    ))
+}
+#[frb(sync)]
+pub fn add_years_to_jewish_date(
+    year: i32,
+    month: u8,
+    day: u8,
+    years_to_add: i32,
+) -> Option<(i32, u8, u8)> {
+    let mut date =
+        Date::<Hebrew>::from_hebrew_date(year, HebrewMonth::try_from(month).unwrap(), day).unwrap();
+    date.try_add_with_options(
+        DateDuration::for_years(years_to_add),
+        DateAddOptions::default(),
+    )
+    .ok()?;
+    Some((
+        date.extended_year(),
+        date.month().month_number(),
+        date.day_of_month().0,
+    ))
 }

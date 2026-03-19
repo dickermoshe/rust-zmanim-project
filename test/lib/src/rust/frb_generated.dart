@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 1618619683;
+  int get rustContentHash => -1762524272;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -80,6 +80,24 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
 abstract class RustLibApi extends BaseApi {
   String crateApiZmanimPresetName({required ZmanimPreset that});
+
+  (int, int, int)? crateApiAddDaysToJewishDate(
+      {required int year,
+      required int month,
+      required int day,
+      required PlatformInt64 daysToAdd});
+
+  (int, int, int)? crateApiAddMonthsToJewishDate(
+      {required int year,
+      required int month,
+      required int day,
+      required int monthsToAdd});
+
+  (int, int, int)? crateApiAddYearsToJewishDate(
+      {required int year,
+      required int month,
+      required int day,
+      required int yearsToAdd});
 
   (String, PlatformInt64)? crateApiCalculateZman(
       {required PlatformInt64 ateretTorahSunsetOffsetMinutes,
@@ -97,6 +115,12 @@ abstract class RustLibApi extends BaseApi {
 
   String crateApiFindTimezone(
       {required double longitude, required double latitude});
+
+  (int, int, int)? crateApiGregorianDateToJewishDate(
+      {required int year, required int month, required int day});
+
+  (int, int, int)? crateApiJewishDateToGregorianDate(
+      {required int year, required int month, required int day});
 
   List<ZmanimPreset> crateApiPresets();
 
@@ -144,6 +168,99 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  (int, int, int)? crateApiAddDaysToJewishDate(
+      {required int year,
+      required int month,
+      required int day,
+      required PlatformInt64 daysToAdd}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_32(year, serializer);
+        sse_encode_u_8(month, serializer);
+        sse_encode_u_8(day, serializer);
+        sse_encode_i_64(daysToAdd, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_opt_box_autoadd_record_i_32_u_8_u_8,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiAddDaysToJewishDateConstMeta,
+      argValues: [year, month, day, daysToAdd],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiAddDaysToJewishDateConstMeta =>
+      const TaskConstMeta(
+        debugName: "add_days_to_jewish_date",
+        argNames: ["year", "month", "day", "daysToAdd"],
+      );
+
+  @override
+  (int, int, int)? crateApiAddMonthsToJewishDate(
+      {required int year,
+      required int month,
+      required int day,
+      required int monthsToAdd}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_32(year, serializer);
+        sse_encode_u_8(month, serializer);
+        sse_encode_u_8(day, serializer);
+        sse_encode_i_32(monthsToAdd, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_opt_box_autoadd_record_i_32_u_8_u_8,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiAddMonthsToJewishDateConstMeta,
+      argValues: [year, month, day, monthsToAdd],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiAddMonthsToJewishDateConstMeta =>
+      const TaskConstMeta(
+        debugName: "add_months_to_jewish_date",
+        argNames: ["year", "month", "day", "monthsToAdd"],
+      );
+
+  @override
+  (int, int, int)? crateApiAddYearsToJewishDate(
+      {required int year,
+      required int month,
+      required int day,
+      required int yearsToAdd}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_32(year, serializer);
+        sse_encode_u_8(month, serializer);
+        sse_encode_u_8(day, serializer);
+        sse_encode_i_32(yearsToAdd, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_opt_box_autoadd_record_i_32_u_8_u_8,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiAddYearsToJewishDateConstMeta,
+      argValues: [year, month, day, yearsToAdd],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiAddYearsToJewishDateConstMeta =>
+      const TaskConstMeta(
+        debugName: "add_years_to_jewish_date",
+        argNames: ["year", "month", "day", "yearsToAdd"],
+      );
+
+  @override
   (String, PlatformInt64)? crateApiCalculateZman(
       {required PlatformInt64 ateretTorahSunsetOffsetMinutes,
       required PlatformInt64 candleLightingOffsetMinutes,
@@ -173,7 +290,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_bool(useElevation, serializer);
         sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerZmanimPreset(
             zman, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_opt_box_autoadd_record_string_i_64,
@@ -224,7 +341,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_f_64(longitude, serializer);
         sse_encode_f_64(latitude, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -242,11 +359,65 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  (int, int, int)? crateApiGregorianDateToJewishDate(
+      {required int year, required int month, required int day}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_32(year, serializer);
+        sse_encode_u_8(month, serializer);
+        sse_encode_u_8(day, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_opt_box_autoadd_record_i_32_u_8_u_8,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiGregorianDateToJewishDateConstMeta,
+      argValues: [year, month, day],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiGregorianDateToJewishDateConstMeta =>
+      const TaskConstMeta(
+        debugName: "gregorian_date_to_jewish_date",
+        argNames: ["year", "month", "day"],
+      );
+
+  @override
+  (int, int, int)? crateApiJewishDateToGregorianDate(
+      {required int year, required int month, required int day}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_32(year, serializer);
+        sse_encode_u_8(month, serializer);
+        sse_encode_u_8(day, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_opt_box_autoadd_record_i_32_u_8_u_8,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiJewishDateToGregorianDateConstMeta,
+      argValues: [year, month, day],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiJewishDateToGregorianDateConstMeta =>
+      const TaskConstMeta(
+        debugName: "jewish_date_to_gregorian_date",
+        argNames: ["year", "month", "day"],
+      );
+
+  @override
   List<ZmanimPreset> crateApiPresets() {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -269,7 +440,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_String,
@@ -331,6 +502,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (int, int, int) dco_decode_box_autoadd_record_i_32_u_8_u_8(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as (int, int, int);
+  }
+
+  @protected
   (String, PlatformInt64) dco_decode_box_autoadd_record_string_i_64(
       dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -341,6 +518,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   double dco_decode_f_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as double;
+  }
+
+  @protected
+  int dco_decode_i_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
   }
 
   @protected
@@ -373,10 +556,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (int, int, int)? dco_decode_opt_box_autoadd_record_i_32_u_8_u_8(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_record_i_32_u_8_u_8(raw);
+  }
+
+  @protected
   (String, PlatformInt64)? dco_decode_opt_box_autoadd_record_string_i_64(
       dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_record_string_i_64(raw);
+  }
+
+  @protected
+  (int, int, int) dco_decode_record_i_32_u_8_u_8(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3) {
+      throw Exception('Expected 3 elements, got ${arr.length}');
+    }
+    return (
+      dco_decode_i_32(arr[0]),
+      dco_decode_u_8(arr[1]),
+      dco_decode_u_8(arr[2]),
+    );
   }
 
   @protected
@@ -451,6 +654,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (int, int, int) sse_decode_box_autoadd_record_i_32_u_8_u_8(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_record_i_32_u_8_u_8(deserializer));
+  }
+
+  @protected
   (String, PlatformInt64) sse_decode_box_autoadd_record_string_i_64(
       SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -461,6 +671,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   double sse_decode_f_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getFloat64();
+  }
+
+  @protected
+  int sse_decode_i_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getInt32();
   }
 
   @protected
@@ -505,6 +721,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (int, int, int)? sse_decode_opt_box_autoadd_record_i_32_u_8_u_8(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_record_i_32_u_8_u_8(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   (String, PlatformInt64)? sse_decode_opt_box_autoadd_record_string_i_64(
       SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -514,6 +742,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     } else {
       return null;
     }
+  }
+
+  @protected
+  (int, int, int) sse_decode_record_i_32_u_8_u_8(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_field0 = sse_decode_i_32(deserializer);
+    var var_field1 = sse_decode_u_8(deserializer);
+    var var_field2 = sse_decode_u_8(deserializer);
+    return (var_field0, var_field1, var_field2);
   }
 
   @protected
@@ -540,12 +777,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt sse_decode_usize(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getBigUint64();
-  }
-
-  @protected
-  int sse_decode_i_32(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getInt32();
   }
 
   @protected
@@ -591,6 +822,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_record_i_32_u_8_u_8(
+      (int, int, int) self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_record_i_32_u_8_u_8(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_record_string_i_64(
       (String, PlatformInt64) self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -601,6 +839,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_f_64(double self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putFloat64(self);
+  }
+
+  @protected
+  void sse_encode_i_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putInt32(self);
   }
 
   @protected
@@ -639,6 +883,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_record_i_32_u_8_u_8(
+      (int, int, int)? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_record_i_32_u_8_u_8(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_box_autoadd_record_string_i_64(
       (String, PlatformInt64)? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -647,6 +902,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     if (self != null) {
       sse_encode_box_autoadd_record_string_i_64(self, serializer);
     }
+  }
+
+  @protected
+  void sse_encode_record_i_32_u_8_u_8(
+      (int, int, int) self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.$1, serializer);
+    sse_encode_u_8(self.$2, serializer);
+    sse_encode_u_8(self.$3, serializer);
   }
 
   @protected
@@ -672,12 +936,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putBigUint64(self);
-  }
-
-  @protected
-  void sse_encode_i_32(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putInt32(self);
   }
 }
 
