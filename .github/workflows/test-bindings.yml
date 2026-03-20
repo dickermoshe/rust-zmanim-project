@@ -1,0 +1,80 @@
+name: Cross-language Test Harness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "test/**"
+      - ".github/workflows/test-bindings.yml"
+      - "crates/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "test/**"
+      - ".github/workflows/test-bindings.yml"
+      - "crates/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Rebuild bindings and run tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Verify toolchain
+        run: |
+          rustc --version
+          cargo --version
+          dart --version
+          java -version
+          mvn -version
+
+      - name: Install Rust prerequisites
+        run: |
+          cargo install cargo-expand --locked
+          cargo install flutter_rust_bridge_codegen --locked
+
+      - name: Install Dart prerequisites
+        run: |
+          dart pub get
+          dart run jni:setup
+
+      - name: Rebuild Rust bindings
+        run: flutter_rust_bridge_codegen generate
+
+      - name: Rebuild Java bindings
+        run: dart run jnigen.dart
+
+      - name: Build Rust and Java artifacts
+        run: dart run build.dart
+
+      - name: Run zmanim parity test (10k)
+        run: dart run bin/zmanim_test.dart --iterations 10000
+
+      - name: Run Jewish date parity test (10k)
+        run: dart run bin/jewish_date_test.dart --iterations 10000
