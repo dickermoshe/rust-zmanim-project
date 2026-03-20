@@ -476,9 +476,15 @@ impl AstronomicalCalculator {
 
             let tc = find_solar_time(t, 12, 0, 0, self.delta_t, self.delta_ut1, self.lon_radians)?;
             let mut calculator = self.with_time(unix_to_datetime(tc)?);
-            let pos = calculator.get_solar_position();
+            let pos = self.refraction.apply(
+                *calculator.get_solar_position(),
+                self.gdip,
+                self.elevation,
+                self.pressure,
+                self.temperature,
+            )?;
             Ok(SolarInfo {
-                position: *pos,
+                position: pos,
                 timestamp: tc,
             })
         });
