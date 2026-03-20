@@ -94,12 +94,3 @@ jobs:
           RUST_BACKTRACE: 1
           TEST_ITERATIONS: 100
         run: cargo test -p zmanim-calculator --verbose --no-default-features
-      - name: Generate Codecov report
-        run: cargo llvm-cov --codecov --output-path codecov.json --no-run
-      - name: Upload Codecov report
-        uses: codecov/codecov-action@v5
-        with:
-          files: codecov.json
-          flags: zmanim-calculator
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true

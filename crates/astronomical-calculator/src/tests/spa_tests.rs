@@ -278,7 +278,7 @@ fn refraction_strategy() -> impl Strategy<Value = Refraction> {
 proptest! {
 
     #[test]
-    fn solar_events_memoization(
+    fn original_spa_test(
         datetime in any_utc_datetime(),
         longitude in -180.0_f64..=180.0_f64,
         latitude in -90.0_f64..=90.0_f64,
