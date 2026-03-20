@@ -1,4 +1,4 @@
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 #![warn(missing_docs)]
 //! Calculate zmanim (Jewish halachic times) using KosherJava-style concepts and naming.
 //!
@@ -17,8 +17,6 @@
 //! If Rust borrow rules are awkward for your call pattern, clone the calculator and use each
 //! clone independently.
 #[cfg(test)]
-mod java_tests;
-#[cfg(test)]
 mod tests;
 mod types {
     /// Configuration types for zmanim calculations.
@@ -31,6 +29,8 @@ mod types {
 // Calculation logic for zmanim.
 pub mod calculator;
 mod duration_helper;
+/// Molad calculations.
+pub mod molad;
 /// Predefined zmanim calculations built from reusable primitives.
 pub mod presets;
 /// Low-level zman formulas used to build higher-level presets.

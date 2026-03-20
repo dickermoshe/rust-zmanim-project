@@ -65,18 +65,6 @@ match calc.get_sunrise().unwrap() {
 
 When calculating solar events (sunrise, sunset, twilight), the input time should be close to local noon for the given location. This ensures events are calculated for the correct solar day.
 
-## Accuracy
-
-The library provides high-precision calculations based on:
-
-- **VSOP87 Theory** — Variations Séculaires des Orbites Planétaires for planetary ephemeris
-- **Atmospheric Refraction** — Corrects for the atmosphere bending light
-- **Parallax** — Corrects for the observer's position on Earth's surface
-- **Nutation** — Accounts for small periodic variations in Earth's rotation axis
-- **Aberration** — Corrects for the finite speed of light and Earth's motion
-
-For dates within the historical range (1657–2024), ΔT values are interpolated from historical data. Outside this range, polynomial approximations are used.
-
 ## License
 
 Licensed under MIT. See [LICENSE](LICENSE) for details.

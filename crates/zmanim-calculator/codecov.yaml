@@ -1,5 +1,0 @@
-coverage:
-  ignore:
-    - "src/java_tests/**"
-    - "src/zmanim_calendar_tests.rs"
-    - "src/types/zman.rs"

@@ -1,24 +1,14 @@
 use chrono::TimeDelta;
-use core::time::Duration as StdDuration;
-use time::Duration as TimeDuration;
 
 /// A helper function to multiply a duration by a factor.
-/// This uses a clever workaround to handle negative durations which std duration does not support.
 pub(crate) fn multiply_duration(core_timedelta: TimeDelta, factor: f64) -> Option<TimeDelta> {
-    let is_timedelta_negative = core_timedelta < TimeDelta::zero();
-    let factor_is_negative = factor < 0.0;
-    let std_duration = core_timedelta.abs().to_std().ok()?;
-    let time_duration: TimeDuration = std_duration.try_into().ok()?;
-    let std_duration: StdDuration = (time_duration * factor.abs()).try_into().ok()?;
-    let core_timedelta = TimeDelta::from_std(std_duration).ok()?;
-
-    if (is_timedelta_negative && !factor_is_negative)
-        || (!is_timedelta_negative && factor_is_negative)
-    {
-        core_timedelta.checked_mul(-1)
-    } else {
-        Some(core_timedelta)
+    let result = core_timedelta.as_seconds_f64() * factor;
+    if result.is_nan() {
+        return None;
     }
+    let seconds = result as i64;
+    let nanoseconds = (result % 1.0 * 1_000_000_000.0) as i64;
+    Some(TimeDelta::seconds(seconds) + TimeDelta::nanoseconds(nanoseconds))
 }
 
 #[cfg(test)]

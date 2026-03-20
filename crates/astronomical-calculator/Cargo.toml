@@ -22,9 +22,6 @@ chrono.workspace = true
 thiserror.workspace = true
 defmt = { workspace = true, optional = true }
 
-[[example]]
-name = "lakewood_nj"
-path = "examples/lakewood_nj.rs"
 
 [dev-dependencies]
 chrono = { workspace = true, features = ["std", "arbitrary", "serde"] }

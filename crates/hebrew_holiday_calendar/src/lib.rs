@@ -36,8 +36,7 @@
 
 use core::ops::RangeInclusive;
 use core::slice::Iter;
-#[cfg(test)]
-mod java_tests;
+
 mod parshas;
 use crate::parshas::*;
 use chrono::Weekday;
@@ -45,21 +44,14 @@ use icu_calendar::options::DateAddOptions;
 use icu_calendar::types::{DateDuration, MonthCode, Weekday as IcuWeekday};
 use icu_calendar::{cal::Hebrew, Date, Gregorian};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
-mod molad;
-pub use molad::*;
 
 /// Number of chalakim (parts) from the molad tohu (theoretical first new moon)
-pub(crate) const CHALAKIM_MOLAD_TOHU: i64 = 31524;
+static CHALAKIM_MOLAD_TOHU: i64 = 31524;
 /// Number of chalakim in a lunar month
-pub(crate) const CHALAKIM_PER_MONTH: i64 = 765433;
+static CHALAKIM_PER_MONTH: i64 = 765433;
 /// Number of chalakim in a day
-pub(crate) const CHALAKIM_PER_DAY: i64 = 25920;
-/// Number of chalakim in a minute
-pub(crate) const CHALAKIM_PER_MINUTE: i64 = 18;
-/// Number of chalakim in an hour
-pub(crate) const CHALAKIM_PER_HOUR: i64 = 1080;
-/// Number of chalakim in a day
-pub(crate) const JEWISH_EPOCH: i64 = -1373429;
+static CHALAKIM_PER_DAY: i64 = 25920;
+
 /// Iterator that yields holidays occurring on a specific Hebrew date.
 ///
 /// This iterator filters through all possible holidays and returns only those
@@ -205,33 +197,6 @@ pub trait HebrewHolidayCalendar {
         let hebrew_date = hebrew_date.ok()?;
         Some(hebrew_date)
     }
-}
-
-fn get_last_day_of_gregorian_month(month: u8, year: i32) -> Option<u8> {
-    let day = Date::<Gregorian>::try_new_gregorian(year, month, 1).ok()?;
-    Some(day.days_in_month())
-}
-fn gregorian_date_to_abs_date(year: i32, month: u8, day_of_month: u8) -> Option<i64> {
-    let mut abs_date = day_of_month as i64;
-    for m in (1..month).rev() {
-        abs_date += get_last_day_of_gregorian_month(m, year)? as i64;
-    }
-    let year: i64 = year as i64;
-    Some(abs_date + 365 * (year - 1) + (year - 1) / 4 - (year - 1) / 100 + (year - 1) / 400)
-}
-fn abs_date_to_gregorian_date(abs_date: i64) -> Option<Date<Gregorian>> {
-    let mut year = (abs_date / 366) as i32;
-    while abs_date >= gregorian_date_to_abs_date(year + 1, 1, 1)? {
-        year += 1;
-    }
-    let mut month: u8 = 1;
-    while abs_date
-        > gregorian_date_to_abs_date(year, month, get_last_day_of_gregorian_month(month, year)?)?
-    {
-        month += 1;
-    }
-    let day_of_month: u8 = (abs_date - gregorian_date_to_abs_date(year, month, 1)? + 1) as u8;
-    Date::try_new_gregorian(year, month, day_of_month).ok()
 }
 
 fn get_parsha_list(&date: &Date<Hebrew>, in_israel: bool) -> Option<ParshaList> {
@@ -927,7 +892,7 @@ impl HolidayRule<'_> {
 pub enum Holiday {
     ErevPesach,
     Pesach,
-    CholHamoed,
+    CholHamoedPesach,
     PesachSheni,
     ErevShavuos,
     Shavuos,
@@ -941,6 +906,7 @@ pub enum Holiday {
     YomKippur,
     ErevSuccos,
     Succos,
+    CholHamoedSuccos,
     HoshanaRabbah,
     SheminiAtzeres,
     SimchasTorah,
@@ -978,11 +944,9 @@ impl Holiday {
                 &HolidayRule::ExactDateChutz(16, HebrewMonth::Nissan),
                 &HolidayRule::ExactDateChutz(22, HebrewMonth::Nissan),
             ]),
-            Holiday::CholHamoed => HolidayRule::ExactDates4([
+            Holiday::CholHamoedPesach => HolidayRule::ExactDates2([
                 &HolidayRule::ExactDateIsrael(16, HebrewMonth::Nissan),
                 &HolidayRule::ExactDates(17..=20, HebrewMonth::Nissan),
-                &HolidayRule::ExactDateIsrael(16, HebrewMonth::Tishrei),
-                &HolidayRule::ExactDates(17..=20, HebrewMonth::Tishrei),
             ]),
             Holiday::PesachSheni => HolidayRule::ExactDate(14, HebrewMonth::Iyar),
             Holiday::ErevShavuos => HolidayRule::ExactDate(5, HebrewMonth::Sivan),
@@ -1027,7 +991,10 @@ impl Holiday {
                 &HolidayRule::ExactDate(15, HebrewMonth::Tishrei),
                 &HolidayRule::ExactDateChutz(16, HebrewMonth::Tishrei),
             ]),
-
+            Holiday::CholHamoedSuccos => HolidayRule::ExactDates2([
+                &HolidayRule::ExactDateIsrael(16, HebrewMonth::Tishrei),
+                &HolidayRule::ExactDates(17..=20, HebrewMonth::Tishrei),
+            ]),
             Holiday::HoshanaRabbah => HolidayRule::ExactDate(21, HebrewMonth::Tishrei),
             Holiday::SheminiAtzeres => HolidayRule::ExactDate(22, HebrewMonth::Tishrei),
             Holiday::SimchasTorah => HolidayRule::ExactDateChutz(23, HebrewMonth::Tishrei),
@@ -1239,14 +1206,14 @@ impl Holiday {
     }
 
     /// Returns a slice of all possible holidays.
-    pub const fn all() -> &'static [Holiday; 41] {
+    pub const fn all() -> &'static [Holiday; 42] {
         &ALL_HOLIDAYS
     }
     pub fn he(&self) -> &str {
         match self {
             Holiday::ErevPesach => "ערב פסח",
             Holiday::Pesach => "פסח",
-            Holiday::CholHamoed => "חול המועד",
+            Holiday::CholHamoedPesach => "חול המועד פסח",
             Holiday::PesachSheni => "פסח שני",
             Holiday::ErevShavuos => "ערב שבועות",
             Holiday::Shavuos => "שבועות",
@@ -1260,6 +1227,7 @@ impl Holiday {
             Holiday::YomKippur => "יום כיפור",
             Holiday::ErevSuccos => "ערב סוכות",
             Holiday::Succos => "סוכות",
+            Holiday::CholHamoedSuccos => "חול המועד סוכות",
             Holiday::HoshanaRabbah => "הושענא רבה",
             Holiday::SheminiAtzeres => "שמיני עצרת",
             Holiday::SimchasTorah => "שמחת תורה",
@@ -1295,9 +1263,10 @@ impl core::fmt::Display for Holiday {
     }
 }
 
-const ALL_HOLIDAYS: [Holiday; 41] = [
+static ALL_HOLIDAYS: [Holiday; 42] = [
     Holiday::ErevPesach,
     Holiday::Pesach,
+    Holiday::CholHamoedPesach,
     Holiday::PesachSheni,
     Holiday::ErevShavuos,
     Holiday::Shavuos,
@@ -1311,7 +1280,7 @@ const ALL_HOLIDAYS: [Holiday; 41] = [
     Holiday::YomKippur,
     Holiday::ErevSuccos,
     Holiday::Succos,
-    Holiday::CholHamoed,
+    Holiday::CholHamoedSuccos,
     Holiday::HoshanaRabbah,
     Holiday::SheminiAtzeres,
     Holiday::SimchasTorah,
@@ -1516,7 +1485,7 @@ mod tests {
 
         // In Israel
         let holidays_israel: Vec<_> = date.holidays(true, false).collect();
-        assert!(holidays_israel.contains(&&Holiday::CholHamoed));
+        assert!(holidays_israel.contains(&&Holiday::CholHamoedPesach));
         assert!(!date.is_assur_bemelacha(true));
     }
 

@@ -26,10 +26,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: std
-            args: "--no-default-features --features std"
-          - name: std+defmt
-            args: "--no-default-features --features std,defmt"
+          - name: no_std
+            args: "--no-default-features"
+          - name: no_std+defmt
+            args: "--no-default-features --features defmt"
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Check documentation
-        run: cargo doc -p zmanim-calculator --no-deps --no-default-features --features std
+        run: cargo doc -p zmanim-calculator --no-deps --no-default-features
         env:
           RUSTDOCFLAGS: -D warnings
 
@@ -54,10 +54,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: std
-            args: "--no-default-features --features std"
-          - name: std+defmt
-            args: "--no-default-features --features std,defmt"
+          - name: no_std
+            args: "--no-default-features"
+          - name: no_std+defmt
+            args: "--no-default-features --features defmt"
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -65,41 +65,10 @@ jobs:
 
   test:
     name: Test
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          components: llvm-tools-preview
-          cache: false
       - uses: taiki-e/install-action@cargo-llvm-cov
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: maven
-      - name: Build Java submodule
-        shell: bash
-        working-directory: crates/zmanim-calculator/kosher-java
-        run: mvn -DskipTests -Dmaven.javadoc.skip=true -Dmaven.source.skip=true package
       - name: Run tests
-        env:
-          RUST_BACKTRACE: 1
-          TEST_ITERATIONS: 1000
-        run: cargo llvm-cov -p zmanim-calculator --no-report --verbose
-      - name: Run tests (no default features)
-        env:
-          RUST_BACKTRACE: 1
-          TEST_ITERATIONS: 100
         run: cargo test -p zmanim-calculator --verbose --no-default-features
-      - name: Generate Codecov report
-        run: cargo llvm-cov --codecov --output-path codecov.json --no-run
-      - name: Upload Codecov report
-        uses: codecov/codecov-action@v5
-        with:
-          files: codecov.json
-          flags: zmanim-calculator
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true

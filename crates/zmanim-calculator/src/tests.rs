@@ -33,7 +33,12 @@ fn new_calc(elevation_m: f64) -> ZmanimCalculator<Tz> {
     ZmanimCalculator::new(
         lakewood_location(elevation_m),
         lakewood_date(),
-        Default::default(),
+        CalculatorConfig {
+            candle_lighting_offset: Duration::minutes(18),
+            use_astronomical_chatzos_for_other_zmanim: false,
+            use_elevation: true,
+            ateret_torah_sunset_offset: Duration::minutes(40),
+        },
     )
     .unwrap()
 }
@@ -105,8 +110,12 @@ fn shaah_zmanis_by_degrees_and_offset(
         )
     } else {
         (
-            ZmanPrimitive::Sunrise.calculate(calc).unwrap(),
-            ZmanPrimitive::Sunset.calculate(calc).unwrap(),
+            ZmanPrimitive::ElevationAdjustedSunrise
+                .calculate(calc)
+                .unwrap(),
+            ZmanPrimitive::ElevationAdjustedSunset
+                .calculate(calc)
+                .unwrap(),
         )
     };
     let start = start - Duration::minutes(offset_minutes);
@@ -146,14 +155,21 @@ fn test_local_mean_time_invalid_hours() {
 #[test]
 fn test_half_day_based_zman_negative_hours() {
     let mut calc = new_calc(0.0);
-    let sunrise = ZmanPrimitive::Sunrise.calculate(&mut calc).unwrap();
-    let sunset = ZmanPrimitive::Sunset.calculate(&mut calc).unwrap();
+    let sunrise = ZmanPrimitive::ElevationAdjustedSunrise
+        .calculate(&mut calc)
+        .unwrap();
+    let sunset = ZmanPrimitive::ElevationAdjustedSunset
+        .calculate(&mut calc)
+        .unwrap();
     let shaah = (sunset - sunrise) / 6;
     let expected = sunset + multiply_duration(shaah, -1.0).unwrap();
-    let actual =
-        ZmanPrimitive::HalfDayBasedOffset(&ZmanPrimitive::Sunrise, &ZmanPrimitive::Sunset, -1.0)
-            .calculate(&mut calc)
-            .unwrap();
+    let actual = ZmanPrimitive::HalfDayBasedOffset(
+        &ZmanPrimitive::ElevationAdjustedSunrise,
+        &ZmanPrimitive::ElevationAdjustedSunset,
+        -1.0,
+    )
+    .calculate(&mut calc)
+    .unwrap();
     assert_eq!(actual, expected);
 }
 
@@ -162,9 +178,13 @@ fn test_high_latitude_sunrise_sunset_ordering() {
     let date = NaiveDate::from_ymd_opt(2017, 3, 21).unwrap();
     let mut calc = calc_for(64.1466, -21.9426, 0.0, chrono_tz::Atlantic::Reykjavik, date);
     #[allow(clippy::expect_used)]
-    let sunrise = ZmanPrimitive::Sunrise.calculate(&mut calc).unwrap();
+    let sunrise = ZmanPrimitive::ElevationAdjustedSunrise
+        .calculate(&mut calc)
+        .unwrap();
     #[allow(clippy::expect_used)]
-    let sunset = ZmanPrimitive::Sunset.calculate(&mut calc).unwrap();
+    let sunset = ZmanPrimitive::ElevationAdjustedSunset
+        .calculate(&mut calc)
+        .unwrap();
     assert!(sunrise < sunset);
 
     let dawn = ZmanPrimitive::SunriseOffsetByDegrees(6.0)
@@ -183,12 +203,20 @@ fn test_extreme_elevation_shifts_sunrise_sunset() {
     let mut high = calc_for(27.9881, 86.9250, 8848.0, chrono_tz::Asia::Kathmandu, date);
     let mut sea = calc_for(27.9881, 86.9250, 0.0, chrono_tz::Asia::Kathmandu, date);
 
-    let sunrise_high = ZmanPrimitive::Sunrise.calculate(&mut high).unwrap();
-    let sunrise_sea = ZmanPrimitive::Sunrise.calculate(&mut sea).unwrap();
+    let sunrise_high = ZmanPrimitive::ElevationAdjustedSunrise
+        .calculate(&mut high)
+        .unwrap();
+    let sunrise_sea = ZmanPrimitive::ElevationAdjustedSunrise
+        .calculate(&mut sea)
+        .unwrap();
     assert!(sunrise_high < sunrise_sea);
 
-    let sunset_high = ZmanPrimitive::Sunset.calculate(&mut high).unwrap();
-    let sunset_sea = ZmanPrimitive::Sunset.calculate(&mut sea).unwrap();
+    let sunset_high = ZmanPrimitive::ElevationAdjustedSunset
+        .calculate(&mut high)
+        .unwrap();
+    let sunset_sea = ZmanPrimitive::ElevationAdjustedSunset
+        .calculate(&mut sea)
+        .unwrap();
     assert!(sunset_high > sunset_sea);
 }
 
@@ -197,8 +225,12 @@ fn test_polar_day_returns_none_for_sun_times() {
     let date = NaiveDate::from_ymd_opt(2017, 6, 21).unwrap();
     let mut calc = calc_for(69.6492, 18.9553, 0.0, chrono_tz::Europe::Oslo, date);
 
-    assert!(ZmanPrimitive::Sunrise.calculate(&mut calc).is_err());
-    assert!(ZmanPrimitive::Sunset.calculate(&mut calc).is_err());
+    assert!(ZmanPrimitive::ElevationAdjustedSunrise
+        .calculate(&mut calc)
+        .is_err());
+    assert!(ZmanPrimitive::ElevationAdjustedSunset
+        .calculate(&mut calc)
+        .is_err());
     assert!(ZmanPrimitive::SeaLevelSunrise.calculate(&mut calc).is_err());
     assert!(ZmanPrimitive::SeaLevelSunset.calculate(&mut calc).is_err());
     assert!(ZmanPrimitive::SunriseOffsetByDegrees(6.0)
@@ -230,8 +262,16 @@ fn test_reykjavik_equinox_java_expected_times() {
     let date = NaiveDate::from_ymd_opt(2017, 3, 21).unwrap();
     let mut calc = calc_for(64.1466, -21.9426, 0.0, chrono_tz::Atlantic::Reykjavik, date);
 
-    assert_zman_str(&mut calc, &SUNRISE, "2017-03-21T07:24:24Z");
-    assert_zman_str(&mut calc, &SUNSET, "2017-03-21T19:46:56Z");
+    assert_zman_str(
+        &mut calc,
+        &ELEVATION_ADJUSTED_SUNRISE,
+        "2017-03-21T07:24:24Z",
+    );
+    assert_zman_str(
+        &mut calc,
+        &ELEVATION_ADJUSTED_SUNSET,
+        "2017-03-21T19:46:56Z",
+    );
     assert_zman_str(&mut calc, &SEA_LEVEL_SUNRISE, "2017-03-21T07:24:24Z");
     assert_zman_str(&mut calc, &SEA_LEVEL_SUNSET, "2017-03-21T19:46:56Z");
     assert_zman_str(&mut calc, &CHATZOS_ASTRONOMICAL, "2017-03-21T13:34:59Z");
@@ -242,8 +282,18 @@ fn test_everest_java_expected_times() {
     let date = NaiveDate::from_ymd_opt(2017, 10, 17).unwrap();
     let mut calc = calc_for(27.9881, 86.9250, 8826.0, chrono_tz::Asia::Kathmandu, date);
     // At very high elevation our refraction model and javas refraction model start to differ slightly, so we allow for a larger time difference.
-    assert_zman_str_with_max_time_diff(&mut calc, &SUNRISE, "2017-10-17T05:44:49+05:45", Some(120));
-    assert_zman_str_with_max_time_diff(&mut calc, &SUNSET, "2017-10-17T17:40:04+05:45", Some(120));
+    assert_zman_str_with_max_time_diff(
+        &mut calc,
+        &ELEVATION_ADJUSTED_SUNRISE,
+        "2017-10-17T05:44:49+05:45",
+        Some(120),
+    );
+    assert_zman_str_with_max_time_diff(
+        &mut calc,
+        &ELEVATION_ADJUSTED_SUNSET,
+        "2017-10-17T17:40:04+05:45",
+        Some(120),
+    );
     assert_zman_str_with_max_time_diff(
         &mut calc,
         &SEA_LEVEL_SUNRISE,

@@ -1,0 +1,23 @@
+name: test_with_java
+description: flutter rust bridge example
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+dependencies:
+  lints: ^6.1.0
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+  jni: ^0.15.2
+  intl: ^0.20.2
+  flutter_rust_bridge: ^2.11.1
+  config: ^0.8.4
+  collection: ^1.19.1
+dev_dependencies:
+  test: ^1.21.4
+  freezed: ^3.0.0
+  build_runner: ^2.4.4
+  json_serializable: ^6.9.0
+  jnigen: ^0.15.0
+
+  
