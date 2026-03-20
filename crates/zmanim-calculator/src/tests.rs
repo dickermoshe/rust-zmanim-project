@@ -33,7 +33,12 @@ fn new_calc(elevation_m: f64) -> ZmanimCalculator<Tz> {
     ZmanimCalculator::new(
         lakewood_location(elevation_m),
         lakewood_date(),
-        Default::default(),
+        CalculatorConfig {
+            candle_lighting_offset: Duration::minutes(18),
+            use_astronomical_chatzos_for_other_zmanim: false,
+            use_elevation: true,
+            ateret_torah_sunset_offset: Duration::minutes(40),
+        },
     )
     .unwrap()
 }
