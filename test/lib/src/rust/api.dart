@@ -6,7 +6,7 @@
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `create_clamped_hebrew_date`
+// These functions are ignored because they are not marked as `pub`: `create_clamped_hebrew_date`, `java_holiday_index_to_rust`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `FINDER`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `deref`, `initialize`
 
@@ -89,7 +89,6 @@ void testJewishCalendar(
         required int month,
         required int day,
         required bool inIsrael,
-        required bool isMukafChoma,
         required bool useModernHolidays,
         required JavaJewishCalendarTestResults java}) =>
     RustLib.instance.api.crateApiTestJewishCalendar(
@@ -97,7 +96,6 @@ void testJewishCalendar(
         month: month,
         day: day,
         inIsrael: inIsrael,
-        isMukafChoma: isMukafChoma,
         useModernHolidays: useModernHolidays,
         java: java);
 
@@ -109,305 +107,115 @@ abstract class ZmanimPreset implements RustOpaqueInterface {
 }
 
 class JavaJewishCalendarTestResults {
-  final bool isUseModernHolidays;
-  final bool getInIsrael;
-  final bool getIsMukafChoma;
   final bool isBirkasHachamah;
   final int? getParshah;
   final int getUpcomingParshah;
   final int? getSpecialShabbos;
   final int getYomTovIndex;
-  final bool isYomTov;
-  final bool isYomTovAssurBemelacha;
   final bool isAssurBemelacha;
   final bool hasCandleLighting;
-  final bool isTomorrowShabbosOrYomTov;
-  final bool isErevYomTovSheni;
   final bool isAseresYemeiTeshuva;
-  final bool isPesach;
-  final bool isCholHamoedPesach;
-  final bool isShavuos;
-  final bool isRoshHashana;
-  final bool isYomKippur;
-  final bool isSuccos;
-  final bool isHoshanaRabba;
-  final bool isShminiAtzeres;
-  final bool isSimchasTorah;
-  final bool isCholHamoedSuccos;
-  final bool isCholHamoed;
-  final bool isErevYomTov;
-  final bool isErevRoshChodesh;
   final bool isYomKippurKatan;
   final bool isBeHaB;
-  final bool isTaanis;
   final bool isTaanisBechoros;
   final int? getDayOfChanukah;
-  final bool isChanukah;
-  final bool isPurim;
   final bool isRoshChodesh;
   final bool isMacharChodesh;
   final bool isShabbosMevorchim;
   final int? getDayOfOmer;
-  final bool isTishaBav;
-  final PlatformInt64 getMoladAsInstant;
-  final PlatformInt64 getTchilasZmanKidushLevana3Days;
-  final PlatformInt64 getTchilasZmanKidushLevana7Days;
-  final PlatformInt64 getSofZmanKidushLevanaBetweenMoldos;
-  final PlatformInt64 getSofZmanKidushLevana15Days;
-  final int getTekufasTishreiElapsedDays;
-  final bool isIsruChag;
 
   const JavaJewishCalendarTestResults.raw({
-    required this.isUseModernHolidays,
-    required this.getInIsrael,
-    required this.getIsMukafChoma,
     required this.isBirkasHachamah,
     this.getParshah,
     required this.getUpcomingParshah,
     this.getSpecialShabbos,
     required this.getYomTovIndex,
-    required this.isYomTov,
-    required this.isYomTovAssurBemelacha,
     required this.isAssurBemelacha,
     required this.hasCandleLighting,
-    required this.isTomorrowShabbosOrYomTov,
-    required this.isErevYomTovSheni,
     required this.isAseresYemeiTeshuva,
-    required this.isPesach,
-    required this.isCholHamoedPesach,
-    required this.isShavuos,
-    required this.isRoshHashana,
-    required this.isYomKippur,
-    required this.isSuccos,
-    required this.isHoshanaRabba,
-    required this.isShminiAtzeres,
-    required this.isSimchasTorah,
-    required this.isCholHamoedSuccos,
-    required this.isCholHamoed,
-    required this.isErevYomTov,
-    required this.isErevRoshChodesh,
     required this.isYomKippurKatan,
     required this.isBeHaB,
-    required this.isTaanis,
     required this.isTaanisBechoros,
     this.getDayOfChanukah,
-    required this.isChanukah,
-    required this.isPurim,
     required this.isRoshChodesh,
     required this.isMacharChodesh,
     required this.isShabbosMevorchim,
     this.getDayOfOmer,
-    required this.isTishaBav,
-    required this.getMoladAsInstant,
-    required this.getTchilasZmanKidushLevana3Days,
-    required this.getTchilasZmanKidushLevana7Days,
-    required this.getSofZmanKidushLevanaBetweenMoldos,
-    required this.getSofZmanKidushLevana15Days,
-    required this.getTekufasTishreiElapsedDays,
-    required this.isIsruChag,
   });
 
   factory JavaJewishCalendarTestResults(
-          {required bool isUseModernHolidays,
-          required bool getInIsrael,
-          required bool getIsMukafChoma,
-          required bool isBirkasHachamah,
+          {required bool isBirkasHachamah,
           int? getParshah,
           required int getUpcomingParshah,
           int? getSpecialShabbos,
           required int getYomTovIndex,
-          required bool isYomTov,
-          required bool isYomTovAssurBemelacha,
           required bool isAssurBemelacha,
           required bool hasCandleLighting,
-          required bool isTomorrowShabbosOrYomTov,
-          required bool isErevYomTovSheni,
           required bool isAseresYemeiTeshuva,
-          required bool isPesach,
-          required bool isCholHamoedPesach,
-          required bool isShavuos,
-          required bool isRoshHashana,
-          required bool isYomKippur,
-          required bool isSuccos,
-          required bool isHoshanaRabba,
-          required bool isShminiAtzeres,
-          required bool isSimchasTorah,
-          required bool isCholHamoedSuccos,
-          required bool isCholHamoed,
-          required bool isErevYomTov,
-          required bool isErevRoshChodesh,
           required bool isYomKippurKatan,
           required bool isBeHaB,
-          required bool isTaanis,
           required bool isTaanisBechoros,
           int? getDayOfChanukah,
-          required bool isChanukah,
-          required bool isPurim,
           required bool isRoshChodesh,
           required bool isMacharChodesh,
           required bool isShabbosMevorchim,
-          int? getDayOfOmer,
-          required bool isTishaBav,
-          required PlatformInt64 getMoladAsInstant,
-          required PlatformInt64 getTchilasZmanKidushLevana3Days,
-          required PlatformInt64 getTchilasZmanKidushLevana7Days,
-          required PlatformInt64 getSofZmanKidushLevanaBetweenMoldos,
-          required PlatformInt64 getSofZmanKidushLevana15Days,
-          required int getTekufasTishreiElapsedDays,
-          required bool isIsruChag}) =>
+          int? getDayOfOmer}) =>
       RustLib.instance.api.crateApiJavaJewishCalendarTestResultsNew(
-          isUseModernHolidays: isUseModernHolidays,
-          getInIsrael: getInIsrael,
-          getIsMukafChoma: getIsMukafChoma,
           isBirkasHachamah: isBirkasHachamah,
           getParshah: getParshah,
           getUpcomingParshah: getUpcomingParshah,
           getSpecialShabbos: getSpecialShabbos,
           getYomTovIndex: getYomTovIndex,
-          isYomTov: isYomTov,
-          isYomTovAssurBemelacha: isYomTovAssurBemelacha,
           isAssurBemelacha: isAssurBemelacha,
           hasCandleLighting: hasCandleLighting,
-          isTomorrowShabbosOrYomTov: isTomorrowShabbosOrYomTov,
-          isErevYomTovSheni: isErevYomTovSheni,
           isAseresYemeiTeshuva: isAseresYemeiTeshuva,
-          isPesach: isPesach,
-          isCholHamoedPesach: isCholHamoedPesach,
-          isShavuos: isShavuos,
-          isRoshHashana: isRoshHashana,
-          isYomKippur: isYomKippur,
-          isSuccos: isSuccos,
-          isHoshanaRabba: isHoshanaRabba,
-          isShminiAtzeres: isShminiAtzeres,
-          isSimchasTorah: isSimchasTorah,
-          isCholHamoedSuccos: isCholHamoedSuccos,
-          isCholHamoed: isCholHamoed,
-          isErevYomTov: isErevYomTov,
-          isErevRoshChodesh: isErevRoshChodesh,
           isYomKippurKatan: isYomKippurKatan,
           isBeHaB: isBeHaB,
-          isTaanis: isTaanis,
           isTaanisBechoros: isTaanisBechoros,
           getDayOfChanukah: getDayOfChanukah,
-          isChanukah: isChanukah,
-          isPurim: isPurim,
           isRoshChodesh: isRoshChodesh,
           isMacharChodesh: isMacharChodesh,
           isShabbosMevorchim: isShabbosMevorchim,
-          getDayOfOmer: getDayOfOmer,
-          isTishaBav: isTishaBav,
-          getMoladAsInstant: getMoladAsInstant,
-          getTchilasZmanKidushLevana3Days: getTchilasZmanKidushLevana3Days,
-          getTchilasZmanKidushLevana7Days: getTchilasZmanKidushLevana7Days,
-          getSofZmanKidushLevanaBetweenMoldos:
-              getSofZmanKidushLevanaBetweenMoldos,
-          getSofZmanKidushLevana15Days: getSofZmanKidushLevana15Days,
-          getTekufasTishreiElapsedDays: getTekufasTishreiElapsedDays,
-          isIsruChag: isIsruChag);
+          getDayOfOmer: getDayOfOmer);
 
   @override
   int get hashCode =>
-      isUseModernHolidays.hashCode ^
-      getInIsrael.hashCode ^
-      getIsMukafChoma.hashCode ^
       isBirkasHachamah.hashCode ^
       getParshah.hashCode ^
       getUpcomingParshah.hashCode ^
       getSpecialShabbos.hashCode ^
       getYomTovIndex.hashCode ^
-      isYomTov.hashCode ^
-      isYomTovAssurBemelacha.hashCode ^
       isAssurBemelacha.hashCode ^
       hasCandleLighting.hashCode ^
-      isTomorrowShabbosOrYomTov.hashCode ^
-      isErevYomTovSheni.hashCode ^
       isAseresYemeiTeshuva.hashCode ^
-      isPesach.hashCode ^
-      isCholHamoedPesach.hashCode ^
-      isShavuos.hashCode ^
-      isRoshHashana.hashCode ^
-      isYomKippur.hashCode ^
-      isSuccos.hashCode ^
-      isHoshanaRabba.hashCode ^
-      isShminiAtzeres.hashCode ^
-      isSimchasTorah.hashCode ^
-      isCholHamoedSuccos.hashCode ^
-      isCholHamoed.hashCode ^
-      isErevYomTov.hashCode ^
-      isErevRoshChodesh.hashCode ^
       isYomKippurKatan.hashCode ^
       isBeHaB.hashCode ^
-      isTaanis.hashCode ^
       isTaanisBechoros.hashCode ^
       getDayOfChanukah.hashCode ^
-      isChanukah.hashCode ^
-      isPurim.hashCode ^
       isRoshChodesh.hashCode ^
       isMacharChodesh.hashCode ^
       isShabbosMevorchim.hashCode ^
-      getDayOfOmer.hashCode ^
-      isTishaBav.hashCode ^
-      getMoladAsInstant.hashCode ^
-      getTchilasZmanKidushLevana3Days.hashCode ^
-      getTchilasZmanKidushLevana7Days.hashCode ^
-      getSofZmanKidushLevanaBetweenMoldos.hashCode ^
-      getSofZmanKidushLevana15Days.hashCode ^
-      getTekufasTishreiElapsedDays.hashCode ^
-      isIsruChag.hashCode;
+      getDayOfOmer.hashCode;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is JavaJewishCalendarTestResults &&
           runtimeType == other.runtimeType &&
-          isUseModernHolidays == other.isUseModernHolidays &&
-          getInIsrael == other.getInIsrael &&
-          getIsMukafChoma == other.getIsMukafChoma &&
           isBirkasHachamah == other.isBirkasHachamah &&
           getParshah == other.getParshah &&
           getUpcomingParshah == other.getUpcomingParshah &&
           getSpecialShabbos == other.getSpecialShabbos &&
           getYomTovIndex == other.getYomTovIndex &&
-          isYomTov == other.isYomTov &&
-          isYomTovAssurBemelacha == other.isYomTovAssurBemelacha &&
           isAssurBemelacha == other.isAssurBemelacha &&
           hasCandleLighting == other.hasCandleLighting &&
-          isTomorrowShabbosOrYomTov == other.isTomorrowShabbosOrYomTov &&
-          isErevYomTovSheni == other.isErevYomTovSheni &&
           isAseresYemeiTeshuva == other.isAseresYemeiTeshuva &&
-          isPesach == other.isPesach &&
-          isCholHamoedPesach == other.isCholHamoedPesach &&
-          isShavuos == other.isShavuos &&
-          isRoshHashana == other.isRoshHashana &&
-          isYomKippur == other.isYomKippur &&
-          isSuccos == other.isSuccos &&
-          isHoshanaRabba == other.isHoshanaRabba &&
-          isShminiAtzeres == other.isShminiAtzeres &&
-          isSimchasTorah == other.isSimchasTorah &&
-          isCholHamoedSuccos == other.isCholHamoedSuccos &&
-          isCholHamoed == other.isCholHamoed &&
-          isErevYomTov == other.isErevYomTov &&
-          isErevRoshChodesh == other.isErevRoshChodesh &&
           isYomKippurKatan == other.isYomKippurKatan &&
           isBeHaB == other.isBeHaB &&
-          isTaanis == other.isTaanis &&
           isTaanisBechoros == other.isTaanisBechoros &&
           getDayOfChanukah == other.getDayOfChanukah &&
-          isChanukah == other.isChanukah &&
-          isPurim == other.isPurim &&
           isRoshChodesh == other.isRoshChodesh &&
           isMacharChodesh == other.isMacharChodesh &&
           isShabbosMevorchim == other.isShabbosMevorchim &&
-          getDayOfOmer == other.getDayOfOmer &&
-          isTishaBav == other.isTishaBav &&
-          getMoladAsInstant == other.getMoladAsInstant &&
-          getTchilasZmanKidushLevana3Days ==
-              other.getTchilasZmanKidushLevana3Days &&
-          getTchilasZmanKidushLevana7Days ==
-              other.getTchilasZmanKidushLevana7Days &&
-          getSofZmanKidushLevanaBetweenMoldos ==
-              other.getSofZmanKidushLevanaBetweenMoldos &&
-          getSofZmanKidushLevana15Days == other.getSofZmanKidushLevana15Days &&
-          getTekufasTishreiElapsedDays == other.getTekufasTishreiElapsedDays &&
-          isIsruChag == other.isIsruChag;
+          getDayOfOmer == other.getDayOfOmer;
 }

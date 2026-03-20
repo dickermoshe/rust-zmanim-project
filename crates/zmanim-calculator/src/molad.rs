@@ -1,21 +1,29 @@
 use chrono::{DateTime, Datelike, NaiveDate, TimeZone, Utc};
+use hebrew_holiday_calendar::{HebrewHolidayCalendar, HebrewMonth};
 use icu_calendar::{
     cal::Hebrew,
     options::{DateAddOptions, Overflow},
     types::DateDuration,
     Date, Gregorian,
 };
-
-use crate::{
-    abs_date_to_gregorian_date, chalakim_since_molad_tohu, HebrewHolidayCalendar, HebrewMonth,
-    CHALAKIM_PER_DAY, CHALAKIM_PER_HOUR, CHALAKIM_PER_MINUTE, JEWISH_EPOCH,
-};
+/// Number of chalakim (parts) from the molad tohu (theoretical first new moon)
+static CHALAKIM_MOLAD_TOHU: i64 = 31524;
+/// Number of chalakim in a lunar month
+static CHALAKIM_PER_MONTH: i64 = 765433;
+/// Number of chalakim in a day
+static CHALAKIM_PER_DAY: i64 = 25920;
+/// Number of chalakim in a minute
+static CHALAKIM_PER_MINUTE: i64 = 18;
+/// Number of chalakim in an hour
+static CHALAKIM_PER_HOUR: i64 = 1080;
+/// Number of chalakim in a day
+static JEWISH_EPOCH: i64 = -1373429;
 
 /// A trait for calculating times related to the molad (new moon) and Kiddush Levana (blessing of the new moon).
 ///
 /// This trait provides methods for calculating various times related to the Jewish lunar month,
 /// specifically for the mitzvah of Kiddush Levana.
-pub trait MoladCalendar {
+pub(crate) trait MoladCalendar {
     /// Returns the latest time of _Kiddush Levana_ calculated as 15 days after the molad.
     ///
     /// # Returns
@@ -221,9 +229,9 @@ fn is_same_gregorian_day<Tz: TimeZone>(
     Some(gdate_local) == hdate_greg
 }
 struct MoladData {
-    pub hours: i64,
-    pub minutes: i64,
-    pub chalakim: i64,
+    hours: i64,
+    minutes: i64,
+    chalakim: i64,
 }
 fn _get_molad(date: &Date<Hebrew>) -> Option<(Date<Gregorian>, MoladData)> {
     let chalakim_since_molad_tohu =
@@ -252,7 +260,7 @@ fn _get_molad(date: &Date<Hebrew>) -> Option<(Date<Gregorian>, MoladData)> {
     ))
 }
 // Molad and Kiddush Levana
-pub(crate) fn months_molad(date: &Date<Hebrew>) -> Option<DateTime<Utc>> {
+fn months_molad(date: &Date<Hebrew>) -> Option<DateTime<Utc>> {
     use chrono::TimeZone;
 
     let (molad, molad_data) = _get_molad(date)?;
@@ -285,4 +293,64 @@ pub(crate) fn months_molad(date: &Date<Hebrew>) -> Option<DateTime<Utc>> {
     // 35.2354° away from 35° (GMT+2 +  20 minutes) = 0.2354° = ~0.94 minutes
     // Total: 20 minutes 56.496 seconds ≈ 1256.496 seconds
     Some(datetime_jerusalem.to_utc() - chrono::Duration::milliseconds(1256496))
+}
+
+/// Returns the number of chalakim from the original hypothetical Molad Tohu
+fn chalakim_since_molad_tohu(year: i32, month: HebrewMonth) -> i64 {
+    let month_of_year = hebrew_month_of_year(year, month);
+    let months_elapsed = (235 * ((year - 1) / 19))
+        + (12 * ((year - 1) % 19))
+        + ((7 * ((year - 1) % 19) + 1) / 19)
+        + (month_of_year as i32 - 1);
+
+    CHALAKIM_MOLAD_TOHU + (CHALAKIM_PER_MONTH * months_elapsed as i64)
+}
+/// Returns the `HebrewMonth` as a `u8` which is indexed starting from Tishrei
+/// instead of Nissan.
+fn hebrew_month_of_year(year: i32, month: HebrewMonth) -> u8 {
+    let is_leap_year = Date::<Hebrew>::is_hebrew_leap_year(year);
+    (month as u8 + if is_leap_year { 6 } else { 5 }) % if is_leap_year { 13 } else { 12 } + 1
+}
+
+fn abs_date_to_gregorian_date(abs_date: i64) -> Option<Date<Gregorian>> {
+    let mut year = (abs_date / 366) as i32;
+    while abs_date >= gregorian_date_to_abs_date(year + 1, 1, 1)? {
+        year += 1;
+    }
+    let mut month: u8 = 1;
+    while abs_date
+        > gregorian_date_to_abs_date(year, month, get_last_day_of_gregorian_month(month, year)?)?
+    {
+        month += 1;
+    }
+    let day_of_month: u8 = (abs_date - gregorian_date_to_abs_date(year, month, 1)? + 1) as u8;
+    Date::try_new_gregorian(year, month, day_of_month).ok()
+}
+
+fn gregorian_date_to_abs_date(year: i32, month: u8, day_of_month: u8) -> Option<i64> {
+    let mut abs_date = day_of_month as i64;
+    for m in (1..month).rev() {
+        abs_date += get_last_day_of_gregorian_month(m, year)? as i64;
+    }
+    let year: i64 = year as i64;
+    Some(abs_date + 365 * (year - 1) + (year - 1) / 4 - (year - 1) / 100 + (year - 1) / 400)
+}
+
+fn get_last_day_of_gregorian_month(month: u8, year: i32) -> Option<u8> {
+    let day = Date::<Gregorian>::try_new_gregorian(year, month, 1).ok()?;
+    Some(day.days_in_month())
+}
+
+#[test]
+fn test_chalakim_calculations() {
+    // Test that chalakim are calculated consistently
+    let chalakim1 = chalakim_since_molad_tohu(5784, HebrewMonth::Tishrei);
+    let chalakim2 = chalakim_since_molad_tohu(5784, HebrewMonth::Cheshvan);
+
+    // Next month should have more chalakim
+    assert!(chalakim2 > chalakim1);
+
+    // Difference should be approximately one month
+    let diff = chalakim2 - chalakim1;
+    assert!((diff - CHALAKIM_PER_MONTH).abs() < 100);
 }

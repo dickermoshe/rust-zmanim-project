@@ -11,12 +11,12 @@
 //! not already provided by a preset.
 
 use chrono::{DateTime, Datelike, Duration, TimeZone, Utc};
-use hebrew_holiday_calendar::MoladCalendar;
 use icu_calendar::Date;
 
 use crate::{
     calculator::ZmanLike,
     duration_helper::multiply_duration,
+    molad::MoladCalendar,
     prelude::ZmanimCalculator,
     presets::{
         ALOS_16_POINT_1_DEGREES, MINCHA_GEDOLA_BAAL_HATANYA, MINCHA_GEDOLA_MINUTES_30,
