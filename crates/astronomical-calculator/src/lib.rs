@@ -58,12 +58,10 @@
 //! ```
 #![no_std]
 
-pub(crate) mod tables;
+mod tables;
 
 #[cfg(test)]
 mod tests;
-#[cfg(test)]
-mod unsafe_spa;
 
 use chrono::DateTime;
 use chrono::Datelike;
@@ -87,8 +85,8 @@ const ETJD0: i64 = 946728000; // Unix timestamp for J2000.0 epoch
 
 // Physical constants
 const SUN_RADIUS: f64 = 4.654_269_516_293_279e-3_f64; // Sun's angular radius in radians
-pub(crate) const EARTH_R: f64 = 6378136.6f64; // Earth's radius in meters
-pub(crate) const ABSOLUTEZERO: f64 = -273.15f64; // Absolute zero in Celsius
+const EARTH_R: f64 = 6378136.6f64; // Earth's radius in meters
+const ABSOLUTEZERO: f64 = -273.15f64; // Absolute zero in Celsius
 
 // Standard atmospheric conditions
 const AP0: f64 = 1010.0f64; // Standard pressure in millibars
@@ -388,7 +386,7 @@ impl AstronomicalCalculator {
             .get_or_init(|| JulianDate::new(self.ut, self.delta_t, self.delta_ut1))
     }
 
-    pub(crate) fn get_geocentric_position(&mut self) -> &GeoCentricSolPos {
+    fn get_geocentric_position(&mut self) -> &GeoCentricSolPos {
         let julian_date = *self.get_julian_day();
         self.geocentric_position
             .get_or_init(|| GeoCentricSolPos::new(&julian_date))
@@ -1496,7 +1494,7 @@ impl GeoCentricSolPos {
 }
 
 /// Find the time when the sun is at a specific hour angle (solar time)
-pub(crate) fn find_solar_time(
+fn find_solar_time(
     timestamp: i64,
     hour: i64,
     min: i64,
@@ -1666,10 +1664,10 @@ fn true_solar_time(
     Ok(datetime)
 }
 
-pub(crate) fn jd_to_timestamp(jd: f64) -> i64 {
+fn jd_to_timestamp(jd: f64) -> i64 {
     ((jd - 2440587.5) * 86400000.0).round() as i64
 }
 
-pub(crate) fn timestamp_to_jd(ms: i64) -> f64 {
+fn timestamp_to_jd(ms: i64) -> f64 {
     (ms as f64 / 86400000.0) + 2440587.5
 }

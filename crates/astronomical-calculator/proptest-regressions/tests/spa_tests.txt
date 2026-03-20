@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc f3e767a5d833673a284fd99a083b5d20d4f2599628097778190849fa16f5b9a7 # shrinks to datetime = 2092-07-20T11:23:02Z, longitude = -169.11425406477923, latitude = -70.7769785980595, elevation = 51.642871565671044, pressure = 1005.0251354940381, temperature = 21.961937135417763, refraction = ApSolposBennet, delta_t = 52.015110084808455, use_explicit_delta_t = false, delta_ut1 = 0.7239710617938651, gdip = -0.1461103611995458, use_explicit_gdip = false
