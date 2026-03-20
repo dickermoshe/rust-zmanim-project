@@ -1,4 +1,0 @@
-[submodule "kosher-java"]
-	path = kosher-java
-	url = https://github.com/dickermoshe/zmanim
-	branch = icu

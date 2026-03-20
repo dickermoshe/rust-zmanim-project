@@ -46,11 +46,11 @@ use icu_calendar::{cal::Hebrew, Date, Gregorian};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 /// Number of chalakim (parts) from the molad tohu (theoretical first new moon)
-pub(crate) const CHALAKIM_MOLAD_TOHU: i64 = 31524;
+static CHALAKIM_MOLAD_TOHU: i64 = 31524;
 /// Number of chalakim in a lunar month
-pub(crate) const CHALAKIM_PER_MONTH: i64 = 765433;
+static CHALAKIM_PER_MONTH: i64 = 765433;
 /// Number of chalakim in a day
-pub(crate) const CHALAKIM_PER_DAY: i64 = 25920;
+static CHALAKIM_PER_DAY: i64 = 25920;
 
 /// Iterator that yields holidays occurring on a specific Hebrew date.
 ///

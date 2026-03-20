@@ -6,27 +6,11 @@ A Rust library for working with the Hebrew calendar, including holidays, Torah r
 
 [![Crates.io](https://img.shields.io/crates/v/hebrew_holiday_calendar.svg)](https://crates.io/crates/hebrew_holiday_calendar)
 [![Documentation](https://docs.rs/hebrew_holiday_calendar/badge.svg)](https://docs.rs/hebrew_holiday_calendar)
-[![codecov](https://codecov.io/gh/dickermoshe/rust-zmanim-project/graph/badge.svg?flag=hebrew_holiday_calendar)](https://codecov.io/gh/dickermoshe/rust-zmanim-project)
 
 ## Installation
 
 ```bash
 cargo add hebrew_holiday_calendar icu_calendar
-```
-
-Or manually add to your `Cargo.toml`:
-
-```toml
-[dependencies]
-hebrew_holiday_calendar = "0.2"
-icu_calendar = "2"
-```
-
-For `no_std` environments, disable default features:
-
-```toml
-[dependencies]
-hebrew_holiday_calendar = { version = "0.2", default-features = false }
 ```
 
 ## Usage
