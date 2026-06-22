@@ -40,7 +40,7 @@ We are currently tracking commit [76688b](https://github.com/KosherJava/zmanim/c
 
 # TODOs
 
-There are some parts fof KosherJava which have not been ported to Rust yet.
+There are some parts of KosherJava which have not been ported to Rust yet.  
 These may happen someday or never. If you need them, please open an issue and we'll see what we can do.
 
 - `JewishCalendar.getTekufa`
