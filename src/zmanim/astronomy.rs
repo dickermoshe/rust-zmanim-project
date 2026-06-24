@@ -235,6 +235,7 @@ fn normalize_utc_hours(time: f64) -> f64 {
     (time % 24.0 + 24.0) % 24.0
 }
 
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 fn apparent_solar_radius(date: Date) -> f64 {
     let month = date.month();
     let day = date.day();
