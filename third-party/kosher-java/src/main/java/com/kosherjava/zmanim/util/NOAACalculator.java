@@ -1,6 +1,6 @@
 /*
  * Zmanim Java API
- * Copyright (C) 2004-2026 Eliyahu Hershfeld
+ * Copyright © 2004-2026 Eliyahu Hershfeld
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General
  * Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option)
@@ -31,7 +31,7 @@ import java.time.ZonedDateTime;
  * to account for elevation. The algorithm can be found in the <a
  * href="https://en.wikipedia.org/wiki/Sunrise_equation">Wikipedia Sunrise Equation</a> article.
  * 
- * @author &copy; Eliyahu Hershfeld 2011 - 2026
+ * @author © Eliyahu Hershfeld 2011 - 2026
  */
 public class NOAACalculator extends AstronomicalCalculator {
 	
@@ -99,15 +99,15 @@ public class NOAACalculator extends AstronomicalCalculator {
 	private double getUTCSunRiseSet(LocalDate localDate, GeoLocation geoLocation, double zenith, boolean adjustForElevation, 
 			SolarEvent solarEvent) {
 		double elevation = adjustForElevation ? geoLocation.getElevation() : 0;
-		double adjustedZenith = adjustZenith(zenith, elevation);
+		double adjustedZenith = adjustZenith(zenith, elevation, localDate);
 		double riseSet = getSunRiseSetUTC(localDate, geoLocation.getLatitude(), -geoLocation.getLongitude(),
 				adjustedZenith, solarEvent);
 		riseSet = riseSet / 60;
-		return riseSet > 0  ? riseSet % 24 : riseSet % 24 + 24; // ensure that the time is >= 0 and < 24
+		return (riseSet % 24 + 24) % 24; // ensure that the time is >= 0 and < 24
 	}
 
 	/**
-	 * Return the <a href="https://en.wikipedia.org/wiki/Julian_day">Julian day</a> from a Java Calendar.
+	 * Return the <a href="https://en.wikipedia.org/wiki/Julian_day">Julian day</a> from a Java {@code LocalDate}.
 	 * 
 	 * @param localDate The LocalDate
 	 * @return the Julian day corresponding to the date Note: Number is returned for the start of the Julian day. Fractional days
@@ -149,7 +149,7 @@ public class NOAACalculator extends AstronomicalCalculator {
 	 */
 	private static double getSunGeometricMeanLongitude(double julianCenturies) {
 		double longitude = 280.46646 + julianCenturies * (36000.76983 + 0.0003032 * julianCenturies);
-		return longitude > 0  ? longitude % 360 : longitude % 360 + 360; // ensure that the longitude is >= 0 and < 360
+		return (longitude % 360 + 360) % 360; // return a longitude is in the range of 0 - 360
 	}
 
 	/**
@@ -386,7 +386,7 @@ public class NOAACalculator extends AstronomicalCalculator {
 	public double getUTCNoon(LocalDate localDate, GeoLocation geoLocation) {
 		double noon = getSolarNoonMidnightUTC(getJulianDay(localDate), -geoLocation.getLongitude(), SolarEvent.NOON);
 		noon = noon / 60;
-		return noon > 0  ? noon % 24 : noon % 24 + 24; // ensure that the time is >= 0 and < 24
+		return (noon % 24 + 24) % 24; // ensure that the time is >= 0 and < 24
 	}
 	
 	/**
@@ -397,7 +397,7 @@ public class NOAACalculator extends AstronomicalCalculator {
 	public double getUTCMidnight(LocalDate localDate, GeoLocation geoLocation) {
 		double midnight = getSolarNoonMidnightUTC(getJulianDay(localDate), -geoLocation.getLongitude(), SolarEvent.MIDNIGHT);
 		midnight = midnight / 60;
-		return midnight > 0  ? midnight % 24 : midnight % 24 + 24; // ensure that the time is >= 0 and < 24
+		return (midnight % 24 + 24) % 24; // ensure that the time is >= 0 and < 24
 	}
 
 	/**
@@ -415,7 +415,7 @@ public class NOAACalculator extends AstronomicalCalculator {
 	 * @see #getUTCMidnight(LocalDate, GeoLocation)
 	 */
 	private static double getSolarNoonMidnightUTC(double julianDay, double longitude, SolarEvent solarEvent) {
-		julianDay = (solarEvent == SolarEvent.NOON) ? julianDay : julianDay + 0.5;
+		// no day-half shift: the loop epoch julianDay + solNoonUTC/1440 already lands on the event
 		// First pass for approximate solar noon to calculate equation of time
 		double tnoon = getJulianCenturiesFromJulianDay(julianDay + longitude / 360.0);
 		double equationOfTime = getEquationOfTime(tnoon);
@@ -479,8 +479,8 @@ public class NOAACalculator extends AstronomicalCalculator {
 	 * {@inheritDoc}
 	 * The current implementation in this class only supports azimuth values of 90° (directly east) or 270° (directly west) that are
 	 * directly needed in this library for the
-	 * {@link com.kosherjava.zmanim.ComprehensiveZmanimCalendar#getSunsetOrWesternmostSolarAzimuth()} and
-	 * {@link com.kosherjava.zmanim.ComprehensiveZmanimCalendar#getSunriseOrEasternmostSolarAzimuth()}.
+	 * {@link com.kosherjava.zmanim.ComprehensiveZmanimCalendar#getPolarSunsetBenIshChai()} and
+	 * {@link com.kosherjava.zmanim.ComprehensiveZmanimCalendar#getPolarSunriseBenIshChai()}.
 	 * @throws IllegalArgumentException if the azimuth is not 90° or 270°.
 	 * @todo complete the implementation for other azimuths. While not needed by this library, they may be of value to some projects.
 	 *         There will be edge cases where the azimuth will occur more than once a day when based on the equation of time, the day
@@ -499,7 +499,7 @@ public class NOAACalculator extends AstronomicalCalculator {
 			double julianCenturies = getJulianCenturiesFromJulianDay(julianDay + dateTime);
 			double ratio = tanDegrees(getSunDeclination(julianCenturies)) / tanDegrees(geoLocation.getLatitude());
 
-			if (Double.isNaN(ratio) || ratio > 1.0 || ratio < -1.0) { // Handle Tropics, Polar Regions, and Equator line divisions
+			if (Double.isNaN(ratio) || ratio > 1.0 || ratio < -1.0) { // Handle Tropics, the Poles, and Equator line divisions
 				return Double.NaN;
 			}
 
@@ -507,6 +507,6 @@ public class NOAACalculator extends AstronomicalCalculator {
 			dateTime = solarNoonBase + offset - (getEquationOfTime(julianCenturies) / 1440.0);
 		}
 		
-		return dateTime * 24.0;
+		return (dateTime * 24 % 24 + 24) % 24;
 	}
 }

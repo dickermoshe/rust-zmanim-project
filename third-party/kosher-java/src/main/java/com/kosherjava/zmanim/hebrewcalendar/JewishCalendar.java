@@ -1,7 +1,7 @@
 /*
  * Zmanim Java API
  * Copyright © 2011 - 2026 Eliyahu Hershfeld
- * Copyright © September 2002 Avrom Finkelstien
+ * Copyright © September 2002 Avrom Finkelstein
  * Copyright © 2019 - 2022 Y Paritcher
  * Copyright © 2026 Moshe Dicker
  *
@@ -29,7 +29,7 @@ import java.util.Calendar; // We still use the old Calendar.WEEKDAY constants
 /**
  * The JewishCalendar extends the JewishDate class and adds calendar methods.
  * 
- * This open source Java code was originally ported by <a href="http://www.facebook.com/avromf">Avrom Finkelstien</a>
+ * This open source Java code was originally ported by <a href="https://www.linkedin.com/in/avromf/">Avrom Finkelstein</a>
  * from his C++ code. It was refactored to fit the KosherJava Zmanim API with simplification of the code, enhancements
  * and some bug fixing. The class allows setting whether the holiday and <em>parsha</em> scheme follows the Israel scheme
  * or outside Israel scheme. The default is the outside Israel scheme.
@@ -42,10 +42,10 @@ import java.util.Calendar; // We still use the old Calendar.WEEKDAY constants
  * 
  * @see java.util.Date
  * @see java.util.Calendar
- * @author &copy; Y. Paritcher 2019 - 2022
- * @author &copy; Avrom Finkelstien 2002
- * @author &copy; Moshe Dicker 2026
- * @author &copy; Eliyahu Hershfeld 2011 - 2026
+ * @author © Y. Paritcher 2019 - 2022
+ * @author © Avrom Finkelstein 2002
+ * @author © Moshe Dicker 2026
+ * @author © Eliyahu Hershfeld 2011 - 2026
  */
 public class JewishCalendar extends JewishDate {
 	/** The 14th day of Nissan, the day before Pesach (Passover).*/
@@ -524,7 +524,7 @@ public class JewishCalendar extends JewishDate {
 	/**
 	 * Returns a {@link Parsha <em>Parsha</em>} enum if the <em>Shabbos</em> is one of the four <em>parshiyos</em> of {@link
 	 * Parsha#SHKALIM <em>Shkalim</em>}, {@link Parsha#ZACHOR <em>Zachor</em>}, {@link Parsha#PARA <em>Para</em>}, {@link
-	 * Parsha#HACHODESH <em>Hachdesh</em>}, or five other special <em>Shabbasos</em> of {@link Parsha#HAGADOL <em>Hagadol</em>},
+	 * Parsha#HACHODESH <em>Hachodesh</em>}, or five other special <em>Shabbasos</em> of {@link Parsha#HAGADOL <em>Hagadol</em>},
 	 * {@link Parsha#CHAZON <em>Chazon</em>}, {@link Parsha#NACHAMU <em>Nachamu</em>}, {@link Parsha#SHUVA <em>Shuva</em>},
 	 * {@link Parsha#SHIRA <em>Shira</em>}, or {@link Parsha#NONE Parsha.NONE} for a regular <em>Shabbos</em> (or any weekday).
 	 * 

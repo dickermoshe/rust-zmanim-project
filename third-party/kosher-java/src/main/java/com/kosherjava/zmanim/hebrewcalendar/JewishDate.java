@@ -1,7 +1,7 @@
 /*
  * Zmanim Java API
  * Copyright © 2011 - 2026 Eliyahu Hershfeld
- * Copyright © September 2002 Avrom Finkelstien
+ * Copyright © September 2002 Avrom Finkelstein
  * Copyright © 2026 Moshe Dicker
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General
@@ -33,7 +33,7 @@ import java.time.ZonedDateTime;
  * CE Julian as recorded by <a href="http://en.wikipedia.org/wiki/Hai_Gaon">Rav Hai Gaon</a>) would be just an
  * approximation.
  *
- * This open source Java code was written by <a href="http://www.facebook.com/avromf">Avrom Finkelstien</a> from his C++
+ * This open source Java code was written by <a href="https://www.linkedin.com/in/avromf/">Avrom Finkelstein</a> from his C++
  * code. It was refactored to fit the KosherJava Zmanim API with simplification of the code, enhancements and some bug
  * fixing.
  *
@@ -51,9 +51,9 @@ import java.time.ZonedDateTime;
  * @see HebrewDateFormatter
  * @see java.util.Date
  * @see java.util.Calendar
- * @author &copy; Avrom Finkelstien 2002
- * @author &copy; Moshe Dicker 2026
- * @author &copy; Eliyahu Hershfeld 2011 - 2026
+ * @author © Avrom Finkelstein 2002
+ * @author © Moshe Dicker 2026
+ * @author © Eliyahu Hershfeld 2011 - 2026
  */
 public class JewishDate implements Comparable<JewishDate>, Cloneable {
 	/**
@@ -226,8 +226,8 @@ public class JewishDate implements Comparable<JewishDate>, Cloneable {
 
 	/**
 	 * Returns the <em>molad</em> minutes. Only an object populated with {@link #getMolad()},
-	 * {@link #setJewishDate(int, int, int, int, int, int)} or or {@link #setMoladMinutes(int)} will have these fields
-	 * populated. A regular JewishDate object will have this field set to 0.
+	 * {@link #setJewishDate(int, int, int, int, int, int)} or {@link #setMoladMinutes(int)} will have these fields populated.
+	 * A regular JewishDate object will have this field set to 0.
 	 *
 	 * @return the <em>molad</em> minutes
 	 * @see #setMoladMinutes(int)
@@ -272,7 +272,7 @@ public class JewishDate implements Comparable<JewishDate>, Cloneable {
 
 	/**
 	 * Returns the <em>molad chalakim</em> / parts. Only an object populated with {@link #getMolad()},
-	 * {@link #setJewishDate(int, int, int, int, int, int)} or or {@link #setMoladChalakim(int)} will have these fields
+	 * {@link #setJewishDate(int, int, int, int, int, int)} or {@link #setMoladChalakim(int)} will have these fields
 	 * populated. A regular JewishDate object will have this field set to 0.
 	 *
 	 * @return the <em>molad chalakim</em> / parts

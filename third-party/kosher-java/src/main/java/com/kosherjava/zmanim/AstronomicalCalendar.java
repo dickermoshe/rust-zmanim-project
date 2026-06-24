@@ -1,6 +1,6 @@
 /*
  * Zmanim Java API
- * Copyright (C) 2004-2026 Eliyahu Hershfeld
+ * Copyright © 2004-2026 Eliyahu Hershfeld
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General
  * Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option)
@@ -73,8 +73,8 @@ public class AstronomicalCalendar implements Cloneable {
 	 * 90° below the vertical. Used as a basis for most calculations since the location of the sun is 90° below the horizon
 	 * at sunrise and sunset.
 	 * <b>Note </b>: it is important to note that for sunrise and sunset the {@link AstronomicalCalculator#adjustZenith(double,
-	 * double) adjusted zenith} is required to account for the radius of the sun and refraction. The adjusted zenith should not be
-	 * used for calculations above or below 90° since they are usually calculated as an offset to 90°.
+	 * double, LocalDate) adjusted zenith} is required to account for the radius of the sun and refraction. The adjusted zenith should
+	 * not be used for calculations above or below 90° since they are usually calculated as an offset to 90°.
 	 */
 	public static final double GEOMETRIC_ZENITH = 90;
 
@@ -119,7 +119,7 @@ public class AstronomicalCalendar implements Cloneable {
 	 * @return the {@code Instant} representing the exact sunrise time. If the calculation can't be computed such as in the
 	 *         Arctic Circle where there is at least one day a year where the sun does not rise, and one where it does not set, a
 	 *         {@code null} will be returned. See detailed explanation on top of the page.
-	 * @see AstronomicalCalculator#adjustZenith(double, double)
+	 * @see AstronomicalCalculator#adjustZenith(double, double, LocalDate)
 	 * @see #getSeaLevelSunrise()
 	 * @see #getUTCSunrise(double)
 	 */
@@ -193,16 +193,17 @@ public class AstronomicalCalendar implements Cloneable {
 	 * calculation uses {@link #GEOMETRIC_ZENITH geometric zenith} of 90° plus {@link AstronomicalCalculator
 	 * #getElevationAdjustment(double)}. This is adjusted by the {@link AstronomicalCalculator} to add approximately 50/60 of a
 	 * degree to account for 34 arcminutes of refraction and 16 arcminutes for the sun's radius for a total of {@link
-	 * AstronomicalCalculator#adjustZenith(double, double) 90.83333°}. See documentation for the specific implementation of the
+	 * AstronomicalCalculator#adjustZenith(double, double, LocalDate) 90.83333°}. See documentation for the specific implementation of the
 	 * {@link AstronomicalCalculator} that you are using.
 	 * Note: In certain cases the calculates sunset will occur before sunrise. This will typically happen when a time zone other than
 	 * the local timezone is used (calculating Los Angeles sunset using a GMT time zone for example). In this case the sunset date
 	 * will be incremented to the following date.
+	 * @todo update documentation for solar radius changes.
 	 *
 	 * @return the {@code Instant} representing the exact sunset time. If the calculation can't be computed such as in the Arctic
 	 *         Circle where there is at least one day a year where the sun does not rise, and one where it does not set, a
 	 *         {@code null} will be returned. See detailed explanation on top of the page.
-	 * @see AstronomicalCalculator#adjustZenith(double, double)
+	 * @see AstronomicalCalculator#adjustZenith(double, double, LocalDate)
 	 * @see #getSeaLevelSunset()
 	 * @see #getUTCSunset(double)
 	 */
@@ -513,12 +514,11 @@ public class AstronomicalCalendar implements Cloneable {
 	}
 
 	/**
-	 * An enum to indicate what type of solar event is being calculated.
+	 * An {@code enum} to indicate what type of solar event is being calculated.
 	 */
 	protected enum SolarEvent {
 		/**SUNRISE A solar event related to sunrise*/SUNRISE, /**SUNSET A solar event related to sunset*/SUNSET,
-		/**NOON A solar event related to noon*/NOON, /**MIDNIGHT A solar event related to midnight*/MIDNIGHT,
-		/**NONE solar event representing azimuth or elevation calculations that can be any time of the day*/ NONE;
+		/**NOON A solar event related to noon*/NOON, /**MIDNIGHT A solar event related to midnight*/MIDNIGHT;
 	}
 	
 	/**
@@ -528,15 +528,15 @@ public class AstronomicalCalendar implements Cloneable {
 	 * @return the time that the azimuth will be reached. There are cases where this azimuth will never be reached for the date and
 	 *         location, and a null will be returned in that case.
 	 * @see com.kosherjava.zmanim.util.AstronomicalCalculator#getTimeAtAzimuth(LocalDate, GeoLocation, double)
-	 * @see com.kosherjava.zmanim.ComprehensiveZmanimCalendar#getSunriseOrEasternmostSolarAzimuth()
-	 * @see com.kosherjava.zmanim.ComprehensiveZmanimCalendar#getSunsetOrWesternmostSolarAzimuth()
+	 * @see com.kosherjava.zmanim.ComprehensiveZmanimCalendar#getPolarSunriseBenIshChai()
+	 * @see com.kosherjava.zmanim.ComprehensiveZmanimCalendar#getPolarSunsetBenIshChai()
 	 * @throws IllegalArgumentException if the azimuth is not 90° or 270°.
 	 * @todo Once a reliable implementation to get any azimuth at any date for any latitude is implemented, make this method more
 	 *         generic.
 	 */
 	public Instant getTimeAtAzimuth90Or270(double azimuth) {
 		double rawAzimuth = getAstronomicalCalculator().getTimeAtAzimuth(getAdjustedLocalDate(), getGeoLocation(), azimuth);
-		return getInstantFromTime(rawAzimuth, SolarEvent.NONE);
+		return getInstantFromTime(rawAzimuth, (azimuth == 90) ? SolarEvent.SUNRISE : SolarEvent.SUNSET); 
 	}
 	
 	/**
@@ -565,18 +565,6 @@ public class AstronomicalCalendar implements Cloneable {
 				date = date.plusDays(1);
 			} else if (localTimeHours > 24) {
 				date = date.minusDays(1);
-			}
-		} else if (solarEvent == SolarEvent.NONE) {
-			// Azimuth events can occur at any time of day; apply the same date-boundary adjustments as SUNRISE/SUNSET to handle
-			// far-east and far-west locations where local date differs from UTC date. For example, Suva, Fiji (UTC+12): the first
-			// half of any local day (midnight–noon local) corresponds to the previous UTC calendar date (12:00–24:00 UTC the day
-			// before).  A morning azimuth event like 90° (due East, ~6–7 AM local) therefore has a UTC time of ~18:xx on the day
-			// before the requested Fiji local date. Without a date adjustment, anchoring that UTC time to the wrong calendar date
-			// produces an Instant one full day too late.
-			if (localTimeHours > 18) {
-				date = date.minusDays(1);
-			} else if (localTimeHours < 6) {
-				date = date.plusDays(1);
 			}
 		}
 		
@@ -771,7 +759,7 @@ public class AstronomicalCalendar implements Cloneable {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Two {@code AstronomicalCalculator} instances are considered equal if their {@link #getLocalDate()}, {@link #getGeoLocation()}
+	 * Two {@code AstronomicalCalendar} instances are considered equal if their {@link #getLocalDate()}, {@link #getGeoLocation()}
 	 * and {@link #getAstronomicalCalculator()} values are identical.
 	 * 
 	 * @param object the reference object with which to compare
