@@ -9,13 +9,6 @@ mod ffi {
 
     use crate::common::{TractateCode as InternalTractateCode, civil_date_to_jiff, side_to_code, tractate_to_code};
 
-    /// Gregorian civil date (year, month, day).
-    pub struct CivilDate {
-        pub year: i32,
-        pub month: u8,
-        pub day: u8,
-    }
-
     pub enum TractateCode {
         Berachos,
         Peah,
@@ -126,14 +119,6 @@ mod ffi {
         pub end_verse: u16,
     }
 
-    fn to_internal(date: &CivilDate) -> crate::common::CivilDate {
-        crate::common::CivilDate {
-            year: date.year,
-            month: date.month,
-            day: date.day,
-        }
-    }
-
     fn to_ffi_tractate(code: InternalTractateCode) -> TractateCode {
         use InternalTractateCode as C;
         match code {
@@ -218,8 +203,12 @@ mod ffi {
         }
     }
 
-    pub fn daf_yomi_bavli(date: &CivilDate) -> Option<DafResult> {
-        let jiff = civil_date_to_jiff(to_internal(date))?;
+    fn jiff_from_parts(year: i32, month: u8, day: u8) -> Option<jiff::civil::Date> {
+        civil_date_to_jiff(crate::common::CivilDate { year, month, day })
+    }
+
+    fn daf_yomi_bavli_impl(year: i32, month: u8, day: u8) -> Option<DafResult> {
+        let jiff = jiff_from_parts(year, month, day)?;
         let daf = jiff.limud(DafYomiBavli::default())?;
         Some(DafResult {
             tractate: to_ffi_tractate(tractate_to_code(daf.tractate)),
@@ -227,8 +216,8 @@ mod ffi {
         })
     }
 
-    pub fn daf_yomi_yerushalmi(date: &CivilDate) -> Option<DafResult> {
-        let jiff = civil_date_to_jiff(to_internal(date))?;
+    fn daf_yomi_yerushalmi_impl(year: i32, month: u8, day: u8) -> Option<DafResult> {
+        let jiff = jiff_from_parts(year, month, day)?;
         let daf = jiff.limud(DafYomiYerushalmiVilna::default())?;
         Some(DafResult {
             tractate: to_ffi_tractate(tractate_to_code(daf.tractate)),
@@ -236,8 +225,8 @@ mod ffi {
         })
     }
 
-    pub fn daf_hashavua_bavli(date: &CivilDate) -> Option<DafResult> {
-        let jiff = civil_date_to_jiff(to_internal(date))?;
+    fn daf_hashavua_bavli_impl(year: i32, month: u8, day: u8) -> Option<DafResult> {
+        let jiff = jiff_from_parts(year, month, day)?;
         let daf = jiff.limud(DafHashavuaBavli::default())?;
         Some(DafResult {
             tractate: to_ffi_tractate(tractate_to_code(daf.tractate)),
@@ -245,8 +234,8 @@ mod ffi {
         })
     }
 
-    pub fn amud_yomi_bavli_dirshu(date: &CivilDate) -> Option<AmudResult> {
-        let jiff = civil_date_to_jiff(to_internal(date))?;
+    fn amud_yomi_bavli_dirshu_impl(year: i32, month: u8, day: u8) -> Option<AmudResult> {
+        let jiff = jiff_from_parts(year, month, day)?;
         let amud = jiff.limud(AmudYomiBavliDirshu::default())?;
         Some(AmudResult {
             tractate: to_ffi_tractate(tractate_to_code(amud.tractate)),
@@ -255,8 +244,8 @@ mod ffi {
         })
     }
 
-    pub fn mishna_yomis(date: &CivilDate) -> Option<MishnasResult> {
-        let jiff = civil_date_to_jiff(to_internal(date))?;
+    fn mishna_yomis_impl(year: i32, month: u8, day: u8) -> Option<MishnasResult> {
+        let jiff = jiff_from_parts(year, month, day)?;
         let mishnas = jiff.limud(MishnaYomis)?;
         Some(MishnasResult {
             start: to_mishna_result(mishnas.0),
@@ -264,8 +253,8 @@ mod ffi {
         })
     }
 
-    pub fn pirkei_avos(date: &CivilDate, in_israel: bool) -> Option<PirkeiAvosResult> {
-        let jiff = civil_date_to_jiff(to_internal(date))?;
+    fn pirkei_avos_impl(year: i32, month: u8, day: u8, in_israel: bool) -> Option<PirkeiAvosResult> {
+        let jiff = jiff_from_parts(year, month, day)?;
         let unit = jiff.limud(PirkeiAvos { in_israel })?;
         Some(match unit {
             PirkeiAvosUnit::Single(perek) => PirkeiAvosResult {
@@ -281,8 +270,8 @@ mod ffi {
         })
     }
 
-    pub fn tehillim_monthly(date: &CivilDate) -> Option<TehillimResult> {
-        let jiff = civil_date_to_jiff(to_internal(date))?;
+    fn tehillim_monthly_impl(year: i32, month: u8, day: u8) -> Option<TehillimResult> {
+        let jiff = jiff_from_parts(year, month, day)?;
         let unit = jiff.limud(TehillimMonthly)?;
         Some(match unit {
             TehillimUnit::Psalms { start, end } => TehillimResult {
@@ -306,5 +295,81 @@ mod ffi {
                 end_verse,
             },
         })
+    }
+
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn daf_yomi_bavli(year: i32, month: u8, day: u8) -> Option<DafResult> {
+        daf_yomi_bavli_impl(year, month, day)
+    }
+
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn daf_yomi_yerushalmi(year: i32, month: u8, day: u8) -> Option<DafResult> {
+        daf_yomi_yerushalmi_impl(year, month, day)
+    }
+
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn daf_hashavua_bavli(year: i32, month: u8, day: u8) -> Option<DafResult> {
+        daf_hashavua_bavli_impl(year, month, day)
+    }
+
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn amud_yomi_bavli_dirshu(year: i32, month: u8, day: u8) -> Option<AmudResult> {
+        amud_yomi_bavli_dirshu_impl(year, month, day)
+    }
+
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn mishna_yomis(year: i32, month: u8, day: u8) -> Option<MishnasResult> {
+        mishna_yomis_impl(year, month, day)
+    }
+
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn pirkei_avos(year: i32, month: u8, day: u8, in_israel: bool) -> Option<PirkeiAvosResult> {
+        pirkei_avos_impl(year, month, day, in_israel)
+    }
+
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn tehillim_monthly(year: i32, month: u8, day: u8) -> Option<TehillimResult> {
+        tehillim_monthly_impl(year, month, day)
+    }
+
+    /// Dart entry point: construct once and call instance methods.
+    #[diplomat::cfg(not(supports = free_functions))]
+    #[diplomat::opaque]
+    #[allow(dead_code)]
+    pub struct Limudim(u8);
+
+    impl Limudim {
+        #[diplomat::attr(*, constructor)]
+        pub fn new() -> Box<Limudim> {
+            Box::new(Limudim(0))
+        }
+
+        pub fn daf_yomi_bavli(&self, year: i32, month: u8, day: u8) -> Option<DafResult> {
+            daf_yomi_bavli_impl(year, month, day)
+        }
+
+        pub fn daf_yomi_yerushalmi(&self, year: i32, month: u8, day: u8) -> Option<DafResult> {
+            daf_yomi_yerushalmi_impl(year, month, day)
+        }
+
+        pub fn daf_hashavua_bavli(&self, year: i32, month: u8, day: u8) -> Option<DafResult> {
+            daf_hashavua_bavli_impl(year, month, day)
+        }
+
+        pub fn amud_yomi_bavli_dirshu(&self, year: i32, month: u8, day: u8) -> Option<AmudResult> {
+            amud_yomi_bavli_dirshu_impl(year, month, day)
+        }
+
+        pub fn mishna_yomis(&self, year: i32, month: u8, day: u8) -> Option<MishnasResult> {
+            mishna_yomis_impl(year, month, day)
+        }
+
+        pub fn pirkei_avos(&self, year: i32, month: u8, day: u8, in_israel: bool) -> Option<PirkeiAvosResult> {
+            pirkei_avos_impl(year, month, day, in_israel)
+        }
+
+        pub fn tehillim_monthly(&self, year: i32, month: u8, day: u8) -> Option<TehillimResult> {
+            tehillim_monthly_impl(year, month, day)
+        }
     }
 }

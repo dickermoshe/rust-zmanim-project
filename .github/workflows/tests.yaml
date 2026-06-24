@@ -124,6 +124,33 @@ jobs:
         working-directory: interop-tests/js_interop_tests
         run: cargo test --test js_interop
 
+  typescript-interop:
+    name: TypeScript interop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: wasm32-unknown-unknown
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Regenerate interop files
+        working-directory: tools
+        run: uv run python generate-interop.py
+      - name: Install diplomat-tool
+        run: cargo install diplomat-tool --version 0.15.0 --locked
+      - name: Test TypeScript package
+        working-directory: interop/packages/typescript
+        run: |
+          npm run generate
+          npm test
+          npm run typecheck
+
   java-interop-tests:
     name: Java Interop Tests
     runs-on: ubuntu-latest

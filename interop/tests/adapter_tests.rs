@@ -4,6 +4,7 @@ use interop::common::{civil_date_to_jiff, gregorian_to_hebrew, hebrew_to_gregori
 use kosher_rust::{calendar::HebrewHolidayCalendar, limudim::prelude::*, zmanim::prelude::*};
 
 #[test]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 fn gregorian_hebrew_round_trip() {
     let civil = interop::common::CivilDate {
         year: 2024,
@@ -20,6 +21,7 @@ fn gregorian_hebrew_round_trip() {
 }
 
 #[test]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 fn yom_kippur_is_assur_bemelacha() {
     let date = interop::common::CivilDate {
         year: 2025,
@@ -31,6 +33,7 @@ fn yom_kippur_is_assur_bemelacha() {
 }
 
 #[test]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 fn daf_yomi_bavli_matches_core_api() {
     let date = interop::common::CivilDate {
         year: 2017,
@@ -48,6 +51,7 @@ fn daf_yomi_bavli_matches_core_api() {
 }
 
 #[test]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 fn elevation_adjusted_sunrise_via_preset_dispatch() {
     use interop::generated::preset_dispatch::{PRESET_METADATA, preset_by_index};
     use jiff::{civil::Date, tz::TimeZone};
@@ -70,6 +74,7 @@ fn elevation_adjusted_sunrise_via_preset_dispatch() {
 }
 
 #[test]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 fn preset_dispatch_count_matches_dsl() {
     use interop::generated::preset_dispatch::{ZMAN_PRESET_COUNT, preset_by_index};
 

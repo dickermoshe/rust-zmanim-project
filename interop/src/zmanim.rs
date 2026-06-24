@@ -26,19 +26,13 @@ mod ffi {
     }
 
     /// Calculator configuration (durations in minutes).
+    #[derive(Copy, Clone)]
     pub struct CalculatorConfig {
         pub candle_lighting_offset_minutes: i32,
         pub use_astronomical_chatzos_for_other_zmanim: bool,
         pub use_elevation: bool,
         pub ateret_torah_sunset_offset_minutes: i32,
         pub use_astronomical_chatzos: bool,
-    }
-
-    /// Gregorian civil date (year, month, day).
-    pub struct CivilDate {
-        pub year: i32,
-        pub month: u8,
-        pub day: u8,
     }
 
     #[diplomat::opaque]
@@ -64,13 +58,15 @@ mod ffi {
     impl FfiZmanimCalculator {
         pub fn new(
             location: &FfiLocation,
-            date: &CivilDate,
-            config: &CalculatorConfig,
+            year: i32,
+            month: u8,
+            day: u8,
+            config: CalculatorConfig,
         ) -> Option<Box<FfiZmanimCalculator>> {
             let date = Date::new(
-                i16::try_from(date.year).ok()?,
-                i8::try_from(date.month).ok()?,
-                i8::try_from(date.day).ok()?,
+                i16::try_from(year).ok()?,
+                i8::try_from(month).ok()?,
+                i8::try_from(day).ok()?,
             )
             .ok()?;
             let config = CoreCalculatorConfig {

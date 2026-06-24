@@ -3,6 +3,10 @@
 
 #[diplomat::bridge]
 mod ffi {
+    use core::fmt::Write;
+
+    use diplomat_runtime::DiplomatWrite;
+
     use crate::generated::preset_dispatch::{PRESET_METADATA, ZMAN_PRESET_COUNT};
 
     /// Stable identifier for a generated zman preset.
@@ -177,24 +181,66 @@ mod ffi {
     }
 
     /// Returns the number of available presets.
+    #[diplomat::attr(not(supports = free_functions), disable)]
     pub fn preset_count() -> u32 {
         u32::try_from(ZMAN_PRESET_COUNT).unwrap_or(u32::MAX)
     }
 
-    /// Returns the display name for a preset.
-    pub fn preset_name(preset: ZmanPresetId) -> Option<String> {
-        PRESET_METADATA.get(preset as usize).map(|meta| meta.name.to_string())
+    /// Writes the display name for a preset. Returns false when the preset is unknown.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn preset_name(preset: ZmanPresetId, write: &mut DiplomatWrite) -> bool {
+        PRESET_METADATA
+            .get(preset as usize)
+            .map(|meta| write!(write, "{}", meta.name).is_ok())
+            .unwrap_or(false)
     }
 
     /// Returns whether a preset is deprecated.
+    #[diplomat::attr(not(supports = free_functions), disable)]
     pub fn preset_deprecated(preset: ZmanPresetId) -> bool {
         PRESET_METADATA.get(preset as usize).is_some_and(|meta| meta.deprecated)
     }
 
-    /// Returns the KosherJava-style method name for a preset.
-    pub fn preset_method_name(preset: ZmanPresetId) -> Option<String> {
+    /// Writes the KosherJava-style method name for a preset. Returns false when unknown.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn preset_method_name(preset: ZmanPresetId, write: &mut DiplomatWrite) -> bool {
         PRESET_METADATA
             .get(preset as usize)
-            .map(|meta| meta.method_name.to_string())
+            .map(|meta| write!(write, "{}", meta.method_name).is_ok())
+            .unwrap_or(false)
+    }
+
+    /// Dart entry point: construct once and call instance methods.
+    #[diplomat::cfg(not(supports = free_functions))]
+    #[diplomat::opaque]
+    pub struct ZmanPresets(u8);
+
+    impl ZmanPresets {
+        #[diplomat::attr(*, constructor)]
+        pub fn new() -> Box<ZmanPresets> {
+            Box::new(ZmanPresets(0))
+        }
+
+        pub fn preset_count(&self) -> u32 {
+            u32::try_from(ZMAN_PRESET_COUNT).unwrap_or(u32::MAX)
+        }
+
+        pub fn preset_name(&self, preset: ZmanPresetId, write: &mut DiplomatWrite) -> bool {
+            PRESET_METADATA
+                .get(preset as usize)
+                .map(|meta| write!(write, "{}", meta.name).is_ok())
+                .unwrap_or(false)
+        }
+
+        pub fn preset_deprecated(&self, preset: ZmanPresetId) -> bool {
+            PRESET_METADATA.get(preset as usize).is_some_and(|meta| meta.deprecated)
+        }
+
+        pub fn preset_method_name(&self, preset: ZmanPresetId, write: &mut DiplomatWrite) -> bool {
+            PRESET_METADATA
+                .get(preset as usize)
+                .map(|meta| write!(write, "{}", meta.method_name).is_ok())
+                .unwrap_or(false)
+        }
     }
 }

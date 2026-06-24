@@ -1,0 +1,16 @@
+name: kosher_rust_for_dart
+description: Kosher Rust for Dart
+version: 1.0.0
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  ffi: ^2.2.0
+  meta: ^1.18.0
+
+dev_dependencies:
+  code_assets: ^1.2.1
+  hooks: ^2.0.2
+  lints: ^6.0.0
+  test: ^1.25.6

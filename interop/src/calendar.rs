@@ -11,6 +11,7 @@ mod ffi {
     };
 
     /// Gregorian civil date (year, month, day).
+    #[derive(Copy, Clone)]
     pub struct CivilDate {
         pub year: i32,
         pub month: u8,
@@ -18,6 +19,7 @@ mod ffi {
     }
 
     /// Hebrew calendar date (year, month code, day).
+    #[derive(Copy, Clone)]
     pub struct HebrewDate {
         pub year: i32,
         pub month: u8,
@@ -169,7 +171,7 @@ mod ffi {
         }
     }
 
-    fn to_internal(date: &CivilDate) -> crate::common::CivilDate {
+    fn to_internal(date: CivilDate) -> crate::common::CivilDate {
         crate::common::CivilDate {
             year: date.year,
             month: date.month,
@@ -177,7 +179,7 @@ mod ffi {
         }
     }
 
-    fn to_internal_hebrew(date: &HebrewDate) -> crate::common::HebrewDate {
+    fn to_internal_hebrew(date: HebrewDate) -> crate::common::HebrewDate {
         crate::common::HebrewDate {
             year: date.year,
             month: date.month,
@@ -317,13 +319,11 @@ mod ffi {
         }
     }
 
-    /// Converts a Gregorian date to Hebrew.
-    pub fn gregorian_to_hebrew(date: &CivilDate) -> Option<HebrewDate> {
+    fn gregorian_to_hebrew_impl(date: CivilDate) -> Option<HebrewDate> {
         common_gregorian_to_hebrew(to_internal(date)).map(to_ffi_hebrew)
     }
 
-    /// Converts a Hebrew date to Gregorian.
-    pub fn hebrew_to_gregorian(date: &HebrewDate) -> Option<CivilDate> {
+    fn hebrew_to_gregorian_impl(date: HebrewDate) -> Option<CivilDate> {
         common_hebrew_to_gregorian(to_internal_hebrew(date)).map(|d| CivilDate {
             year: d.year,
             month: d.month,
@@ -331,8 +331,7 @@ mod ffi {
         })
     }
 
-    /// Returns holidays occurring on a Gregorian date.
-    pub fn holidays_on_date(date: &CivilDate, in_israel: bool, use_modern_holidays: bool) -> Option<Box<HolidayList>> {
+    fn holidays_on_date_impl(date: CivilDate, in_israel: bool, use_modern_holidays: bool) -> Option<Box<HolidayList>> {
         let jiff = civil_date_to_jiff(to_internal(date))?;
         let items = jiff
             .holidays(in_israel, use_modern_holidays)
@@ -347,61 +346,179 @@ mod ffi {
         Some(Box::new(HolidayList(items)))
     }
 
-    /// Returns whether work is forbidden on this date.
-    pub fn is_assur_bemelacha(date: &CivilDate, in_israel: bool) -> Option<bool> {
+    fn is_assur_bemelacha_impl(date: CivilDate, in_israel: bool) -> Option<bool> {
         let jiff = civil_date_to_jiff(to_internal(date))?;
         Some(jiff.is_assur_bemelacha(in_israel))
     }
 
-    /// Returns whether candle lighting occurs on this date.
-    pub fn has_candle_lighting(date: &CivilDate, in_israel: bool) -> Option<bool> {
+    fn has_candle_lighting_impl(date: CivilDate, in_israel: bool) -> Option<bool> {
         let jiff = civil_date_to_jiff(to_internal(date))?;
         Some(jiff.has_candle_lighting(in_israel))
     }
 
-    /// Returns the weekly parsha when this date is Shabbat.
-    pub fn todays_parsha(date: &CivilDate, in_israel: bool) -> Option<ParshaCode> {
+    fn todays_parsha_impl(date: CivilDate, in_israel: bool) -> Option<ParshaCode> {
         let jiff = civil_date_to_jiff(to_internal(date))?;
         jiff.todays_parsha(in_israel)
             .map(|p| to_ffi_parsha(crate::common::ParshaCode::from(p)))
     }
 
-    /// Returns the special Shabbat designation when applicable.
-    pub fn special_parsha(date: &CivilDate, in_israel: bool) -> Option<ParshaCode> {
+    fn special_parsha_impl(date: CivilDate, in_israel: bool) -> Option<ParshaCode> {
         let jiff = civil_date_to_jiff(to_internal(date))?;
         jiff.special_parsha(in_israel)
             .map(|p| to_ffi_parsha(crate::common::ParshaCode::from(p)))
     }
 
-    /// Returns the parsha for the next Shabbat on or after this date.
-    pub fn upcoming_parsha(date: &CivilDate, in_israel: bool) -> Option<ParshaCode> {
+    fn upcoming_parsha_impl(date: CivilDate, in_israel: bool) -> Option<ParshaCode> {
         let jiff = civil_date_to_jiff(to_internal(date))?;
         jiff.upcoming_parsha(in_israel)
             .map(|p| to_ffi_parsha(crate::common::ParshaCode::from(p)))
     }
 
+    fn cheshvan_kislev_kviah_impl(year: i32) -> Option<YearLengthTypeCode> {
+        Hebrew::cheshvan_kislev_kviah(year).map(|value| match crate::common::YearLengthTypeCode::from(value) {
+            crate::common::YearLengthTypeCode::Chaserim => YearLengthTypeCode::Chaserim,
+            crate::common::YearLengthTypeCode::Kesidran => YearLengthTypeCode::Kesidran,
+            crate::common::YearLengthTypeCode::Shelaimim => YearLengthTypeCode::Shelaimim,
+        })
+    }
+
+    /// Converts a Gregorian date to Hebrew.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn gregorian_to_hebrew(date: CivilDate) -> Option<HebrewDate> {
+        gregorian_to_hebrew_impl(date)
+    }
+
+    /// Converts a Hebrew date to Gregorian.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn hebrew_to_gregorian(date: HebrewDate) -> Option<CivilDate> {
+        hebrew_to_gregorian_impl(date)
+    }
+
+    /// Returns holidays occurring on a Gregorian date.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn holidays_on_date(date: CivilDate, in_israel: bool, use_modern_holidays: bool) -> Option<Box<HolidayList>> {
+        holidays_on_date_impl(date, in_israel, use_modern_holidays)
+    }
+
+    /// Returns whether work is forbidden on this date.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn is_assur_bemelacha(date: CivilDate, in_israel: bool) -> Option<bool> {
+        is_assur_bemelacha_impl(date, in_israel)
+    }
+
+    /// Returns whether candle lighting occurs on this date.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn has_candle_lighting(date: CivilDate, in_israel: bool) -> Option<bool> {
+        has_candle_lighting_impl(date, in_israel)
+    }
+
+    /// Returns the weekly parsha when this date is Shabbat.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn todays_parsha(date: CivilDate, in_israel: bool) -> Option<ParshaCode> {
+        todays_parsha_impl(date, in_israel)
+    }
+
+    /// Returns the special Shabbat designation when applicable.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn special_parsha(date: CivilDate, in_israel: bool) -> Option<ParshaCode> {
+        special_parsha_impl(date, in_israel)
+    }
+
+    /// Returns the parsha for the next Shabbat on or after this date.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn upcoming_parsha(date: CivilDate, in_israel: bool) -> Option<ParshaCode> {
+        upcoming_parsha_impl(date, in_israel)
+    }
+
     /// Returns the number of days in a Hebrew year.
+    #[diplomat::attr(not(supports = free_functions), disable)]
     pub fn days_in_hebrew_year(year: i32) -> Option<i32> {
         Hebrew::days_in_hebrew_year(year)
     }
 
     /// Returns the number of days in a Hebrew month.
+    #[diplomat::attr(not(supports = free_functions), disable)]
     pub fn days_in_hebrew_month(year: i32, month: u8) -> Option<u8> {
         let month = decode_hebrew_month(month)?;
         Hebrew::days_in_hebrew_month(year, month)
     }
 
     /// Returns whether a Hebrew year is a leap year.
+    #[diplomat::attr(not(supports = free_functions), disable)]
     pub fn is_hebrew_leap_year(year: i32) -> bool {
         Hebrew::is_hebrew_leap_year(year)
     }
 
     /// Returns the Cheshvan/Kislev year length type.
+    #[diplomat::attr(not(supports = free_functions), disable)]
     pub fn cheshvan_kislev_kviah(year: i32) -> Option<YearLengthTypeCode> {
-        Hebrew::cheshvan_kislev_kviah(year).map(|value| match crate::common::YearLengthTypeCode::from(value) {
-            crate::common::YearLengthTypeCode::Chaserim => YearLengthTypeCode::Chaserim,
-            crate::common::YearLengthTypeCode::Kesidran => YearLengthTypeCode::Kesidran,
-            crate::common::YearLengthTypeCode::Shelaimim => YearLengthTypeCode::Shelaimim,
-        })
+        cheshvan_kislev_kviah_impl(year)
+    }
+
+    /// Dart entry point: construct once and call instance methods.
+    #[diplomat::cfg(not(supports = free_functions))]
+    #[diplomat::opaque]
+    #[allow(dead_code)]
+    pub struct Calendar(u8);
+
+    impl Calendar {
+        #[diplomat::attr(*, constructor)]
+        pub fn new() -> Box<Calendar> {
+            Box::new(Calendar(0))
+        }
+
+        pub fn gregorian_to_hebrew(&self, date: CivilDate) -> Option<HebrewDate> {
+            gregorian_to_hebrew_impl(date)
+        }
+
+        pub fn hebrew_to_gregorian(&self, date: HebrewDate) -> Option<CivilDate> {
+            hebrew_to_gregorian_impl(date)
+        }
+
+        pub fn holidays_on_date(
+            &self,
+            date: CivilDate,
+            in_israel: bool,
+            use_modern_holidays: bool,
+        ) -> Option<Box<HolidayList>> {
+            holidays_on_date_impl(date, in_israel, use_modern_holidays)
+        }
+
+        pub fn is_assur_bemelacha(&self, date: CivilDate, in_israel: bool) -> Option<bool> {
+            is_assur_bemelacha_impl(date, in_israel)
+        }
+
+        pub fn has_candle_lighting(&self, date: CivilDate, in_israel: bool) -> Option<bool> {
+            has_candle_lighting_impl(date, in_israel)
+        }
+
+        pub fn todays_parsha(&self, date: CivilDate, in_israel: bool) -> Option<ParshaCode> {
+            todays_parsha_impl(date, in_israel)
+        }
+
+        pub fn special_parsha(&self, date: CivilDate, in_israel: bool) -> Option<ParshaCode> {
+            special_parsha_impl(date, in_israel)
+        }
+
+        pub fn upcoming_parsha(&self, date: CivilDate, in_israel: bool) -> Option<ParshaCode> {
+            upcoming_parsha_impl(date, in_israel)
+        }
+
+        pub fn days_in_hebrew_year(&self, year: i32) -> Option<i32> {
+            Hebrew::days_in_hebrew_year(year)
+        }
+
+        pub fn days_in_hebrew_month(&self, year: i32, month: u8) -> Option<u8> {
+            let month = decode_hebrew_month(month)?;
+            Hebrew::days_in_hebrew_month(year, month)
+        }
+
+        pub fn is_hebrew_leap_year(&self, year: i32) -> bool {
+            Hebrew::is_hebrew_leap_year(year)
+        }
+
+        pub fn cheshvan_kislev_kviah(&self, year: i32) -> Option<YearLengthTypeCode> {
+            cheshvan_kislev_kviah_impl(year)
+        }
     }
 }
