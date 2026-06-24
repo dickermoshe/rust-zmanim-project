@@ -174,6 +174,25 @@ fn test_extreme_elevation_shifts_sunrise_sunset() {
 }
 
 #[test]
+fn test_polar_ben_ish_chai_unavailable_on_normal_days() {
+    let calc = new_calc(0.0);
+    assert!(ZmanPrimitive::PolarSunriseBenIshChai.calculate(&calc).is_err());
+    assert!(ZmanPrimitive::PolarSunsetBenIshChai.calculate(&calc).is_err());
+    assert!(POLAR_SUNRISE_BEN_ISH_CHAI.calculate(&calc).is_err());
+    assert!(POLAR_SUNSET_BEN_ISH_CHAI.calculate(&calc).is_err());
+}
+
+#[test]
+fn test_polar_ben_ish_chai_azimuth_fallback_on_polar_day() {
+    let date = Date::new(2017, 6, 21).unwrap();
+    let calc = calc_for(69.6492, 18.9553, 0.0, TimeZone::get("Europe/Oslo").unwrap(), date);
+
+    assert!(ZmanPrimitive::ElevationAdjustedSunrise.calculate(&calc).is_err());
+    assert!(ZmanPrimitive::PolarSunriseBenIshChai.calculate(&calc).is_ok());
+    assert!(ZmanPrimitive::PolarSunsetBenIshChai.calculate(&calc).is_ok());
+}
+
+#[test]
 fn test_polar_day_returns_none_for_sun_times() {
     let date = Date::new(2017, 6, 21).unwrap();
     let calc = calc_for(69.6492, 18.9553, 0.0, TimeZone::get("Europe/Oslo").unwrap(), date);
@@ -208,7 +227,7 @@ fn test_reykjavik_equinox_java_expected_times() {
 fn test_everest_java_expected_times() {
     let date = Date::new(2017, 10, 17).unwrap();
     let calc = calc_for(27.9881, 86.9250, 8826.0, TimeZone::get("Asia/Kathmandu").unwrap(), date);
-    assert_zman_str_with_max_time_diff(&calc, &ELEVATION_ADJUSTED_SUNRISE, "2017-10-17T05:44:49+05:45", Some(1));
+    assert_zman_str_with_max_time_diff(&calc, &ELEVATION_ADJUSTED_SUNRISE, "2017-10-17T05:44:51+05:45", Some(1));
     assert_zman_str_with_max_time_diff(&calc, &ELEVATION_ADJUSTED_SUNSET, "2017-10-17T17:40:04+05:45", Some(1));
     assert_zman_str_with_max_time_diff(&calc, &SEA_LEVEL_SUNRISE, "2017-10-17T05:58:42+05:45", Some(1));
     assert_zman_str_with_max_time_diff(&calc, &SEA_LEVEL_SUNSET, "2017-10-17T17:26:12+05:45", Some(1));

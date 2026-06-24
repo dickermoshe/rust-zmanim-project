@@ -1524,6 +1524,38 @@ pub static PLAG_HAMINCHA_GRAFIXED_LOCAL_CHATZOS_TO_SUNSET: ZmanPreset = ZmanPres
     deprecated: false,
 };
 
+/// Sunrise calculated as the time when the sun is directly due east (azimuth 90 degrees) in polar regions on days when there is no sunrise.
+///
+/// If sunrise occurs that day, this zman is not available. In polar regions (the Arctic or Antarctic circles), there are days with no sunrise or sunset. Some opinions hold that during these periods, sunrise is when the sun is directly due east (azimuth 90 degrees), and sunset is when the sun is directly due west (azimuth 270 degrees), returned by `getPolarSunsetBenIshChai`. This follows [Rabbi Yehosef Schwarz](https://en.wikipedia.org/wiki/Joseph_Schwarz_(geographer)) in [Devarim Yosef - Derech Mevo Hashemesh](https://hebrewbooks.org/pdfpager.aspx?req=31703&pgnum=134) and [Devarim Yosef - Teshuvot, She'elah 8](https://hebrewbooks.org/pdfpager.aspx?req=159&pgnum=83), brought lehalacha by the [Ben Ish Chai](https://en.wikipedia.org/wiki/Yosef_Hayyim) in [Rav Pe'alim, chelek 2, Sod Yesharim siman 4](https://hebrewbooks.org/pdfpager.aspx?req=1401&pgnum=461). This time is close to six hours before astronomical chatzos, but depending on the season and location in the Arctic or Antarctic, it can be up to 46 minutes earlier or later.
+///
+/// If there is no sunrise that day and the sun does not reach azimuth 90 degrees, this zman may not be available or cannot be calculated.
+pub static POLAR_SUNRISE_BEN_ISH_CHAI: ZmanPreset = ZmanPreset {
+    event: ZmanPrimitive::PolarSunriseBenIshChai,
+    method_name: "getPolarSunriseBenIshChai",
+    name: "Polar Sunrise Ben Ish Chai",
+    #[cfg(feature = "alloc")]
+    description: |_| {
+        "Sunrise calculated as the time when the sun is directly due east (azimuth 90 degrees) in polar regions on days when there is no sunrise.\n\nIf sunrise occurs that day, this zman is not available. In polar regions (the Arctic or Antarctic circles), there are days with no sunrise or sunset. Some opinions hold that during these periods, sunrise is when the sun is directly due east (azimuth 90 degrees), and sunset is when the sun is directly due west (azimuth 270 degrees), returned by `getPolarSunsetBenIshChai`. This follows [Rabbi Yehosef Schwarz](https://en.wikipedia.org/wiki/Joseph_Schwarz_(geographer)) in [Devarim Yosef - Derech Mevo Hashemesh](https://hebrewbooks.org/pdfpager.aspx?req=31703&pgnum=134) and [Devarim Yosef - Teshuvot, She'elah 8](https://hebrewbooks.org/pdfpager.aspx?req=159&pgnum=83), brought lehalacha by the [Ben Ish Chai](https://en.wikipedia.org/wiki/Yosef_Hayyim) in [Rav Pe'alim, chelek 2, Sod Yesharim siman 4](https://hebrewbooks.org/pdfpager.aspx?req=1401&pgnum=461). This time is close to six hours before astronomical chatzos, but depending on the season and location in the Arctic or Antarctic, it can be up to 46 minutes earlier or later.\n\nIf there is no sunrise that day and the sun does not reach azimuth 90 degrees, this zman may not be available or cannot be calculated.".to_string()
+    },
+    deprecated: false,
+};
+
+/// Sunset calculated as the time when the sun is directly due west (azimuth 270 degrees) in polar regions on days when there is no sunset.
+///
+/// If sunset occurs that day, this zman is not available. In polar regions (the Arctic or Antarctic circles), there are days with no sunrise or sunset. Some opinions hold that during these periods, sunset (the day-night boundary) is when the sun is directly due west (azimuth 270 degrees), and sunrise is when the sun is directly due east (azimuth 90 degrees), returned by `getPolarSunriseBenIshChai`. This follows [Rabbi Yehosef Schwarz](https://en.wikipedia.org/wiki/Joseph_Schwarz_(geographer)) in [Devarim Yosef - Derech Mevo Hashemesh](https://hebrewbooks.org/pdfpager.aspx?req=31703&pgnum=134) and [Devarim Yosef - Teshuvot, She'elah 8](https://hebrewbooks.org/pdfpager.aspx?req=159&pgnum=83), brought lehalacha by the [Ben Ish Chai](https://en.wikipedia.org/wiki/Yosef_Hayyim) in [Rav Pe'alim, chelek 2, Sod Yesharim siman 4](https://hebrewbooks.org/pdfpager.aspx?req=1401&pgnum=461). This time is close to six hours after astronomical chatzos, but depending on the season and location in the Arctic or Antarctic, it can be up to 46 minutes earlier or later.
+///
+/// If there is no sunset that day and the sun does not reach azimuth 270 degrees, this zman may not be available or cannot be calculated.
+pub static POLAR_SUNSET_BEN_ISH_CHAI: ZmanPreset = ZmanPreset {
+    event: ZmanPrimitive::PolarSunsetBenIshChai,
+    method_name: "getPolarSunsetBenIshChai",
+    name: "Polar Sunset Ben Ish Chai",
+    #[cfg(feature = "alloc")]
+    description: |_| {
+        "Sunset calculated as the time when the sun is directly due west (azimuth 270 degrees) in polar regions on days when there is no sunset.\n\nIf sunset occurs that day, this zman is not available. In polar regions (the Arctic or Antarctic circles), there are days with no sunrise or sunset. Some opinions hold that during these periods, sunset (the day-night boundary) is when the sun is directly due west (azimuth 270 degrees), and sunrise is when the sun is directly due east (azimuth 90 degrees), returned by `getPolarSunriseBenIshChai`. This follows [Rabbi Yehosef Schwarz](https://en.wikipedia.org/wiki/Joseph_Schwarz_(geographer)) in [Devarim Yosef - Derech Mevo Hashemesh](https://hebrewbooks.org/pdfpager.aspx?req=31703&pgnum=134) and [Devarim Yosef - Teshuvot, She'elah 8](https://hebrewbooks.org/pdfpager.aspx?req=159&pgnum=83), brought lehalacha by the [Ben Ish Chai](https://en.wikipedia.org/wiki/Yosef_Hayyim) in [Rav Pe'alim, chelek 2, Sod Yesharim siman 4](https://hebrewbooks.org/pdfpager.aspx?req=1401&pgnum=461). This time is close to six hours after astronomical chatzos, but depending on the season and location in the Arctic or Antarctic, it can be up to 46 minutes earlier or later.\n\nIf there is no sunset that day and the sun does not reach azimuth 270 degrees, this zman may not be available or cannot be calculated.".to_string()
+    },
+    deprecated: false,
+};
+
 /// The point near mincha ketana when eating or other activity should not begin before praying mincha, using the 16.1-degree day.
 ///
 /// 9 shaos zmaniyos after alos at 16.1 degrees below the horizon, using a day that begins and ends at 16.1 degrees.
@@ -2578,38 +2610,6 @@ pub static SOLAR_MIDNIGHT: ZmanPreset = ZmanPreset {
     deprecated: false,
 };
 
-/// Sunrise when it occurs, or the time when the sun reaches its easternmost position (azimuth 90 degrees) on days when sunrise does not occur.
-///
-/// In polar regions, where there are days with no sunrise or sunset, some opinions treat the day-night boundary as when the sun is at its easternmost or westernmost position. This follows [Rabbi Yehosef Schwarz](https://en.wikipedia.org/wiki/Joseph_Schwarz_(geographer)) in [Devarim Yosef - Derech Mevo Hashemesh](https://hebrewbooks.org/pdfpager.aspx?req=31703&pgnum=134) and [Devarim Yosef - Teshuvot, She'elah 8](https://hebrewbooks.org/pdfpager.aspx?req=159&pgnum=83), brought lehalacha by the [Ben Ish Chai](https://en.wikipedia.org/wiki/Yosef_Hayyim) in [Rav Pe'alim, chelek 2, Sod Yesharim siman 4](https://hebrewbooks.org/pdfpager.aspx?req=1401&pgnum=461). This time is close to six hours before astronomical chatzos, but depending on the season and location in the Arctic or Antarctic, it can be up to 46 minutes earlier or later.
-///
-/// If there is no sunrise that day and the sun does not reach azimuth 90 degrees, this zman may not be available or cannot be calculated.
-pub static SUNRISE_OR_EASTERNMOST_SOLAR_AZIMUTH: ZmanPreset = ZmanPreset {
-    event: ZmanPrimitive::SunriseOrEasternmostSolarAzimuth,
-    method_name: "getSunriseOrEasternmostSolarAzimuth",
-    name: "Sunrise Or Easternmost Solar Azimuth",
-    #[cfg(feature = "alloc")]
-    description: |_| {
-        "Sunrise when it occurs, or the time when the sun reaches its easternmost position (azimuth 90 degrees) on days when sunrise does not occur.\n\nIn polar regions, where there are days with no sunrise or sunset, some opinions treat the day-night boundary as when the sun is at its easternmost or westernmost position. This follows [Rabbi Yehosef Schwarz](https://en.wikipedia.org/wiki/Joseph_Schwarz_(geographer)) in [Devarim Yosef - Derech Mevo Hashemesh](https://hebrewbooks.org/pdfpager.aspx?req=31703&pgnum=134) and [Devarim Yosef - Teshuvot, She'elah 8](https://hebrewbooks.org/pdfpager.aspx?req=159&pgnum=83), brought lehalacha by the [Ben Ish Chai](https://en.wikipedia.org/wiki/Yosef_Hayyim) in [Rav Pe'alim, chelek 2, Sod Yesharim siman 4](https://hebrewbooks.org/pdfpager.aspx?req=1401&pgnum=461). This time is close to six hours before astronomical chatzos, but depending on the season and location in the Arctic or Antarctic, it can be up to 46 minutes earlier or later.\n\nIf there is no sunrise that day and the sun does not reach azimuth 90 degrees, this zman may not be available or cannot be calculated.".to_string()
-    },
-    deprecated: false,
-};
-
-/// Sunset when it occurs, or the time when the sun reaches its westernmost position (azimuth 270 degrees) on days when sunset does not occur.
-///
-/// In polar regions, where there are days with no sunrise or sunset, some opinions treat the day-night boundary as when the sun is at its easternmost or westernmost position. This follows [Rabbi Yehosef Schwarz](https://en.wikipedia.org/wiki/Joseph_Schwarz_(geographer)) in [Devarim Yosef - Derech Mevo Hashemesh](https://hebrewbooks.org/pdfpager.aspx?req=31703&pgnum=134) and [Devarim Yosef - Teshuvot, She'elah 8](https://hebrewbooks.org/pdfpager.aspx?req=159&pgnum=83), brought lehalacha by the [Ben Ish Chai](https://en.wikipedia.org/wiki/Yosef_Hayyim) in [Rav Pe'alim, chelek 2, Sod Yesharim siman 4](https://hebrewbooks.org/pdfpager.aspx?req=1401&pgnum=461). This time is close to six hours after astronomical chatzos, but depending on the season and location in the Arctic or Antarctic, it can be up to 46 minutes earlier or later.
-///
-/// If there is no sunset that day and the sun does not reach azimuth 270 degrees, this zman may not be available or cannot be calculated.
-pub static SUNSET_OR_WESTERNMOST_SOLAR_AZIMUTH: ZmanPreset = ZmanPreset {
-    event: ZmanPrimitive::SunsetOrWesternmostSolarAzimuth,
-    method_name: "getSunsetOrWesternmostSolarAzimuth",
-    name: "Sunset Or Westernmost Solar Azimuth",
-    #[cfg(feature = "alloc")]
-    description: |_| {
-        "Sunset when it occurs, or the time when the sun reaches its westernmost position (azimuth 270 degrees) on days when sunset does not occur.\n\nIn polar regions, where there are days with no sunrise or sunset, some opinions treat the day-night boundary as when the sun is at its easternmost or westernmost position. This follows [Rabbi Yehosef Schwarz](https://en.wikipedia.org/wiki/Joseph_Schwarz_(geographer)) in [Devarim Yosef - Derech Mevo Hashemesh](https://hebrewbooks.org/pdfpager.aspx?req=31703&pgnum=134) and [Devarim Yosef - Teshuvot, She'elah 8](https://hebrewbooks.org/pdfpager.aspx?req=159&pgnum=83), brought lehalacha by the [Ben Ish Chai](https://en.wikipedia.org/wiki/Yosef_Hayyim) in [Rav Pe'alim, chelek 2, Sod Yesharim siman 4](https://hebrewbooks.org/pdfpager.aspx?req=1401&pgnum=461). This time is close to six hours after astronomical chatzos, but depending on the season and location in the Arctic or Antarctic, it can be up to 46 minutes earlier or later.\n\nIf there is no sunset that day and the sun does not reach azimuth 270 degrees, this zman may not be available or cannot be calculated.".to_string()
-    },
-    deprecated: false,
-};
-
 /// Solar noon - when the sun transits the celestial meridian.
 ///
 /// Also called sundial noon or astronomical chatzos hayom. See [The Definition of Chatzos](https://kosherjava.com/2020/07/02/definition-of-chatzos/) for details on the proper definition of solar noon.
@@ -3185,6 +3185,8 @@ pub static ALL_ZMANIM: &[&ZmanPreset] = &[
     &PLAG_HAMINCHA_BAAL_HATANYA,
     &PLAG_HAMINCHA_GRA,
     &PLAG_HAMINCHA_GRAFIXED_LOCAL_CHATZOS_TO_SUNSET,
+    &POLAR_SUNRISE_BEN_ISH_CHAI,
+    &POLAR_SUNSET_BEN_ISH_CHAI,
     &SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES,
     &SAMUCH_LE_MINCHA_KETANA_72_MINUTES,
     &SAMUCH_LE_MINCHA_KETANA_GRA,
@@ -3239,8 +3241,6 @@ pub static ALL_ZMANIM: &[&ZmanPreset] = &[
     &SOF_ZMAN_TFILA_MGA_96_MINUTES,
     &SOF_ZMAN_TFILA_MGA_96_MINUTES_ZMANIS,
     &SOLAR_MIDNIGHT,
-    &SUNRISE_OR_EASTERNMOST_SOLAR_AZIMUTH,
-    &SUNSET_OR_WESTERNMOST_SOLAR_AZIMUTH,
     &SUN_TRANSIT,
     &TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS,
     &TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS,
@@ -3362,6 +3362,8 @@ macro_rules! for_all_zman_presets {
         $callback!(PLAG_HAMINCHA_BAAL_HATANYA);
         $callback!(PLAG_HAMINCHA_GRA);
         $callback!(PLAG_HAMINCHA_GRAFIXED_LOCAL_CHATZOS_TO_SUNSET);
+        $callback!(POLAR_SUNRISE_BEN_ISH_CHAI);
+        $callback!(POLAR_SUNSET_BEN_ISH_CHAI);
         $callback!(SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES);
         $callback!(SAMUCH_LE_MINCHA_KETANA_72_MINUTES);
         $callback!(SAMUCH_LE_MINCHA_KETANA_GRA);
@@ -3416,8 +3418,6 @@ macro_rules! for_all_zman_presets {
         $callback!(SOF_ZMAN_TFILA_MGA_96_MINUTES);
         $callback!(SOF_ZMAN_TFILA_MGA_96_MINUTES_ZMANIS);
         $callback!(SOLAR_MIDNIGHT);
-        $callback!(SUNRISE_OR_EASTERNMOST_SOLAR_AZIMUTH);
-        $callback!(SUNSET_OR_WESTERNMOST_SOLAR_AZIMUTH);
         $callback!(SUN_TRANSIT);
         $callback!(TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS);
         $callback!(TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS);

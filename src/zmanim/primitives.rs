@@ -123,10 +123,10 @@ pub enum ZmanPrimitive {
     BeginAstronomicalTwilight,
     /// The end of astronomical twilight, when the sun is 18° below the geometric horizon (108° zenith).
     EndAstronomicalTwilight,
-    /// Configured sunset, or the westernmost solar azimuth when sunset does not occur.
-    SunsetOrWesternmostSolarAzimuth,
-    /// Configured sunrise, or the easternmost solar azimuth when sunrise does not occur.
-    SunriseOrEasternmostSolarAzimuth,
+    /// Polar sunset (Ben Ish Chai): due west azimuth on polar no-sunset days only.
+    PolarSunsetBenIshChai,
+    /// Polar sunrise (Ben Ish Chai): due east azimuth on polar no-sunrise days only.
+    PolarSunriseBenIshChai,
 }
 
 #[cfg(feature = "defmt")]
@@ -208,12 +208,8 @@ impl defmt::Format for ZmanPrimitive {
             ZmanPrimitive::EndNauticalTwilight => defmt::write!(fmt, "EndNauticalTwilight"),
             ZmanPrimitive::BeginAstronomicalTwilight => defmt::write!(fmt, "BeginAstronomicalTwilight"),
             ZmanPrimitive::EndAstronomicalTwilight => defmt::write!(fmt, "EndAstronomicalTwilight"),
-            ZmanPrimitive::SunsetOrWesternmostSolarAzimuth => {
-                defmt::write!(fmt, "SunsetOrWesternmostSolarAzimuth")
-            }
-            ZmanPrimitive::SunriseOrEasternmostSolarAzimuth => {
-                defmt::write!(fmt, "SunriseOrEasternmostSolarAzimuth")
-            }
+            ZmanPrimitive::PolarSunsetBenIshChai => defmt::write!(fmt, "PolarSunsetBenIshChai"),
+            ZmanPrimitive::PolarSunriseBenIshChai => defmt::write!(fmt, "PolarSunriseBenIshChai"),
             ZmanPrimitive::ChatzosHayomAsHalfDay => defmt::write!(fmt, "ChatzosHayomAsHalfDay"),
             ZmanPrimitive::ChatzosHayom => defmt::write!(fmt, "ChatzosHayom"),
             ZmanPrimitive::ChatzosHalaylaAsHalfDay => defmt::write!(fmt, "ChatzosHalaylaAsHalfDay"),
@@ -595,24 +591,20 @@ impl ZmanLike for ZmanPrimitive {
             ZmanPrimitive::EndAstronomicalTwilight => {
                 calculator.calculate(&ZmanPrimitive::SunsetOffsetByDegrees(ASTRONOMICAL_ZENITH))
             }
-            ZmanPrimitive::SunsetOrWesternmostSolarAzimuth => {
-                match ZmanPrimitive::ConfiguredSunset.calculate(calculator) {
-                    Ok(sunset) => Ok(sunset),
-                    Err(ZmanimError::AllDay | ZmanimError::AllNight) => {
-                        crate::zmanim::astronomy::time_at_azimuth(calculator.date, &calculator.location, 270.0)
-                    }
-                    Err(error) => Err(error),
+            ZmanPrimitive::PolarSunsetBenIshChai => match ZmanPrimitive::ConfiguredSunset.calculate(calculator) {
+                Ok(_) => Err(ZmanimError::CalculationError),
+                Err(ZmanimError::AllDay | ZmanimError::AllNight) => {
+                    crate::zmanim::astronomy::time_at_azimuth(calculator.date, &calculator.location, 270.0)
                 }
-            }
-            ZmanPrimitive::SunriseOrEasternmostSolarAzimuth => {
-                match ZmanPrimitive::ConfiguredSunrise.calculate(calculator) {
-                    Ok(sunrise) => Ok(sunrise),
-                    Err(ZmanimError::AllDay | ZmanimError::AllNight) => {
-                        crate::zmanim::astronomy::time_at_azimuth(calculator.date, &calculator.location, 90.0)
-                    }
-                    Err(error) => Err(error),
+                Err(error) => Err(error),
+            },
+            ZmanPrimitive::PolarSunriseBenIshChai => match ZmanPrimitive::ConfiguredSunrise.calculate(calculator) {
+                Ok(_) => Err(ZmanimError::CalculationError),
+                Err(ZmanimError::AllDay | ZmanimError::AllNight) => {
+                    crate::zmanim::astronomy::time_at_azimuth(calculator.date, &calculator.location, 90.0)
                 }
-            }
+                Err(error) => Err(error),
+            },
             ZmanPrimitive::ChatzosHayomAsHalfDay => {
                 let sunrise = ZmanPrimitive::SeaLevelSunrise.calculate(calculator)?;
                 let sunset = ZmanPrimitive::SeaLevelSunset.calculate(calculator)?;
@@ -703,8 +695,8 @@ impl ZmanPrimitive {
             | ZmanPrimitive::EndNauticalTwilight
             | ZmanPrimitive::BeginAstronomicalTwilight
             | ZmanPrimitive::EndAstronomicalTwilight
-            | ZmanPrimitive::SunsetOrWesternmostSolarAzimuth
-            | ZmanPrimitive::SunriseOrEasternmostSolarAzimuth => false,
+            | ZmanPrimitive::PolarSunsetBenIshChai
+            | ZmanPrimitive::PolarSunriseBenIshChai => false,
         }
     }
 
@@ -752,8 +744,8 @@ impl ZmanPrimitive {
             | ZmanPrimitive::EndNauticalTwilight
             | ZmanPrimitive::BeginAstronomicalTwilight
             | ZmanPrimitive::EndAstronomicalTwilight
-            | ZmanPrimitive::SunsetOrWesternmostSolarAzimuth
-            | ZmanPrimitive::SunriseOrEasternmostSolarAzimuth => false,
+            | ZmanPrimitive::PolarSunsetBenIshChai
+            | ZmanPrimitive::PolarSunriseBenIshChai => false,
         }
     }
 
@@ -776,8 +768,8 @@ impl ZmanPrimitive {
             ZmanPrimitive::TzaisAteretTorah
             | ZmanPrimitive::BainHashmashosRt2Stars
             | ZmanPrimitive::MinchaGedolaGraGreaterThan30
-            | ZmanPrimitive::SunsetOrWesternmostSolarAzimuth
-            | ZmanPrimitive::SunriseOrEasternmostSolarAzimuth => true,
+            | ZmanPrimitive::PolarSunsetBenIshChai
+            | ZmanPrimitive::PolarSunriseBenIshChai => true,
             ZmanPrimitive::ElevationAdjustedSunrise
             | ZmanPrimitive::SeaLevelSunrise
             | ZmanPrimitive::SolarTransit
