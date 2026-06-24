@@ -1,0 +1,30 @@
+[package]
+name = "interop"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+diplomat = "0.15.0"
+diplomat-runtime = "0.15.1"
+icu_calendar = { version = "2.2.0", default-features = false }
+jiff = { version = "0.2.0", features = ["std", "alloc", "tzdb-bundle-always"] }
+jiff-icu = { version = "0.2.0", default-features = false }
+kosher-rust = { path = "..", features = ["alloc"] }
+num_enum = { version = "0.7.0", default-features = false }
+
+[build-dependencies]
+
+[dev-dependencies]
+kosher-rust = { path = "..", features = ["alloc"] }
+jiff = { version = "0.2.0", features = ["std", "alloc", "tzdb-bundle-always"] }
+
+[lints]
+workspace = true
+
+[[test]]
+name = "adapter_tests"
+path = "tests/adapter_tests.rs"

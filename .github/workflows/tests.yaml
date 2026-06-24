@@ -24,8 +24,27 @@ jobs:
       - name: Regenerate presets.rs
         working-directory: tools
         run: uv run python generate-rust.py
-      - name: Verify presets.rs matches committed output
-        run: git diff --exit-code src/zmanim/presets.rs
+      - name: Regenerate interop generated files
+        working-directory: tools
+        run: uv run python generate-interop.py
+      - name: Verify generated outputs match committed files
+        run: git diff --exit-code src/zmanim/presets.rs interop/src/generated interop/src/zman_preset.rs
+
+  diplomat-interop:
+    name: Diplomat interop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+      - uses: Swatinem/rust-cache@v2
+      - name: Regenerate interop files
+        working-directory: tools
+        run: uv run python generate-interop.py
+      - name: Build and test interop crate
+        run: cargo test -p interop
 
   fmt:
     name: Format

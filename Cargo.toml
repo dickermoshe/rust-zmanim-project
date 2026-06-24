@@ -63,7 +63,7 @@ workspace = true
 
 [workspace]
 resolver = "2"
-members = ["interop-tests/java_interop_tests", "interop-tests/js_interop_tests"]
+members = ["interop","interop-tests/java_interop_tests", "interop-tests/js_interop_tests"]
 
 [workspace.lints.rust]
 missing_docs = "warn"

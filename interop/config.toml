@@ -1,0 +1,14 @@
+lib-name = "kosher_rust_interop"
+
+[c]
+path = "bindings/c"
+
+[cpp]
+path = "bindings/cpp"
+
+[js]
+path = "bindings/js"
+
+[kotlin]
+path = "bindings/kotlin"
+domain = "com.dickersystems.kosherrust"
