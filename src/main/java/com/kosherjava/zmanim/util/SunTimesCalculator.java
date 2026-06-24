@@ -1,6 +1,6 @@
 /*
  * Zmanim Java API
- * Copyright (C) 2004-2026 Eliyahu Hershfeld
+ * Copyright © 2004-2026 Eliyahu Hershfeld
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General
  * Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option)
@@ -25,11 +25,32 @@ import java.time.LocalDate;
  * href="https://aa.usno.navy.mil/publications/asa">Astronomical Almanac</a> and used with his permission. Added to Kevin's
  * code is adjustment of the zenith to account for elevation. This algorithm returns the same time every year and does not
  * account for leap years. It is not as accurate as the Jean Meeus based {@link NOAACalculator} that is the default calculator
- * use by the KosherJava <em>zmanim</em> library. It also does not have an implementation of some solar calculation methods.
+ * use by the KosherJava <em>zmanim</em> library, and is certainly not as accurate as some newer calculators such as the {@link 
+ * MeeusCalculator} ot the {@link SPACalculator}. It also does not have an implementation of some solar calculation methods as
+ * detailed in the deprecation notes.
+ * 
+ * @deprecated This calculator implements the legacy <em><a href=
+ *         "https://www.google.com/books/edition/Almanac_for_Computers/4f8TAQAAIAAJ">Almanac for Computers</a></em> procedure of the
+ *         US Naval Observatory, a deliberately simplified solar model (a single-term equation of center, fixed mean obliquity, and
+ *         no nutation or aberration) that was designed for roughly one-minute accuracy on early calculators and personal computers.
+ *         It is the least accurate of the calculators in this library by about an order of magnitude: in a grid study over latitudes
+ *         60°S to 60°N for all of 2024, its sunrise and sunset differed from an exact ephemeris by a median of approximately 8
+ *         seconds, compared with roughly 1 second for {@link NOAACalculator} and under 1 second for {@link MeeusCalculator} and
+ *         {@link SPACalculator}, with worst cases of tens of seconds and far larger errors at high latitudes and for deep (18°)
+ *         twilight. In addition, this calculator does not compute a true solar transit: {@link #getUTCNoon(LocalDate, GeoLocation)}
+ *         returns the midpoint of its own sunrise and sunset, {@link #getUTCMidnight(LocalDate, GeoLocation)} returns that value
+ *         plus twelve hours, and {@link #getSolarElevation(Instant, GeoLocation)} is not implemented. It is retained only for
+ *         backward compatibility and for cases where its simplicity is preferred over accuracy. For new code use
+ *         {@link SPACalculator} (the NREL Solar Position Algorithm, the most accurate option) or {@link MeeusCalculator} (the
+ *         high-accuracy method of Jean Meeus); where a lighter NOAA-family calculator is sufficient, {@link NOAACalculator} is the
+ *         library default and is already substantially more accurate than this class. There are no current plans on removing this
+ *         calculator. There is value on using it as a reference for various reasons, key among them is to compare and validate
+ *         historically calculates astronomical times. 
  *
  * @author © Eliyahu Hershfeld 2004 - 2026
  * @author © Kevin Boone 2000
  */
+@Deprecated  (since = "3.0.0", forRemoval=false)
 public class SunTimesCalculator extends AstronomicalCalculator {
 	
 	/**
@@ -47,14 +68,14 @@ public class SunTimesCalculator extends AstronomicalCalculator {
 	@Override
 	public double getUTCSunrise(LocalDate localDate, GeoLocation geoLocation, double zenith, boolean adjustForElevation) {
 		double elevation = adjustForElevation ? geoLocation.getElevation() : 0;
-		double adjustedZenith = adjustZenith(zenith, elevation);
+		double adjustedZenith = adjustZenith(zenith, elevation, localDate);
 		return getTimeUTC(localDate, geoLocation, adjustedZenith, true);
 	}
 
 	@Override
 	public double getUTCSunset(LocalDate localDate, GeoLocation geoLocation, double zenith, boolean adjustForElevation) {
 		double elevation = adjustForElevation ? geoLocation.getElevation() : 0;
-		double adjustedZenith = adjustZenith(zenith, elevation);
+		double adjustedZenith = adjustZenith(zenith, elevation, localDate);
 		return getTimeUTC(localDate, geoLocation, adjustedZenith, false);
 	}
 
@@ -111,15 +132,8 @@ public class SunTimesCalculator extends AstronomicalCalculator {
 	 */
 	private static double getSunTrueLongitude(double sunMeanAnomaly) {
 		double l = sunMeanAnomaly + (1.916 * sinDegrees(sunMeanAnomaly)) + (0.020 * sinDegrees(2 * sunMeanAnomaly)) + 282.634;
-
-		// get longitude into 0-360 degree range
-		if (l >= 360.0) {
-			l = l - 360.0;
-		}
-		if (l < 0) {
-			l = l + 360.0;
-		}
-		return l;
+		return (l % 360 + 360) % 360; // return longitude as a 0-360 degree range
+		
 	}
 
 	/**
@@ -195,7 +209,7 @@ public class SunTimesCalculator extends AstronomicalCalculator {
 		double localMeanTime = getLocalMeanTime(localHour, sunRightAscensionHours,
 				getApproxTimeDays(dayOfYear, getHoursFromMeridian(geoLocation.getLongitude()), isSunrise));
 		double pocessedTime = localMeanTime - getHoursFromMeridian(geoLocation.getLongitude());
-		return pocessedTime > 0  ? pocessedTime % 24 : pocessedTime % 24 + 24; // ensure that the time is >= 0 and < 24
+		return (pocessedTime % 24 + 24) % 24; // ensure that the time is >= 0 and < 24
 	}
 	
 	@Override
@@ -203,18 +217,15 @@ public class SunTimesCalculator extends AstronomicalCalculator {
 		double sunrise = getUTCSunrise(localDate, geoLocation, 90, false);
 		double sunset = getUTCSunset(localDate, geoLocation, 90, false);
 		double noon = sunrise + ((sunset - sunrise) / 2);
-		if (noon < 0) {
-			noon += 12;
-		}
 		if (noon < sunrise) {
 			noon -= 12;
-		} 
-		return noon;
+		}
+		return (noon % 24 + 24) % 24; // ensure that the time is >= 0 and < 24
 	}
 	
 	@Override
 	public double getUTCMidnight(LocalDate localDate, GeoLocation geoLocation) {
-		return (getUTCNoon(localDate, geoLocation) + 12);
+		return (getUTCNoon(localDate, geoLocation) + 12) % 24;
 	}
 	
 	/**
