@@ -177,12 +177,11 @@ ZmanimMethod = Literal[
     "getTchilasZmanKidushLevana7Days",
 ]
 
-ZmanimType = Literal[
+ZmanType = Literal[
     "twilight",  # Start and End of Astronomical, Civil, and Nautical Twilight
     "alos",
     "misheyakir",
     "netz",
-    "sof_zman_shema",
     "sof_zman_shma",
     "sof_zman_tefila",
     "sof_zman_achilas_chametz",
@@ -197,7 +196,6 @@ ZmanimType = Literal[
     "shkiya",
     "tzais",
     "kidush_levana",
-    "molad",
     "chatzos_halayla",
 ]
 
@@ -575,7 +573,7 @@ class Zman(BaseModel):
 
     id: ZmanimMethod
     """The KosherJava getter this preset matches, such as `getAlos120Zmanis`."""
-    type_: ZmanimType
+    type_: ZmanType
     """The broad zman category used for grouping."""
     name: str
     """The human-readable display name."""

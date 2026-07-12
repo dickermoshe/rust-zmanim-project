@@ -180,6 +180,53 @@ mod ffi {
         TzaisGeonim9Point75Degrees,
     }
 
+    /// Broad category of a zman preset.
+    pub enum ZmanType {
+        Twilight,
+        Alos,
+        Misheyakir,
+        Netz,
+        SofZmanShma,
+        SofZmanTefila,
+        SofZmanAchilasChametz,
+        SofZmanBiurChametz,
+        ChatzosHayom,
+        MinchaGedola,
+        PlagHamincha,
+        SamuchLeMinchaKetana,
+        MinchaKetana,
+        BeinHashmashos,
+        CandleLighting,
+        Shkiya,
+        Tzais,
+        KidushLevana,
+        ChatzosHalayla,
+    }
+
+    fn to_ffi_zman_type(zman_type: kosher_rust::zmanim::ZmanType) -> ZmanType {
+        match zman_type {
+            kosher_rust::zmanim::ZmanType::Twilight => ZmanType::Twilight,
+            kosher_rust::zmanim::ZmanType::Alos => ZmanType::Alos,
+            kosher_rust::zmanim::ZmanType::Misheyakir => ZmanType::Misheyakir,
+            kosher_rust::zmanim::ZmanType::Netz => ZmanType::Netz,
+            kosher_rust::zmanim::ZmanType::SofZmanShma => ZmanType::SofZmanShma,
+            kosher_rust::zmanim::ZmanType::SofZmanTefila => ZmanType::SofZmanTefila,
+            kosher_rust::zmanim::ZmanType::SofZmanAchilasChametz => ZmanType::SofZmanAchilasChametz,
+            kosher_rust::zmanim::ZmanType::SofZmanBiurChametz => ZmanType::SofZmanBiurChametz,
+            kosher_rust::zmanim::ZmanType::ChatzosHayom => ZmanType::ChatzosHayom,
+            kosher_rust::zmanim::ZmanType::MinchaGedola => ZmanType::MinchaGedola,
+            kosher_rust::zmanim::ZmanType::PlagHamincha => ZmanType::PlagHamincha,
+            kosher_rust::zmanim::ZmanType::SamuchLeMinchaKetana => ZmanType::SamuchLeMinchaKetana,
+            kosher_rust::zmanim::ZmanType::MinchaKetana => ZmanType::MinchaKetana,
+            kosher_rust::zmanim::ZmanType::BeinHashmashos => ZmanType::BeinHashmashos,
+            kosher_rust::zmanim::ZmanType::CandleLighting => ZmanType::CandleLighting,
+            kosher_rust::zmanim::ZmanType::Shkiya => ZmanType::Shkiya,
+            kosher_rust::zmanim::ZmanType::Tzais => ZmanType::Tzais,
+            kosher_rust::zmanim::ZmanType::KidushLevana => ZmanType::KidushLevana,
+            kosher_rust::zmanim::ZmanType::ChatzosHalayla => ZmanType::ChatzosHalayla,
+        }
+    }
+
     /// Returns the number of available presets.
     #[diplomat::attr(not(supports = free_functions), disable)]
     pub fn preset_count() -> u32 {
@@ -208,6 +255,12 @@ mod ffi {
             .get(preset as usize)
             .map(|meta| write!(write, "{}", meta.method_name).is_ok())
             .unwrap_or(false)
+    }
+
+    /// Returns the broad category for a preset.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn preset_zman_type(preset: ZmanPresetId) -> ZmanType {
+        to_ffi_zman_type(PRESET_METADATA[preset as usize].zman_type)
     }
 
     /// Dart entry point: construct once and call instance methods.
@@ -241,6 +294,10 @@ mod ffi {
                 .get(preset as usize)
                 .map(|meta| write!(write, "{}", meta.method_name).is_ok())
                 .unwrap_or(false)
+        }
+
+        pub fn preset_zman_type(&self, preset: ZmanPresetId) -> ZmanType {
+            to_ffi_zman_type(PRESET_METADATA[preset as usize].zman_type)
         }
     }
 }

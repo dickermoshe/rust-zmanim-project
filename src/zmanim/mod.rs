@@ -15,7 +15,7 @@
 //!
 //! Most callers use the ready-made constants in [`presets`] (for example
 //! [`presets::ELEVATION_ADJUSTED_SUNRISE`]). Each preset is a [`ZmanPreset`] backed
-//! by a low-level [`ZmanPrimitive`] expression.
+//! by a low-level [`ZmanPrimitive`] expression and tagged with a [`ZmanType`].
 //!
 //! Failures return [`ZmanimError`] — unlike calendar or limud lookups, which use
 //! `Option` when a value simply does not apply on a given date. Some zmanim cannot
@@ -88,7 +88,7 @@ pub mod prelude {
     pub use super::types::config::CalculatorConfig;
     pub use super::types::error::ZmanimError;
     pub use super::types::location::Location;
-    pub use super::{ZmanLike, ZmanPreset, ZmanimCalculator};
+    pub use super::{ZmanLike, ZmanPreset, ZmanType, ZmanimCalculator};
 }
 
 #[cfg(test)]
@@ -146,6 +146,53 @@ pub trait ZmanLike {
     /// Custom zman definitions should put their calculation logic here.
     fn calculate(&self, calculator: &ZmanimCalculator) -> Result<Timestamp, ZmanimError>;
 }
+/// Broad category of a zman preset (alos, tzais, sof zman shma, …).
+///
+/// Every generated [`ZmanPreset`] carries one of these values so callers can
+/// group or filter presets by kind without parsing method names.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum ZmanType {
+    /// Start and end of astronomical, civil, and nautical twilight.
+    Twilight,
+    /// Dawn (*alos*).
+    Alos,
+    /// Earliest time for tallis and tefillin (*misheyakir*).
+    Misheyakir,
+    /// Sunrise (*netz*).
+    Netz,
+    /// Latest time for the morning Shema (*sof zman shma*).
+    SofZmanShma,
+    /// Latest time for morning prayer (*sof zman tefila*).
+    SofZmanTefila,
+    /// Latest time to eat chametz on Erev Pesach.
+    SofZmanAchilasChametz,
+    /// Latest time to burn chametz on Erev Pesach.
+    SofZmanBiurChametz,
+    /// Midday (*chatzos hayom*).
+    ChatzosHayom,
+    /// Earliest Mincha (*mincha gedola*).
+    MinchaGedola,
+    /// Plag hamincha.
+    PlagHamincha,
+    /// Immediately before *mincha ketana* (*samuch le-mincha ketana*).
+    SamuchLeMinchaKetana,
+    /// Preferred Mincha time (*mincha ketana*).
+    MinchaKetana,
+    /// Twilight between sunset and nightfall (*bein hashmashos*).
+    BeinHashmashos,
+    /// Candle lighting before Shabbat or Yom Tov.
+    CandleLighting,
+    /// Sunset (*shkiya*).
+    Shkiya,
+    /// Nightfall (*tzais*).
+    Tzais,
+    /// Kiddush Levana window bounds.
+    KidushLevana,
+    /// Midnight (*chatzos halayla*).
+    ChatzosHalayla,
+}
+
 /// A named zman preset backed by a low-level [`ZmanPrimitive`].
 ///
 /// Most callers should use presets directly instead of constructing
@@ -154,6 +201,8 @@ pub trait ZmanLike {
 pub struct ZmanPreset {
     /// The primitive calculation used by this preset.
     pub event: ZmanPrimitive,
+    /// The broad category this preset belongs to.
+    pub zman_type: ZmanType,
     /// The KosherJava getter name (for example `getSunrise`).
     pub method_name: &'static str,
     /// The user-facing preset name.
@@ -232,6 +281,12 @@ impl defmt::Format for ZmanimCalculator {
 #[cfg(feature = "defmt")]
 impl defmt::Format for ZmanPreset {
     fn format(&self, fmt: defmt::Formatter) {
-        defmt::write!(fmt, "ZmanPreset {{ event: {}, name: {} }}", self.event, self.name)
+        defmt::write!(
+            fmt,
+            "ZmanPreset {{ event: {}, zman_type: {}, name: {} }}",
+            self.event,
+            self.zman_type,
+            self.name
+        )
     }
 }

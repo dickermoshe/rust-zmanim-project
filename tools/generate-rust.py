@@ -186,6 +186,7 @@ def preset_block(
     const_name: str,
     method_name: str,
     event: str,
+    zman_type: str,
     preset_name: str,
     description: str,
     deprecated: bool,
@@ -196,6 +197,7 @@ def preset_block(
     return f"""{doc}
 pub static {const_name}: ZmanPreset = ZmanPreset {{
     event: {event},
+    zman_type: ZmanType::{snake_to_pascal(zman_type)},
     method_name: {json.dumps(method_name)},
     name: {name_literal},
     #[cfg(feature = "alloc")]
@@ -271,6 +273,7 @@ def generate(docs: dict[str, str]) -> str:
                     const_name,
                     method_name,
                     rust_primitive(zman.zman),
+                    zman.type_,
                     zman.name,
                     docs[method_name],
                     zman.deprecated,
@@ -294,7 +297,7 @@ use alloc::format;
 #[cfg(feature = "alloc")]
 use alloc::string::{String, ToString};
 
-use crate::zmanim::ZmanPreset;
+use crate::zmanim::{ZmanPreset, ZmanType};
 use crate::zmanim::primitives::ZmanPrimitive;
 use jiff::SignedDuration as Duration;
 
