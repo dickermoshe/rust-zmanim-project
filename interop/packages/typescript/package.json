@@ -1,0 +1,29 @@
+{
+  "name": "kosher-rust-for-typescript",
+  "description": "Kosher Rust for TypeScript and JavaScript (Diplomat WASM bindings)",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.mjs"
+    }
+  },
+  "files": [
+    "diplomat.config.mjs",
+    "lib"
+  ],
+  "scripts": {
+    "build:wasm": "node scripts/build-wasm.mjs",
+    "generate": "node scripts/generate.mjs",
+    "test": "npm run build:wasm && node --test test/*.test.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

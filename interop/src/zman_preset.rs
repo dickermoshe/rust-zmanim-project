@@ -1,0 +1,303 @@
+//! Generated zman preset diplomat bridge.
+#![allow(missing_docs, dead_code)]
+
+#[diplomat::bridge]
+mod ffi {
+    use core::fmt::Write;
+
+    use diplomat_runtime::DiplomatWrite;
+
+    use crate::generated::preset_dispatch::{PRESET_METADATA, ZMAN_PRESET_COUNT};
+
+    /// Stable identifier for a generated zman preset.
+    pub enum ZmanPresetId {
+        Alos120Minutes,
+        Alos120Zmanis,
+        Alos16Point1Degrees,
+        Alos18Degrees,
+        Alos19Degrees,
+        Alos19Point8Degrees,
+        Alos26Degrees,
+        Alos60Minutes,
+        Alos72Minutes,
+        Alos72Zmanis,
+        Alos90Minutes,
+        Alos90Zmanis,
+        Alos96Minutes,
+        Alos96Zmanis,
+        AlosBaalHatanya,
+        BainHashmashosRt13Point24Degrees,
+        BainHashmashosRt13Point5MinutesBefore7Point083Degrees,
+        BainHashmashosRt2Stars,
+        BainHashmashosRt58Point5Minutes,
+        BainHashmashosYereim13Point5Minutes,
+        BainHashmashosYereim16Point875Minutes,
+        BainHashmashosYereim18Minutes,
+        BainHashmashosYereim2Point1Degrees,
+        BainHashmashosYereim2Point8Degrees,
+        BainHashmashosYereim3Point05Degrees,
+        BeginAstronomicalTwilight,
+        BeginCivilTwilight,
+        BeginNauticalTwilight,
+        CandleLighting,
+        ChatzosHalayla,
+        ChatzosHayom,
+        ChatzosHayomAsHalfDay,
+        ElevationAdjustedSunrise,
+        ElevationAdjustedSunset,
+        EndAstronomicalTwilight,
+        EndCivilTwilight,
+        EndNauticalTwilight,
+        FixedLocalChatzosHayom,
+        MinchaGedola16Point1Degrees,
+        MinchaGedola30Minutes,
+        MinchaGedola72Minutes,
+        MinchaGedolaAhavatShalom,
+        MinchaGedolaAteretTorah,
+        MinchaGedolaBaalHatanya,
+        MinchaGedolaGra,
+        MinchaGedolaGrafixedLocalChatzos30Minutes,
+        MinchaGedolaGragreaterThan30,
+        MinchaKetana16Point1Degrees,
+        MinchaKetana72Minutes,
+        MinchaKetanaAhavatShalom,
+        MinchaKetanaAteretTorah,
+        MinchaKetanaBaalHatanya,
+        MinchaKetanaGra,
+        MinchaKetanaGrafixedLocalChatzosToSunset,
+        Misheyakir10Point2Degrees,
+        Misheyakir11Degrees,
+        Misheyakir11Point5Degrees,
+        Misheyakir12Point85Degrees,
+        Misheyakir7Point65Degrees,
+        Misheyakir9Point5Degrees,
+        PlagAhavatShalom,
+        PlagAlos16Point1DegreesToTzaisGeonim7Point083Degrees,
+        PlagAlosToSunset,
+        PlagHamincha120Minutes,
+        PlagHamincha120MinutesZmanis,
+        PlagHamincha16Point1Degrees,
+        PlagHamincha18Degrees,
+        PlagHamincha19Point8Degrees,
+        PlagHamincha26Degrees,
+        PlagHamincha60Minutes,
+        PlagHamincha72Minutes,
+        PlagHamincha72MinutesZmanis,
+        PlagHamincha90Minutes,
+        PlagHamincha90MinutesZmanis,
+        PlagHamincha96Minutes,
+        PlagHamincha96MinutesZmanis,
+        PlagHaminchaAteretTorah,
+        PlagHaminchaBaalHatanya,
+        PlagHaminchaGra,
+        PlagHaminchaGrafixedLocalChatzosToSunset,
+        PolarSunriseBenIshChai,
+        PolarSunsetBenIshChai,
+        SamuchLeMinchaKetana16Point1Degrees,
+        SamuchLeMinchaKetana72Minutes,
+        SamuchLeMinchaKetanaGra,
+        SeaLevelSunrise,
+        SeaLevelSunset,
+        SofZmanAchilasChametzBaalHatanya,
+        SofZmanAchilasChametzGra,
+        SofZmanAchilasChametzMga16Point1Degrees,
+        SofZmanAchilasChametzMga72Minutes,
+        SofZmanAchilasChametzMga72MinutesZmanis,
+        SofZmanBiurChametzBaalHatanya,
+        SofZmanBiurChametzGra,
+        SofZmanBiurChametzMga16Point1Degrees,
+        SofZmanBiurChametzMga72Minutes,
+        SofZmanBiurChametzMga72MinutesZmanis,
+        SofZmanKidushLevana15Days,
+        SofZmanKidushLevanaBetweenMoldos,
+        SofZmanShma3HoursBeforeChatzos,
+        SofZmanShmaAlos16Point1DegreesToTzaisGeonim7Point083Degrees,
+        SofZmanShmaAlos16Point1ToSunset,
+        SofZmanShmaAteretTorah,
+        SofZmanShmaBaalHatanya,
+        SofZmanShmaGra,
+        SofZmanShmaGrasunriseToFixedLocalChatzos,
+        SofZmanShmaMga120Minutes,
+        SofZmanShmaMga16Point1Degrees,
+        SofZmanShmaMga16Point1DegreesToFixedLocalChatzos,
+        SofZmanShmaMga18Degrees,
+        SofZmanShmaMga18DegreesToFixedLocalChatzos,
+        SofZmanShmaMga19Point8Degrees,
+        SofZmanShmaMga72Minutes,
+        SofZmanShmaMga72MinutesToFixedLocalChatzos,
+        SofZmanShmaMga72MinutesZmanis,
+        SofZmanShmaMga90Minutes,
+        SofZmanShmaMga90MinutesToFixedLocalChatzos,
+        SofZmanShmaMga90MinutesZmanis,
+        SofZmanShmaMga96Minutes,
+        SofZmanShmaMga96MinutesZmanis,
+        SofZmanTfila2HoursBeforeChatzos,
+        SofZmanTfilaAteretTorah,
+        SofZmanTfilaBaalHatanya,
+        SofZmanTfilaGra,
+        SofZmanTfilaGrasunriseToFixedLocalChatzos,
+        SofZmanTfilaMga120Minutes,
+        SofZmanTfilaMga16Point1Degrees,
+        SofZmanTfilaMga18Degrees,
+        SofZmanTfilaMga19Point8Degrees,
+        SofZmanTfilaMga72Minutes,
+        SofZmanTfilaMga72MinutesZmanis,
+        SofZmanTfilaMga90Minutes,
+        SofZmanTfilaMga90MinutesZmanis,
+        SofZmanTfilaMga96Minutes,
+        SofZmanTfilaMga96MinutesZmanis,
+        SolarMidnight,
+        SunTransit,
+        TchilasZmanKidushLevana3Days,
+        TchilasZmanKidushLevana7Days,
+        Tzais120Minutes,
+        Tzais120Zmanis,
+        Tzais16Point1Degrees,
+        Tzais18Degrees,
+        Tzais19Point8Degrees,
+        Tzais26Degrees,
+        Tzais50Minutes,
+        Tzais60Minutes,
+        Tzais72Minutes,
+        Tzais72Zmanis,
+        Tzais90Minutes,
+        Tzais90Zmanis,
+        Tzais96Minutes,
+        Tzais96Zmanis,
+        TzaisAteretTorah,
+        TzaisBaalHatanya,
+        TzaisGeonim3Point7Degrees,
+        TzaisGeonim3Point8Degrees,
+        TzaisGeonim4Point42Degrees,
+        TzaisGeonim4Point66Degrees,
+        TzaisGeonim4Point8Degrees,
+        TzaisGeonim5Point95Degrees,
+        TzaisGeonim6Point45Degrees,
+        TzaisGeonim7Point083Degrees,
+        TzaisGeonim7Point67Degrees,
+        TzaisGeonim8Point5Degrees,
+        TzaisGeonim9Point3Degrees,
+        TzaisGeonim9Point75Degrees,
+    }
+
+    /// Broad category of a zman preset.
+    pub enum ZmanType {
+        Twilight,
+        Alos,
+        Misheyakir,
+        Netz,
+        SofZmanShma,
+        SofZmanTefila,
+        SofZmanAchilasChametz,
+        SofZmanBiurChametz,
+        ChatzosHayom,
+        MinchaGedola,
+        PlagHamincha,
+        SamuchLeMinchaKetana,
+        MinchaKetana,
+        BeinHashmashos,
+        CandleLighting,
+        Shkiya,
+        Tzais,
+        KidushLevana,
+        ChatzosHalayla,
+    }
+
+    fn to_ffi_zman_type(zman_type: kosher_rust::zmanim::ZmanType) -> ZmanType {
+        match zman_type {
+            kosher_rust::zmanim::ZmanType::Twilight => ZmanType::Twilight,
+            kosher_rust::zmanim::ZmanType::Alos => ZmanType::Alos,
+            kosher_rust::zmanim::ZmanType::Misheyakir => ZmanType::Misheyakir,
+            kosher_rust::zmanim::ZmanType::Netz => ZmanType::Netz,
+            kosher_rust::zmanim::ZmanType::SofZmanShma => ZmanType::SofZmanShma,
+            kosher_rust::zmanim::ZmanType::SofZmanTefila => ZmanType::SofZmanTefila,
+            kosher_rust::zmanim::ZmanType::SofZmanAchilasChametz => ZmanType::SofZmanAchilasChametz,
+            kosher_rust::zmanim::ZmanType::SofZmanBiurChametz => ZmanType::SofZmanBiurChametz,
+            kosher_rust::zmanim::ZmanType::ChatzosHayom => ZmanType::ChatzosHayom,
+            kosher_rust::zmanim::ZmanType::MinchaGedola => ZmanType::MinchaGedola,
+            kosher_rust::zmanim::ZmanType::PlagHamincha => ZmanType::PlagHamincha,
+            kosher_rust::zmanim::ZmanType::SamuchLeMinchaKetana => ZmanType::SamuchLeMinchaKetana,
+            kosher_rust::zmanim::ZmanType::MinchaKetana => ZmanType::MinchaKetana,
+            kosher_rust::zmanim::ZmanType::BeinHashmashos => ZmanType::BeinHashmashos,
+            kosher_rust::zmanim::ZmanType::CandleLighting => ZmanType::CandleLighting,
+            kosher_rust::zmanim::ZmanType::Shkiya => ZmanType::Shkiya,
+            kosher_rust::zmanim::ZmanType::Tzais => ZmanType::Tzais,
+            kosher_rust::zmanim::ZmanType::KidushLevana => ZmanType::KidushLevana,
+            kosher_rust::zmanim::ZmanType::ChatzosHalayla => ZmanType::ChatzosHalayla,
+        }
+    }
+
+    /// Returns the number of available presets.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn preset_count() -> u32 {
+        u32::try_from(ZMAN_PRESET_COUNT).unwrap_or(u32::MAX)
+    }
+
+    /// Writes the display name for a preset. Returns false when the preset is unknown.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn preset_name(preset: ZmanPresetId, write: &mut DiplomatWrite) -> bool {
+        PRESET_METADATA
+            .get(preset as usize)
+            .map(|meta| write!(write, "{}", meta.name).is_ok())
+            .unwrap_or(false)
+    }
+
+    /// Returns whether a preset is deprecated.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn preset_deprecated(preset: ZmanPresetId) -> bool {
+        PRESET_METADATA.get(preset as usize).is_some_and(|meta| meta.deprecated)
+    }
+
+    /// Writes the KosherJava-style method name for a preset. Returns false when unknown.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn preset_method_name(preset: ZmanPresetId, write: &mut DiplomatWrite) -> bool {
+        PRESET_METADATA
+            .get(preset as usize)
+            .map(|meta| write!(write, "{}", meta.method_name).is_ok())
+            .unwrap_or(false)
+    }
+
+    /// Returns the broad category for a preset.
+    #[diplomat::attr(not(supports = free_functions), disable)]
+    pub fn preset_zman_type(preset: ZmanPresetId) -> ZmanType {
+        to_ffi_zman_type(PRESET_METADATA[preset as usize].zman_type)
+    }
+
+    /// Dart entry point: construct once and call instance methods.
+    #[diplomat::cfg(not(supports = free_functions))]
+    #[diplomat::opaque]
+    pub struct ZmanPresets(u8);
+
+    impl ZmanPresets {
+        #[diplomat::attr(*, constructor)]
+        pub fn new() -> Box<ZmanPresets> {
+            Box::new(ZmanPresets(0))
+        }
+
+        pub fn preset_count(&self) -> u32 {
+            u32::try_from(ZMAN_PRESET_COUNT).unwrap_or(u32::MAX)
+        }
+
+        pub fn preset_name(&self, preset: ZmanPresetId, write: &mut DiplomatWrite) -> bool {
+            PRESET_METADATA
+                .get(preset as usize)
+                .map(|meta| write!(write, "{}", meta.name).is_ok())
+                .unwrap_or(false)
+        }
+
+        pub fn preset_deprecated(&self, preset: ZmanPresetId) -> bool {
+            PRESET_METADATA.get(preset as usize).is_some_and(|meta| meta.deprecated)
+        }
+
+        pub fn preset_method_name(&self, preset: ZmanPresetId, write: &mut DiplomatWrite) -> bool {
+            PRESET_METADATA
+                .get(preset as usize)
+                .map(|meta| write!(write, "{}", meta.method_name).is_ok())
+                .unwrap_or(false)
+        }
+
+        pub fn preset_zman_type(&self, preset: ZmanPresetId) -> ZmanType {
+            to_ffi_zman_type(PRESET_METADATA[preset as usize].zman_type)
+        }
+    }
+}

@@ -7,8 +7,8 @@ use alloc::format;
 #[cfg(feature = "alloc")]
 use alloc::string::{String, ToString};
 
-use crate::zmanim::ZmanPreset;
 use crate::zmanim::primitives::ZmanPrimitive;
+use crate::zmanim::{ZmanPreset, ZmanType};
 use jiff::SignedDuration as Duration;
 
 #[cfg(feature = "alloc")]
@@ -28,6 +28,7 @@ fn format_minutes(duration: Duration) -> String {
 /// In places where sunrise cannot be calculated, this zman may not be available.
 pub static ALOS_120_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::from_mins(-120)),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos120Minutes",
     name: "Alos (120 Minutes)",
     #[cfg(feature = "alloc")]
@@ -48,6 +49,7 @@ pub static ALOS_120_MINUTES: ZmanPreset = ZmanPreset {
 /// In places where sunrise or sunset cannot be calculated, this zman may not be available.
 pub static ALOS_120_ZMANIS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunrise, -2.0),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos120Zmanis",
     name: "Alos (120 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -66,6 +68,7 @@ pub static ALOS_120_ZMANIS: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static ALOS_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(16.1),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos16Point1Degrees",
     name: "Alos (16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -82,6 +85,7 @@ pub static ALOS_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static ALOS_18_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(18.0),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos18Degrees",
     name: "Alos (18 Degrees)",
     #[cfg(feature = "alloc")]
@@ -98,6 +102,7 @@ pub static ALOS_18_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static ALOS_19_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(19.0),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos19Degrees",
     name: "Alos (19 Degrees)",
     #[cfg(feature = "alloc")]
@@ -116,6 +121,7 @@ pub static ALOS_19_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static ALOS_19_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(19.8),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos19Point8Degrees",
     name: "Alos (19.8 Degrees)",
     #[cfg(feature = "alloc")]
@@ -136,6 +142,7 @@ pub static ALOS_19_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static ALOS_26_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(26.0),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos26Degrees",
     name: "Alos (26 Degrees)",
     #[cfg(feature = "alloc")]
@@ -154,6 +161,7 @@ pub static ALOS_26_DEGREES: ZmanPreset = ZmanPreset {
 /// In places where sunrise cannot be calculated, this zman may not be available.
 pub static ALOS_60_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::from_mins(-60)),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos60Minutes",
     name: "Alos (60 Minutes)",
     #[cfg(feature = "alloc")]
@@ -172,6 +180,7 @@ pub static ALOS_60_MINUTES: ZmanPreset = ZmanPreset {
 /// In places where sunrise cannot be calculated, this zman may not be available.
 pub static ALOS_72_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::from_mins(-72)),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos72Minutes",
     name: "Alos (72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -190,6 +199,7 @@ pub static ALOS_72_MINUTES: ZmanPreset = ZmanPreset {
 /// In places where sunrise or sunset cannot be calculated, this zman may not be available.
 pub static ALOS_72_ZMANIS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunrise, -1.2),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos72Zmanis",
     name: "Alos (72 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -208,6 +218,7 @@ pub static ALOS_72_ZMANIS: ZmanPreset = ZmanPreset {
 /// In places where sunrise cannot be calculated, this zman may not be available.
 pub static ALOS_90_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::from_mins(-90)),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos90Minutes",
     name: "Alos (90 Minutes)",
     #[cfg(feature = "alloc")]
@@ -226,6 +237,7 @@ pub static ALOS_90_MINUTES: ZmanPreset = ZmanPreset {
 /// In places where sunrise or sunset cannot be calculated, this zman may not be available.
 pub static ALOS_90_ZMANIS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunrise, -1.5),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos90Zmanis",
     name: "Alos (90 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -244,6 +256,7 @@ pub static ALOS_90_ZMANIS: ZmanPreset = ZmanPreset {
 /// In places where sunrise cannot be calculated, this zman may not be available.
 pub static ALOS_96_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunrise, Duration::from_mins(-96)),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos96Minutes",
     name: "Alos (96 Minutes)",
     #[cfg(feature = "alloc")]
@@ -262,6 +275,7 @@ pub static ALOS_96_MINUTES: ZmanPreset = ZmanPreset {
 /// In places where sunrise or sunset cannot be calculated, this zman may not be available.
 pub static ALOS_96_ZMANIS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunrise, -1.6),
+    zman_type: ZmanType::Alos,
     method_name: "getAlos96Zmanis",
     name: "Alos (96 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -280,6 +294,7 @@ pub static ALOS_96_ZMANIS: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static ALOS_BAAL_HATANYA: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(16.9),
+    zman_type: ZmanType::Alos,
     method_name: "getAlosBaalHatanya",
     name: "Alos (Baal Hatanya)",
     #[cfg(feature = "alloc")]
@@ -296,6 +311,7 @@ pub static ALOS_BAAL_HATANYA: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, including places even south of the Arctic Circle and north of the Antarctic Circle, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static BAIN_HASHMASHOS_RT_13_POINT_24_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(13.24),
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosRT13Point24Degrees",
     name: "Bain Hashmashos (Rabbeinu Tam, 13.24 Degrees)",
     #[cfg(feature = "alloc")]
@@ -315,6 +331,7 @@ pub static BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES: Zma
         &ZmanPrimitive::SunsetOffsetByDegrees(7.083333333333333),
         Duration::from_millis(-810000),
     ),
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosRT13Point5MinutesBefore7Point083Degrees",
     name: "Bain Hashmashos (Rabbeinu Tam, 13.5 Minutes Before 7.083 Degrees)",
     #[cfg(feature = "alloc")]
@@ -331,6 +348,7 @@ pub static BAIN_HASHMASHOS_RT_13_POINT_5_MINUTES_BEFORE_7_POINT_083_DEGREES: Zma
 /// At some northern and southern locations, including places even south of the Arctic Circle and north of the Antarctic Circle, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static BAIN_HASHMASHOS_RT_2_STARS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::BainHashmashosRt2Stars,
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosRT2Stars",
     name: "Bain Hashmashos (Rabbeinu Tam, 2 Stars)",
     #[cfg(feature = "alloc")]
@@ -347,6 +365,7 @@ pub static BAIN_HASHMASHOS_RT_2_STARS: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static BAIN_HASHMASHOS_RT_58_POINT_5_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_millis(3510000)),
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosRT58Point5Minutes",
     name: "Bain Hashmashos (Rabbeinu Tam, 58.5 Minutes)",
     #[cfg(feature = "alloc")]
@@ -363,6 +382,7 @@ pub static BAIN_HASHMASHOS_RT_58_POINT_5_MINUTES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static BAIN_HASHMASHOS_YEREIM_13_POINT_5_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_millis(-810000)),
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosYereim13Point5Minutes",
     name: "Bain Hashmashos (Yereim, 13.5 Minutes)",
     #[cfg(feature = "alloc")]
@@ -379,6 +399,7 @@ pub static BAIN_HASHMASHOS_YEREIM_13_POINT_5_MINUTES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static BAIN_HASHMASHOS_YEREIM_16_POINT_875_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_millis(-1012500)),
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosYereim16Point875Minutes",
     name: "Bain Hashmashos (Yereim, 16.875 Minutes)",
     #[cfg(feature = "alloc")]
@@ -395,6 +416,7 @@ pub static BAIN_HASHMASHOS_YEREIM_16_POINT_875_MINUTES: ZmanPreset = ZmanPreset 
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static BAIN_HASHMASHOS_YEREIM_18_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(-18)),
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosYereim18Minutes",
     name: "Bain Hashmashos (Yereim, 18 Minutes)",
     #[cfg(feature = "alloc")]
@@ -411,6 +433,7 @@ pub static BAIN_HASHMASHOS_YEREIM_18_MINUTES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static BAIN_HASHMASHOS_YEREIM_2_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(-2.1),
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosYereim2Point1Degrees",
     name: "Bain Hashmashos (Yereim, 2.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -427,6 +450,7 @@ pub static BAIN_HASHMASHOS_YEREIM_2_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static BAIN_HASHMASHOS_YEREIM_2_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(-2.8),
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosYereim2Point8Degrees",
     name: "Bain Hashmashos (Yereim, 2.8 Degrees)",
     #[cfg(feature = "alloc")]
@@ -445,6 +469,7 @@ pub static BAIN_HASHMASHOS_YEREIM_2_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static BAIN_HASHMASHOS_YEREIM_3_POINT_05_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(-3.05),
+    zman_type: ZmanType::BeinHashmashos,
     method_name: "getBainHashmashosYereim3Point05Degrees",
     name: "Bain Hashmashos (Yereim, 3.05 Degrees)",
     #[cfg(feature = "alloc")]
@@ -461,6 +486,7 @@ pub static BAIN_HASHMASHOS_YEREIM_3_POINT_05_DEGREES: ZmanPreset = ZmanPreset {
 /// This zman may not be available or cannot be calculated when the computation cannot be performed.
 pub static BEGIN_ASTRONOMICAL_TWILIGHT: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::BeginAstronomicalTwilight,
+    zman_type: ZmanType::Twilight,
     method_name: "getBeginAstronomicalTwilight",
     name: "Begin Astronomical Twilight",
     #[cfg(feature = "alloc")]
@@ -477,6 +503,7 @@ pub static BEGIN_ASTRONOMICAL_TWILIGHT: ZmanPreset = ZmanPreset {
 /// This zman may not be available or cannot be calculated when the computation cannot be performed.
 pub static BEGIN_CIVIL_TWILIGHT: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::BeginCivilTwilight,
+    zman_type: ZmanType::Twilight,
     method_name: "getBeginCivilTwilight",
     name: "Begin Civil Twilight",
     #[cfg(feature = "alloc")]
@@ -493,6 +520,7 @@ pub static BEGIN_CIVIL_TWILIGHT: ZmanPreset = ZmanPreset {
 /// This zman may not be available or cannot be calculated when the computation cannot be performed.
 pub static BEGIN_NAUTICAL_TWILIGHT: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::BeginNauticalTwilight,
+    zman_type: ZmanType::Twilight,
     method_name: "getBeginNauticalTwilight",
     name: "Begin Nautical Twilight",
     #[cfg(feature = "alloc")]
@@ -509,6 +537,7 @@ pub static BEGIN_NAUTICAL_TWILIGHT: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static CANDLE_LIGHTING: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::CandleLighting,
+    zman_type: ZmanType::CandleLighting,
     method_name: "getCandleLighting",
     name: "Candle Lighting",
     #[cfg(feature = "alloc")]
@@ -526,6 +555,7 @@ pub static CANDLE_LIGHTING: ZmanPreset = ZmanPreset {
 /// For how chatzos can be defined and calculated, see [The Definition of Chatzos](https://kosherjava.com/2020/07/02/definition-of-chatzos/) on the KosherJava blog.
 pub static CHATZOS_HALAYLA: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ChatzosHalayla,
+    zman_type: ZmanType::ChatzosHalayla,
     method_name: "getChatzosHalayla",
     name: "Chatzos Halayla",
     #[cfg(feature = "alloc")]
@@ -540,6 +570,7 @@ pub static CHATZOS_HALAYLA: ZmanPreset = ZmanPreset {
 /// For how chatzos can be defined and calculated, see [The Definition of Chatzos](https://kosherjava.com/2020/07/02/definition-of-chatzos/) on the KosherJava blog.
 pub static CHATZOS_HAYOM: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ChatzosHayom,
+    zman_type: ZmanType::ChatzosHayom,
     method_name: "getChatzosHayom",
     name: "Chatzos Hayom",
     #[cfg(feature = "alloc")]
@@ -560,6 +591,7 @@ pub static CHATZOS_HAYOM: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static CHATZOS_HAYOM_AS_HALF_DAY: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ChatzosHayomAsHalfDay,
+    zman_type: ZmanType::ChatzosHayom,
     method_name: "getChatzosHayomAsHalfDay",
     name: "Chatzos Hayom (Midpoint of Sunrise and Sunset)",
     #[cfg(feature = "alloc")]
@@ -576,6 +608,7 @@ pub static CHATZOS_HAYOM_AS_HALF_DAY: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static ELEVATION_ADJUSTED_SUNRISE: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ElevationAdjustedSunrise,
+    zman_type: ZmanType::Netz,
     method_name: "getSunrise",
     name: "Sunrise",
     #[cfg(feature = "alloc")]
@@ -592,6 +625,7 @@ pub static ELEVATION_ADJUSTED_SUNRISE: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static ELEVATION_ADJUSTED_SUNSET: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ElevationAdjustedSunset,
+    zman_type: ZmanType::Shkiya,
     method_name: "getSunset",
     name: "Sunset",
     #[cfg(feature = "alloc")]
@@ -608,6 +642,7 @@ pub static ELEVATION_ADJUSTED_SUNSET: ZmanPreset = ZmanPreset {
 /// This zman may not be available or cannot be calculated when the computation cannot be performed.
 pub static END_ASTRONOMICAL_TWILIGHT: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::EndAstronomicalTwilight,
+    zman_type: ZmanType::Twilight,
     method_name: "getEndAstronomicalTwilight",
     name: "End Astronomical Twilight",
     #[cfg(feature = "alloc")]
@@ -624,6 +659,7 @@ pub static END_ASTRONOMICAL_TWILIGHT: ZmanPreset = ZmanPreset {
 /// This zman may not be available or cannot be calculated when the computation cannot be performed.
 pub static END_CIVIL_TWILIGHT: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::EndCivilTwilight,
+    zman_type: ZmanType::Twilight,
     method_name: "getEndCivilTwilight",
     name: "End Civil Twilight",
     #[cfg(feature = "alloc")]
@@ -640,6 +676,7 @@ pub static END_CIVIL_TWILIGHT: ZmanPreset = ZmanPreset {
 /// This zman may not be available or cannot be calculated when the computation cannot be performed.
 pub static END_NAUTICAL_TWILIGHT: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::EndNauticalTwilight,
+    zman_type: ZmanType::Twilight,
     method_name: "getEndNauticalTwilight",
     name: "End Nautical Twilight",
     #[cfg(feature = "alloc")]
@@ -656,6 +693,7 @@ pub static END_NAUTICAL_TWILIGHT: ZmanPreset = ZmanPreset {
 /// This is the time of chatzos according to the [Aruch Hashulchan](https://en.wikipedia.org/wiki/Aruch_HaShulchan) ([Orach Chaim 233:14](https://hebrewbooks.org/pdfpager.aspx?req=7705&pgnum=426)) and [Rabbi Moshe Feinstein](https://en.wikipedia.org/wiki/Moshe_Feinstein) ([Igros Moshe, Orach Chaim 1:24](https://hebrewbooks.org/pdfpager.aspx?req=916&st=&pgnum=67), [2:20](https://hebrewbooks.org/pdfpager.aspx?req=14675&pgnum=191)).
 pub static FIXED_LOCAL_CHATZOS_HAYOM: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::LocalMeanTime(12.0),
+    zman_type: ZmanType::ChatzosHayom,
     method_name: "getFixedLocalChatzosHayom",
     name: "Chatzos Hayom (Fixed Local Chatzos)",
     #[cfg(feature = "alloc")]
@@ -676,6 +714,7 @@ pub static MINCHA_GEDOLA_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(16.1),
         true,
     ),
+    zman_type: ZmanType::MinchaGedola,
     method_name: "getMinchaGedola16Point1Degrees",
     name: "Mincha Gedola (16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -694,6 +733,7 @@ pub static MINCHA_GEDOLA_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
 /// In places where chatzos cannot be calculated, this zman may not be available.
 pub static MINCHA_GEDOLA_30_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ChatzosHayom, Duration::from_mins(30)),
+    zman_type: ZmanType::MinchaGedola,
     method_name: "getMinchaGedola30Minutes",
     name: "Mincha Gedola (30 Minutes)",
     #[cfg(feature = "alloc")]
@@ -714,6 +754,7 @@ pub static MINCHA_GEDOLA_72_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(72)),
         true,
     ),
+    zman_type: ZmanType::MinchaGedola,
     method_name: "getMinchaGedola72Minutes",
     name: "Mincha Gedola (72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -732,6 +773,7 @@ pub static MINCHA_GEDOLA_72_MINUTES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static MINCHA_GEDOLA_AHAVAT_SHALOM: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::MinchaGedolaAhavatShalom,
+    zman_type: ZmanType::MinchaGedola,
     method_name: "getMinchaGedolaAhavatShalom",
     name: "Mincha Gedola (Ahavat Shalom)",
     #[cfg(feature = "alloc")]
@@ -754,6 +796,7 @@ pub static MINCHA_GEDOLA_ATERET_TORAH: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::TzaisAteretTorah,
         false,
     ),
+    zman_type: ZmanType::MinchaGedola,
     method_name: "getMinchaGedolaAteretTorah",
     name: "Mincha Gedola (Ateret Torah)",
     #[cfg(feature = "alloc")]
@@ -777,6 +820,7 @@ pub static MINCHA_GEDOLA_BAAL_HATANYA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(1.583),
         true,
     ),
+    zman_type: ZmanType::MinchaGedola,
     method_name: "getMinchaGedolaBaalHatanya",
     name: "Mincha Gedola (Baal Hatanya)",
     #[cfg(feature = "alloc")]
@@ -799,6 +843,7 @@ pub static MINCHA_GEDOLA_GRA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
+    zman_type: ZmanType::MinchaGedola,
     method_name: "getMinchaGedolaGRA",
     name: "Mincha Gedola (GR'A)",
     #[cfg(feature = "alloc")]
@@ -815,6 +860,7 @@ pub static MINCHA_GEDOLA_GRA: ZmanPreset = ZmanPreset {
 /// In places where fixed local chatzos cannot be calculated, this zman may not be available.
 pub static MINCHA_GEDOLA_GRAFIXED_LOCAL_CHATZOS_30_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::LocalMeanTime(12.0), Duration::from_mins(30)),
+    zman_type: ZmanType::MinchaGedola,
     method_name: "getMinchaGedolaGRAFixedLocalChatzos30Minutes",
     name: "Mincha Gedola (GR'A, Fixed Local Chatzos, 30 Minutes)",
     #[cfg(feature = "alloc")]
@@ -831,6 +877,7 @@ pub static MINCHA_GEDOLA_GRAFIXED_LOCAL_CHATZOS_30_MINUTES: ZmanPreset = ZmanPre
 /// In places where sunrise, sunset, or chatzos cannot be calculated, this zman may not be available.
 pub static MINCHA_GEDOLA_GRAGREATER_THAN_30: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::MinchaGedolaGraGreaterThan30,
+    zman_type: ZmanType::MinchaGedola,
     method_name: "getMinchaGedolaGRAGreaterThan30",
     name: "Mincha Gedola (GR'A, Greater Than 30)",
     #[cfg(feature = "alloc")]
@@ -851,6 +898,7 @@ pub static MINCHA_KETANA_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(16.1),
         true,
     ),
+    zman_type: ZmanType::MinchaKetana,
     method_name: "getMinchaKetana16Point1Degrees",
     name: "Mincha Ketana (16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -871,6 +919,7 @@ pub static MINCHA_KETANA_72_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(72)),
         true,
     ),
+    zman_type: ZmanType::MinchaKetana,
     method_name: "getMinchaKetana72Minutes",
     name: "Mincha Ketana (72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -887,6 +936,7 @@ pub static MINCHA_KETANA_72_MINUTES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static MINCHA_KETANA_AHAVAT_SHALOM: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::MinchaKetanaAhavatShalom,
+    zman_type: ZmanType::MinchaKetana,
     method_name: "getMinchaKetanaAhavatShalom",
     name: "Mincha Ketana (Ahavat Shalom)",
     #[cfg(feature = "alloc")]
@@ -909,6 +959,7 @@ pub static MINCHA_KETANA_ATERET_TORAH: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::TzaisAteretTorah,
         false,
     ),
+    zman_type: ZmanType::MinchaKetana,
     method_name: "getMinchaKetanaAteretTorah",
     name: "Mincha Ketana (Ateret Torah)",
     #[cfg(feature = "alloc")]
@@ -932,6 +983,7 @@ pub static MINCHA_KETANA_BAAL_HATANYA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(1.583),
         true,
     ),
+    zman_type: ZmanType::MinchaKetana,
     method_name: "getMinchaKetanaBaalHatanya",
     name: "Mincha Ketana (Baal Hatanya)",
     #[cfg(feature = "alloc")]
@@ -954,6 +1006,7 @@ pub static MINCHA_KETANA_GRA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
+    zman_type: ZmanType::MinchaKetana,
     method_name: "getMinchaKetanaGRA",
     name: "Mincha Ketana (GR'A)",
     #[cfg(feature = "alloc")]
@@ -974,6 +1027,7 @@ pub static MINCHA_KETANA_GRAFIXED_LOCAL_CHATZOS_TO_SUNSET: ZmanPreset = ZmanPres
         &ZmanPrimitive::ConfiguredSunset,
         3.5,
     ),
+    zman_type: ZmanType::MinchaKetana,
     method_name: "getMinchaKetanaGRAFixedLocalChatzosToSunset",
     name: "Mincha Ketana (GR'A, Fixed Local Chatzos to Sunset)",
     #[cfg(feature = "alloc")]
@@ -992,6 +1046,7 @@ pub static MINCHA_KETANA_GRAFIXED_LOCAL_CHATZOS_TO_SUNSET: ZmanPreset = ZmanPres
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static MISHEYAKIR_10_POINT_2_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(10.2),
+    zman_type: ZmanType::Misheyakir,
     method_name: "getMisheyakir10Point2Degrees",
     name: "Misheyakir (10.2 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1010,6 +1065,7 @@ pub static MISHEYAKIR_10_POINT_2_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static MISHEYAKIR_11_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(11.0),
+    zman_type: ZmanType::Misheyakir,
     method_name: "getMisheyakir11Degrees",
     name: "Misheyakir (11 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1028,6 +1084,7 @@ pub static MISHEYAKIR_11_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static MISHEYAKIR_11_POINT_5_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(11.5),
+    zman_type: ZmanType::Misheyakir,
     method_name: "getMisheyakir11Point5Degrees",
     name: "Misheyakir (11.5 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1048,6 +1105,7 @@ pub static MISHEYAKIR_11_POINT_5_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static MISHEYAKIR_12_POINT_85_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(12.85),
+    zman_type: ZmanType::Misheyakir,
     method_name: "getMisheyakir12Point85Degrees",
     name: "Misheyakir (12.85 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1066,6 +1124,7 @@ pub static MISHEYAKIR_12_POINT_85_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static MISHEYAKIR_7_POINT_65_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(7.65),
+    zman_type: ZmanType::Misheyakir,
     method_name: "getMisheyakir7Point65Degrees",
     name: "Misheyakir (7.65 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1084,6 +1143,7 @@ pub static MISHEYAKIR_7_POINT_65_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static MISHEYAKIR_9_POINT_5_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunriseOffsetByDegrees(9.5),
+    zman_type: ZmanType::Misheyakir,
     method_name: "getMisheyakir9Point5Degrees",
     name: "Misheyakir (9.5 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1100,6 +1160,7 @@ pub static MISHEYAKIR_9_POINT_5_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available if the sun does not reach low enough below the horizon.
 pub static PLAG_AHAVAT_SHALOM: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::PlagAhavatShalom,
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagAhavatShalom",
     name: "Plag Hamincha (Ahavat Shalom)",
     #[cfg(feature = "alloc")]
@@ -1120,6 +1181,7 @@ pub static PLAG_ALOS_16_POINT_1_DEGREES_TO_TZAIS_GEONIM_7_POINT_083_DEGREES: Zma
         &ZmanPrimitive::SunsetOffsetByDegrees(7.083333333333333),
         false,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagAlos16Point1DegreesToTzaisGeonim7Point083Degrees",
     name: "Plag Hamincha (Alos 16.1 to Tzais Geonim 7.083 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1142,6 +1204,7 @@ pub static PLAG_ALOS_TO_SUNSET: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         false,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagAlosToSunset",
     name: "Plag Hamincha (Alos 16.1 to Sunset)",
     #[cfg(feature = "alloc")]
@@ -1164,6 +1227,7 @@ pub static PLAG_HAMINCHA_120_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(120)),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha120Minutes",
     name: "Plag Hamincha (120 Minutes)",
     #[cfg(feature = "alloc")]
@@ -1186,6 +1250,7 @@ pub static PLAG_HAMINCHA_120_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 2.0),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha120MinutesZmanis",
     name: "Plag Hamincha (120 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -1208,6 +1273,7 @@ pub static PLAG_HAMINCHA_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(16.1),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha16Point1Degrees",
     name: "Plag Hamincha (16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1230,6 +1296,7 @@ pub static PLAG_HAMINCHA_18_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(18.0),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha18Degrees",
     name: "Plag Hamincha (18 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1252,6 +1319,7 @@ pub static PLAG_HAMINCHA_19_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(19.8),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha19Point8Degrees",
     name: "Plag Hamincha (19.8 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1274,6 +1342,7 @@ pub static PLAG_HAMINCHA_26_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(26.0),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha26Degrees",
     name: "Plag Hamincha (26 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1294,6 +1363,7 @@ pub static PLAG_HAMINCHA_60_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(60)),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha60Minutes",
     name: "Plag Hamincha (60 Minutes)",
     #[cfg(feature = "alloc")]
@@ -1316,6 +1386,7 @@ pub static PLAG_HAMINCHA_72_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(72)),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha72Minutes",
     name: "Plag Hamincha (72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -1338,6 +1409,7 @@ pub static PLAG_HAMINCHA_72_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.2),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha72MinutesZmanis",
     name: "Plag Hamincha (72 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -1360,6 +1432,7 @@ pub static PLAG_HAMINCHA_90_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(90)),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha90Minutes",
     name: "Plag Hamincha (90 Minutes)",
     #[cfg(feature = "alloc")]
@@ -1382,6 +1455,7 @@ pub static PLAG_HAMINCHA_90_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.5),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha90MinutesZmanis",
     name: "Plag Hamincha (90 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -1404,6 +1478,7 @@ pub static PLAG_HAMINCHA_96_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(96)),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha96Minutes",
     name: "Plag Hamincha (96 Minutes)",
     #[cfg(feature = "alloc")]
@@ -1426,6 +1501,7 @@ pub static PLAG_HAMINCHA_96_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.6),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHamincha96MinutesZmanis",
     name: "Plag Hamincha (96 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -1448,6 +1524,7 @@ pub static PLAG_HAMINCHA_ATERET_TORAH: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::TzaisAteretTorah,
         false,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHaminchaAteretTorah",
     name: "Plag Hamincha (Ateret Torah)",
     #[cfg(feature = "alloc")]
@@ -1473,6 +1550,7 @@ pub static PLAG_HAMINCHA_BAAL_HATANYA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(1.583),
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHaminchaBaalHatanya",
     name: "Plag Hamincha (Baal Hatanya)",
     #[cfg(feature = "alloc")]
@@ -1495,6 +1573,7 @@ pub static PLAG_HAMINCHA_GRA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHaminchaGRA",
     name: "Plag Hamincha (GR'A)",
     #[cfg(feature = "alloc")]
@@ -1515,6 +1594,7 @@ pub static PLAG_HAMINCHA_GRAFIXED_LOCAL_CHATZOS_TO_SUNSET: ZmanPreset = ZmanPres
         &ZmanPrimitive::ConfiguredSunset,
         4.75,
     ),
+    zman_type: ZmanType::PlagHamincha,
     method_name: "getPlagHaminchaGRAFixedLocalChatzosToSunset",
     name: "Plag Hamincha (GR'A, Fixed Local Chatzos to Sunset)",
     #[cfg(feature = "alloc")]
@@ -1531,6 +1611,7 @@ pub static PLAG_HAMINCHA_GRAFIXED_LOCAL_CHATZOS_TO_SUNSET: ZmanPreset = ZmanPres
 /// If there is no sunrise that day and the sun does not reach azimuth 90 degrees, this zman may not be available or cannot be calculated.
 pub static POLAR_SUNRISE_BEN_ISH_CHAI: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::PolarSunriseBenIshChai,
+    zman_type: ZmanType::Netz,
     method_name: "getPolarSunriseBenIshChai",
     name: "Polar Sunrise Ben Ish Chai",
     #[cfg(feature = "alloc")]
@@ -1547,6 +1628,7 @@ pub static POLAR_SUNRISE_BEN_ISH_CHAI: ZmanPreset = ZmanPreset {
 /// If there is no sunset that day and the sun does not reach azimuth 270 degrees, this zman may not be available or cannot be calculated.
 pub static POLAR_SUNSET_BEN_ISH_CHAI: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::PolarSunsetBenIshChai,
+    zman_type: ZmanType::Shkiya,
     method_name: "getPolarSunsetBenIshChai",
     name: "Polar Sunset Ben Ish Chai",
     #[cfg(feature = "alloc")]
@@ -1571,6 +1653,7 @@ pub static SAMUCH_LE_MINCHA_KETANA_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(16.1),
         true,
     ),
+    zman_type: ZmanType::SamuchLeMinchaKetana,
     method_name: "getSamuchLeMinchaKetana16Point1Degrees",
     name: "Samuch Le Mincha Ketana (16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1595,6 +1678,7 @@ pub static SAMUCH_LE_MINCHA_KETANA_72_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(72)),
         true,
     ),
+    zman_type: ZmanType::SamuchLeMinchaKetana,
     method_name: "getSamuchLeMinchaKetana72Minutes",
     name: "Samuch Le Mincha Ketana (72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -1619,6 +1703,7 @@ pub static SAMUCH_LE_MINCHA_KETANA_GRA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
+    zman_type: ZmanType::SamuchLeMinchaKetana,
     method_name: "getSamuchLeMinchaKetanaGRA",
     name: "Samuch Le Mincha Ketana (GR'A)",
     #[cfg(feature = "alloc")]
@@ -1635,6 +1720,7 @@ pub static SAMUCH_LE_MINCHA_KETANA_GRA: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static SEA_LEVEL_SUNRISE: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SeaLevelSunrise,
+    zman_type: ZmanType::Netz,
     method_name: "getSeaLevelSunrise",
     name: "Sea Level Sunrise",
     #[cfg(feature = "alloc")]
@@ -1651,6 +1737,7 @@ pub static SEA_LEVEL_SUNRISE: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static SEA_LEVEL_SUNSET: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SeaLevelSunset,
+    zman_type: ZmanType::Shkiya,
     method_name: "getSeaLevelSunset",
     name: "Sea Level Sunset",
     #[cfg(feature = "alloc")]
@@ -1669,6 +1756,7 @@ pub static SOF_ZMAN_ACHILAS_CHAMETZ_BAAL_HATANYA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(1.583),
         true,
     ),
+    zman_type: ZmanType::SofZmanAchilasChametz,
     method_name: "getSofZmanAchilasChametzBaalHatanya",
     name: "Sof Zman Achilas Chametz (Baal Hatanya)",
     #[cfg(feature = "alloc")]
@@ -1687,6 +1775,7 @@ pub static SOF_ZMAN_ACHILAS_CHAMETZ_GRA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
+    zman_type: ZmanType::SofZmanAchilasChametz,
     method_name: "getSofZmanAchilasChametzGRA",
     name: "Sof Zman Achilas Chametz (GR'A)",
     #[cfg(feature = "alloc")]
@@ -1705,6 +1794,7 @@ pub static SOF_ZMAN_ACHILAS_CHAMETZ_MGA_16_POINT_1_DEGREES: ZmanPreset = ZmanPre
         &ZmanPrimitive::SunsetOffsetByDegrees(16.1),
         true,
     ),
+    zman_type: ZmanType::SofZmanAchilasChametz,
     method_name: "getSofZmanAchilasChametzMGA16Point1Degrees",
     name: "Sof Zman Achilas Chametz (MGA, 16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1723,6 +1813,7 @@ pub static SOF_ZMAN_ACHILAS_CHAMETZ_MGA_72_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(72)),
         true,
     ),
+    zman_type: ZmanType::SofZmanAchilasChametz,
     method_name: "getSofZmanAchilasChametzMGA72Minutes",
     name: "Sof Zman Achilas Chametz (MGA, 72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -1741,6 +1832,7 @@ pub static SOF_ZMAN_ACHILAS_CHAMETZ_MGA_72_MINUTES_ZMANIS: ZmanPreset = ZmanPres
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.2),
         true,
     ),
+    zman_type: ZmanType::SofZmanAchilasChametz,
     method_name: "getSofZmanAchilasChametzMGA72MinutesZmanis",
     name: "Sof Zman Achilas Chametz (MGA, 72 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -1759,6 +1851,7 @@ pub static SOF_ZMAN_BIUR_CHAMETZ_BAAL_HATANYA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(1.583),
         true,
     ),
+    zman_type: ZmanType::SofZmanBiurChametz,
     method_name: "getSofZmanBiurChametzBaalHatanya",
     name: "Sof Zman Biur Chametz (Baal Hatanya)",
     #[cfg(feature = "alloc")]
@@ -1777,6 +1870,7 @@ pub static SOF_ZMAN_BIUR_CHAMETZ_GRA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
+    zman_type: ZmanType::SofZmanBiurChametz,
     method_name: "getSofZmanBiurChametzGRA",
     name: "Sof Zman Biur Chametz (GR'A)",
     #[cfg(feature = "alloc")]
@@ -1795,6 +1889,7 @@ pub static SOF_ZMAN_BIUR_CHAMETZ_MGA_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset
         &ZmanPrimitive::SunsetOffsetByDegrees(16.1),
         true,
     ),
+    zman_type: ZmanType::SofZmanBiurChametz,
     method_name: "getSofZmanBiurChametzMGA16Point1Degrees",
     name: "Sof Zman Biur Chametz (MGA, 16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1813,6 +1908,7 @@ pub static SOF_ZMAN_BIUR_CHAMETZ_MGA_72_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(72)),
         true,
     ),
+    zman_type: ZmanType::SofZmanBiurChametz,
     method_name: "getSofZmanBiurChametzMGA72Minutes",
     name: "Sof Zman Biur Chametz (MGA, 72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -1831,6 +1927,7 @@ pub static SOF_ZMAN_BIUR_CHAMETZ_MGA_72_MINUTES_ZMANIS: ZmanPreset = ZmanPreset 
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.2),
         true,
     ),
+    zman_type: ZmanType::SofZmanBiurChametz,
     method_name: "getSofZmanBiurChametzMGA72MinutesZmanis",
     name: "Sof Zman Biur Chametz (MGA, 72 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -1847,6 +1944,7 @@ pub static SOF_ZMAN_BIUR_CHAMETZ_MGA_72_MINUTES_ZMANIS: ZmanPreset = ZmanPreset 
 /// Note that although this time may be during the daytime, Kiddush Levana cannot be said during the daytime.
 pub static SOF_ZMAN_KIDUSH_LEVANA_15_DAYS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SofZmanKidushLevana15Days,
+    zman_type: ZmanType::KidushLevana,
     method_name: "getSofZmanKidushLevana15Days",
     name: "Sof Zman Kidush Levana (15 Days)",
     #[cfg(feature = "alloc")]
@@ -1863,6 +1961,7 @@ pub static SOF_ZMAN_KIDUSH_LEVANA_15_DAYS: ZmanPreset = ZmanPreset {
 /// Note that although this time may be during the daytime, Kiddush Levana cannot be said during the daytime.
 pub static SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SofZmanKidushLevanaBetweenMoldos,
+    zman_type: ZmanType::KidushLevana,
     method_name: "getSofZmanKidushLevanaBetweenMoldos",
     name: "Sof Zman Kidush Levana (Between Moldos)",
     #[cfg(feature = "alloc")]
@@ -1881,6 +1980,7 @@ pub static SOF_ZMAN_KIDUSH_LEVANA_BETWEEN_MOLDOS: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static SOF_ZMAN_SHMA_3_HOURS_BEFORE_CHATZOS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ChatzosHayom, Duration::from_mins(-180)),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShma3HoursBeforeChatzos",
     name: "Sof Zman Shma (3 Hours Before Chatzos)",
     #[cfg(feature = "alloc")]
@@ -1901,6 +2001,7 @@ pub static SOF_ZMAN_SHMA_ALOS_16_POINT_1_DEGREES_TO_TZAIS_GEONIM_7_POINT_083_DEG
         &ZmanPrimitive::SunsetOffsetByDegrees(7.083333333333333),
         false,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaAlos16Point1DegreesToTzaisGeonim7Point083Degrees",
     name: "Sof Zman Shma (Alos 16.1 to Tzais Geonim 7.083 Degrees)",
     #[cfg(feature = "alloc")]
@@ -1921,6 +2022,7 @@ pub static SOF_ZMAN_SHMA_ALOS_16_POINT_1_TO_SUNSET: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         false,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaAlos16Point1ToSunset",
     name: "Sof Zman Shma (Alos 16.1 to Sunset)",
     #[cfg(feature = "alloc")]
@@ -1941,6 +2043,7 @@ pub static SOF_ZMAN_SHMA_ATERET_TORAH: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::TzaisAteretTorah,
         false,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaAteretTorah",
     name: "Sof Zman Shma (Ateret Torah)",
     #[cfg(feature = "alloc")]
@@ -1964,6 +2067,7 @@ pub static SOF_ZMAN_SHMA_BAAL_HATANYA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(1.583),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaBaalHatanya",
     name: "Sof Zman Shma (Baal Hatanya)",
     #[cfg(feature = "alloc")]
@@ -1984,6 +2088,7 @@ pub static SOF_ZMAN_SHMA_GRA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaGRA",
     name: "Sof Zman Shma (GR'A)",
     #[cfg(feature = "alloc")]
@@ -2004,6 +2109,7 @@ pub static SOF_ZMAN_SHMA_GRASUNRISE_TO_FIXED_LOCAL_CHATZOS: ZmanPreset = ZmanPre
         &ZmanPrimitive::LocalMeanTime(12.0),
         3.0,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaGRASunriseToFixedLocalChatzos",
     name: "Sof Zman Shma (GR'A, Sunrise to Fixed Local Chatzos)",
     #[cfg(feature = "alloc")]
@@ -2024,6 +2130,7 @@ pub static SOF_ZMAN_SHMA_MGA_120_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(120)),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA120Minutes",
     name: "Sof Zman Shma (MGA, 120 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2044,6 +2151,7 @@ pub static SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(16.1),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA16Point1Degrees",
     name: "Sof Zman Shma (MGA, 16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2064,6 +2172,7 @@ pub static SOF_ZMAN_SHMA_MGA_16_POINT_1_DEGREES_TO_FIXED_LOCAL_CHATZOS: ZmanPres
         &ZmanPrimitive::LocalMeanTime(12.0),
         3.0,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA16Point1DegreesToFixedLocalChatzos",
     name: "Sof Zman Shma (MGA, 16.1 Degrees to Fixed Local Chatzos)",
     #[cfg(feature = "alloc")]
@@ -2084,6 +2193,7 @@ pub static SOF_ZMAN_SHMA_MGA_18_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(18.0),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA18Degrees",
     name: "Sof Zman Shma (MGA, 18 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2104,6 +2214,7 @@ pub static SOF_ZMAN_SHMA_MGA_18_DEGREES_TO_FIXED_LOCAL_CHATZOS: ZmanPreset = Zma
         &ZmanPrimitive::LocalMeanTime(12.0),
         3.0,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA18DegreesToFixedLocalChatzos",
     name: "Sof Zman Shma (MGA, 18 Degrees to Fixed Local Chatzos)",
     #[cfg(feature = "alloc")]
@@ -2124,6 +2235,7 @@ pub static SOF_ZMAN_SHMA_MGA_19_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(19.8),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA19Point8Degrees",
     name: "Sof Zman Shma (MGA, 19.8 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2144,6 +2256,7 @@ pub static SOF_ZMAN_SHMA_MGA_72_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(72)),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA72Minutes",
     name: "Sof Zman Shma (MGA, 72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2164,6 +2277,7 @@ pub static SOF_ZMAN_SHMA_MGA_72_MINUTES_TO_FIXED_LOCAL_CHATZOS: ZmanPreset = Zma
         &ZmanPrimitive::LocalMeanTime(12.0),
         3.0,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA72MinutesToFixedLocalChatzos",
     name: "Sof Zman Shma (MGA, 72 Minutes to Fixed Local Chatzos)",
     #[cfg(feature = "alloc")]
@@ -2184,6 +2298,7 @@ pub static SOF_ZMAN_SHMA_MGA_72_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.2),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA72MinutesZmanis",
     name: "Sof Zman Shma (MGA, 72 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2204,6 +2319,7 @@ pub static SOF_ZMAN_SHMA_MGA_90_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(90)),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA90Minutes",
     name: "Sof Zman Shma (MGA, 90 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2224,6 +2340,7 @@ pub static SOF_ZMAN_SHMA_MGA_90_MINUTES_TO_FIXED_LOCAL_CHATZOS: ZmanPreset = Zma
         &ZmanPrimitive::LocalMeanTime(12.0),
         3.0,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA90MinutesToFixedLocalChatzos",
     name: "Sof Zman Shma (MGA, 90 Minutes to Fixed Local Chatzos)",
     #[cfg(feature = "alloc")]
@@ -2244,6 +2361,7 @@ pub static SOF_ZMAN_SHMA_MGA_90_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.5),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA90MinutesZmanis",
     name: "Sof Zman Shma (MGA, 90 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2264,6 +2382,7 @@ pub static SOF_ZMAN_SHMA_MGA_96_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(96)),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA96Minutes",
     name: "Sof Zman Shma (MGA, 96 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2284,6 +2403,7 @@ pub static SOF_ZMAN_SHMA_MGA_96_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.6),
         true,
     ),
+    zman_type: ZmanType::SofZmanShma,
     method_name: "getSofZmanShmaMGA96MinutesZmanis",
     name: "Sof Zman Shma (MGA, 96 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2302,6 +2422,7 @@ pub static SOF_ZMAN_SHMA_MGA_96_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static SOF_ZMAN_TFILA_2_HOURS_BEFORE_CHATZOS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ChatzosHayom, Duration::from_mins(-120)),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfila2HoursBeforeChatzos",
     name: "Sof Zman Tfila (2 Hours Before Chatzos)",
     #[cfg(feature = "alloc")]
@@ -2322,6 +2443,7 @@ pub static SOF_ZMAN_TFILA_ATERET_TORAH: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::TzaisAteretTorah,
         false,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaAteretTorah",
     name: "Sof Zman Tfila (Ateret Torah)",
     #[cfg(feature = "alloc")]
@@ -2345,6 +2467,7 @@ pub static SOF_ZMAN_TFILA_BAAL_HATANYA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(1.583),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaBaalHatanya",
     name: "Sof Zman Tfila (Baal Hatanya)",
     #[cfg(feature = "alloc")]
@@ -2365,6 +2488,7 @@ pub static SOF_ZMAN_TFILA_GRA: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ConfiguredSunset,
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaGRA",
     name: "Sof Zman Tfila (GR'A)",
     #[cfg(feature = "alloc")]
@@ -2385,6 +2509,7 @@ pub static SOF_ZMAN_TFILA_GRASUNRISE_TO_FIXED_LOCAL_CHATZOS: ZmanPreset = ZmanPr
         &ZmanPrimitive::LocalMeanTime(12.0),
         4.0,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaGRASunriseToFixedLocalChatzos",
     name: "Sof Zman Tfila (GR'A, Sunrise to Fixed Local Chatzos)",
     #[cfg(feature = "alloc")]
@@ -2405,6 +2530,7 @@ pub static SOF_ZMAN_TFILA_MGA_120_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(120)),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA120Minutes",
     name: "Sof Zman Tfila (MGA, 120 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2425,6 +2551,7 @@ pub static SOF_ZMAN_TFILA_MGA_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(16.1),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA16Point1Degrees",
     name: "Sof Zman Tfila (MGA, 16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2445,6 +2572,7 @@ pub static SOF_ZMAN_TFILA_MGA_18_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(18.0),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA18Degrees",
     name: "Sof Zman Tfila (MGA, 18 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2465,6 +2593,7 @@ pub static SOF_ZMAN_TFILA_MGA_19_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::SunsetOffsetByDegrees(19.8),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA19Point8Degrees",
     name: "Sof Zman Tfila (MGA, 19.8 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2485,6 +2614,7 @@ pub static SOF_ZMAN_TFILA_MGA_72_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(72)),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA72Minutes",
     name: "Sof Zman Tfila (MGA, 72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2505,6 +2635,7 @@ pub static SOF_ZMAN_TFILA_MGA_72_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.2),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA72MinutesZmanis",
     name: "Sof Zman Tfila (MGA, 72 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2525,6 +2656,7 @@ pub static SOF_ZMAN_TFILA_MGA_90_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(90)),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA90Minutes",
     name: "Sof Zman Tfila (MGA, 90 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2545,6 +2677,7 @@ pub static SOF_ZMAN_TFILA_MGA_90_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.5),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA90MinutesZmanis",
     name: "Sof Zman Tfila (MGA, 90 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2565,6 +2698,7 @@ pub static SOF_ZMAN_TFILA_MGA_96_MINUTES: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(96)),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA96Minutes",
     name: "Sof Zman Tfila (MGA, 96 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2585,6 +2719,7 @@ pub static SOF_ZMAN_TFILA_MGA_96_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
         &ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.6),
         true,
     ),
+    zman_type: ZmanType::SofZmanTefila,
     method_name: "getSofZmanTfilaMGA96MinutesZmanis",
     name: "Sof Zman Tfila (MGA, 96 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2601,6 +2736,7 @@ pub static SOF_ZMAN_TFILA_MGA_96_MINUTES_ZMANIS: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static SOLAR_MIDNIGHT: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SolarMidnight,
+    zman_type: ZmanType::ChatzosHalayla,
     method_name: "getSolarMidnight",
     name: "Solar Midnight",
     #[cfg(feature = "alloc")]
@@ -2617,6 +2753,7 @@ pub static SOLAR_MIDNIGHT: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static SUN_TRANSIT: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SolarTransit,
+    zman_type: ZmanType::ChatzosHayom,
     method_name: "getSunTransit",
     name: "Solar Transit",
     #[cfg(feature = "alloc")]
@@ -2631,6 +2768,7 @@ pub static SUN_TRANSIT: ZmanPreset = ZmanPreset {
 /// Note that although this time may be during the daytime, Kiddush Levana cannot be said during the daytime.
 pub static TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::TchilasZmanKidushLevana3Days,
+    zman_type: ZmanType::KidushLevana,
     method_name: "getTchilasZmanKidushLevana3Days",
     name: "Tchilas Zman Kidush Levana (3 Days)",
     #[cfg(feature = "alloc")]
@@ -2645,6 +2783,7 @@ pub static TCHILAS_ZMAN_KIDUSH_LEVANA_3_DAYS: ZmanPreset = ZmanPreset {
 /// Note that although this time may be during the daytime, Kiddush Levana cannot be said during the daytime.
 pub static TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::TchilasZmanKidushLevana7Days,
+    zman_type: ZmanType::KidushLevana,
     method_name: "getTchilasZmanKidushLevana7Days",
     name: "Tchilas Zman Kidush Levana (7 Days)",
     #[cfg(feature = "alloc")]
@@ -2663,6 +2802,7 @@ pub static TCHILAS_ZMAN_KIDUSH_LEVANA_7_DAYS: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_120_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(120)),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais120Minutes",
     name: "Tzais (120 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2679,6 +2819,7 @@ pub static TZAIS_120_MINUTES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_120_ZMANIS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 2.0),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais120Zmanis",
     name: "Tzais (120 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2695,6 +2836,7 @@ pub static TZAIS_120_ZMANIS: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(16.1),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais16Point1Degrees",
     name: "Tzais (16.1 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2711,6 +2853,7 @@ pub static TZAIS_16_POINT_1_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_18_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(18.0),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais18Degrees",
     name: "Tzais (18 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2727,6 +2870,7 @@ pub static TZAIS_18_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_19_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(19.8),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais19Point8Degrees",
     name: "Tzais (19.8 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2743,6 +2887,7 @@ pub static TZAIS_19_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_26_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(26.0),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais26Degrees",
     name: "Tzais (26 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2761,6 +2906,7 @@ pub static TZAIS_26_DEGREES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_50_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(50)),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais50Minutes",
     name: "Tzais (50 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2777,6 +2923,7 @@ pub static TZAIS_50_MINUTES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_60_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(60)),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais60Minutes",
     name: "Tzais (60 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2793,6 +2940,7 @@ pub static TZAIS_60_MINUTES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_72_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(72)),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais72Minutes",
     name: "Tzais (72 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2809,6 +2957,7 @@ pub static TZAIS_72_MINUTES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_72_ZMANIS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.2),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais72Zmanis",
     name: "Tzais (72 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2825,6 +2974,7 @@ pub static TZAIS_72_ZMANIS: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_90_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(90)),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais90Minutes",
     name: "Tzais (90 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2841,6 +2991,7 @@ pub static TZAIS_90_MINUTES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_90_ZMANIS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.5),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais90Zmanis",
     name: "Tzais (90 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2857,6 +3008,7 @@ pub static TZAIS_90_ZMANIS: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_96_MINUTES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::Offset(&ZmanPrimitive::ConfiguredSunset, Duration::from_mins(96)),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais96Minutes",
     name: "Tzais (96 Minutes)",
     #[cfg(feature = "alloc")]
@@ -2871,6 +3023,7 @@ pub static TZAIS_96_MINUTES: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_96_ZMANIS: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::ZmanisOffset(&ZmanPrimitive::ConfiguredSunset, 1.6),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzais96Zmanis",
     name: "Tzais (96 Minutes in Shaos Zmanios)",
     #[cfg(feature = "alloc")]
@@ -2887,6 +3040,7 @@ pub static TZAIS_96_ZMANIS: ZmanPreset = ZmanPreset {
 /// In places such as the Arctic Circle, where there is at least one day a year when the sun does not rise and one when it does not set, this zman may not be available or cannot be calculated.
 pub static TZAIS_ATERET_TORAH: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::TzaisAteretTorah,
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisAteretTorah",
     name: "Tzais (Ateret Torah)",
     #[cfg(feature = "alloc")]
@@ -2906,6 +3060,7 @@ pub static TZAIS_ATERET_TORAH: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_BAAL_HATANYA: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(6.0),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisBaalHatanya",
     name: "Tzais (Baal Hatanya)",
     #[cfg(feature = "alloc")]
@@ -2920,6 +3075,7 @@ pub static TZAIS_BAAL_HATANYA: ZmanPreset = ZmanPreset {
 /// Corresponds to 13.5 minutes after sunset (3/4 of a mil at 18 minutes per mil) in Jerusalem [around the equinox/equilux](https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/). Does not include the time to walk 49 amos for bain hashmashos of Rav Yosi.
 pub static TZAIS_GEONIM_3_POINT_7_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(3.7),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim3Point7Degrees",
     name: "Tzais (Geonim, 3.7 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2934,6 +3090,7 @@ pub static TZAIS_GEONIM_3_POINT_7_DEGREES: ZmanPreset = ZmanPreset {
 /// Corresponds to 14 minutes after sunset: 13.5 minutes for 3/4 of an 18-minute mil, plus 30 seconds for 49 amos (bain hashmashos of Rav Yosi), in Jerusalem [around the equinox/equilux](https://kosherjava.com/2022/01/12/equinox-vs-equilux-zmanim-calculations/).
 pub static TZAIS_GEONIM_3_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(3.8),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim3Point8Degrees",
     name: "Tzais (Geonim, 3.8 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2950,6 +3107,7 @@ pub static TZAIS_GEONIM_3_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_4_POINT_42_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(4.42),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim4Point42Degrees",
     name: "Tzais (Geonim, 4.42 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2966,6 +3124,7 @@ pub static TZAIS_GEONIM_4_POINT_42_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_4_POINT_66_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(4.66),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim4Point66Degrees",
     name: "Tzais (Geonim, 4.66 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2982,6 +3141,7 @@ pub static TZAIS_GEONIM_4_POINT_66_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_4_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(4.8),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim4Point8Degrees",
     name: "Tzais (Geonim, 4.8 Degrees)",
     #[cfg(feature = "alloc")]
@@ -2998,6 +3158,7 @@ pub static TZAIS_GEONIM_4_POINT_8_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_5_POINT_95_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(5.95),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim5Point95Degrees",
     name: "Tzais (Geonim, 5.95 Degrees)",
     #[cfg(feature = "alloc")]
@@ -3014,6 +3175,7 @@ pub static TZAIS_GEONIM_5_POINT_95_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_6_POINT_45_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(6.45),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim6Point45Degrees",
     name: "Tzais (Geonim, 6.45 Degrees)",
     #[cfg(feature = "alloc")]
@@ -3030,6 +3192,7 @@ pub static TZAIS_GEONIM_6_POINT_45_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_7_POINT_083_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(7.083333333333333),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim7Point083Degrees",
     name: "Tzais (Geonim, 7.083 Degrees)",
     #[cfg(feature = "alloc")]
@@ -3046,6 +3209,7 @@ pub static TZAIS_GEONIM_7_POINT_083_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_7_POINT_67_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(7.67),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim7Point67Degrees",
     name: "Tzais (Geonim, 7.67 Degrees)",
     #[cfg(feature = "alloc")]
@@ -3062,6 +3226,7 @@ pub static TZAIS_GEONIM_7_POINT_67_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_8_POINT_5_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(8.5),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim8Point5Degrees",
     name: "Tzais (Geonim, 8.5 Degrees)",
     #[cfg(feature = "alloc")]
@@ -3078,6 +3243,7 @@ pub static TZAIS_GEONIM_8_POINT_5_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_9_POINT_3_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(9.3),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim9Point3Degrees",
     name: "Tzais (Geonim, 9.3 Degrees)",
     #[cfg(feature = "alloc")]
@@ -3094,6 +3260,7 @@ pub static TZAIS_GEONIM_9_POINT_3_DEGREES: ZmanPreset = ZmanPreset {
 /// At some northern and southern locations, this zman may not be available or cannot be calculated if the sun does not reach low enough below the horizon.
 pub static TZAIS_GEONIM_9_POINT_75_DEGREES: ZmanPreset = ZmanPreset {
     event: ZmanPrimitive::SunsetOffsetByDegrees(9.75),
+    zman_type: ZmanType::Tzais,
     method_name: "getTzaisGeonim9Point75Degrees",
     name: "Tzais (Geonim, 9.75 Degrees)",
     #[cfg(feature = "alloc")]
